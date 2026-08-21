@@ -1,0 +1,6 @@
+{
+  "name": "HRIS Pesantren Baitul Qur'an Al-Ikhwan",
+  "description": "Sistem Informasi Manajemen Guru, Absensi Jurnal Mengajar, Guru Badal, dan Penggajian Otomatis Pesantren Baitul Qur'an Al-Ikhwan",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
