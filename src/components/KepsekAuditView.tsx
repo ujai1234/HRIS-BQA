@@ -44,37 +44,20 @@ export const KepsekAuditView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Leadership Header Banner */}
-      <div className="bg-slate-900 rounded-xl sm:rounded-2xl p-6 text-white shadow-xs border border-slate-800">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-lg bg-emerald-600/20 flex items-center justify-center text-white border border-emerald-500/30">
-              <GraduationCap className="w-6 h-6 text-emerald-400" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-md border border-emerald-500/30">
-                  Dashboard Pimpinan Lembaga
-                </span>
-                <span className="text-xs text-slate-300">
-                  Kepala Sekolah & Kepesantrenan
-                </span>
-              </div>
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white mt-1">
-                Audit Ketaatan Jurnal & Ringkasan Eksekutif
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Pimpinan Aktif: <strong className="text-slate-200">{currentUser.name}</strong> ({currentUser.position}) • Periode: {selectedPeriod}
-              </p>
-            </div>
-          </div>
+      {/* Header Bar */}
+      <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-xs flex items-center justify-between gap-4">
+        <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+          <GraduationCap className="w-5 h-5 text-emerald-600" />
+          <span>Monitoring Jurnal Mengajar</span>
+        </h2>
 
+        <div className="flex items-center gap-2.5">
           <button
             onClick={() => window.print()}
-            className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition-all shadow-xs"
+            className="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-xs"
           >
-            <Printer className="w-4 h-4" />
-            <span>Cetak Laporan Ketaatan (PDF)</span>
+            <Printer className="w-3.5 h-3.5" />
+            <span>Cetak</span>
           </button>
         </div>
       </div>
@@ -172,26 +155,26 @@ export const KepsekAuditView: React.FC = () => {
                 const hasPendingJournal = item.emptyJournalCount > 0;
 
                 return (
-                  <tr key={item.teacher.id} className="hover:bg-slate-50/70 transition-colors">
+                  <tr key={item.teacher?.id || index} className="hover:bg-slate-50/70 transition-colors">
                     <td className="py-3 px-3 text-center text-slate-400 font-mono">
                       {index + 1}
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2.5">
-                        <div className={`w-7 h-7 rounded-lg ${item.teacher.avatarColor || 'bg-emerald-600'} flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-xs`}>
-                          {item.teacher.name.split(' ')[0]?.[0]}
-                          {item.teacher.name.split(' ')[1]?.[0] || 'A'}
+                        <div className={`w-7 h-7 rounded-lg ${item.teacher?.avatarColor || 'bg-emerald-600'} flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-xs`}>
+                          {item.teacher?.name ? item.teacher.name.split(' ')[0]?.[0] : 'U'}
+                          {item.teacher?.name ? (item.teacher.name.split(' ')[1]?.[0] || 'A') : 'A'}
                         </div>
                         <div>
-                          <p className="font-semibold text-slate-900">{item.teacher.name}</p>
-                          <p className="text-[11px] text-slate-400 font-mono">{item.teacher.nip}</p>
+                          <p className="font-semibold text-slate-900">{item.teacher?.name || 'Guru'}</p>
+                          <p className="text-[11px] text-slate-400 font-mono">{item.teacher?.nip || '-'}</p>
                         </div>
                       </div>
                     </td>
                     <td className="py-3 px-3">
-                      <span className="font-medium text-slate-800 block">{item.teacher.position}</span>
+                      <span className="font-medium text-slate-800 block">{item.teacher?.position || '-'}</span>
                       <span className="text-[10px] text-emerald-800 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/80">
-                        {item.teacher.unit}
+                        {item.teacher?.unit || '-'}
                       </span>
                     </td>
                     <td className="py-3 px-3 text-center font-mono font-semibold text-slate-800">

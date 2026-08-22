@@ -35,12 +35,15 @@ export const PayrollRecap: React.FC = () => {
 
   // Filter items
   const filteredItems = payrollSummary.items.filter((item) => {
+    const teacherName = item.teacher?.name || '';
+    const teacherNip = item.teacher?.nip || '';
+    const teacherPos = item.teacher?.position || '';
     const matchesSearch =
-      item.teacher.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.teacher.nip.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.teacher.position.toLowerCase().includes(searchQuery.toLowerCase());
+      teacherName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      teacherNip.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      teacherPos.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesUnit = unitFilter === 'ALL' || item.teacher.unit === unitFilter;
+    const matchesUnit = unitFilter === 'ALL' || item.teacher?.unit === unitFilter;
 
     return matchesSearch && matchesUnit;
   });
@@ -117,30 +120,17 @@ export const PayrollRecap: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner & Title */}
-      <div className="bg-white rounded-xl sm:rounded-2xl p-6 border border-slate-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-md border border-emerald-200/80">
-              Admin & Penggajian Pesantren
-            </span>
-            <span className="text-xs text-slate-500 font-medium">
-              Tercatat 23 Guru / Asatidz
-            </span>
-          </div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mt-1.5 flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-emerald-600" />
-            <span>Rekapitulasi Payroll & Penggajian Guru</span>
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Perhitungan otomatis berbasis Gaji Pokok, Tarif Jam Mengajar (Rp 40.000/JP), Transport (Rp 10.000/Hari), dan Potongan Kedisiplinan.
-          </p>
-        </div>
+      {/* Top Header Bar */}
+      <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+          <CreditCard className="w-5 h-5 text-emerald-600" />
+          <span>Laporan & Rekapitulasi Gaji</span>
+        </h2>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           {/* Period Selector */}
-          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700">
+          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-700">
             <Calendar className="w-4 h-4 text-emerald-600" />
             <select
               value={selectedPeriod}
@@ -155,18 +145,18 @@ export const PayrollRecap: React.FC = () => {
 
           <button
             onClick={handleExportExcel}
-            className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition-all shadow-xs"
+            className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-all shadow-xs"
           >
             <FileSpreadsheet className="w-4 h-4" />
-            <span>Ekspor Excel (CSV)</span>
+            <span>Ekspor Excel</span>
           </button>
 
           <button
             onClick={handlePrint}
-            className="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition-all shadow-xs"
+            className="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-all shadow-xs"
           >
             <Printer className="w-4 h-4" />
-            <span>Cetak Rekap</span>
+            <span>Cetak</span>
           </button>
         </div>
       </div>
@@ -291,16 +281,16 @@ export const PayrollRecap: React.FC = () => {
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-2.5">
-                      <div className={`w-7 h-7 rounded-lg ${item.teacher.avatarColor || 'bg-emerald-600'} flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-xs`}>
-                        {item.teacher.name.split(' ')[0]?.[0]}
-                        {item.teacher.name.split(' ')[1]?.[0] || 'A'}
+                      <div className={`w-7 h-7 rounded-lg ${item.teacher?.avatarColor || 'bg-emerald-600'} flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-xs`}>
+                        {item.teacher?.name ? item.teacher.name.split(' ')[0]?.[0] : 'U'}
+                        {item.teacher?.name ? (item.teacher.name.split(' ')[1]?.[0] || 'A') : 'A'}
                       </div>
                       <div>
                         <p className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">
-                          {item.teacher.name}
+                          {item.teacher?.name || '-'}
                         </p>
                         <p className="text-[11px] text-slate-400 font-mono">
-                          {item.teacher.nip}
+                          {item.teacher?.nip || '-'}
                         </p>
                       </div>
                     </div>

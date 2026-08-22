@@ -78,24 +78,16 @@ export const TeacherDashboard: React.FC = () => {
       <div className="bg-slate-900 rounded-xl sm:rounded-2xl p-6 text-white border border-slate-800 shadow-sm">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className={`w-14 h-14 rounded-xl ${currentUser.avatarColor || 'bg-emerald-600'} flex items-center justify-center font-bold text-xl text-white shadow-md border border-emerald-500/30`}>
-              {currentUser.name.split(' ')[0]?.[0]}
-              {currentUser.name.split(' ')[1]?.[0] || 'A'}
+            <div className={`w-14 h-14 rounded-xl ${currentUser?.avatarColor || 'bg-emerald-600'} flex items-center justify-center font-bold text-xl text-white shadow-md border border-emerald-500/30`}>
+              {currentUser?.name ? currentUser.name.split(' ')[0]?.[0] : 'U'}
+              {currentUser?.name ? (currentUser.name.split(' ')[1]?.[0] || 'A') : 'A'}
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  {currentUser.position}
-                </span>
-                <span className="text-xs text-slate-400 font-mono">
-                  {currentUser.nip}
-                </span>
-              </div>
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white mt-1">
-                {currentUser.name}
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                {currentUser?.name || 'Guru'}
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                Unit Penugasan: <span className="text-emerald-300 font-medium">{currentUser.unit}</span> • Lembaga Pesantren Baitul Qur'an Al-Ikhwan
+                {currentUser?.position || 'Guru'} • Unit {currentUser?.unit || '-'}
               </p>
             </div>
           </div>

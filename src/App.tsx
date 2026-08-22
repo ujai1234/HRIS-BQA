@@ -1,51 +1,62 @@
 import React, { useState } from 'react';
 import { HRISProvider, useHRIS } from './context/HRISContext';
+import { LoginPage } from './components/LoginPage';
 import { Header } from './components/Header';
-import { DashboardOverview } from './components/DashboardOverview';
-import { TeacherDashboard } from './components/TeacherDashboard';
-import { PayrollRecap } from './components/PayrollRecap';
-import { SlipGajiView } from './components/SlipGajiView';
-import { BadalManagement } from './components/BadalManagement';
-import { MasterTeachers } from './components/MasterTeachers';
-import { MasterSchedules } from './components/MasterSchedules';
-import { KepsekAuditView } from './components/KepsekAuditView';
-import { Building2 } from 'lucide-react';
+import { GuruView } from './components/GuruView';
+import { AdminView } from './components/AdminView';
+import { KepsekView } from './components/KepsekView';
 
 const MainContent: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { currentRole } = useHRIS();
+  const { isAuthenticated, currentRole, currentPath } = useHRIS();
 
-  // Route renderer
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return <DashboardOverview setActiveTab={setActiveTab} />;
-      case 'teacher_workbench':
-        return <TeacherDashboard />;
-      case 'payroll':
-        return <PayrollRecap />;
-      case 'slip_gaji':
-        return <SlipGajiView />;
-      case 'badal':
-        return <BadalManagement />;
-      case 'master_teachers':
-        return <MasterTeachers />;
-      case 'master_schedules':
-        return <MasterSchedules />;
-      case 'kepsek_audit':
-        return <KepsekAuditView />;
-      default:
-        return <DashboardOverview setActiveTab={setActiveTab} />;
+  // If not logged in, render the clean login portal
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  // Dynamic router based on role and path matching user flow
+  const renderDashboardByRole = () => {
+    if (currentRole === 'GURU' || currentPath.startsWith('/dashboard/guru')) {
+      if (currentPath === '/dashboard/guru/slip') {
+        return <GuruView initialTab="slip_gaji" key="guru-slip" />;
+      }
+      if (currentPath === '/dashboard/guru/jadwal') {
+        return <GuruView initialTab="jadwal" key="guru-jadwal" />;
+      }
+      return <GuruView initialTab="clockin_journal" key="guru-clockin" />;
     }
+
+    if (currentRole === 'ADMIN' || currentPath.startsWith('/dashboard/admin')) {
+      if (currentPath === '/dashboard/admin/jadwal') {
+        return <AdminView initialTab="master_jadwal" key="admin-jadwal" />;
+      }
+      if (currentPath === '/dashboard/admin/badal') {
+        return <AdminView initialTab="guru_badal" key="admin-badal" />;
+      }
+      if (currentPath === '/dashboard/admin/payroll') {
+        return <AdminView initialTab="generate_payroll" key="admin-payroll" />;
+      }
+      return <AdminView initialTab="guru_gaji" key="admin-guru" />;
+    }
+
+    if (currentRole === 'KEPALA_PESANTREN' || currentPath.startsWith('/dashboard/kepsek')) {
+      if (currentPath === '/dashboard/kepsek/audit') {
+        return <KepsekView initialTab="ketaatan_jurnal" key="kepsek-audit" />;
+      }
+      if (currentPath === '/dashboard/kepsek/laporan') {
+        return <KepsekView initialTab="laporan_payroll" key="kepsek-laporan" />;
+      }
+      return <KepsekView initialTab="ringkasan_kehadiran" key="kepsek-overview" />;
+    }
+
+    return <GuruView initialTab="clockin_journal" key="default-guru" />;
   };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex font-sans antialiased">
       {/* Sidebar & Topbar Shell */}
       <Header 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
       />
@@ -57,10 +68,10 @@ const MainContent: React.FC = () => {
 
         {/* Content Container */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
-          {renderTabContent()}
+          {renderDashboardByRole()}
         </main>
 
-        {/* Professional Footer */}
+        {/* Professional Institutional Footer */}
         <footer className="bg-white border-t border-slate-200 py-5 text-xs text-slate-500 mt-auto print:hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
             <div className="flex items-center gap-2">
@@ -92,4 +103,3 @@ export default function App() {
     </HRISProvider>
   );
 }
-

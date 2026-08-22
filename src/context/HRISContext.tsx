@@ -25,8 +25,13 @@ interface HRISContextType {
   currentUser: Teacher;
   currentRole: UserRole;
   selectedPeriod: string;
+  isAuthenticated: boolean;
+  currentPath: string;
   
-  // Role & User Actions
+  // Role, Auth & User Actions
+  login: (role: UserRole, teacherId?: string) => void;
+  logout: () => void;
+  setCurrentPath: (path: string) => void;
   setCurrentUserById: (teacherId: string) => void;
   setCurrentRole: (role: UserRole) => void;
   setSelectedPeriod: (period: string) => void;
@@ -74,12 +79,28 @@ const STORAGE_KEYS = {
 export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [teachers, setTeachers] = useState<Teacher[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.TEACHERS);
-    return saved ? JSON.parse(saved) : INITIAL_TEACHERS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {
+        console.error('Failed to parse teachers from storage', e);
+      }
+    }
+    return INITIAL_TEACHERS;
   });
 
   const [schedules, setSchedules] = useState<ClassSchedule[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.SCHEDULES);
-    return saved ? JSON.parse(saved) : INITIAL_SCHEDULES;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {
+        console.error('Failed to parse schedules from storage', e);
+      }
+    }
+    return INITIAL_SCHEDULES;
   });
 
   const [attendances, setAttendances] = useState<AttendanceRecord[]>(() => {
@@ -99,13 +120,32 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [currentRole, setCurrentRoleState] = useState<UserRole>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.CURRENT_ROLE);
-    return (saved as UserRole) || 'ADMIN';
+    return (saved as UserRole) || 'GURU';
+  });
+
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    const saved = localStorage.getItem('hris_pbq_auth_v1');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  const [currentPath, setCurrentPath] = useState<string>(() => {
+    const saved = localStorage.getItem('hris_pbq_path_v1');
+    return saved || '/dashboard/guru';
   });
 
   const [selectedPeriod, setSelectedPeriod] = useState<string>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.PERIOD);
     return saved || 'Agustus 2026';
   });
+
+  // Sync to local storage
+  useEffect(() => {
+    localStorage.setItem('hris_pbq_auth_v1', JSON.stringify(isAuthenticated));
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    localStorage.setItem('hris_pbq_path_v1', currentPath);
+  }, [currentPath]);
 
   // Sync to local storage
   useEffect(() => {
@@ -137,7 +177,29 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [selectedPeriod]);
 
   // Derived current user object
-  const currentUser = teachers.find((t) => t.id === currentUserId) || teachers[6] || teachers[0];
+  const currentUser = teachers.find((t) => t.id === currentUserId) || teachers[6] || teachers[0] || INITIAL_TEACHERS[0];
+
+  const login = (role: UserRole, teacherId?: string) => {
+    setIsAuthenticated(true);
+    setCurrentRoleState(role);
+    if (role === 'GURU') {
+      setCurrentPath('/dashboard/guru');
+      const targetId = teacherId || 'T-08';
+      setCurrentUserId(targetId);
+    } else if (role === 'ADMIN') {
+      setCurrentPath('/dashboard/admin');
+      const targetId = teacherId || 'T-07';
+      setCurrentUserId(targetId);
+    } else if (role === 'KEPALA_PESANTREN') {
+      setCurrentPath('/dashboard/kepsek');
+      const targetId = teacherId || 'T-01';
+      setCurrentUserId(targetId);
+    }
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+  };
 
   const setCurrentUserById = (teacherId: string) => {
     const target = teachers.find((t) => t.id === teacherId);
@@ -149,6 +211,9 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const setCurrentRole = (role: UserRole) => {
     setCurrentRoleState(role);
+    if (role === 'GURU') setCurrentPath('/dashboard/guru');
+    else if (role === 'ADMIN') setCurrentPath('/dashboard/admin');
+    else if (role === 'KEPALA_PESANTREN') setCurrentPath('/dashboard/kepsek');
   };
 
   // Clock In Action
@@ -182,7 +247,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       lateCategory: category,
       latePenalty: penalty,
       status: 'HADIR_JURNAL_KOSONG',
-      notes: notes || (isBadal ? `Clock-in sebagai Guru Badal menggantikan ${teachers.find(t => t.id === schedule.teacherId)?.name}` : undefined),
+      notes: notes || (isBadal ? `Clock-in sebagai Guru Badal menggantikan ${teachers.find(t => t.id === schedule.teacherId)?.name || 'Guru Asal'}` : undefined),
     };
 
     setAttendances((prev) => {
@@ -304,10 +369,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Payroll Calculation Engine for a specific teacher
   const calculateTeacherPayroll = (teacherId: string, _period = selectedPeriod): TeacherPayrollItem => {
-    const teacher = teachers.find((t) => t.id === teacherId);
-    if (!teacher) {
-      throw new Error(`Guru tidak ditemukan (ID: ${teacherId})`);
-    }
+    const teacher = teachers.find((t) => t.id === teacherId) || teachers[0] || INITIAL_TEACHERS[0];
 
     const teacherSchedules = schedules.filter((s) => s.teacherId === teacherId);
     const weeklyHours = teacherSchedules.reduce((sum, s) => sum + s.hours, 0);
@@ -442,6 +504,11 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         currentUser,
         currentRole,
         selectedPeriod,
+        isAuthenticated,
+        currentPath,
+        login,
+        logout,
+        setCurrentPath,
         setCurrentUserById,
         setCurrentRole,
         setSelectedPeriod,

@@ -40,10 +40,13 @@ export const MasterTeachers: React.FC = () => {
   });
 
   const filteredTeachers = teachers.filter((t) => {
+    const tName = t.name || '';
+    const tNip = t.nip || '';
+    const tPos = t.position || '';
     const matchesSearch =
-      t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.nip.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.position.toLowerCase().includes(searchQuery.toLowerCase());
+      tName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tNip.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tPos.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesUnit = unitFilter === 'ALL' || t.unit === unitFilter;
     return matchesSearch && matchesUnit;
   });
@@ -98,29 +101,16 @@ export const MasterTeachers: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="bg-white rounded-xl sm:rounded-2xl p-6 border border-slate-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-md border border-emerald-200/80">
-              Master Data Tenaga Pendidik
-            </span>
-            <span className="text-xs text-slate-500 font-medium">
-              Total {teachers.length} Guru / Asatidz Terdaftar
-            </span>
-          </div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mt-1.5 flex items-center gap-2">
-            <Users className="w-5 h-5 text-emerald-600" />
-            <span>Master Data Guru & Skema Honorarium</span>
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Konfigurasi Gaji Pokok, Tarif Jam Mengajar (Rp 40.000), Uang Transport Harian (Rp 10.000), dan Hak Akses Pengguna.
-          </p>
-        </div>
+      {/* Header Bar */}
+      <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+          <Users className="w-5 h-5 text-emerald-600" />
+          <span>Data Guru & Honorarium</span>
+        </h2>
 
         <button
           onClick={handleOpenAdd}
-          className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition-all shadow-xs"
+          className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-all shadow-xs"
         >
           <Plus className="w-4 h-4" />
           <span>Tambah Guru Baru</span>
@@ -184,12 +174,12 @@ export const MasterTeachers: React.FC = () => {
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-2.5">
                       <div className={`w-7 h-7 rounded-lg ${t.avatarColor || 'bg-emerald-600'} flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-xs`}>
-                        {t.name.split(' ')[0]?.[0]}
-                        {t.name.split(' ')[1]?.[0] || 'A'}
+                        {t.name ? t.name.split(' ')[0]?.[0] : 'U'}
+                        {t.name ? (t.name.split(' ')[1]?.[0] || 'A') : 'A'}
                       </div>
                       <div>
-                        <p className="font-semibold text-slate-900">{t.name}</p>
-                        <p className="text-[11px] text-slate-400 font-mono">{t.nip}</p>
+                        <p className="font-semibold text-slate-900">{t.name || '-'}</p>
+                        <p className="text-[11px] text-slate-400 font-mono">{t.nip || '-'}</p>
                       </div>
                     </div>
                   </td>

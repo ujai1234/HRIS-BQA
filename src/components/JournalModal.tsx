@@ -15,9 +15,9 @@ import { AttendanceRecord, ClassSchedule, Teacher, StudentAttendance } from '../
 import { useHRIS } from '../context/HRISContext';
 
 interface JournalModalProps {
-  attendance: AttendanceRecord;
+  attendance?: AttendanceRecord | null;
   schedule: ClassSchedule;
-  teacher: Teacher;
+  teacher?: Teacher;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -29,9 +29,13 @@ export const JournalModal: React.FC<JournalModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const { submitJournal } = useHRIS();
+  const { attendances, currentUser, clockIn, submitJournal } = useHRIS();
 
-  const existingJournal = attendance.journal;
+  const resolvedAttendance = attendance || attendances.find(
+    (a) => a.scheduleId === schedule.id && a.date === new Date().toISOString().split('T')[0]
+  );
+
+  const existingJournal = resolvedAttendance?.journal;
 
   const [topic, setTopic] = useState(existingJournal?.topic || '');
   const [learningObjectives, setLearningObjectives] = useState(
@@ -75,18 +79,20 @@ export const JournalModal: React.FC<JournalModalProps> = ({
     : 100;
 
   const handleFillSample = () => {
-    if (schedule.subject.toLowerCase().includes('nahwu') || schedule.subject.toLowerCase().includes('sharaf') || schedule.subject.toLowerCase().includes('kitab')) {
+    if (!schedule) return;
+    const subj = schedule.subject || '';
+    if (subj.toLowerCase().includes('nahwu') || subj.toLowerCase().includes('sharaf') || subj.toLowerCase().includes('kitab')) {
       setTopic('Pembahasan Bab I’rab & Pembagian I’rab (Rafa’, Nashab, Khafadh, Jazm) Kitab Jurumiyyah');
       setLearningObjectives('Santri dapat menyebutkan 4 macam i’rab dan tanda-tanda aslinya secara tepat.');
       setClassNotes('Santri menyimak dengan khidmat, seluruh santri mampu melafalkan nadhom kaidah dengan baik.');
       setAssignmentGiven('Hafalan bait kaidah i’rab halaman 14-16 disetor pada pertemuan berikutnya.');
-    } else if (schedule.subject.toLowerCase().includes('tahfidz') || schedule.subject.toLowerCase().includes('tajwid') || schedule.subject.toLowerCase().includes('qur')) {
+    } else if (subj.toLowerCase().includes('tahfidz') || subj.toLowerCase().includes('tajwid') || subj.toLowerCase().includes('qur')) {
       setTopic('Setoran Hafalan Baru Surah Al-Mulk ayat 1-15 & Kaidah Ghunnah Musyaddadah');
       setLearningObjectives('Penyempurnaan makharijul huruf ‘Ain, Ha, dan konsistensi panjang mad thabi’i 2 harakat.');
       setClassNotes('Alhamdulillah 90% santri mutqin, 3 santri perlu bimbingan khusus pada kelancaran ayat 10-12.');
       setAssignmentGiven('Muraja’ah mandiri bakda Maghrib bersama pembimbing kamar masing-masing.');
     } else {
-      setTopic(`Penyampaian Materi Pokok: ${schedule.subject} Bab 3 Semester Ganjil`);
+      setTopic(`Penyampaian Materi Pokok: ${subj} Bab 3 Semester Ganjil`);
       setLearningObjectives('Santri mampu memahami konsep dasar dan mempraktikkannya dalam latihan mandiri.');
       setClassNotes('KBM berjalan tertib, santri aktif bertanya selama sesi diskusi.');
       setAssignmentGiven('Mengerjakan latihan soal halaman 45 buku panduan.');
@@ -103,16 +109,23 @@ export const JournalModal: React.FC<JournalModalProps> = ({
     setIsSubmitting(true);
 
     try {
-      submitJournal(attendance.id, {
-        scheduleId: schedule.id,
-        date: attendance.date,
-        teacherId: attendance.actualTeacherId,
-        topic,
-        learningObjectives,
-        classNotes,
-        studentAttendance,
-        assignmentGiven,
-      });
+      let targetAttendance = resolvedAttendance;
+      if (!targetAttendance) {
+        targetAttendance = clockIn(schedule.id);
+      }
+
+      if (targetAttendance) {
+        submitJournal(targetAttendance.id, {
+          scheduleId: schedule.id,
+          date: targetAttendance.date || new Date().toISOString().split('T')[0],
+          teacherId: targetAttendance.actualTeacherId || targetAttendance.teacherId || teacher?.id || currentUser?.id || 'T-08',
+          topic,
+          learningObjectives,
+          classNotes,
+          studentAttendance,
+          assignmentGiven,
+        });
+      }
 
       // Confetti celebration
       try {
@@ -168,7 +181,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({
             <div className="flex items-center gap-2 text-emerald-900">
               <BookOpen className="w-4 h-4 text-emerald-700 shrink-0" />
               <span>
-                Guru Pengajar: <strong>{teacher.name}</strong> ({schedule.hours} JP)
+                Guru Pengajar: <strong>{teacher?.name || 'Guru'}</strong> ({schedule?.hours || 2} JP)
               </span>
             </div>
             <button
@@ -317,14 +330,11 @@ export const JournalModal: React.FC<JournalModalProps> = ({
           </div>
 
           {/* Policy Info */}
-          <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200/80 flex items-start gap-2.5 text-xs text-emerald-900">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold">Validasi Status Otomatis</p>
-              <p className="text-[11px] text-emerald-800">
-                Menyimpan jurnal ini akan mengubah status presensi menjadi <strong>Selesai (Jurnal Terisi)</strong> dan mengamankan 100% honor jam mengajar pada rekapitulasi penggajian.
-              </p>
-            </div>
+          <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200/80 flex items-center gap-2.5 text-xs text-emerald-900">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <p className="text-xs text-emerald-800">
+              Jurnal ini memvalidasi kehadiran KBM agar honor mengajar dihitung penuh 100%.
+            </p>
           </div>
 
           {/* Submit Actions */}
@@ -342,7 +352,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({
               className="px-5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-all shadow-xs flex items-center gap-2 disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
-              <span>{isSubmitting ? 'Menyimpan...' : 'Simpan & Selesaikan Jurnal'}</span>
+              <span>{isSubmitting ? 'Menyimpan...' : 'Simpan Jurnal'}</span>
             </button>
           </div>
         </form>

@@ -96,29 +96,16 @@ export const MasterSchedules: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="bg-white rounded-xl sm:rounded-2xl p-6 border border-slate-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-md border border-emerald-200/80">
-              Manajemen Kurikulum & KBM
-            </span>
-            <span className="text-xs text-slate-500 font-medium">
-              Pesantren Baitul Qur'an Al-Ikhwan
-            </span>
-          </div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mt-1.5 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-emerald-600" />
-            <span>Master Jadwal Mengajar Guru</span>
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Pengaturan sesi belajar mingguan, mata pelajaran diniyah & formal, pembagian kelas, serta jumlah Jam Pelajaran (JP).
-          </p>
-        </div>
+      {/* Header Bar */}
+      <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+          <Calendar className="w-5 h-5 text-emerald-600" />
+          <span>Jadwal Mengajar Guru</span>
+        </h2>
 
         <button
           onClick={handleOpenAdd}
-          className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition-all shadow-xs"
+          className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-all shadow-xs"
         >
           <Plus className="w-4 h-4" />
           <span>Tambah Jadwal Sesi</span>
@@ -222,12 +209,12 @@ export const MasterSchedules: React.FC = () => {
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         <div className={`w-7 h-7 rounded-lg ${teacher?.avatarColor || 'bg-emerald-600'} flex items-center justify-center font-bold text-[10px] text-white shrink-0 shadow-xs`}>
-                          {teacher?.name.split(' ')[0]?.[0]}
-                          {teacher?.name.split(' ')[1]?.[0] || 'A'}
+                          {teacher?.name ? teacher.name.split(' ')[0]?.[0] : 'U'}
+                          {teacher?.name ? (teacher.name.split(' ')[1]?.[0] || 'A') : 'A'}
                         </div>
                         <div>
-                          <p className="font-semibold text-slate-900">{teacher?.name}</p>
-                          <p className="text-[10px] text-slate-400">{teacher?.position}</p>
+                          <p className="font-semibold text-slate-900">{teacher?.name || 'Guru'}</p>
+                          <p className="text-[10px] text-slate-400">{teacher?.position || '-'}</p>
                         </div>
                       </div>
                     </td>

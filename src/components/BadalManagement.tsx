@@ -67,29 +67,16 @@ export const BadalManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="bg-white rounded-xl sm:rounded-2xl p-6 border border-slate-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider bg-purple-50 text-purple-800 px-2.5 py-0.5 rounded-md border border-purple-200/80">
-              Sistem Delegasi Mengajar
-            </span>
-            <span className="text-xs text-slate-500 font-medium">
-              Pesantren Baitul Qur'an Al-Ikhwan
-            </span>
-          </div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mt-1.5 flex items-center gap-2">
-            <Users className="w-5 h-5 text-purple-600" />
-            <span>Manajemen Guru Badal (Pengganti KBM)</span>
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Penugasan guru badal saat asatidz berhalangan hadir (Sakit/Izin/Dinas). Honor mengajar (@ Rp 40.000/JP) otomatis dialokasikan ke guru badal.
-          </p>
-        </div>
+      {/* Header Bar */}
+      <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+          <Users className="w-5 h-5 text-purple-600" />
+          <span>Manajemen Guru Badal</span>
+        </h2>
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-2 bg-purple-700 hover:bg-purple-800 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition-all shadow-xs"
+          className="inline-flex items-center gap-1.5 bg-purple-700 hover:bg-purple-800 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-all shadow-xs"
         >
           <Plus className="w-4 h-4" />
           <span>Tunjuk Guru Badal Baru</span>
@@ -176,15 +163,15 @@ export const BadalManagement: React.FC = () => {
                     </td>
                     <td className="py-3.5 px-4">
                       <span className="font-medium text-slate-700 line-through decoration-rose-400">
-                        {origTeacher?.name}
+                        {origTeacher?.name || 'Guru Utama'}
                       </span>
-                      <p className="text-[10px] text-slate-400">{origTeacher?.position}</p>
+                      <p className="text-[10px] text-slate-400">{origTeacher?.position || '-'}</p>
                     </td>
                     <td className="py-3.5 px-4">
                       <span className="font-semibold text-purple-900 bg-purple-50 px-2 py-0.5 rounded border border-purple-200/80">
-                        {badalTeacher?.name}
+                        {badalTeacher?.name || 'Guru Badal'}
                       </span>
-                      <p className="text-[10px] text-slate-500 mt-0.5">{badalTeacher?.position}</p>
+                      <p className="text-[10px] text-slate-500 mt-0.5">{badalTeacher?.position || '-'}</p>
                     </td>
                     <td className="py-3.5 px-4">
                       <span className="font-medium text-slate-800 block">{b.reason}</span>
@@ -192,7 +179,7 @@ export const BadalManagement: React.FC = () => {
                     </td>
                     <td className="py-3.5 px-4 font-semibold text-emerald-700">
                       +{formatRupiah(hours * 40000)}
-                      <span className="block text-[10px] text-slate-400">Masuk ke slip {badalTeacher?.name.split(' ')[1] || 'Badal'}</span>
+                      <span className="block text-[10px] text-slate-400">Masuk ke slip {badalTeacher?.name ? (badalTeacher.name.split(' ')[1] || 'Badal') : 'Badal'}</span>
                     </td>
                     <td className="py-3.5 px-4 text-center">
                       <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/80">
