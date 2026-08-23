@@ -4,8 +4,8 @@ import cors from 'cors';
 import { createServer as createViteServer } from 'vite';
 import { db } from './src/db';
 import * as schema from './src/db/schema';
-import { eq, and } from 'drizzle-orm';
-import { INITIAL_TEACHERS, INITIAL_SCHEDULES } from './src/data/initialData';
+import { eq, and, or } from 'drizzle-orm';
+import { INITIAL_TEACHERS, INITIAL_SCHEDULES, INITIAL_ATTENDANCES, INITIAL_BADAL_ASSIGNMENTS } from './src/data/initialData';
 
 async function startServer() {
   const app = express();
@@ -13,6 +13,11 @@ async function startServer() {
 
   app.use(cors());
   app.use(express.json());
+
+  // Health check for Cloud Run and monitoring
+  app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok' });
+  });
 
   // Authentication
   app.post('/api/login', async (req, res) => {
@@ -129,7 +134,10 @@ async function startServer() {
       const { teacherId } = req.query;
       let whereClause = undefined;
       if (teacherId) {
-        whereClause = eq(schema.attendances.teacherId, teacherId as string);
+        whereClause = or(
+          eq(schema.attendances.teacherId, teacherId as string),
+          eq(schema.attendances.actualTeacherId, teacherId as string)
+        );
       }
       const attendances = await db.query.attendances.findMany({
         where: whereClause
@@ -257,7 +265,7 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*', (req, res) => {
+    app.get('*all', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }

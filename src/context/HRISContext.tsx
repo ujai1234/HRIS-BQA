@@ -274,6 +274,20 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       filledAt: new Date().toISOString(),
     };
 
+    // Optimistically update attendance in state
+    setAttendances((prev) =>
+      prev.map((att) => {
+        if (att.id === attendanceId) {
+          return {
+            ...att,
+            status: 'SELESAI',
+            journal: newJournal,
+          };
+        }
+        return att;
+      })
+    );
+
     fetch('/api/journals', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

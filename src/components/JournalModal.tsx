@@ -13,6 +13,7 @@ import {
 import confetti from 'canvas-confetti';
 import { AttendanceRecord, ClassSchedule, Teacher, StudentAttendance } from '../types';
 import { useHRIS } from '../context/HRISContext';
+import { formatIndonesianDate } from '../utils/formatters';
 
 interface JournalModalProps {
   attendance?: AttendanceRecord | null;
@@ -178,11 +179,16 @@ export const JournalModal: React.FC<JournalModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Status & Quick Template Action Bar */}
           <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-emerald-50 rounded-lg border border-emerald-200/80 text-xs">
-            <div className="flex items-center gap-2 text-emerald-900">
-              <BookOpen className="w-4 h-4 text-emerald-700 shrink-0" />
-              <span>
-                Guru Pengajar: <strong>{teacher?.name || 'Guru'}</strong> ({schedule?.hours || 2} JP)
-              </span>
+            <div className="space-y-0.5 text-emerald-900">
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-emerald-700 shrink-0" />
+                <span>
+                  Guru: <strong>{teacher?.name || 'Guru'}</strong> ({schedule?.hours || 2} JP • {schedule?.startTime}-{schedule?.endTime})
+                </span>
+              </div>
+              <p className="text-[11px] text-emerald-700 font-medium pl-6">
+                Tanggal Sesi: <strong>{formatIndonesianDate(resolvedAttendance?.date || new Date().toISOString().split('T')[0])}</strong>
+              </p>
             </div>
             <button
               type="button"

@@ -25,7 +25,7 @@ import { ClockInModal } from './ClockInModal';
 import { JournalModal } from './JournalModal';
 import { SalarySlipModal } from './SalarySlipModal';
 import { SlipGajiView } from './SlipGajiView';
-import { formatRupiah, getLateCategoryLabel } from '../utils/formatters';
+import { formatRupiah, getLateCategoryLabel, formatIndonesianDate } from '../utils/formatters';
 
 interface GuruViewProps {
   initialTab?: 'clockin_journal' | 'slip_gaji' | 'jadwal';
@@ -91,6 +91,57 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
     );
   };
 
+  // Missed journal entries detection (past shifts & pending shifts)
+  const missedJournalRecords = attendances.filter((a) => {
+    const isMyRecord = a.teacherId === currentUser.id || a.actualTeacherId === currentUser.id;
+    if (!isMyRecord) return false;
+    const isPresentWithoutJournal =
+      a.status === 'HADIR_JURNAL_KOSONG' ||
+      (!!a.clockInTime && !a.journal && a.status !== 'SELESAI' && a.status !== 'IZIN' && a.status !== 'SAKIT' && a.status !== 'ALPA');
+    return isPresentWithoutJournal;
+  });
+
+  const missedShiftsWithDetails = missedJournalRecords.map((att) => {
+    let sched = schedules.find((s) => s.id === att.scheduleId);
+    if (!sched) {
+      sched = {
+        id: att.scheduleId,
+        teacherId: att.teacherId || currentUser.id,
+        subject: 'KBM Mengajar',
+        className: 'Kelas Terdaftar',
+        unit: currentUser.unit,
+        dayOfWeek: 'Senin',
+        startTime: att.clockInTime || '07:30',
+        endTime: '08:50',
+        hours: 2,
+        room: 'Ruang Kelas',
+      };
+    }
+    const hours = sched.hours || 2;
+    const hourlyRate = currentUser.hourlyRate || 40000;
+    const sessionHonor = hours * hourlyRate;
+    const potentialPenalty = Math.round(sessionHonor * 0.5); // 50% honor deduction
+    const isPastShift = att.date < todayStr;
+
+    return {
+      attendance: att,
+      schedule: sched,
+      hours,
+      hourlyRate,
+      sessionHonor,
+      potentialPenalty,
+      isPastShift,
+    };
+  }).sort((a, b) => {
+    // Past shifts first, then date descending
+    if (a.isPastShift && !b.isPastShift) return -1;
+    if (!a.isPastShift && b.isPastShift) return 1;
+    return b.attendance.date.localeCompare(a.attendance.date);
+  });
+
+  const pastMissedCount = missedShiftsWithDetails.filter((m) => m.isPastShift).length;
+  const totalPotentialMissedPenalty = missedShiftsWithDetails.reduce((sum, m) => sum + m.potentialPenalty, 0);
+
   return (
     <div className="space-y-6">
       {/* Teacher Profile & Flow Banner */}
@@ -131,6 +182,149 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
       {/* Tab Content 1: Presensi & Jurnal Mengajar */}
       {activeSubTab === 'clockin_journal' && (
         <div className="space-y-6">
+          {/* Warning System: Missed Journals Notification Banner */}
+          {missedShiftsWithDetails.length > 0 ? (
+            <div className="bg-gradient-to-br from-amber-50 via-amber-50/70 to-rose-50/60 border-2 border-amber-300 rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
+              {/* Top Summary Bar */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-11 h-11 rounded-xl bg-amber-500/20 flex items-center justify-center border border-amber-400/50 shrink-0 text-amber-800 shadow-xs">
+                    <AlertTriangle className="w-6 h-6 text-amber-700" />
+                  </div>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-base sm:text-lg font-bold text-amber-950">
+                        Peringatan: {missedShiftsWithDetails.length} Jurnal Mengajar Belum Diisi
+                      </h3>
+                      {pastMissedCount > 0 && (
+                        <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-600 text-white shadow-xs animate-pulse">
+                          {pastMissedCount} Shift Lampau
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-amber-900/90 mt-0.5 leading-relaxed">
+                      Sesi KBM yang tidak dilengkapi jurnal mengajar akan dikenakan <strong>potongan 50% honor mengajar per sesi</strong>.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Total Potential Penalty Badge */}
+                <div className="bg-white/90 border border-amber-300 px-4 py-2.5 rounded-xl text-left sm:text-right shrink-0 shadow-2xs w-full sm:w-auto">
+                  <span className="text-[10px] text-amber-800 block uppercase font-bold tracking-wider">
+                    Total Potensi Potongan
+                  </span>
+                  <span className="text-base font-extrabold text-rose-600">
+                    -{formatRupiah(totalPotentialMissedPenalty)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Policy Explanation Alert Box */}
+              <div className="bg-white/95 rounded-xl p-4 border border-amber-200 text-xs text-slate-700 space-y-2 shadow-2xs">
+                <div className="flex items-center gap-2 text-amber-900 font-bold">
+                  <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>Ketentuan HRIS Penggajian Pesantren:</span>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed pl-6">
+                  Sesuai kebijakan akademik pesantren, hak honor mengajar guru divalidasi melalui <strong>presensi dan pengisian jurnal KBM</strong> (materi pembelajaran & presensi santri). Kehadiran tanpa jurnal hanya dihitung <strong>50% honor</strong>. Segera lengkapi jurnal di bawah ini sebelum penutupan periode penggajian agar honor dicairkan <strong>100% penuh</strong>.
+                </p>
+              </div>
+
+              {/* Itemized Missed Shifts List */}
+              <div className="space-y-2.5 pt-1">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-800 px-1">
+                  <span>Daftar Sesi Mengajar Menunggu Jurnal:</span>
+                  <span className="text-[11px] font-semibold text-amber-800">
+                    Klik tombol untuk melengkapi langsung
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2.5">
+                  {missedShiftsWithDetails.map((item) => (
+                    <div
+                      key={item.attendance.id}
+                      className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 transition-all shadow-2xs ${
+                        item.isPastShift 
+                          ? 'bg-white border-amber-300 hover:border-amber-400' 
+                          : 'bg-white/90 border-amber-200 hover:border-amber-300'
+                      }`}
+                    >
+                      <div className="space-y-1.5">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-md border ${
+                            item.isPastShift 
+                              ? 'bg-rose-50 text-rose-800 border-rose-200' 
+                              : 'bg-amber-50 text-amber-800 border-amber-200'
+                          }`}>
+                            {item.isPastShift ? 'Shift Lampau' : 'Shift Hari Ini'}: {formatIndonesianDate(item.attendance.date)}
+                          </span>
+                          <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+                            {item.schedule.startTime} - {item.schedule.endTime} WIB
+                          </span>
+                          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            {item.hours} JP
+                          </span>
+                        </div>
+
+                        <div>
+                          <h4 className="text-sm font-bold text-slate-900">
+                            {item.schedule.subject}
+                          </h4>
+                          <p className="text-xs text-slate-600 mt-0.5">
+                            Kelas: <strong>{item.schedule.className}</strong> • Ruang: {item.schedule.room} • Unit: {item.schedule.unit}
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 pt-0.5">
+                          <span>Honor Sesi Penuh: <strong>{formatRupiah(item.sessionHonor)}</strong></span>
+                          <span>•</span>
+                          <span className="text-rose-600 font-bold">
+                            Potensi Potongan 50%: -{formatRupiah(item.potentialPenalty)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => setActiveJournalData({ attendance: item.attendance, schedule: item.schedule })}
+                        className="inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-all shadow-xs shrink-0 self-start sm:self-center"
+                      >
+                        <FileText className="w-4 h-4" />
+                        <span>Isi Jurnal Sekarang</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
+              <div className="flex items-center gap-3 text-emerald-900">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                <div>
+                  <h4 className="font-bold text-emerald-950 text-sm">Status Jurnal Mengajar Tertib</h4>
+                  <p className="text-xs text-emerald-800 mt-0.5">
+                    Seluruh sesi KBM yang Anda hadiri telah dilengkapi jurnal pembelajaran. Tidak ada potensi potongan honor (100% aman).
+                  </p>
+                </div>
+              </div>
+              <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0 self-start sm:self-center">
+                Honor 100% Aman
+              </span>
+            </div>
+          )}
+
+          {/* Section Header */}
+          <div className="flex items-center justify-between pt-2">
+            <div>
+              <h3 className="text-base font-bold text-slate-900">Jadwal Mengajar Hari Ini ({selectedDay})</h3>
+              <p className="text-xs text-slate-500">Lakukan clock-in dan isi jurnal mengajar untuk mencatat kehadiran KBM Anda.</p>
+            </div>
+            <span className="text-xs font-semibold text-slate-700 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">
+              {formatIndonesianDate(todayStr)}
+            </span>
+          </div>
+
           {/* Schedule List for Selected Day */}
           <div className="space-y-4">
             {daySchedules.length === 0 ? (
