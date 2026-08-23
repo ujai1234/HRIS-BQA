@@ -39,7 +39,6 @@ export const Header: React.FC<HeaderProps> = ({
     currentUser, 
     currentRole, 
     currentPath,
-    login,
     logout,
     setCurrentPath,
     setCurrentUserById, 
@@ -47,10 +46,6 @@ export const Header: React.FC<HeaderProps> = ({
     setSelectedPeriod, 
     resetToDefault 
   } = useHRIS();
-
-  const handleRoleChange = (role: UserRole) => {
-    login(role);
-  };
 
   // Role-specific navigation items
   const getNavItems = () => {
@@ -114,8 +109,8 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Logo and Brand Header */}
           <div className="p-5 border-b border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-emerald-500 rounded-lg flex items-center justify-center font-bold text-white shadow-md shadow-emerald-500/20">
-                <span className="text-sm tracking-tighter">BQ</span>
+              <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center font-bold text-white shadow-md shadow-emerald-500/20">
+                <span className="text-base font-extrabold tracking-tighter">BQA</span>
               </div>
               <div className="leading-tight">
                 <h1 className="font-bold text-sm text-white tracking-tight">HRIS Pesantren</h1>
@@ -209,39 +204,21 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right: RBAC Persona Simulator & Period Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Quick Role Switcher */}
-          <div className="hidden sm:flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+          {/* Reset Database Button (Visible for Admins) */}
+          {currentRole === 'ADMIN' && (
             <button
-              onClick={() => handleRoleChange('GURU')}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
-                currentRole === 'GURU'
-                  ? 'bg-white text-emerald-800 shadow-xs border border-slate-200/80'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              onClick={() => {
+                if (window.confirm('Yakin ingin reset ulang semua data ke pengaturan awal?')) {
+                  resetToDefault();
+                }
+              }}
+              className="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-500 hover:text-emerald-700 py-1.5 px-3 rounded-lg text-[10px] font-bold transition-all"
+              title="Reset Sinkronisasi Data"
             >
-              Guru
+              <RotateCcw className="w-3 h-3" />
+              <span className="hidden sm:inline">RESET DATA</span>
             </button>
-            <button
-              onClick={() => handleRoleChange('ADMIN')}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
-                currentRole === 'ADMIN'
-                  ? 'bg-white text-blue-800 shadow-xs border border-slate-200/80'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Admin
-            </button>
-            <button
-              onClick={() => handleRoleChange('KEPALA_PESANTREN')}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
-                currentRole === 'KEPALA_PESANTREN'
-                  ? 'bg-white text-amber-800 shadow-xs border border-slate-200/80'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Kepsek
-            </button>
-          </div>
+          )}
 
           {/* Logged in User Pill */}
           <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 py-1.5 px-3 rounded-lg">

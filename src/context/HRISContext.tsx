@@ -77,45 +77,52 @@ const STORAGE_KEYS = {
 };
 
 export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [teachers, setTeachers] = useState<Teacher[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.TEACHERS);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) {
-        console.error('Failed to parse teachers from storage', e);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [schedules, setSchedules] = useState<ClassSchedule[]>([]);
+  const [attendances, setAttendances] = useState<AttendanceRecord[]>([]);
+  const [badalAssignments, setBadalAssignments] = useState<BadalAssignment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchAllData = async () => {
+    setIsLoading(true);
+    try {
+      // Get current user from state to determine filtering
+      const isGuru = currentRole === 'GURU';
+      const teacherIdParam = isGuru ? `?teacherId=${currentUserId}` : '';
+
+      const [tRes, sRes, aRes, bRes] = await Promise.all([
+        fetch('/api/teachers'),
+        fetch(`/api/schedules${teacherIdParam}`),
+        fetch(`/api/attendances${teacherIdParam}`),
+        fetch('/api/badal')
+      ]);
+
+      const [t, s, a, b] = await Promise.all([
+        tRes.json(),
+        sRes.json(),
+        aRes.json(),
+        bRes.json()
+      ]);
+
+      if (t.length === 0) {
+        await fetch('/api/seed', { method: 'POST' });
+        return fetchAllData();
       }
+
+      setTeachers(t);
+      setSchedules(s);
+      setAttendances(a);
+      setBadalAssignments(b);
+    } catch (error) {
+      console.error('Failed to fetch data', error);
+    } finally {
+      setIsLoading(false);
     }
-    return INITIAL_TEACHERS;
-  });
-
-  const [schedules, setSchedules] = useState<ClassSchedule[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SCHEDULES);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) {
-        console.error('Failed to parse schedules from storage', e);
-      }
-    }
-    return INITIAL_SCHEDULES;
-  });
-
-  const [attendances, setAttendances] = useState<AttendanceRecord[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.ATTENDANCES);
-    return saved ? JSON.parse(saved) : INITIAL_ATTENDANCES;
-  });
-
-  const [badalAssignments, setBadalAssignments] = useState<BadalAssignment[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.BADAL);
-    return saved ? JSON.parse(saved) : INITIAL_BADAL_ASSIGNMENTS;
-  });
+  };
 
   const [currentUserId, setCurrentUserId] = useState<string>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.CURRENT_USER_ID);
-    return saved || 'T-07'; // Default to Ust Akmal Yaqien (Admin)
+    return saved || '';
   });
 
   const [currentRole, setCurrentRoleState] = useState<UserRole>(() => {
@@ -125,7 +132,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const saved = localStorage.getItem('hris_pbq_auth_v1');
-    return saved !== null ? JSON.parse(saved) : true;
+    return saved === 'true';
   });
 
   const [currentPath, setCurrentPath] = useState<string>(() => {
@@ -138,7 +145,11 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved || 'Agustus 2026';
   });
 
-  // Sync to local storage
+  useEffect(() => {
+    fetchAllData();
+  }, [currentUserId, currentRole]);
+
+  // Sync to local storage for auth/path only
   useEffect(() => {
     localStorage.setItem('hris_pbq_auth_v1', JSON.stringify(isAuthenticated));
   }, [isAuthenticated]);
@@ -146,23 +157,6 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem('hris_pbq_path_v1', currentPath);
   }, [currentPath]);
-
-  // Sync to local storage
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.TEACHERS, JSON.stringify(teachers));
-  }, [teachers]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.SCHEDULES, JSON.stringify(schedules));
-  }, [schedules]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.ATTENDANCES, JSON.stringify(attendances));
-  }, [attendances]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.BADAL, JSON.stringify(badalAssignments));
-  }, [badalAssignments]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.CURRENT_USER_ID, currentUserId);
@@ -176,29 +170,30 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem(STORAGE_KEYS.PERIOD, selectedPeriod);
   }, [selectedPeriod]);
 
-  // Derived current user object
-  const currentUser = teachers.find((t) => t.id === currentUserId) || teachers[6] || teachers[0] || INITIAL_TEACHERS[0];
+  // Derived current user object - with array check safety
+  const currentUser = Array.isArray(teachers) 
+    ? (teachers.find((t) => t.id === currentUserId) || teachers[0] || INITIAL_TEACHERS[0])
+    : INITIAL_TEACHERS[0];
 
   const login = (role: UserRole, teacherId?: string) => {
     setIsAuthenticated(true);
     setCurrentRoleState(role);
-    if (role === 'GURU') {
-      setCurrentPath('/dashboard/guru');
-      const targetId = teacherId || 'T-08';
-      setCurrentUserId(targetId);
-    } else if (role === 'ADMIN') {
-      setCurrentPath('/dashboard/admin');
-      const targetId = teacherId || 'T-07';
-      setCurrentUserId(targetId);
-    } else if (role === 'KEPALA_PESANTREN') {
-      setCurrentPath('/dashboard/kepsek');
-      const targetId = teacherId || 'T-01';
-      setCurrentUserId(targetId);
-    }
+    if (teacherId) setCurrentUserId(teacherId);
+    
+    // Trigger path change based on role
+    if (role === 'GURU') setCurrentPath('/dashboard/guru/clockin');
+    else if (role === 'ADMIN') setCurrentPath('/dashboard/admin/guru');
+    else if (role === 'KEPALA_PESANTREN') setCurrentPath('/dashboard/kepsek/audit');
   };
 
   const logout = () => {
     setIsAuthenticated(false);
+    setCurrentUserId('');
+    setCurrentRoleState('GURU');
+    setCurrentPath('/');
+    localStorage.removeItem(STORAGE_KEYS.CURRENT_USER_ID);
+    localStorage.removeItem(STORAGE_KEYS.CURRENT_ROLE);
+    localStorage.setItem('hris_pbq_auth_v1', 'false');
   };
 
   const setCurrentUserById = (teacherId: string) => {
@@ -233,7 +228,14 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const actualTeacherId = activeBadal ? activeBadal.badalTeacherId : currentUser.id;
     const isBadal = !!activeBadal && activeBadal.badalTeacherId === currentUser.id;
 
-    const { lateMinutes, category, penalty } = calculateLatePenalty(actualClockIn, schedule.startTime);
+    const teacherForLate = teachers.find(t => t.id === actualTeacherId) || currentUser;
+    const { lateMinutes, category, penalty } = calculateLatePenalty(
+      actualClockIn, 
+      schedule.startTime,
+      teacherForLate.dailyTransport,
+      schedule.hours,
+      teacherForLate.hourlyRate
+    );
 
     const newRecord: AttendanceRecord = {
       id: `ATT-${Date.now()}`,
@@ -250,11 +252,11 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       notes: notes || (isBadal ? `Clock-in sebagai Guru Badal menggantikan ${teachers.find(t => t.id === schedule.teacherId)?.name || 'Guru Asal'}` : undefined),
     };
 
-    setAttendances((prev) => {
-      // Remove any existing placeholder for this schedule today
-      const filtered = prev.filter((a) => !(a.scheduleId === scheduleId && a.date === todayStr));
-      return [newRecord, ...filtered];
-    });
+    fetch('/api/attendances', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newRecord)
+    }).then(res => res.json()).then(() => fetchAllData());
 
     return newRecord;
   };
@@ -272,18 +274,11 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       filledAt: new Date().toISOString(),
     };
 
-    setAttendances((prev) =>
-      prev.map((att) => {
-        if (att.id === attendanceId) {
-          return {
-            ...att,
-            status: 'SELESAI',
-            journal: newJournal,
-          };
-        }
-        return att;
-      })
-    );
+    fetch('/api/journals', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newJournal)
+    }).then(res => res.json()).then(() => fetchAllData());
   };
 
   // Direct status mark (e.g. Alpa, Izin, Sakit)
@@ -308,10 +303,11 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       notes,
     };
 
-    setAttendances((prev) => {
-      const filtered = prev.filter((a) => !(a.scheduleId === scheduleId && a.date === todayStr));
-      return [newRecord, ...filtered];
-    });
+    fetch('/api/attendances', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newRecord)
+    }).then(res => res.json()).then(() => fetchAllData());
   };
 
   // Guru Badal Handlers
@@ -322,13 +318,19 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       status: 'APPROVED',
       createdAt: new Date().toISOString(),
     };
-    setBadalAssignments((prev) => [newBadal, ...prev]);
+    fetch('/api/badal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newBadal)
+    }).then(() => fetchAllData());
   };
 
   const approveBadalAssignment = (badalId: string) => {
-    setBadalAssignments((prev) =>
-      prev.map((b) => (b.id === badalId ? { ...b, status: 'APPROVED' } : b))
-    );
+    fetch(`/api/badal/${badalId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'APPROVED' })
+    }).then(() => fetchAllData());
   };
 
   // Master Data Guru CRUD
@@ -338,15 +340,25 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ...teacherInput,
       id: newId,
     };
-    setTeachers((prev) => [...prev, newTeacher]);
+    fetch('/api/teachers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newTeacher)
+    }).then(() => fetchAllData());
   };
 
   const updateTeacher = (id: string, updates: Partial<Teacher>) => {
-    setTeachers((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
+    fetch(`/api/teachers/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    }).then(() => fetchAllData());
   };
 
   const deleteTeacher = (id: string) => {
-    setTeachers((prev) => prev.filter((t) => t.id !== id));
+    fetch(`/api/teachers/${id}`, {
+      method: 'DELETE'
+    }).then(() => fetchAllData());
   };
 
   // Master Schedule CRUD
@@ -356,15 +368,25 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ...schedInput,
       id: newId,
     };
-    setSchedules((prev) => [...prev, newSched]);
+    fetch('/api/schedules', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newSched)
+    }).then(() => fetchAllData());
   };
 
   const updateSchedule = (id: string, updates: Partial<ClassSchedule>) => {
-    setSchedules((prev) => prev.map((s) => (s.id === id ? { ...s, ...updates } : s)));
+    fetch(`/api/schedules/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    }).then(() => fetchAllData());
   };
 
   const deleteSchedule = (id: string) => {
-    setSchedules((prev) => prev.filter((s) => s.id !== id));
+    fetch(`/api/schedules/${id}`, {
+      method: 'DELETE'
+    }).then(() => fetchAllData());
   };
 
   // Payroll Calculation Engine for a specific teacher
@@ -434,8 +456,18 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return sum + alphaPerDay;
     }, 0);
 
+    // 4. Izin Penalty: Transport + (Jam Mengajar x Tarif)
+    const izinRecords = attendances.filter((a) => a.teacherId === teacherId && a.status === 'IZIN');
+    const izinDays = izinRecords.length;
+    const izinPenalty = izinRecords.reduce((sum, a) => {
+      const sched = schedules.find((s) => s.id === a.scheduleId);
+      const hours = sched ? sched.hours : 2;
+      const izinPerDay = teacher.dailyTransport + (hours * teacher.hourlyRate);
+      return sum + izinPerDay;
+    }, 0);
+
     const otherDeductions = 0; // Kasbon/Infaq sukarela
-    const totalDeductions = latePenaltyTotal + emptyJournalPenalty + alphaPenalty + otherDeductions;
+    const totalDeductions = latePenaltyTotal + emptyJournalPenalty + alphaPenalty + izinPenalty + otherDeductions;
     const grossSalary = teacher.baseSalary + teachingHonorarium + totalTransport;
     const netSalary = Math.max(0, grossSalary - totalDeductions);
 
@@ -454,6 +486,8 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       latePenaltyTotal,
       emptyJournalCount,
       emptyJournalPenalty,
+      izinDays,
+      izinPenalty,
       alphaDays,
       alphaPenalty,
       otherDeductions,
@@ -485,13 +519,10 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetToDefault = () => {
     localStorage.clear();
-    setTeachers(INITIAL_TEACHERS);
-    setSchedules(INITIAL_SCHEDULES);
-    setAttendances(INITIAL_ATTENDANCES);
-    setBadalAssignments(INITIAL_BADAL_ASSIGNMENTS);
-    setCurrentUserId('T-07');
-    setCurrentRoleState('ADMIN');
-    setSelectedPeriod('Agustus 2026');
+    fetch('/api/reset', { method: 'POST' }).then(() => {
+      logout();
+      fetchAllData();
+    });
   };
 
   return (

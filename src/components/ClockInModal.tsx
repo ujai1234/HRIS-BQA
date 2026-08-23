@@ -47,7 +47,13 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
     (b) => b.scheduleId === schedule.id && b.date === todayStr && b.status !== 'PENDING'
   );
 
-  const penaltyCalculation = calculateLatePenalty(selectedTime, schedule.startTime);
+  const penaltyCalculation = calculateLatePenalty(
+    selectedTime, 
+    schedule.startTime,
+    teacher?.dailyTransport || 10000,
+    schedule.hours || 2,
+    teacher?.hourlyRate || 40000
+  );
   const categoryInfo = getLateCategoryLabel(penaltyCalculation.category);
 
   // Set default initial time slightly around scheduled start time

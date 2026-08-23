@@ -198,6 +198,18 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ payroll, onClo
 
                   <div className="flex justify-between items-baseline">
                     <div>
+                      <span className="font-medium text-slate-800">Potongan Izin</span>
+                      <p className="text-[10px] text-slate-400">
+                        {(payroll.izinDays || 0) > 0 ? `${payroll.izinDays} hari izin` : 'Nihil'}
+                      </p>
+                    </div>
+                    <span className={(payroll.izinPenalty || 0) > 0 ? 'font-semibold text-rose-600' : 'text-slate-400'}>
+                      {(payroll.izinPenalty || 0) > 0 ? `-${formatRupiah(payroll.izinPenalty || 0)}` : 'Rp 0'}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-baseline">
+                    <div>
                       <span className="font-medium text-slate-800">Potongan Alpa</span>
                       <p className="text-[10px] text-slate-400">
                         {payroll.alphaDays > 0 ? `${payroll.alphaDays} hari tanpa izin` : 'Nihil'}

@@ -43,9 +43,15 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
 
   const [activeSubTab, setActiveSubTab] = useState<'clockin_journal' | 'slip_gaji' | 'jadwal'>(initialTab);
 
-  // Selected day for simulator (defaults to today's Indonesian day name)
+  // Selected day (defaults to today's Indonesian day name)
   const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] as const;
-  const [selectedDay, setSelectedDay] = useState<string>('Senin');
+  const getTodayDayName = () => {
+    const days = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const todayIndex = new Date().getDay();
+    const day = days[todayIndex];
+    return day === 'Ahad' ? 'Senin' : day;
+  };
+  const [selectedDay] = useState<string>(getTodayDayName());
 
   // Modals state
   const [activeClockInSchedule, setActiveClockInSchedule] = useState<ClassSchedule | null>(null);
@@ -106,7 +112,7 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
           </div>
 
           {/* Quick Metrics */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full lg:w-auto text-xs">
+          <div className="grid grid-cols-2 gap-3 w-full lg:w-auto text-xs">
             <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700/50">
               <span className="text-slate-400 block text-[10px] uppercase font-bold">Total Jam (JP)</span>
               <span className="text-lg font-bold text-white mt-0.5 block">{teacherPayroll.totalTaughtHours} JP</span>
@@ -118,12 +124,6 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
               <span className="text-lg font-bold text-emerald-400 mt-0.5 block">{teacherPayroll.totalPresentDays} Hari</span>
               <span className="text-[10px] text-slate-400">Transport: {formatRupiah(teacherPayroll.totalTransport)}</span>
             </div>
-
-            <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700/50 col-span-2 sm:col-span-1">
-              <span className="text-slate-400 block text-[10px] uppercase font-bold">Estimasi Gaji Bersih</span>
-              <span className="text-lg font-bold text-emerald-300 mt-0.5 block">{formatRupiah(teacherPayroll.netSalary)}</span>
-              <span className="text-[10px] text-slate-400">Periode {selectedPeriod}</span>
-            </div>
           </div>
         </div>
       </div>
@@ -131,43 +131,6 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
       {/* Tab Content 1: Presensi & Jurnal Mengajar */}
       {activeSubTab === 'clockin_journal' && (
         <div className="space-y-6">
-          {/* Day Selector & Status Bar */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-md border border-emerald-200/80">
-                  Jadwal Harian
-                </span>
-                <span className="text-xs text-slate-500 font-medium">
-                  Hari: <strong>{selectedDay}</strong> ({daySchedules.length} Sesi)
-                </span>
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 mt-1">
-                Presensi Masuk & Jurnal Mengajar
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Catat presensi kehadiran saat mulai kelas dan lengkapi jurnal mengajar santri.
-              </p>
-            </div>
-
-            {/* Day Switcher */}
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 overflow-x-auto max-w-full">
-              {daysOfWeek.map((day) => (
-                <button
-                  key={day}
-                  onClick={() => setSelectedDay(day)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
-                    selectedDay === day
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-                  }`}
-                >
-                  {day}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Schedule List for Selected Day */}
           <div className="space-y-4">
             {daySchedules.length === 0 ? (
@@ -429,6 +392,7 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
       {activeClockInSchedule && (
         <ClockInModal
           schedule={activeClockInSchedule}
+          teacher={currentUser}
           onClose={() => setActiveClockInSchedule(null)}
           onSuccess={(record) => {
             setActiveClockInSchedule(null);

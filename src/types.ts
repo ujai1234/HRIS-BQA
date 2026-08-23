@@ -13,7 +13,8 @@ export type PositionCategory =
   | 'Guru Mukim'
   | 'Guru SMP'
   | 'Guru MA'
-  | 'Guru Pesantren';
+  | 'Guru Pesantren'
+  | 'Guru Tahfidz';
 
 export type UnitType = 'SMP' | 'MA' | 'PESANTREN' | 'UMUM';
 
@@ -30,6 +31,8 @@ export interface Teacher {
   phone?: string;
   avatarColor?: string;
   isActive: boolean;
+  username?: string;
+  password?: string;
 }
 
 export type DayOfWeek = 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat' | 'Sabtu' | 'Ahad';
@@ -129,6 +132,8 @@ export interface TeacherPayrollItem {
   latePenaltyTotal: number;
   emptyJournalCount: number;
   emptyJournalPenalty: number; // 50% x (hours x rate)
+  izinDays?: number;
+  izinPenalty?: number; // transport + (hours x rate)
   alphaDays: number;
   alphaPenalty: number; // transport + (hours x rate) + 5% baseSalary
   otherDeductions: number;

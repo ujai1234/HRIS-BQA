@@ -42,7 +42,13 @@ export function formatShortDate(dateString: string): string {
   }
 }
 
-export function calculateLatePenalty(actualClockIn: string, scheduledStartTime: string): {
+export function calculateLatePenalty(
+  actualClockIn: string, 
+  scheduledStartTime: string,
+  dailyTransport: number = 10000,
+  sessionHours: number = 2,
+  hourlyRate: number = 40000
+): {
   lateMinutes: number;
   category: LateCategory;
   penalty: number;
@@ -62,22 +68,25 @@ export function calculateLatePenalty(actualClockIn: string, scheduledStartTime: 
       penalty: 0,
     };
   } else if (diffMinutes <= 15) {
+    // Terlambat 5-15 menit: Potong Transport per hari
     return {
       lateMinutes: diffMinutes,
       category: 'TERLAMBAT_RINGAN',
-      penalty: 10000,
+      penalty: dailyTransport,
     };
   } else if (diffMinutes <= 30) {
+    // Terlambat 16-30 menit: Potong (Transport per hari + 50% Honor)
     return {
       lateMinutes: diffMinutes,
       category: 'TERLAMBAT_SEDANG',
-      penalty: 20000,
+      penalty: dailyTransport + 0.5 * (sessionHours * hourlyRate),
     };
   } else {
+    // Terlambat >30 menit: Dianggap Izin (Potong transport + honor penuh sesi)
     return {
       lateMinutes: diffMinutes,
       category: 'TERLAMBAT_BERAT',
-      penalty: 35000,
+      penalty: dailyTransport + (sessionHours * hourlyRate),
     };
   }
 }

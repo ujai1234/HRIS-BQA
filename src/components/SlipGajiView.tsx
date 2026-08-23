@@ -188,6 +188,18 @@ export const SlipGajiView: React.FC = () => {
 
                 <div className="flex justify-between items-baseline">
                   <div>
+                    <span className="font-medium text-slate-800">Potongan Izin</span>
+                    <p className="text-[10px] text-slate-400">
+                      {(selectedTeacherPayroll.izinDays || 0) > 0 ? `${selectedTeacherPayroll.izinDays} hari izin` : 'Nihil'}
+                    </p>
+                  </div>
+                  <span className={(selectedTeacherPayroll.izinPenalty || 0) > 0 ? 'font-semibold text-rose-600' : 'text-slate-400'}>
+                    {(selectedTeacherPayroll.izinPenalty || 0) > 0 ? `-${formatRupiah(selectedTeacherPayroll.izinPenalty || 0)}` : 'Rp 0'}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-baseline">
+                  <div>
                     <span className="font-medium text-slate-800">Potongan Alpa</span>
                     <p className="text-[10px] text-slate-400">
                       {selectedTeacherPayroll.alphaDays > 0 ? `${selectedTeacherPayroll.alphaDays} hari tanpa izin` : 'Nihil'}

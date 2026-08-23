@@ -14,6 +14,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7801',
     avatarColor: 'bg-emerald-600',
     isActive: true,
+    username: 'kepsek',
+    password: 'kepsek123',
   },
   {
     id: 'T-02',
@@ -28,6 +30,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7802',
     avatarColor: 'bg-teal-600',
     isActive: true,
+    username: 'tofanhasan',
+    password: 'guru123',
   },
   {
     id: 'T-03',
@@ -42,6 +46,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7803',
     avatarColor: 'bg-cyan-700',
     isActive: true,
+    username: 'cahyono',
+    password: 'kepsek123',
   },
   {
     id: 'T-04',
@@ -56,6 +62,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7804',
     avatarColor: 'bg-blue-600',
     isActive: true,
+    username: 'syuhada',
+    password: 'guru123',
   },
   {
     id: 'T-05',
@@ -70,6 +78,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7805',
     avatarColor: 'bg-indigo-600',
     isActive: true,
+    username: 'sudarsono',
+    password: 'guru123',
   },
   {
     id: 'T-06',
@@ -84,6 +94,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7806',
     avatarColor: 'bg-sky-600',
     isActive: true,
+    username: 'ahadiat',
+    password: 'guru123',
   },
   {
     id: 'T-07',
@@ -98,6 +110,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7807',
     avatarColor: 'bg-emerald-700',
     isActive: true,
+    username: 'admin',
+    password: 'admin123',
   },
   {
     id: 'T-08',
@@ -112,6 +126,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7808',
     avatarColor: 'bg-emerald-600',
     isActive: true,
+    username: 'ustfuadaroqomm',
+    password: 'guru123',
   },
   {
     id: 'T-09',
@@ -126,6 +142,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7809',
     avatarColor: 'bg-green-700',
     isActive: true,
+    username: 'rosyid',
+    password: 'guru123',
   },
   {
     id: 'T-10',
@@ -140,6 +158,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7810',
     avatarColor: 'bg-teal-700',
     isActive: true,
+    username: 'saifmufid',
+    password: 'guru123',
   },
   {
     id: 'T-11',
@@ -154,6 +174,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7811',
     avatarColor: 'bg-amber-700',
     isActive: true,
+    username: 'fauzanali',
+    password: 'guru123',
   },
   {
     id: 'T-12',
@@ -168,6 +190,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7812',
     avatarColor: 'bg-violet-700',
     isActive: true,
+    username: 'hasbiyallah',
+    password: 'guru123',
   },
   {
     id: 'T-13',
@@ -182,6 +206,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7813',
     avatarColor: 'bg-slate-700',
     isActive: true,
+    username: 'abdulmufid',
+    password: 'guru123',
   },
   {
     id: 'T-14',
@@ -196,6 +222,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7814',
     avatarColor: 'bg-pink-700',
     isActive: true,
+    username: 'muminatul',
+    password: 'guru123',
   },
   {
     id: 'T-15',
@@ -210,6 +238,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7815',
     avatarColor: 'bg-rose-600',
     isActive: true,
+    username: 'aisyahnm',
+    password: 'guru123',
   },
   {
     id: 'T-16',
@@ -224,6 +254,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7816',
     avatarColor: 'bg-fuchsia-700',
     isActive: true,
+    username: 'darazahara',
+    password: 'guru123',
   },
   {
     id: 'T-17',
@@ -238,6 +270,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7817',
     avatarColor: 'bg-purple-700',
     isActive: true,
+    username: 'inayah',
+    password: 'guru123',
   },
   {
     id: 'T-18',
@@ -252,6 +286,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7818',
     avatarColor: 'bg-emerald-800',
     isActive: true,
+    username: 'farhan',
+    password: 'guru123',
   },
   {
     id: 'T-19',
@@ -266,6 +302,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7819',
     avatarColor: 'bg-teal-800',
     isActive: true,
+    username: 'masyithoh',
+    password: 'guru123',
   },
   {
     id: 'T-20',
@@ -280,6 +318,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7820',
     avatarColor: 'bg-cyan-800',
     isActive: true,
+    username: 'ahmadfurqon',
+    password: 'guru123',
   },
   {
     id: 'T-21',
@@ -294,6 +334,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7821',
     avatarColor: 'bg-blue-800',
     isActive: true,
+    username: 'jihdafi',
+    password: 'guru123',
   },
   {
     id: 'T-22',
@@ -308,6 +350,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7822',
     avatarColor: 'bg-amber-800',
     isActive: true,
+    username: 'qonita',
+    password: 'guru123',
   },
   {
     id: 'T-23',
@@ -322,6 +366,8 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7823',
     avatarColor: 'bg-emerald-900',
     isActive: true,
+    username: 'firly',
+    password: 'guru123',
   },
 ];
 
@@ -648,8 +694,8 @@ export const INITIAL_ATTENDANCES: AttendanceRecord[] = [
       date: '2026-08-21',
       teacherId: 'T-08',
       topic: 'Pembahasan Bab Kalam & Tanda-Tanda Isim dalam Matan Al-Jurumiyyah',
-      learningObjectives: 'Santri mampu mengidentifikasi kalimat isim, fiil, dan huruf dengan benar.',
-      classNotes: 'Santri sangat antusias, Ahmad & Faris hafal matan dengan intonasi fasih.',
+      learningObjectives: 'Santri mampu mengidentifikasi kalimat isim, fiil, dan huruf with benar.',
+      classNotes: 'Santri sangat antusias, Ahmad & Faris hafal matan with intonasi fasih.',
       studentAttendance: {
         totalStudents: 28,
         presentCount: 27,
@@ -694,8 +740,8 @@ export const INITIAL_ATTENDANCES: AttendanceRecord[] = [
       date: '2026-08-21',
       teacherId: 'T-14',
       topic: 'Setoran Hafalan Surah Al-Mulk ayat 1-15 & Kaidah Ghunnah Musyaddadah',
-      learningObjectives: 'Penyempurnaan makhraj huruf ‘Ain dan Ghain pada Surah Al-Mulk.',
-      classNotes: 'Khadijah dan Fatimah tasmi lancar 1 halaman sekali duduk.',
+      learningObjectives: 'Penyempurnaan makhraj huruf ‘Ain and Ghain pada Surah Al-Mulk.',
+      classNotes: 'Khadijah and Fatimah tasmi lancar 1 halaman sekali duduk.',
       studentAttendance: {
         totalStudents: 20,
         presentCount: 19,
@@ -726,7 +772,7 @@ export const INITIAL_ATTENDANCES: AttendanceRecord[] = [
       date: '2026-08-21',
       teacherId: 'T-18', // Ust Farhan filled it as Badal
       topic: 'Karakter Tawadhu & Menjauhi Takabbur dalam Menuntut Ilmu (Kitab Taisirul Khalaq)',
-      learningObjectives: 'Santri memahami urgensi adab rendah hati dihadapan guru dan sesama santri.',
+      learningObjectives: 'Santri memahami urgensi adab rendah hati dihadapan guru and sesama santri.',
       classNotes: 'Menggantikan Ust A Rosyid yang sedang izin kedinasan ke Kemenag.',
       studentAttendance: {
         totalStudents: 25,
@@ -758,7 +804,7 @@ export const INITIAL_ATTENDANCES: AttendanceRecord[] = [
       date: '2026-08-21',
       teacherId: 'T-01',
       topic: 'Tafsir Ayat-ayat Thaharah & Qiyamul Lail (Surah Al-Muzzammil)',
-      learningObjectives: 'Santri menguasai asbabun nuzul dan kandungan hukum ayat 1-8.',
+      learningObjectives: 'Santri menguasai asbabun nuzul and kandungan hukum ayat 1-8.',
       classNotes: 'Tanya jawab interaktif berjalan dinamis.',
       studentAttendance: {
         totalStudents: 26,
