@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Download, Printer, Search } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
 import { formatRupiah, exportToCSV } from '../utils/formatters';
+import { AdminOfficialReportModal } from './AdminOfficialReportModal';
 
 export const PayrollRecap: React.FC = () => {
   const { 
@@ -12,6 +13,7 @@ export const PayrollRecap: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [unitFilter, setUnitFilter] = useState<string>('ALL');
+  const [showOfficialPdfModal, setShowOfficialPdfModal] = useState(false);
 
   const payrollSummary = calculateAllPayroll(selectedPeriod);
 
@@ -30,7 +32,6 @@ export const PayrollRecap: React.FC = () => {
     return matchesSearch && matchesUnit;
   });
 
-  // Handle Export to Excel / CSV
   const handleExportExcel = () => {
     const headers = [
       'No',
@@ -95,208 +96,164 @@ export const PayrollRecap: React.FC = () => {
     ]);
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
     <div className="space-y-4">
       {/* Aggregate Payroll Metrics */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
-          <span className="text-[11px] text-slate-500 font-medium block">Total Gaji Pokok</span>
-          <p className="text-base font-bold text-slate-900 mt-1">
+        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800">
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">Gaji Pokok</span>
+          <p className="text-base font-semibold text-slate-900 dark:text-slate-100 mt-1 font-mono">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.baseSalary, 0))}
           </p>
         </div>
 
-        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
-          <span className="text-[11px] text-slate-500 font-medium block">Honor Mengajar</span>
-          <p className="text-base font-bold text-emerald-800 mt-1">
+        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800">
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">Honor Mengajar</span>
+          <p className="text-base font-semibold text-emerald-800 dark:text-emerald-400 mt-1 font-mono">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.teachingHonorarium, 0))}
           </p>
         </div>
 
-        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
-          <span className="text-[11px] text-slate-500 font-medium block">Transport</span>
-          <p className="text-base font-bold text-slate-800 mt-1">
+        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800">
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">Uang Transport</span>
+          <p className="text-base font-semibold text-slate-900 dark:text-slate-100 mt-1 font-mono">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.totalTransport, 0))}
           </p>
         </div>
 
-        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
-          <span className="text-[11px] text-slate-500 font-medium block">Potongan Disiplin</span>
-          <p className={`text-base font-bold mt-1 ${payrollSummary.totalDeductions > 0 ? 'text-rose-600' : 'text-slate-700'}`}>
-            {payrollSummary.totalDeductions > 0 ? `-${formatRupiah(payrollSummary.totalDeductions)}` : 'Rp 0'}
+        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800">
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">Potongan SOP</span>
+          <p className="text-base font-semibold text-rose-600 dark:text-rose-400 mt-1 font-mono">
+            -{formatRupiah(payrollSummary.totalDeductions)}
           </p>
         </div>
 
-        <div className="col-span-2 sm:col-span-1 bg-emerald-50/50 p-3.5 rounded-xl border border-emerald-200/80 shadow-2xs">
-          <span className="text-[11px] font-semibold text-emerald-900 block">Total Gaji Bersih</span>
-          <p className="text-base font-bold text-emerald-950 mt-1">
+        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 col-span-2 sm:col-span-1">
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">Total Bersih</span>
+          <p className="text-base font-semibold text-emerald-800 dark:text-emerald-400 mt-1 font-mono">
             {formatRupiah(payrollSummary.totalNet)}
           </p>
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
+      {/* Filter and Action Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex flex-1 items-center gap-2">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+        <div className="flex flex-1 items-center gap-2.5">
+          <div className="relative flex-1 max-w-xs">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari nama guru, NIP, atau jabatan..."
-              className="w-full pl-8 pr-3 py-1.5 text-xs bg-white rounded-lg border border-slate-200 focus:outline-none focus:border-emerald-600 shadow-2xs"
+              placeholder="Cari guru..."
+              className="w-full pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-slate-100"
             />
           </div>
 
-          <select
-            value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value)}
-            className="bg-white border border-slate-200 text-slate-800 font-semibold text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-600 shadow-2xs cursor-pointer"
-          >
-            <option value="Agustus 2026">Agustus 2026</option>
-            <option value="Juli 2026">Juli 2026</option>
-            <option value="Juni 2026">Juni 2026</option>
-          </select>
-
-          <button
-            onClick={handleExportExcel}
-            className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 transition-colors shadow-2xs"
-          >
-            <Download className="w-3.5 h-3.5 text-slate-500" />
-            <span>Ekspor</span>
-          </button>
+          <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg">
+            {['ALL', 'SMP', 'MA', 'PESANTREN'].map((unit) => (
+              <button
+                key={unit}
+                onClick={() => setUnitFilter(unit)}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                  unitFilter === unit
+                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-2xs'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                {unit === 'ALL' ? 'Semua' : unit}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
-          {['ALL', 'SMP', 'MA', 'PESANTREN', 'UMUM'].map((unit) => (
-            <button
-              key={unit}
-              onClick={() => setUnitFilter(unit)}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold whitespace-nowrap transition-colors ${
-                unitFilter === unit
-                  ? 'bg-white text-slate-900 shadow-2xs'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              {unit === 'ALL' ? 'Semua' : unit}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportExcel}
+            className="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+            <span>Ekspor CSV</span>
+          </button>
+
+          <button
+            onClick={() => setShowOfficialPdfModal(true)}
+            className="inline-flex items-center gap-1.5 bg-emerald-700 dark:bg-emerald-600 hover:bg-emerald-800 dark:hover:bg-emerald-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+          >
+            <Printer className="w-3.5 h-3.5" />
+            <span>Cetak Rekap PDF</span>
+          </button>
         </div>
       </div>
 
-      {/* Payroll Table without Slip Column */}
-      <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+      {/* Payroll Table */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="bg-slate-50/75 border-b border-slate-200/80 text-slate-500 font-semibold">
-                <th className="py-2.5 px-3 text-center w-10">No</th>
-                <th className="py-2.5 px-4 min-w-[170px]">Nama & NIP</th>
-                <th className="py-2.5 px-3">Jabatan & Unit</th>
+              <tr className="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-medium border-b border-slate-200/70 dark:border-slate-700">
+                <th className="py-2.5 px-3 text-center w-9">No</th>
+                <th className="py-2.5 px-4">Nama & NIP</th>
+                <th className="py-2.5 px-3">Unit</th>
                 <th className="py-2.5 px-3 text-right">Gaji Pokok</th>
                 <th className="py-2.5 px-3 text-center">JP</th>
-                <th className="py-2.5 px-3 text-right">Honor</th>
+                <th className="py-2.5 px-3 text-right">Honor JP</th>
                 <th className="py-2.5 px-3 text-center">Hadir</th>
                 <th className="py-2.5 px-3 text-right">Transport</th>
                 <th className="py-2.5 px-3 text-right">Potongan</th>
-                <th className="py-2.5 px-4 text-right font-bold text-slate-900">
-                  Gaji Bersih
-                </th>
+                <th className="py-2.5 px-4 text-right">Gaji Bersih</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
-              {filteredItems.map((item, index) => (
-                <tr
-                  key={item.teacher.id}
-                  className="hover:bg-slate-50/60 transition-colors"
-                >
-                  <td className="py-2.5 px-3 text-center text-slate-400 font-mono">
-                    {index + 1}
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+              {filteredItems.map((item, idx) => (
+                <tr key={item.teacher.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                  <td className="py-2.5 px-3 text-center text-slate-400 dark:text-slate-500 font-mono">
+                    {idx + 1}
                   </td>
                   <td className="py-2.5 px-4">
-                    <p className="font-semibold text-slate-900">
-                      {item.teacher?.name || '-'}
-                    </p>
-                    <p className="text-[11px] text-slate-400 font-mono">
-                      {item.teacher?.nip || '-'}
-                    </p>
+                    <p className="font-medium text-slate-900 dark:text-slate-100">{item.teacher.name}</p>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500 font-mono">{item.teacher.nip}</p>
                   </td>
                   <td className="py-2.5 px-3">
-                    <p className="font-medium text-slate-800">{item.teacher.position}</p>
-                    <p className="text-[10px] text-slate-400">{item.teacher.unit}</p>
+                    <span className="text-[11px] text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                      {item.teacher.unit}
+                    </span>
                   </td>
-                  <td className="py-2.5 px-3 text-right font-medium text-slate-900">
+                  <td className="py-2.5 px-3 text-right font-mono text-slate-800 dark:text-slate-200">
                     {formatRupiah(item.baseSalary)}
                   </td>
-                  <td className="py-2.5 px-3 text-center font-mono font-medium">
+                  <td className="py-2.5 px-3 text-center font-mono font-medium text-slate-900 dark:text-slate-100">
                     {item.totalTaughtHours}
-                    {item.totalBadalHours > 0 && (
-                      <span className="text-[10px] text-purple-700 block">
-                        (+{item.totalBadalHours})
-                      </span>
-                    )}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-semibold text-emerald-800">
+                  <td className="py-2.5 px-3 text-right font-mono text-emerald-800 dark:text-emerald-400 font-medium">
                     {formatRupiah(item.teachingHonorarium)}
                   </td>
-                  <td className="py-2.5 px-3 text-center font-mono">
-                    {item.totalPresentDays} hr
+                  <td className="py-2.5 px-3 text-center font-mono text-slate-900 dark:text-slate-100">
+                    {item.totalPresentDays}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-medium text-slate-700">
+                  <td className="py-2.5 px-3 text-right font-mono text-slate-700 dark:text-slate-300">
                     {formatRupiah(item.totalTransport)}
                   </td>
-                  <td className="py-2.5 px-3 text-right">
-                    {item.totalDeductions > 0 ? (
-                      <span className="font-semibold text-rose-600">
-                        -{formatRupiah(item.totalDeductions)}
-                      </span>
-                    ) : (
-                      <span className="text-slate-300">-</span>
-                    )}
+                  <td className="py-2.5 px-3 text-right font-mono text-rose-600 dark:text-rose-400">
+                    {item.totalDeductions > 0 ? `-${formatRupiah(item.totalDeductions)}` : '-'}
                   </td>
-                  <td className="py-2.5 px-4 text-right font-bold text-emerald-900">
+                  <td className="py-2.5 px-4 text-right font-mono font-semibold text-emerald-800 dark:text-emerald-400 whitespace-nowrap">
                     {formatRupiah(item.netSalary)}
                   </td>
                 </tr>
               ))}
             </tbody>
-            {/* Table Footer */}
-            <tfoot>
-              <tr className="bg-slate-50/90 font-bold text-slate-900 border-t border-slate-200/80">
-                <td colSpan={3} className="py-2.5 px-4 text-left text-xs">
-                  Total ({filteredItems.length} Guru)
-                </td>
-                <td className="py-2.5 px-3 text-right">
-                  {formatRupiah(filteredItems.reduce((s, i) => s + i.baseSalary, 0))}
-                </td>
-                <td className="py-2.5 px-3 text-center font-mono">
-                  {filteredItems.reduce((s, i) => s + i.totalTaughtHours, 0)}
-                </td>
-                <td className="py-2.5 px-3 text-right text-emerald-800">
-                  {formatRupiah(filteredItems.reduce((s, i) => s + i.teachingHonorarium, 0))}
-                </td>
-                <td className="py-2.5 px-3 text-center font-mono">
-                  {filteredItems.reduce((s, i) => s + i.totalPresentDays, 0)} hr
-                </td>
-                <td className="py-2.5 px-3 text-right text-slate-800">
-                  {formatRupiah(filteredItems.reduce((s, i) => s + i.totalTransport, 0))}
-                </td>
-                <td className="py-2.5 px-3 text-right text-rose-700">
-                  -{formatRupiah(filteredItems.reduce((s, i) => s + i.totalDeductions, 0))}
-                </td>
-                <td className="py-2.5 px-4 text-right text-emerald-950 font-bold">
-                  {formatRupiah(filteredItems.reduce((s, i) => s + i.netSalary, 0))}
-                </td>
-              </tr>
-            </tfoot>
           </table>
         </div>
       </div>
+
+      {/* Official PDF Report Modal */}
+      {showOfficialPdfModal && (
+        <AdminOfficialReportModal
+          initialType="payroll_recap"
+          onClose={() => setShowOfficialPdfModal(false)}
+        />
+      )}
     </div>
   );
 };

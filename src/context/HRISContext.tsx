@@ -7,13 +7,17 @@ import {
   TeachingJournal,
   TeacherPayrollItem,
   MonthlyPayrollSummary,
-  UserRole
+  UserRole,
+  AuditLog,
+  AuditCategory,
+  AuditSeverity
 } from '../types';
 import { 
   INITIAL_TEACHERS, 
   INITIAL_SCHEDULES, 
   INITIAL_ATTENDANCES, 
-  INITIAL_BADAL_ASSIGNMENTS 
+  INITIAL_BADAL_ASSIGNMENTS,
+  INITIAL_AUDIT_LOGS
 } from '../data/initialData';
 import { calculateLatePenalty } from '../utils/formatters';
 
@@ -22,15 +26,18 @@ interface HRISContextType {
   schedules: ClassSchedule[];
   attendances: AttendanceRecord[];
   badalAssignments: BadalAssignment[];
+  auditLogs: AuditLog[];
   currentUser: Teacher;
   currentRole: UserRole;
   selectedPeriod: string;
   isAuthenticated: boolean;
   currentPath: string;
+  isDarkMode: boolean;
   
   // Role, Auth & User Actions
   login: (role: UserRole, teacherId?: string) => void;
   logout: () => void;
+  toggleDarkMode: () => void;
   setCurrentPath: (path: string) => void;
   setCurrentUserById: (teacherId: string) => void;
   setCurrentRole: (role: UserRole) => void;
@@ -50,6 +57,7 @@ interface HRISContextType {
   
   // Master Data
   addTeacher: (teacher: Omit<Teacher, 'id'>) => void;
+  addTeachersBulk: (teachers: Omit<Teacher, 'id'>[]) => Promise<{ success: boolean; count: number }>;
   updateTeacher: (id: string, updates: Partial<Teacher>) => void;
   deleteTeacher: (id: string) => void;
   addSchedule: (schedule: Omit<ClassSchedule, 'id'>) => void;
@@ -60,6 +68,15 @@ interface HRISContextType {
   calculateTeacherPayroll: (teacherId: string, period?: string) => TeacherPayrollItem;
   calculateAllPayroll: (period?: string) => MonthlyPayrollSummary;
   
+  // Audit Logs
+  logActivity: (
+    action: string, 
+    category: AuditCategory, 
+    details: string, 
+    severity?: AuditSeverity, 
+    userOverride?: { id: string; name: string; role: UserRole }
+  ) => Promise<void>;
+
   // Reset
   resetToDefault: () => void;
 }
@@ -81,6 +98,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [schedules, setSchedules] = useState<ClassSchedule[]>([]);
   const [attendances, setAttendances] = useState<AttendanceRecord[]>([]);
   const [badalAssignments, setBadalAssignments] = useState<BadalAssignment[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchAllData = async () => {
@@ -90,18 +108,20 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const isGuru = currentRole === 'GURU';
       const teacherIdParam = isGuru ? `?teacherId=${currentUserId}` : '';
 
-      const [tRes, sRes, aRes, bRes] = await Promise.all([
+      const [tRes, sRes, aRes, bRes, lRes] = await Promise.all([
         fetch('/api/teachers'),
         fetch(`/api/schedules${teacherIdParam}`),
         fetch(`/api/attendances${teacherIdParam}`),
-        fetch('/api/badal')
+        fetch('/api/badal'),
+        fetch('/api/audit-logs')
       ]);
 
-      const [t, s, a, b] = await Promise.all([
+      const [t, s, a, b, l] = await Promise.all([
         tRes.json(),
         sRes.json(),
         aRes.json(),
-        bRes.json()
+        bRes.json(),
+        lRes.ok ? lRes.json() : []
       ]);
 
       if (t.length === 0) {
@@ -113,6 +133,9 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSchedules(s);
       setAttendances(a);
       setBadalAssignments(b);
+      if (Array.isArray(l) && l.length > 0) {
+        setAuditLogs(l);
+      }
     } catch (error) {
       console.error('Failed to fetch data', error);
     } finally {
@@ -145,6 +168,18 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved || 'Agustus 2026';
   });
 
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('hris_pbq_dark_mode_v1');
+      if (saved !== null) {
+        return saved === 'true' || saved === '"true"';
+      }
+      return typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    } catch {
+      return false;
+    }
+  });
+
   useEffect(() => {
     fetchAllData();
   }, [currentUserId, currentRole]);
@@ -153,6 +188,19 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem('hris_pbq_auth_v1', JSON.stringify(isAuthenticated));
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('hris_pbq_dark_mode_v1', isDarkMode ? 'true' : 'false');
+    } catch {
+      // Ignore storage errors
+    }
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   useEffect(() => {
     localStorage.setItem('hris_pbq_path_v1', currentPath);
@@ -175,10 +223,57 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ? (teachers.find((t) => t.id === currentUserId) || teachers[0] || INITIAL_TEACHERS[0])
     : INITIAL_TEACHERS[0];
 
+  const logActivity = async (
+    action: string,
+    category: AuditCategory,
+    details: string,
+    severity: AuditSeverity = 'INFO',
+    userOverride?: { id: string; name: string; role: UserRole }
+  ) => {
+    const user = userOverride || {
+      id: currentUser?.id || 'SYSTEM',
+      name: currentUser?.name || 'Administrator',
+      role: currentRole || 'ADMIN',
+    };
+
+    const newLog: AuditLog = {
+      id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      userId: user.id,
+      userName: user.name,
+      userRole: user.role,
+      action,
+      category,
+      details,
+      severity,
+      timestamp: new Date().toISOString(),
+    };
+
+    setAuditLogs((prev) => [newLog, ...prev]);
+
+    try {
+      await fetch('/api/audit-logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newLog),
+      });
+    } catch (err) {
+      console.error('Failed to persist audit log', err);
+    }
+  };
+
   const login = (role: UserRole, teacherId?: string) => {
     setIsAuthenticated(true);
     setCurrentRoleState(role);
     if (teacherId) setCurrentUserId(teacherId);
+
+    const targetUser = teachers.find((t) => t.id === teacherId) || currentUser;
+    logActivity(
+      'LOGIN',
+      'AUTH',
+      `Login berhasil ke sistem sebagai ${role === 'ADMIN' ? 'Administrator' : role === 'KEPALA_PESANTREN' ? 'Kepala Pesantren' : 'Guru / Asatidz'} (${targetUser.name})`,
+      'INFO',
+      { id: targetUser.id, name: targetUser.name, role }
+    );
     
     // Trigger path change based on role
     if (role === 'GURU') setCurrentPath('/dashboard/guru/clockin');
@@ -187,6 +282,12 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    logActivity(
+      'LOGOUT',
+      'AUTH',
+      `Pengguna ${currentUser.name} (${currentRole}) telah keluar dari sistem`,
+      'INFO'
+    );
     setIsAuthenticated(false);
     setCurrentUserId('');
     setCurrentRoleState('GURU');
@@ -194,6 +295,10 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem(STORAGE_KEYS.CURRENT_USER_ID);
     localStorage.removeItem(STORAGE_KEYS.CURRENT_ROLE);
     localStorage.setItem('hris_pbq_auth_v1', 'false');
+  };
+
+  const toggleDarkMode = () => {
+    setIsDarkMode((prev) => !prev);
   };
 
   const setCurrentUserById = (teacherId: string) => {
@@ -258,6 +363,13 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       body: JSON.stringify(newRecord)
     }).then(res => res.json()).then(() => fetchAllData());
 
+    logActivity(
+      'CLOCK_IN',
+      'KBM',
+      `Presensi Masuk KBM: ${schedule.subject} (${schedule.className}) jam ${actualClockIn} oleh ${teacherForLate.name}${isBadal ? ' (Guru Badal)' : ''} [${category.replace('_', ' ')}]`,
+      category === 'TEPAT_WAKTU' ? 'INFO' : 'WARNING'
+    );
+
     return newRecord;
   };
 
@@ -293,6 +405,13 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newJournal)
     }).then(res => res.json()).then(() => fetchAllData());
+
+    logActivity(
+      'SUBMIT_JOURNAL',
+      'KBM',
+      `Jurnal KBM terisi: "${journalInput.topic}" (Kehadiran: ${journalInput.studentAttendance.presentCount}/${journalInput.studentAttendance.totalStudents} santri)`,
+      'INFO'
+    );
   };
 
   // Direct status mark (e.g. Alpa, Izin, Sakit)
@@ -322,6 +441,14 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newRecord)
     }).then(res => res.json()).then(() => fetchAllData());
+
+    const tName = teachers.find(t => t.id === teacherId)?.name || teacherId;
+    logActivity(
+      'MARK_ATTENDANCE',
+      'KBM',
+      `Penetapan status kehadiran langsung: ${tName} berstatus ${status}${notes ? ` (${notes})` : ''}`,
+      status === 'ALPA' ? 'CRITICAL' : 'WARNING'
+    );
   };
 
   // Guru Badal Handlers
@@ -337,6 +464,15 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newBadal)
     }).then(() => fetchAllData());
+
+    const orig = teachers.find(t => t.id === data.originalTeacherId)?.name || data.originalTeacherId;
+    const badal = teachers.find(t => t.id === data.badalTeacherId)?.name || data.badalTeacherId;
+    logActivity(
+      'ASSIGN_BADAL',
+      'BADAL',
+      `Penugasan Badal Baru: ${badal} menggantikan ${orig} (${data.reason})`,
+      'WARNING'
+    );
   };
 
   const approveBadalAssignment = (badalId: string) => {
@@ -345,6 +481,13 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'APPROVED' })
     }).then(() => fetchAllData());
+
+    logActivity(
+      'APPROVE_BADAL',
+      'BADAL',
+      `Persetujuan penugasan badal ID ${badalId} oleh ${currentUser.name}`,
+      'INFO'
+    );
   };
 
   // Master Data Guru CRUD
@@ -359,20 +502,97 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newTeacher)
     }).then(() => fetchAllData());
+
+    logActivity(
+      'CREATE_TEACHER',
+      'KAFAAH',
+      `Pendaftaran data guru & kafa'ah baru: ${newTeacher.name} (${newTeacher.position}, Unit ${newTeacher.unit}, Gaji Pokok: Rp ${newTeacher.baseSalary.toLocaleString('id-ID')})`,
+      'WARNING'
+    );
+  };
+
+  const addTeachersBulk = async (teacherInputs: Omit<Teacher, 'id'>[]) => {
+    const currentCount = teachers.length;
+    const colors = ['bg-emerald-700', 'bg-teal-700', 'bg-blue-700', 'bg-indigo-700', 'bg-cyan-700'];
+    const newTeachers: Teacher[] = teacherInputs.map((input, idx) => {
+      const nextIdx = currentCount + idx + 1;
+      const cleanUsername = input.username || input.name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 15) || `guru${nextIdx}`;
+      return {
+        ...input,
+        id: `T-${String(nextIdx).padStart(2, '0')}`,
+        username: cleanUsername,
+        password: input.password || 'guru123',
+        avatarColor: input.avatarColor || colors[nextIdx % colors.length],
+        isActive: input.isActive ?? true,
+      };
+    });
+
+    try {
+      const res = await fetch('/api/teachers/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newTeachers)
+      });
+      if (res.ok) {
+        await fetchAllData();
+      } else {
+        for (const t of newTeachers) {
+          await fetch('/api/teachers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(t)
+          });
+        }
+        await fetchAllData();
+      }
+
+      await logActivity(
+        'BULK_IMPORT_TEACHERS',
+        'KAFAAH',
+        `Impor massal data guru: Berhasil mengunggah ${newTeachers.length} data asatidz baru untuk tahun ajaran baru melalui template spreadsheet`,
+        'WARNING'
+      );
+
+      return { success: true, count: newTeachers.length };
+    } catch (err) {
+      console.error('Bulk import error:', err);
+      throw err;
+    }
   };
 
   const updateTeacher = (id: string, updates: Partial<Teacher>) => {
+    const origTeacher = teachers.find(t => t.id === id);
     fetch(`/api/teachers/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates)
     }).then(() => fetchAllData());
+
+    const isFinancial = 'baseSalary' in updates || 'hourlyRate' in updates || 'dailyTransport' in updates;
+    const details = isFinancial 
+      ? `Perubahan data kafa'ah guru ${origTeacher?.name || id}: ${updates.baseSalary !== undefined ? `Gaji Pokok -> Rp ${updates.baseSalary.toLocaleString('id-ID')}; ` : ''}${updates.hourlyRate !== undefined ? `Tarif/JP -> Rp ${updates.hourlyRate.toLocaleString('id-ID')}; ` : ''}${updates.dailyTransport !== undefined ? `Transport -> Rp ${updates.dailyTransport.toLocaleString('id-ID')}` : ''}`
+      : `Pembaruan profil guru ${origTeacher?.name || id}: ${Object.keys(updates).join(', ')}`;
+
+    logActivity(
+      isFinancial ? 'UPDATE_TEACHER_RATE' : 'UPDATE_TEACHER',
+      isFinancial ? 'KAFAAH' : 'SYSTEM',
+      details,
+      isFinancial ? 'WARNING' : 'INFO'
+    );
   };
 
   const deleteTeacher = (id: string) => {
+    const origTeacher = teachers.find(t => t.id === id);
     fetch(`/api/teachers/${id}`, {
       method: 'DELETE'
     }).then(() => fetchAllData());
+
+    logActivity(
+      'DELETE_TEACHER',
+      'SYSTEM',
+      `Penghapusan data guru: ${origTeacher?.name || id} (NIP: ${origTeacher?.nip || '-'})`,
+      'CRITICAL'
+    );
   };
 
   // Master Schedule CRUD
@@ -387,6 +607,14 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newSched)
     }).then(() => fetchAllData());
+
+    const tName = teachers.find(t => t.id === schedInput.teacherId)?.name || schedInput.teacherId;
+    logActivity(
+      'CREATE_SCHEDULE',
+      'KBM',
+      `Penambahan jadwal KBM: ${schedInput.subject} (${schedInput.className}, ${schedInput.dayOfWeek} ${schedInput.startTime}-${schedInput.endTime}) untuk ${tName}`,
+      'INFO'
+    );
   };
 
   const updateSchedule = (id: string, updates: Partial<ClassSchedule>) => {
@@ -395,12 +623,26 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates)
     }).then(() => fetchAllData());
+
+    logActivity(
+      'UPDATE_SCHEDULE',
+      'KBM',
+      `Pembaruan jadwal KBM ID ${id}: ${Object.keys(updates).join(', ')}`,
+      'INFO'
+    );
   };
 
   const deleteSchedule = (id: string) => {
     fetch(`/api/schedules/${id}`, {
       method: 'DELETE'
     }).then(() => fetchAllData());
+
+    logActivity(
+      'DELETE_SCHEDULE',
+      'KBM',
+      `Penghapusan jadwal KBM ID ${id}`,
+      'WARNING'
+    );
   };
 
   // Payroll Calculation Engine for a specific teacher
@@ -532,6 +774,12 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const resetToDefault = () => {
+    logActivity(
+      'RESET_DATABASE',
+      'SYSTEM',
+      'Inisialisasi ulang database sistem ke konfigurasi awal (Factory Reset)',
+      'CRITICAL'
+    );
     localStorage.clear();
     fetch('/api/reset', { method: 'POST' }).then(() => {
       logout();
@@ -546,13 +794,16 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         schedules,
         attendances,
         badalAssignments,
+        auditLogs,
         currentUser,
         currentRole,
         selectedPeriod,
         isAuthenticated,
         currentPath,
+        isDarkMode,
         login,
         logout,
+        toggleDarkMode,
         setCurrentPath,
         setCurrentUserById,
         setCurrentRole,
@@ -563,6 +814,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         createBadalAssignment,
         approveBadalAssignment,
         addTeacher,
+        addTeachersBulk,
         updateTeacher,
         deleteTeacher,
         addSchedule,
@@ -570,6 +822,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deleteSchedule,
         calculateTeacherPayroll,
         calculateAllPayroll,
+        logActivity,
         resetToDefault,
       }}
     >

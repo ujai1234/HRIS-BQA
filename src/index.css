@@ -1,19 +1,44 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer utilities {
   /* Print Optimization */
   @media print {
+    @page {
+      size: A4 portrait;
+      margin: 1.2cm;
+    }
+
     body {
       background-color: #ffffff !important;
       color: #000000 !important;
+      font-size: 11pt;
     }
 
-    header, footer, .no-print, button {
+    header, footer, aside, .no-print, button {
       display: none !important;
     }
 
     .print-only {
       display: block !important;
+    }
+
+    table {
+      page-break-inside: auto;
+    }
+
+    tr {
+      page-break-inside: avoid;
+      page-break-after: auto;
+    }
+
+    thead {
+      display: table-header-group;
+    }
+
+    tfoot {
+      display: table-footer-group;
     }
   }
 
@@ -32,3 +57,4 @@
     animation: bounceSubtle 1.5s infinite;
   }
 }
+

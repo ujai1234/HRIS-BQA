@@ -5,7 +5,7 @@ import { createServer as createViteServer } from 'vite';
 import { db } from './src/db';
 import * as schema from './src/db/schema';
 import { eq, and, or } from 'drizzle-orm';
-import { INITIAL_TEACHERS, INITIAL_SCHEDULES, INITIAL_ATTENDANCES, INITIAL_BADAL_ASSIGNMENTS } from './src/data/initialData';
+import { INITIAL_TEACHERS, INITIAL_SCHEDULES, INITIAL_ATTENDANCES, INITIAL_BADAL_ASSIGNMENTS, INITIAL_AUDIT_LOGS } from './src/data/initialData';
 
 async function startServer() {
   const app = express();
@@ -60,6 +60,20 @@ async function startServer() {
     }
   });
 
+  app.post('/api/teachers/bulk', async (req, res) => {
+    try {
+      const list = req.body;
+      if (!Array.isArray(list) || list.length === 0) {
+        return res.status(400).json({ error: 'Data guru kosong' });
+      }
+      const result = await db.insert(schema.teachers).values(list).returning();
+      res.json(result);
+    } catch (error) {
+      console.error('Bulk teacher insertion error:', error);
+      res.status(500).json({ error: 'Failed to bulk insert teachers' });
+    }
+  });
+
   app.patch('/api/teachers/:id', async (req, res) => {
     try {
       const result = await db.update(schema.teachers)
@@ -104,6 +118,20 @@ async function startServer() {
       res.json(result[0]);
     } catch (error) {
       res.status(500).json({ error: 'Failed to create schedule' });
+    }
+  });
+
+  app.post('/api/schedules/bulk', async (req, res) => {
+    try {
+      const list = req.body;
+      if (!Array.isArray(list) || list.length === 0) {
+        return res.status(400).json({ error: 'Data jadwal kosong' });
+      }
+      const result = await db.insert(schema.schedules).values(list).returning();
+      res.json(result);
+    } catch (error) {
+      console.error('Bulk schedule insertion error:', error);
+      res.status(500).json({ error: 'Failed to bulk insert schedules' });
     }
   });
 
@@ -212,6 +240,34 @@ async function startServer() {
     }
   });
 
+  // Audit Logs
+  app.get('/api/audit-logs', async (req, res) => {
+    try {
+      const logs = await db.query.auditLogs.findMany({
+        orderBy: (logs, { desc }) => [desc(logs.timestamp)],
+      });
+      res.json(logs);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch audit logs' });
+    }
+  });
+
+  app.post('/api/audit-logs', async (req, res) => {
+    try {
+      const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+      const logData = {
+        ...req.body,
+        ipAddress: req.body.ipAddress || clientIp,
+        timestamp: req.body.timestamp || new Date().toISOString(),
+      };
+      const result = await db.insert(schema.auditLogs).values(logData).returning();
+      res.json(result[0]);
+    } catch (error) {
+      console.error('Audit log insertion error:', error);
+      res.status(500).json({ error: 'Failed to create audit log' });
+    }
+  });
+
   // Seed Initial Data if empty or missing usernames
   app.post('/api/seed', async (req, res) => {
     try {
@@ -219,6 +275,7 @@ async function startServer() {
       // If empty OR if the first teacher doesn't have a username (old schema)
       if (existingTeachers.length === 0 || !existingTeachers[0].username) {
         // Clear all first to be safe
+        await db.delete(schema.auditLogs);
         await db.delete(schema.journals);
         await db.delete(schema.attendances);
         await db.delete(schema.badalAssignments);
@@ -227,8 +284,14 @@ async function startServer() {
 
         await db.insert(schema.teachers).values(INITIAL_TEACHERS);
         await db.insert(schema.schedules).values(INITIAL_SCHEDULES);
-        res.json({ success: true, message: 'Database seeded with 23 teachers' });
+        await db.insert(schema.auditLogs).values(INITIAL_AUDIT_LOGS);
+        res.json({ success: true, message: 'Database seeded with teachers and audit logs' });
       } else {
+        // Check if audit logs are empty
+        const existingLogs = await db.query.auditLogs.findMany();
+        if (existingLogs.length === 0) {
+          await db.insert(schema.auditLogs).values(INITIAL_AUDIT_LOGS);
+        }
         res.json({ success: false, message: 'Database already has current data' });
       }
     } catch (error) {
@@ -239,6 +302,7 @@ async function startServer() {
 
   app.post('/api/reset', async (req, res) => {
     try {
+      await db.delete(schema.auditLogs);
       await db.delete(schema.journals);
       await db.delete(schema.attendances);
       await db.delete(schema.badalAssignments);
@@ -247,6 +311,7 @@ async function startServer() {
       
       await db.insert(schema.teachers).values(INITIAL_TEACHERS);
       await db.insert(schema.schedules).values(INITIAL_SCHEDULES);
+      await db.insert(schema.auditLogs).values(INITIAL_AUDIT_LOGS);
       
       res.json({ success: true, message: 'Database reset successfully' });
     } catch (error) {

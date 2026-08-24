@@ -1,4 +1,4 @@
-import { Teacher, ClassSchedule, AttendanceRecord, BadalAssignment } from '../types';
+import { Teacher, ClassSchedule, AttendanceRecord, BadalAssignment, AuditLog } from '../types';
 
 export const INITIAL_TEACHERS: Teacher[] = [
   {
@@ -843,3 +843,91 @@ export const INITIAL_BADAL_ASSIGNMENTS: BadalAssignment[] = [
     createdAt: '2026-08-21T02:00:00.000Z',
   },
 ];
+
+export const INITIAL_AUDIT_LOGS: AuditLog[] = [
+  {
+    id: 'LOG-001',
+    userId: 'T-06',
+    userName: 'Ust M Yusuf',
+    userRole: 'ADMIN',
+    action: 'LOGIN',
+    category: 'AUTH',
+    details: 'Login berhasil ke panel Administrator Tata Usaha Pesantren',
+    severity: 'INFO',
+    ipAddress: '192.168.1.102',
+    timestamp: '2026-08-24T06:45:10.000Z',
+  },
+  {
+    id: 'LOG-002',
+    userId: 'T-06',
+    userName: 'Ust M Yusuf',
+    userRole: 'ADMIN',
+    action: 'UPDATE_TEACHER_RATE',
+    category: 'KAFAAH',
+    details: 'Pembaruan tarif kafa\'ah Ust. Syuhada AA (Gaji Pokok: Rp 900.000, Tarif/JP: Rp 40.000)',
+    severity: 'WARNING',
+    ipAddress: '192.168.1.102',
+    timestamp: '2026-08-24T07:15:22.000Z',
+  },
+  {
+    id: 'LOG-003',
+    userId: 'T-09',
+    userName: 'Ust A Rosyid',
+    userRole: 'GURU',
+    action: 'CLOCK_IN',
+    category: 'KBM',
+    details: 'Presensi Masuk KBM Fiqih Ibadah Kelas VIII-A (Tepat Waktu, 07:31)',
+    severity: 'INFO',
+    ipAddress: '192.168.1.145',
+    timestamp: '2026-08-24T07:31:05.000Z',
+  },
+  {
+    id: 'LOG-004',
+    userId: 'T-09',
+    userName: 'Ust A Rosyid',
+    userRole: 'GURU',
+    action: 'SUBMIT_JOURNAL',
+    category: 'KBM',
+    details: 'Pengisian Jurnal KBM Fiqih Ibadah: Materi Bab Shalat Jamak & Qashar (Kehadiran: 28/28)',
+    severity: 'INFO',
+    ipAddress: '192.168.1.145',
+    timestamp: '2026-08-24T08:55:40.000Z',
+  },
+  {
+    id: 'LOG-005',
+    userId: 'T-06',
+    userName: 'Ust M Yusuf',
+    userRole: 'ADMIN',
+    action: 'ASSIGN_BADAL',
+    category: 'BADAL',
+    details: 'Penugasan Badal KBM: Ust. Farhan menggantikan Ust. A Rosyid (Tugas Kedinasan Kemenag)',
+    severity: 'WARNING',
+    ipAddress: '192.168.1.102',
+    timestamp: '2026-08-24T09:10:15.000Z',
+  },
+  {
+    id: 'LOG-006',
+    userId: 'T-01',
+    userName: 'Ust Idwan Rizqi R',
+    userRole: 'KEPALA_PESANTREN',
+    action: 'LOGIN',
+    category: 'AUTH',
+    details: 'Login berhasil ke panel Eksekutif Kepala Pesantren',
+    severity: 'INFO',
+    ipAddress: '192.168.1.55',
+    timestamp: '2026-08-24T09:30:00.000Z',
+  },
+  {
+    id: 'LOG-007',
+    userId: 'T-06',
+    userName: 'Ust M Yusuf',
+    userRole: 'ADMIN',
+    action: 'EXPORT_PAYROLL_CSV',
+    category: 'KAFAAH',
+    details: 'Ekspor berkas rekapitulasi gaji dan kafa\'ah periode Agustus 2026 ke format CSV',
+    severity: 'INFO',
+    ipAddress: '192.168.1.102',
+    timestamp: '2026-08-24T09:45:00.000Z',
+  },
+];
+

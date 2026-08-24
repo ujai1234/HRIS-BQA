@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Plus, Edit3, Trash2 } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
-import { ClassSchedule, DayOfWeek, UnitType } from '../types';
+import { ClassSchedule } from '../types';
 
 export const MasterSchedules: React.FC = () => {
   const { schedules, teachers, addSchedule, updateSchedule, deleteSchedule } = useHRIS();
@@ -88,42 +88,42 @@ export const MasterSchedules: React.FC = () => {
       {/* Top Actions & Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex flex-wrap flex-1 items-center gap-2">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+          <div className="relative flex-1 min-w-[180px] max-w-xs">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari mapel, guru, kelas..."
-              className="w-full pl-8 pr-3 py-1.5 text-xs bg-white rounded-lg border border-slate-200 focus:outline-none focus:border-emerald-600 shadow-2xs"
+              className="w-full pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-slate-100"
             />
           </div>
 
-          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
+          <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg">
             {['ALL', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].map((day) => (
               <button
                 key={day}
                 onClick={() => setSelectedDayFilter(day)}
-                className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${
+                className={`px-2 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
                   selectedDayFilter === day
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-800'
+                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-2xs'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
-                {day === 'ALL' ? 'Harian' : day.substring(0, 3)}
+                {day === 'ALL' ? 'Semua' : day.substring(0, 3)}
               </button>
             ))}
           </div>
 
-          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
+          <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg">
             {['ALL', 'SMP', 'MA', 'PESANTREN'].map((unit) => (
               <button
                 key={unit}
                 onClick={() => setSelectedUnitFilter(unit)}
-                className={`px-2.5 py-1 rounded-md text-[10px] font-semibold transition-colors ${
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
                   selectedUnitFilter === unit
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-800'
+                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-2xs'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 {unit === 'ALL' ? 'Unit' : unit}
@@ -134,7 +134,7 @@ export const MasterSchedules: React.FC = () => {
 
         <button
           onClick={handleOpenAdd}
-          className="inline-flex items-center justify-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors shadow-2xs shrink-0 self-start sm:self-auto"
+          className="inline-flex items-center justify-center gap-1 bg-emerald-700 dark:bg-emerald-600 hover:bg-emerald-800 dark:hover:bg-emerald-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors cursor-pointer shrink-0 self-start sm:self-auto"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Tambah Jadwal</span>
@@ -142,54 +142,54 @@ export const MasterSchedules: React.FC = () => {
       </div>
 
       {/* Schedules Table */}
-      <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="bg-slate-50/75 text-slate-500 font-semibold border-b border-slate-200/80">
-                <th className="py-2.5 px-3 text-center w-16">Hari</th>
+              <tr className="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-medium border-b border-slate-200/70 dark:border-slate-700">
+                <th className="py-2.5 px-3 text-center w-14">Hari</th>
                 <th className="py-2.5 px-3">Waktu & JP</th>
                 <th className="py-2.5 px-4">Mata Pelajaran</th>
                 <th className="py-2.5 px-3">Kelas & Unit</th>
                 <th className="py-2.5 px-4">Guru Pengampu</th>
                 <th className="py-2.5 px-3">Ruang</th>
-                <th className="py-2.5 px-3 text-center w-20">Aksi</th>
+                <th className="py-2.5 px-3 text-center w-16">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
               {filteredSchedules.map((s) => {
                 const teacher = teachers.find((t) => t.id === s.teacherId);
                 return (
-                  <tr key={s.id} className="hover:bg-slate-50/60 transition-colors">
+                  <tr key={s.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
                     <td className="py-2.5 px-3 text-center">
-                      <span className="inline-block px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700">
+                      <span className="inline-block px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                         {s.dayOfWeek}
                       </span>
                     </td>
                     <td className="py-2.5 px-3">
-                      <p className="font-mono font-medium text-slate-900">{s.startTime} - {s.endTime}</p>
-                      <p className="text-[11px] text-emerald-800 font-semibold">{s.hours} JP</p>
+                      <p className="font-mono text-slate-900 dark:text-slate-100">{s.startTime} - {s.endTime}</p>
+                      <p className="text-[11px] text-emerald-800 dark:text-emerald-400 font-medium">{s.hours} JP</p>
                     </td>
-                    <td className="py-2.5 px-4 font-semibold text-slate-900">
+                    <td className="py-2.5 px-4 font-medium text-slate-900 dark:text-slate-100">
                       {s.subject}
                     </td>
                     <td className="py-2.5 px-3">
-                      <p className="font-medium text-slate-800">{s.className}</p>
-                      <p className="text-[10px] text-slate-400">{s.unit}</p>
+                      <p className="text-slate-800 dark:text-slate-200">{s.className}</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500">{s.unit}</p>
                     </td>
                     <td className="py-2.5 px-4">
-                      <p className="font-medium text-slate-900">{teacher?.name || 'Guru'}</p>
-                      <p className="text-[10px] text-slate-400">{teacher?.position || '-'}</p>
+                      <p className="font-medium text-slate-900 dark:text-slate-100">{teacher?.name || 'Guru'}</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500">{teacher?.position || '-'}</p>
                     </td>
-                    <td className="py-2.5 px-3 text-slate-600">
+                    <td className="py-2.5 px-3 text-slate-600 dark:text-slate-400">
                       {s.room}
                     </td>
                     <td className="py-2.5 px-3 text-center">
                       <div className="flex items-center justify-center gap-1">
                         <button
                           onClick={() => handleOpenEdit(s)}
-                          className="p-1 text-slate-500 hover:text-slate-900 rounded transition-colors"
-                          title="Edit Jadwal"
+                          className="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 rounded transition-colors cursor-pointer"
+                          title="Edit"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
@@ -199,8 +199,8 @@ export const MasterSchedules: React.FC = () => {
                               deleteSchedule(s.id);
                             }
                           }}
-                          className="p-1 text-slate-400 hover:text-rose-600 rounded transition-colors"
-                          title="Hapus Jadwal"
+                          className="p-1 text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 rounded transition-colors cursor-pointer"
+                          title="Hapus"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -216,10 +216,10 @@ export const MasterSchedules: React.FC = () => {
 
       {/* Edit / Add Modal */}
       {(editingSchedule || isAddingSchedule) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-2xs animate-in fade-in duration-100">
-          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200">
-            <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-bold text-sm text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-2xs">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-800">
+            <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
                 {editingSchedule ? 'Edit Jadwal Mengajar' : 'Tambah Jadwal Baru'}
               </h3>
               <button
@@ -227,19 +227,19 @@ export const MasterSchedules: React.FC = () => {
                   setEditingSchedule(null);
                   setIsAddingSchedule(false);
                 }}
-                className="text-slate-400 hover:text-slate-700 p-1 text-xs"
+                className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 text-xs"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="p-5 space-y-3.5 text-xs">
+            <form onSubmit={handleSave} className="p-5 space-y-3 text-xs">
               <div>
-                <label className="block font-medium text-slate-600 mb-1">Guru Pengampu</label>
+                <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">Guru Pengampu</label>
                 <select
                   value={formData.teacherId}
                   onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:border-emerald-600"
+                  className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 focus:outline-none text-slate-900 dark:text-slate-100"
                 >
                   {teachers.map((t) => (
                     <option key={t.id} value={t.id}>
@@ -250,122 +250,113 @@ export const MasterSchedules: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-medium text-slate-600 mb-1">Mata Pelajaran</label>
+                <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">Mata Pelajaran</label>
                 <input
                   type="text"
                   value={formData.subject}
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                  placeholder="Contoh: Fiqih Ibadah"
+                  className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 focus:outline-none text-slate-900 dark:text-slate-100"
                   required
-                  placeholder="Contoh: Nahwu & Sharaf"
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:border-emerald-600"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-medium text-slate-600 mb-1">Kelas</label>
+                  <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">Nama Kelas</label>
                   <input
                     type="text"
                     value={formData.className}
                     onChange={(e) => setFormData({ ...formData, className: e.target.value })}
-                    required
-                    placeholder="Contoh: VII-A (SMP)"
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:border-emerald-600"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 focus:outline-none text-slate-900 dark:text-slate-100"
                   />
                 </div>
                 <div>
-                  <label className="block font-medium text-slate-600 mb-1">Unit</label>
+                  <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">Unit</label>
                   <select
                     value={formData.unit}
-                    onChange={(e) => setFormData({ ...formData, unit: e.target.value as UnitType })}
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:border-emerald-600"
+                    onChange={(e) => setFormData({ ...formData, unit: e.target.value as any })}
+                    className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 focus:outline-none text-slate-900 dark:text-slate-100"
                   >
                     <option value="SMP">SMP</option>
                     <option value="MA">MA</option>
-                    <option value="PESANTREN">PESANTREN</option>
-                    <option value="UMUM">UMUM</option>
+                    <option value="PESANTREN">Pesantren</option>
                   </select>
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label className="block font-medium text-slate-600 mb-1">Hari</label>
+                  <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">Hari</label>
                   <select
                     value={formData.dayOfWeek}
-                    onChange={(e) => setFormData({ ...formData, dayOfWeek: e.target.value as DayOfWeek })}
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 font-semibold focus:outline-none focus:border-emerald-600"
+                    onChange={(e) => setFormData({ ...formData, dayOfWeek: e.target.value as any })}
+                    className="w-full px-2 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 focus:outline-none text-slate-900 dark:text-slate-100"
                   >
-                    <option value="Senin">Senin</option>
-                    <option value="Selasa">Selasa</option>
-                    <option value="Rabu">Rabu</option>
-                    <option value="Kamis">Kamis</option>
-                    <option value="Jumat">Jumat</option>
-                    <option value="Sabtu">Sabtu</option>
+                    {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block font-medium text-slate-600 mb-1">Mulai</label>
+                  <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">Mulai</label>
                   <input
                     type="time"
                     value={formData.startTime}
                     onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                    required
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 font-mono focus:outline-none focus:border-emerald-600"
+                    className="w-full px-2 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 focus:outline-none font-mono text-slate-900 dark:text-slate-100"
                   />
                 </div>
                 <div>
-                  <label className="block font-medium text-slate-600 mb-1">Selesai</label>
+                  <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">Selesai</label>
                   <input
                     type="time"
                     value={formData.endTime}
                     onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                    required
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 font-mono focus:outline-none focus:border-emerald-600"
+                    className="w-full px-2 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 focus:outline-none font-mono text-slate-900 dark:text-slate-100"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-medium text-slate-600 mb-1">Jumlah JP</label>
+                  <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">Jam Pelajaran (JP)</label>
                   <input
                     type="number"
                     min="1"
                     max="6"
                     value={formData.hours}
-                    onChange={(e) => setFormData({ ...formData, hours: Number(e.target.value) })}
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 font-semibold focus:outline-none focus:border-emerald-600"
+                    onChange={(e) => setFormData({ ...formData, hours: parseInt(e.target.value) || 2 })}
+                    className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 focus:outline-none font-mono text-slate-900 dark:text-slate-100"
                   />
                 </div>
                 <div>
-                  <label className="block font-medium text-slate-600 mb-1">Ruang</label>
+                  <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">Ruang Kelas</label>
                   <input
                     type="text"
                     value={formData.room}
                     onChange={(e) => setFormData({ ...formData, room: e.target.value })}
-                    placeholder="Contoh: Kelas 7A"
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:border-emerald-600"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 focus:outline-none text-slate-900 dark:text-slate-100"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => {
                     setEditingSchedule(null);
                     setIsAddingSchedule(false);
                   }}
-                  className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-lg shadow-2xs"
+                  className="px-4 py-1.5 rounded-lg bg-emerald-700 dark:bg-emerald-600 hover:bg-emerald-800 dark:hover:bg-emerald-700 text-white font-medium shadow-2xs"
                 >
-                  Simpan
+                  Simpan Jadwal
                 </button>
               </div>
             </form>

@@ -24,12 +24,12 @@ export const SlipGajiView: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* Action Toolbar */}
-      <div className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="font-bold text-sm text-slate-900">
+          <h2 className="font-bold text-sm text-slate-900 dark:text-slate-100">
             Slip Gaji & Mukafa'ah
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
             Rincian resmi pendapatan, honor mengajar, dan potongan periode {selectedPeriod}
           </p>
         </div>
@@ -39,7 +39,7 @@ export const SlipGajiView: React.FC = () => {
           <select
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value)}
-            className="bg-slate-50 border border-slate-200 text-slate-800 font-semibold text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-600 shadow-2xs cursor-pointer"
+            className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-semibold text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-600 shadow-2xs cursor-pointer"
           >
             <option value="Agustus 2026">Agustus 2026</option>
             <option value="Juli 2026">Juli 2026</option>
@@ -48,7 +48,7 @@ export const SlipGajiView: React.FC = () => {
 
           <button
             onClick={() => setShowPrintModal(true)}
-            className="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-colors shadow-2xs"
+            className="inline-flex items-center gap-1.5 bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-colors shadow-2xs cursor-pointer"
           >
             <Printer className="w-3.5 h-3.5" />
             <span>Cetak Slip</span>
@@ -59,21 +59,27 @@ export const SlipGajiView: React.FC = () => {
       {/* Minimalist Corporate Payslip Document */}
       <div 
         id="salary-slip-document" 
-        className="bg-white rounded-xl border border-slate-200/80 shadow-2xs p-5 sm:p-7 max-w-3xl mx-auto space-y-4 text-slate-800 font-sans"
+        className="bg-white dark:bg-white rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs p-5 sm:p-7 max-w-3xl mx-auto space-y-4 text-slate-800 dark:text-slate-900 font-sans"
       >
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-200/80 pb-3.5 gap-2">
-          <div>
-            <h1 className="font-bold text-sm sm:text-base text-slate-900 tracking-tight">
-              PESANTREN BAITUL QUR'AN AL-IKHWAN
-            </h1>
-            <p className="text-[11px] text-slate-400">
-              Jl. Pesantren No. 07, Bogor • Administrasi & Keuangan
-            </p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b-2 border-slate-900 pb-3.5 gap-2">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-slate-900 text-white flex items-center justify-center font-extrabold text-sm shrink-0 shadow-md shadow-slate-200">
+              BQA
+            </div>
+            <div>
+              <p className="text-[9px] font-bold text-emerald-800 uppercase tracking-widest leading-none mb-0.5">Yayasan Al-Ikhwan Mandiri Sejahtera</p>
+              <h1 className="font-extrabold text-sm sm:text-base text-slate-900 tracking-tight leading-tight uppercase">
+                PONDOK PESANTREN BAITUL QUR'AN AL-IKHWAN
+              </h1>
+              <p className="text-[10px] text-slate-500 font-medium">
+                Jl. Sungai Kendal No.21, Marunda, Cilincing, Jakarta Utara 14150
+              </p>
+            </div>
           </div>
 
           <div className="text-left sm:text-right">
-            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-slate-100 text-slate-700 rounded border border-slate-200">
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-slate-900 text-white rounded">
               SLIP GAJI
             </span>
             <p className="text-xs font-mono text-slate-500 mt-1">
@@ -225,23 +231,26 @@ export const SlipGajiView: React.FC = () => {
 
         {/* Tanda Tangan */}
         <div className="pt-3 border-t border-slate-200/80 text-xs">
+          <div className="text-right text-slate-700 mb-2 text-[10px]">
+            Jakarta, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-[11px] text-slate-400 mb-8">Mengetahui,<br /><strong className="text-slate-700">Pimpinan Pesantren</strong></p>
+              <p className="text-[11px] text-slate-500 mb-8">Mengetahui,<br /><strong className="text-slate-800 font-semibold">Pimpinan Pesantren</strong></p>
               <div className="border-t border-slate-300 pt-1 font-semibold text-slate-800 text-[11px]">
                 Ust Cahyono
               </div>
             </div>
 
             <div>
-              <p className="text-[11px] text-slate-400 mb-8">Dibuat Oleh,<br /><strong className="text-slate-700">Bendahara HRIS</strong></p>
+              <p className="text-[11px] text-slate-500 mb-8">Dibuat Oleh,<br /><strong className="text-slate-800 font-semibold">Bendahara HRIS</strong></p>
               <div className="border-t border-slate-300 pt-1 font-semibold text-slate-800 text-[11px]">
                 Ust Akmal Yaqien
               </div>
             </div>
 
             <div className="col-span-2 sm:col-span-1">
-              <p className="text-[11px] text-slate-400 mb-8">Penerima,<br /><strong className="text-slate-700">Asatidz</strong></p>
+              <p className="text-[11px] text-slate-500 mb-8">Penerima,<br /><strong className="text-slate-800 font-semibold">Karyawan / Guru</strong></p>
               <div className="border-t border-slate-300 pt-1 font-semibold text-slate-800 text-[11px]">
                 {targetTeacher?.name || '-'}
               </div>
@@ -249,8 +258,8 @@ export const SlipGajiView: React.FC = () => {
           </div>
 
           <div className="mt-4 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
-            <span>Dokumen sah dikeluarkan oleh sistem HRIS.</span>
-            <span className="font-mono">{new Date().toLocaleDateString('id-ID')}</span>
+            <span>Dokumen resmi dikeluarkan otomatis oleh HRIS BQA.</span>
+            <span className="font-mono">ID: {targetTeacher?.id?.slice(0, 8).toUpperCase()}</span>
           </div>
         </div>
       </div>

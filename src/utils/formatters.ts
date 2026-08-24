@@ -148,3 +148,98 @@ export function exportToCSV(filename: string, rows: (string | number)[][]) {
   link.click();
   document.body.removeChild(link);
 }
+
+// Currency Input Parser & Formatter with strict Indonesian Rupiah validation
+export function parseCurrencyInput(value: string | number): number {
+  if (typeof value === 'number') {
+    return isNaN(value) ? 0 : Math.max(0, Math.floor(value));
+  }
+  if (!value) return 0;
+  // Remove all non-numeric characters except digits
+  const cleanStr = value.replace(/[^0-9]/g, '');
+  const parsed = parseInt(cleanStr, 10);
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+export function formatCurrencyInput(value: number | string): string {
+  const num = parseCurrencyInput(value);
+  if (num === 0) return '0';
+  return new Intl.NumberFormat('id-ID').format(num);
+}
+
+export interface CurrencyValidationResult {
+  isValid: boolean;
+  message?: string;
+  status: 'valid' | 'warning' | 'error';
+}
+
+export function validateCurrencyRate(
+  amount: number,
+  type: 'baseSalary' | 'hourlyRate' | 'dailyTransport'
+): CurrencyValidationResult {
+  if (isNaN(amount) || amount < 0) {
+    return {
+      isValid: false,
+      message: 'Nominal tidak boleh negatif atau kosong',
+      status: 'error',
+    };
+  }
+
+  if (type === 'hourlyRate') {
+    if (amount === 0) {
+      return {
+        isValid: false,
+        message: 'Kafa\'ah per jam tidak boleh Rp 0 untuk guru aktif',
+        status: 'error',
+      };
+    }
+    if (amount < 25000) {
+      return {
+        isValid: true,
+        message: 'Nominal di bawah standar rata-rata kafa\'ah per jam (min. Rp 25.000)',
+        status: 'warning',
+      };
+    }
+    if (amount > 150000) {
+      return {
+        isValid: true,
+        message: 'Nominal melebihi batas wajar kafa\'ah guru (maks. Rp 150.000/JP)',
+        status: 'warning',
+      };
+    }
+    return {
+      isValid: true,
+      status: 'valid',
+    };
+  }
+
+  if (type === 'baseSalary') {
+    if (amount > 10000000) {
+      return {
+        isValid: true,
+        message: 'Nominal gaji pokok melebihi batas standar pesantren (> Rp 10.000.000)',
+        status: 'warning',
+      };
+    }
+    return {
+      isValid: true,
+      status: 'valid',
+    };
+  }
+
+  if (type === 'dailyTransport') {
+    if (amount > 100000) {
+      return {
+        isValid: true,
+        message: 'Uang transport harian lebih dari Rp 100.000/hari',
+        status: 'warning',
+      };
+    }
+    return {
+      isValid: true,
+      status: 'valid',
+    };
+  }
+
+  return { isValid: true, status: 'valid' };
+}

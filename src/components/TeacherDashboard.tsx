@@ -75,7 +75,7 @@ export const TeacherDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Teacher Profile & Monthly Summary Card */}
-      <div className="bg-slate-900 rounded-xl sm:rounded-2xl p-6 text-white border border-slate-800 shadow-sm">
+      <div className="bg-slate-900 dark:bg-slate-950 rounded-xl sm:rounded-2xl p-6 text-white border border-slate-800 shadow-sm">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <div className={`w-14 h-14 rounded-xl ${currentUser?.avatarColor || 'bg-emerald-600'} flex items-center justify-center font-bold text-xl text-white shadow-md border border-emerald-500/30`}>
@@ -151,29 +151,29 @@ export const TeacherDashboard: React.FC = () => {
       </div>
 
       {/* Main Workbench Section */}
-      <div className="bg-white rounded-xl sm:rounded-2xl p-6 border border-slate-200 shadow-xs space-y-6">
+      <div className="bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xs space-y-6">
         {/* Day Selector & Status Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
           <div>
-            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-emerald-600" />
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-500" />
               <span>Jadwal Mengajar & Presensi Sesi</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Pilih hari untuk melihat jadwal sesi mengajar dan lakukan Clock-In serta Pengisian Jurnal.
             </p>
           </div>
 
           {/* Day Tabs */}
-          <div className="inline-flex bg-slate-100 p-1 rounded-lg border border-slate-200 overflow-x-auto max-w-full">
+          <div className="inline-flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700 overflow-x-auto max-w-full">
             {daysOfWeek.map((day) => (
               <button
                 key={day}
                 onClick={() => setSelectedDay(day)}
                 className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                   selectedDay === day
-                    ? 'bg-white text-emerald-800 shadow-xs border border-slate-200/80 font-bold'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white dark:bg-slate-700 text-emerald-800 dark:text-emerald-400 shadow-xs border border-slate-200/80 dark:border-slate-600 font-bold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
                 {day}
@@ -184,12 +184,12 @@ export const TeacherDashboard: React.FC = () => {
 
         {/* Schedule Cards for Selected Day */}
         {daySchedules.length === 0 ? (
-          <div className="text-center py-12 px-4 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-            <BookOpen className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-            <h4 className="text-sm font-bold text-slate-700">
+          <div className="text-center py-12 px-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+            <BookOpen className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
+            <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300">
               Tidak ada jadwal mengajar pada hari {selectedDay}
             </h4>
-            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">
               Ustadz/Ustadzah tidak memiliki jam mengajar terjadwal pada hari ini. Silakan pilih hari lain di atas.
             </p>
           </div>
@@ -210,26 +210,26 @@ export const TeacherDashboard: React.FC = () => {
                   key={schedule.id}
                   className={`rounded-xl border p-5 transition-all relative flex flex-col justify-between ${
                     isCompleted
-                      ? 'bg-emerald-50/40 border-emerald-200 shadow-xs'
+                      ? 'bg-emerald-50/40 dark:bg-emerald-950/10 border-emerald-200 dark:border-emerald-800/50 shadow-xs'
                       : isClockedInNoJournal
-                      ? 'bg-amber-50/40 border-amber-300 shadow-xs'
+                      ? 'bg-amber-50/40 dark:bg-amber-950/10 border-amber-300 dark:border-amber-800/50 shadow-xs'
                       : isSubstituted
-                      ? 'bg-slate-50 border-slate-200 opacity-80'
-                      : 'bg-white border-slate-200 hover:border-emerald-300 shadow-xs'
+                      ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 opacity-80'
+                      : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 shadow-xs'
                   }`}
                 >
                   {/* Top Badges & Times */}
                   <div>
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
                           {schedule.unit} • {schedule.className}
                         </span>
-                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                           {schedule.hours} JP
                         </span>
                         {isBadalForMe && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-50 text-purple-800 border border-purple-200">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-50 dark:bg-purple-950/30 text-purple-800 dark:text-purple-400 border border-purple-200 dark:border-purple-800/50">
                             Tugas Badal
                           </span>
                         )}
@@ -237,63 +237,63 @@ export const TeacherDashboard: React.FC = () => {
 
                       {/* Status Indicator Badge */}
                       {isCompleted ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/50">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500" />
                           <span>Selesai (Jurnal Terisi)</span>
                         </span>
                       ) : isClockedInNoJournal ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                          <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800/50">
+                          <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-500" />
                           <span>Hadir (Jurnal Kosong)</span>
                         </span>
                       ) : isSubstituted ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700">
                           <span>Digantikan Badal</span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700">
                           <span>Belum Hadir</span>
                         </span>
                       )}
                     </div>
 
                     {/* Subject Title */}
-                    <h4 className="text-base font-bold text-slate-900 mt-2.5 flex items-center gap-2">
-                      <BookOpen className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <h4 className="text-base font-bold text-slate-900 dark:text-slate-100 mt-2.5 flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-500 shrink-0" />
                       <span>{schedule.subject}</span>
                     </h4>
 
                     {/* Schedule Time & Location Details */}
-                    <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 mt-3 pt-3 border-t border-slate-100">
+                    <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-400 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
                       <div className="flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                         <span>
                           {schedule.startTime} - {schedule.endTime} WIB
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                        <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                         <span className="truncate">{schedule.room}</span>
                       </div>
                     </div>
 
                     {/* Clock-In Info if already clocked in */}
                     {att && (
-                      <div className="mt-3 p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-1">
+                      <div className="mt-3 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-500">Waktu Clock-In:</span>
-                          <span className="font-mono font-bold text-slate-800">
+                          <span className="text-slate-500 dark:text-slate-400">Waktu Clock-In:</span>
+                          <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
                             {att.clockInTime} WIB
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-500">Kedisiplinan:</span>
+                          <span className="text-slate-500 dark:text-slate-400">Kedisiplinan:</span>
                           <span className={`font-semibold ${getLateCategoryLabel(att.lateCategory).color}`}>
                             {getLateCategoryLabel(att.lateCategory).label}
                           </span>
                         </div>
                         {att.latePenalty > 0 && (
-                          <div className="flex items-center justify-between text-rose-600 font-semibold">
+                          <div className="flex items-center justify-between text-rose-600 dark:text-rose-400 font-semibold">
                             <span>Denda Terlambat:</span>
                             <span>-{formatRupiah(att.latePenalty)}</span>
                           </div>
@@ -303,7 +303,7 @@ export const TeacherDashboard: React.FC = () => {
                   </div>
 
                   {/* Actions Bar */}
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
                     {isNotPresent && !isSubstituted && (
                       <button
                         onClick={() => setActiveClockInSchedule(schedule)}
@@ -327,15 +327,15 @@ export const TeacherDashboard: React.FC = () => {
                     {isCompleted && att && (
                       <button
                         onClick={() => setActiveJournalData({ attendance: att, schedule })}
-                        className="w-full inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold px-4 py-2 rounded-lg transition-colors border border-slate-200"
+                        className="w-full inline-flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold px-4 py-2 rounded-lg transition-colors border border-slate-200 dark:border-slate-700"
                       >
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-500" />
                         <span>Lihat / Edit Jurnal Mengajar</span>
                       </button>
                     )}
 
                     {isSubstituted && (
-                      <p className="text-xs text-slate-500 italic text-center w-full">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 italic text-center w-full">
                         Telah dialihkan ke Guru Badal ({badalInfo?.reason})
                       </p>
                     )}
@@ -348,14 +348,14 @@ export const TeacherDashboard: React.FC = () => {
       </div>
 
       {/* Teaching History & Journals Table */}
-      <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-xs overflow-hidden space-y-0">
-        <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden space-y-0">
+        <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-emerald-600" />
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-500" />
               <span>Riwayat Presensi & Jurnal Terkini</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Daftar sesi KBM yang telah tercatat dan tersinkronisasi ke sistem payroll.
             </p>
           </div>
@@ -364,7 +364,7 @@ export const TeacherDashboard: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-slate-50/75 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+              <tr className="bg-slate-50/75 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[11px]">
                 <th className="py-3 px-4">Tanggal</th>
                 <th className="py-3 px-4">Mata Pelajaran & Kelas</th>
                 <th className="py-3 px-4">Waktu Clock-In</th>
@@ -374,7 +374,7 @@ export const TeacherDashboard: React.FC = () => {
                 <th className="py-3 px-4 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {attendances
                 .filter((a) => a.actualTeacherId === currentUser.id)
                 .map((att) => {
@@ -383,15 +383,15 @@ export const TeacherDashboard: React.FC = () => {
                   const lateStyle = getLateCategoryLabel(att.lateCategory);
 
                   return (
-                    <tr key={att.id} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="py-3 px-4 font-medium text-slate-800 whitespace-nowrap">
+                    <tr key={att.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors">
+                      <td className="py-3 px-4 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap">
                         {att.date}
                       </td>
                       <td className="py-3 px-4">
-                        <p className="font-semibold text-slate-900">{sched?.subject || 'KBM Pesantren'}</p>
-                        <p className="text-[11px] text-slate-500">{sched?.className} • {sched?.hours} JP</p>
+                        <p className="font-semibold text-slate-900 dark:text-slate-100">{sched?.subject || 'KBM Pesantren'}</p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">{sched?.className} • {sched?.hours} JP</p>
                       </td>
-                      <td className="py-3 px-4 font-mono font-semibold text-slate-700">
+                      <td className="py-3 px-4 font-mono font-semibold text-slate-700 dark:text-slate-300">
                         {att.clockInTime || '-'}
                       </td>
                       <td className="py-3 px-4">
@@ -401,23 +401,23 @@ export const TeacherDashboard: React.FC = () => {
                       </td>
                       <td className="py-3 px-4">
                         {isDone ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold text-[11px]">
+                          <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-500 font-semibold text-[11px]">
                             <CheckCircle2 className="w-3.5 h-3.5" /> Jurnal Terisi
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-amber-700 font-semibold text-[11px]">
+                          <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-500 font-semibold text-[11px]">
                             <AlertCircle className="w-3.5 h-3.5" /> Jurnal Kosong (-50%)
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-4 max-w-xs truncate text-slate-600">
-                        {att.journal?.topic || <span className="italic text-slate-400">Belum diisi</span>}
+                      <td className="py-3 px-4 max-w-xs truncate text-slate-600 dark:text-slate-400">
+                        {att.journal?.topic || <span className="italic text-slate-400 dark:text-slate-600">Belum diisi</span>}
                       </td>
                       <td className="py-3 px-4 text-right">
                         {sched && (
                           <button
                             onClick={() => setActiveJournalData({ attendance: att, schedule: sched })}
-                            className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline"
+                            className="text-xs font-semibold text-emerald-700 dark:text-emerald-500 hover:text-emerald-800 dark:hover:text-emerald-400 hover:underline"
                           >
                             {isDone ? 'Lihat Jurnal' : 'Isi Jurnal'}
                           </button>

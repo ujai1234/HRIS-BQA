@@ -1,4 +1,4 @@
-export type UserRole = 'ADMIN' | 'GURU' | 'KEPALA_PESANTREN';
+export type UserRole = 'ADMIN' | 'GURU' | 'KEPALA_PESANTREN' | 'SYSTEM';
 
 export type PositionCategory = 
   | 'Kepsek SMP'
@@ -153,4 +153,20 @@ export interface MonthlyPayrollSummary {
   totalTeachers: number;
   generatedDate: string;
   items: TeacherPayrollItem[];
+}
+
+export type AuditCategory = 'AUTH' | 'KAFAAH' | 'KBM' | 'BADAL' | 'SYSTEM';
+export type AuditSeverity = 'INFO' | 'WARNING' | 'CRITICAL';
+
+export interface AuditLog {
+  id: string;
+  userId: string;
+  userName: string;
+  userRole: UserRole;
+  action: string;
+  category: AuditCategory;
+  details: string;
+  severity: AuditSeverity;
+  ipAddress?: string;
+  timestamp: string; // ISO String
 }

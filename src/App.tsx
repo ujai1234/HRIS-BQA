@@ -5,6 +5,7 @@ import { Header } from './components/Header';
 import { GuruView } from './components/GuruView';
 import { AdminView } from './components/AdminView';
 import { KepsekView } from './components/KepsekView';
+import { SessionTimeoutManager } from './components/SessionTimeoutManager';
 
 const MainContent: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -12,10 +13,10 @@ const MainContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-slate-600 font-medium animate-pulse">Menyiapkan Data HRIS...</p>
+          <p className="text-slate-600 dark:text-slate-400 font-medium animate-pulse">Menyiapkan Data HRIS...</p>
         </div>
       </div>
     );
@@ -51,6 +52,9 @@ const MainContent: React.FC = () => {
       if (currentPath === '/dashboard/admin/payroll') {
         return <AdminView initialTab="generate_payroll" key="admin-payroll" />;
       }
+      if (currentPath === '/dashboard/admin/audit') {
+        return <AdminView initialTab="audit_logs" key="admin-audit" />;
+      }
       return <AdminView initialTab="dashboard" key="admin-dashboard" />;
     }
 
@@ -61,6 +65,9 @@ const MainContent: React.FC = () => {
       if (currentPath === '/dashboard/kepsek/laporan') {
         return <KepsekView initialTab="laporan_payroll" key="kepsek-laporan" />;
       }
+      if (currentPath === '/dashboard/kepsek/audit-log') {
+        return <KepsekView initialTab="audit_log" key="kepsek-audit-log" />;
+      }
       return <KepsekView initialTab="ringkasan_kehadiran" key="kepsek-overview" />;
     }
 
@@ -68,7 +75,7 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex font-sans antialiased">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex font-sans antialiased transition-colors duration-300">
       {/* Sidebar & Topbar Shell */}
       <Header 
         sidebarOpen={sidebarOpen}
@@ -81,27 +88,27 @@ const MainContent: React.FC = () => {
         <div className="h-16" />
 
         {/* Content Container */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+        <main id="main-content" className="flex-1 p-4 sm:p-6 lg:p-6 max-w-7xl w-full mx-auto space-y-5">
           {renderDashboardByRole()}
         </main>
 
         {/* Professional Institutional Footer */}
-        <footer className="bg-white border-t border-slate-200 py-5 text-xs text-slate-500 mt-auto print:hidden">
+        <footer className="bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800/80 py-4 text-xs text-slate-500 dark:text-slate-400 mt-auto print:hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px]">
+              <div className="w-5 h-5 rounded bg-emerald-700 text-white flex items-center justify-center font-bold text-[10px]">
                 BQ
               </div>
-              <span className="font-semibold text-slate-700">
+              <span className="font-semibold text-slate-700 dark:text-slate-300">
                 Pesantren Baitul Qur'an Al-Ikhwan
               </span>
-              <span className="text-slate-400 hidden md:inline">• Sistem HRIS & Penggajian Guru</span>
+              <span className="text-slate-400 dark:text-slate-500 hidden md:inline">• HRIS & Kafa'ah Asatidz</span>
             </div>
 
             <div className="flex items-center gap-2 text-slate-400 text-[11px]">
               <span>Tahun Ajaran 2026/2027</span>
               <span>•</span>
-              <span className="text-emerald-700 font-medium">Sistem Aktif & Terverifikasi</span>
+              <span className="text-emerald-700 font-medium">Sistem Aktif</span>
             </div>
           </div>
         </footer>
@@ -113,6 +120,7 @@ const MainContent: React.FC = () => {
 export default function App() {
   return (
     <HRISProvider>
+      <SessionTimeoutManager />
       <MainContent />
     </HRISProvider>
   );

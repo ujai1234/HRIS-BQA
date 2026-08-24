@@ -1,6 +1,6 @@
 import { pgTable, text, integer, boolean, timestamp, uuid, doublePrecision, pgEnum } from 'drizzle-orm/pg-core';
 
-export const userRoleEnum = pgEnum('user_role', ['ADMIN', 'GURU', 'KEPALA_PESANTREN']);
+export const userRoleEnum = pgEnum('user_role', ['ADMIN', 'GURU', 'KEPALA_PESANTREN', 'SYSTEM']);
 export const unitTypeEnum = pgEnum('unit_type', ['SMP', 'MA', 'PESANTREN', 'UMUM']);
 export const dayOfWeekEnum = pgEnum('day_of_week', ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Ahad']);
 export const attendanceStatusEnum = pgEnum('attendance_status', [
@@ -92,4 +92,17 @@ export const badalAssignments = pgTable('badal_assignments', {
   status: text('status').notNull().default('PENDING'),
   notes: text('notes'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+export const auditLogs = pgTable('audit_logs', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  userName: text('user_name').notNull(),
+  userRole: userRoleEnum('user_role').notNull(),
+  action: text('action').notNull(),
+  category: text('category').notNull(),
+  details: text('details').notNull(),
+  severity: text('severity').notNull().default('INFO'),
+  ipAddress: text('ip_address'),
+  timestamp: text('timestamp').notNull(),
 });

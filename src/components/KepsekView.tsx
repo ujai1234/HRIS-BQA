@@ -15,14 +15,15 @@ import { useHRIS } from '../context/HRISContext';
 import { DashboardOverview } from './DashboardOverview';
 import { KepsekAuditView } from './KepsekAuditView';
 import { PayrollRecap } from './PayrollRecap';
+import { AuditLogView } from './AuditLogView';
 import { formatRupiah } from '../utils/formatters';
 
 interface KepsekViewProps {
-  initialTab?: 'ringkasan_kehadiran' | 'ketaatan_jurnal' | 'laporan_payroll';
+  initialTab?: 'ringkasan_kehadiran' | 'ketaatan_jurnal' | 'laporan_payroll' | 'audit_log';
 }
 
 export const KepsekView: React.FC<KepsekViewProps> = ({ initialTab = 'ringkasan_kehadiran' }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'ringkasan_kehadiran' | 'ketaatan_jurnal' | 'laporan_payroll'>(initialTab);
+  const [activeSubTab, setActiveSubTab] = useState<'ringkasan_kehadiran' | 'ketaatan_jurnal' | 'laporan_payroll' | 'audit_log'>(initialTab);
 
   return (
     <div className="space-y-6">
@@ -35,6 +36,7 @@ export const KepsekView: React.FC<KepsekViewProps> = ({ initialTab = 'ringkasan_
       )}
       {activeSubTab === 'ketaatan_jurnal' && <KepsekAuditView />}
       {activeSubTab === 'laporan_payroll' && <PayrollRecap />}
+      {activeSubTab === 'audit_log' && <AuditLogView />}
     </div>
   );
 };

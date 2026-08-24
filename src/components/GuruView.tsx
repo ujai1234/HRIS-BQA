@@ -172,42 +172,42 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
   return (
     <div className="space-y-4">
       {/* 1. Minimalist Teacher Overview Card (Strictly Non-Financial Educational Stats) */}
-      <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200/80 shadow-2xs">
+      <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-2xs">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-slate-900">
+              <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">
                 {currentUser?.name || 'Ustadz / Guru'}
               </h1>
-              <span className="text-[11px] font-semibold bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded border border-emerald-200/80">
+              <span className="text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-400 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/50">
                 {currentUser?.unit || 'Unit KBM'}
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               NIP: {currentUser?.nip || '-'} • {currentUser?.position || 'Guru Pengampu'} • Semester Ganjil 2026/2027
             </p>
           </div>
 
           {/* Quick Metrics Strip (Non-Financial: Jam Pelajaran, Hari Hadir, Jurnal Selesai, Jurnal Pending) */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-            <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-100 min-w-[105px]">
-              <span className="text-[11px] text-slate-500 block">Total Beban KBM</span>
-              <span className="text-sm font-bold text-slate-900 mt-0.5 block">{totalWeeklyHours} JP /pekan</span>
+            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2.5 border border-slate-100 dark:border-slate-800 min-w-[105px]">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 block">Total Beban KBM</span>
+              <span className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5 block">{totalWeeklyHours} JP /pekan</span>
             </div>
 
-            <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-100 min-w-[105px]">
-              <span className="text-[11px] text-slate-500 block">Hari Hadir</span>
-              <span className="text-sm font-bold text-slate-900 mt-0.5 block">{teacherPayroll.totalPresentDays} Hari</span>
+            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2.5 border border-slate-100 dark:border-slate-800 min-w-[105px]">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 block">Hari Hadir</span>
+              <span className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5 block">{teacherPayroll.totalPresentDays} Hari</span>
             </div>
 
-            <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-100 min-w-[105px]">
-              <span className="text-[11px] text-slate-500 block">Jurnal Selesai</span>
-              <span className="text-sm font-bold text-emerald-800 mt-0.5 block">{completedJournalsCount} Sesi</span>
+            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2.5 border border-slate-100 dark:border-slate-800 min-w-[105px]">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 block">Jurnal Selesai</span>
+              <span className="text-sm font-bold text-emerald-800 dark:text-emerald-400 mt-0.5 block">{completedJournalsCount} Sesi</span>
             </div>
 
-            <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-100 min-w-[105px]">
-              <span className="text-[11px] text-slate-500 block">Jurnal Pending</span>
-              <span className={`text-sm font-bold mt-0.5 block ${pendingJournalsCount > 0 ? 'text-amber-600' : 'text-slate-900'}`}>
+            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2.5 border border-slate-100 dark:border-slate-800 min-w-[105px]">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 block">Jurnal Pending</span>
+              <span className={`text-sm font-bold mt-0.5 block ${pendingJournalsCount > 0 ? 'text-amber-600 dark:text-amber-500' : 'text-slate-900 dark:text-slate-100'}`}>
                 {pendingJournalsCount} Sesi
               </span>
             </div>
@@ -220,31 +220,31 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
         <div className="space-y-4">
           
           {/* Simple Workflow Explainer Banner */}
-          <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs text-slate-600 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
+          <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-600 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-slate-200/70 text-slate-700 rounded">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded">
                 Alur KBM
               </span>
-              <p className="text-xs text-slate-700">
+              <p className="text-xs text-slate-700 dark:text-slate-300">
                 1. Klik <strong>Presensi Masuk</strong> (waktu terkunci otomatis) ➔ 2. Form <strong>Isi Jurnal</strong> akan terbuka langsung ➔ 3. Selesai.
               </p>
             </div>
-            <span className="text-[11px] text-slate-400 font-mono self-start sm:self-auto">
+            <span className="text-[11px] text-slate-400 dark:text-slate-500 font-mono self-start sm:self-auto">
               Hari ini: {formatIndonesianDate(todayStr)}
             </span>
           </div>
 
           {/* Dedicated Section: Jurnal Hari Ini yang Perlu Diisi (if any) */}
           {todayPendingJournals.length > 0 && (
-            <div className="bg-amber-50/90 border border-amber-200/90 rounded-xl p-4 space-y-3 shadow-2xs">
+            <div className="bg-amber-50/90 dark:bg-amber-950/20 border border-amber-200/90 dark:border-amber-900/30 rounded-xl p-4 space-y-3 shadow-2xs">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                  <h3 className="font-bold text-xs text-amber-950">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0" />
+                  <h3 className="font-bold text-xs text-amber-950 dark:text-amber-200">
                     Jurnal Mengajar Hari Ini yang Perlu Diisi ({todayPendingJournals.length} Sesi)
                   </h3>
                 </div>
-                <span className="text-[10px] font-semibold bg-amber-200/60 text-amber-900 px-2 py-0.5 rounded">
+                <span className="text-[10px] font-semibold bg-amber-200/60 dark:bg-amber-900/40 text-amber-900 dark:text-amber-300 px-2 py-0.5 rounded">
                   Menunggu Pengisian
                 </span>
               </div>
@@ -253,15 +253,15 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
                 {todayPendingJournals.map((item) => (
                   <div 
                     key={item.attendance.id} 
-                    className="bg-white p-3 rounded-lg border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                    className="bg-white dark:bg-slate-900 p-3 rounded-lg border border-amber-200 dark:border-amber-900/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-slate-900">{item.schedule.subject}</span>
-                        <span className="text-[11px] text-slate-500">Kelas {item.schedule.className} • {item.schedule.unit}</span>
+                        <span className="font-semibold text-slate-900 dark:text-slate-100">{item.schedule.subject}</span>
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400">Kelas {item.schedule.className} • {item.schedule.unit}</span>
                       </div>
-                      <p className="text-[11px] text-slate-500 mt-0.5">
-                        Jam: <strong className="font-mono text-slate-700">{item.schedule.startTime} - {item.schedule.endTime}</strong> (Presensi masuk: {item.attendance.clockInTime || '-'})
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        Jam: <strong className="font-mono text-slate-700 dark:text-slate-300">{item.schedule.startTime} - {item.schedule.endTime}</strong> (Presensi masuk: {item.attendance.clockInTime || '-'})
                       </p>
                     </div>
 
@@ -283,27 +283,27 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
           )}
 
           {/* Session List Table & Day Filter Toolbar */}
-          <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
-            <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs overflow-hidden">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h2 className="font-bold text-sm text-slate-900">
+                <h2 className="font-bold text-sm text-slate-900 dark:text-slate-100">
                   Daftar Sesi Mengajar Harian
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                   Pilih hari untuk melihat jadwal, melakukan presensi masuk, atau melengkapi jurnal KBM
                 </p>
               </div>
 
               {/* Day Switcher */}
-              <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg">
                 {daysOfWeek.map((day) => (
                   <button
                     key={day}
                     onClick={() => setSelectedDay(day)}
                     className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${
                       selectedDay === day
-                        ? 'bg-white text-slate-900 shadow-2xs'
-                        : 'text-slate-500 hover:text-slate-800'
+                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-2xs'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                     }`}
                   >
                     {day}
@@ -313,9 +313,9 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
             </div>
 
             {/* Sesi List */}
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
               {daySchedules.length === 0 ? (
-                <div className="py-12 text-center text-slate-400 text-xs">
+                <div className="py-12 text-center text-slate-400 dark:text-slate-600 text-xs">
                   Tidak ada jadwal mengajar pada hari {selectedDay}.
                 </div>
               ) : (
@@ -331,67 +331,67 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
                   const lateInfo = att ? getLateCategoryLabel(att.lateCategory) : null;
 
                   return (
-                    <div key={schedule.id} className="p-4 hover:bg-slate-50/50 transition-colors">
+                    <div key={schedule.id} className="p-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         {/* Left: Info */}
                         <div className="space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-mono text-xs font-semibold text-slate-700">
+                            <span className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300">
                               {schedule.startTime} - {schedule.endTime}
                             </span>
-                            <span className="text-[11px] font-medium text-slate-500">
+                            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
                               ({schedule.hours} JP)
                             </span>
-                            <span className="text-[11px] text-slate-400">•</span>
-                            <span className="text-[11px] font-medium text-slate-600">
+                            <span className="text-[11px] text-slate-400 dark:text-slate-600">•</span>
+                            <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400">
                               Kelas {schedule.className} • {schedule.unit}
                             </span>
-                            <span className="text-[11px] text-slate-400">•</span>
-                            <span className="text-[11px] text-slate-500">
+                            <span className="text-[11px] text-slate-400 dark:text-slate-600">•</span>
+                            <span className="text-[11px] text-slate-500 dark:text-slate-400">
                               {schedule.room}
                             </span>
 
                             {isBadalForMe && (
-                              <span className="text-[10px] font-semibold text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded border border-purple-200">
+                              <span className="text-[10px] font-semibold text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 px-1.5 py-0.2 rounded border border-purple-200 dark:border-purple-800/50">
                                 Tugas Badal
                               </span>
                             )}
                             {isSubstituted && (
-                              <span className="text-[10px] font-semibold text-rose-700 bg-rose-50 px-1.5 py-0.2 rounded border border-rose-200">
+                              <span className="text-[10px] font-semibold text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 px-1.5 py-0.2 rounded border border-rose-200 dark:border-rose-800/50">
                                 Digantikan Badal
                               </span>
                             )}
                           </div>
 
-                          <h3 className="font-bold text-sm text-slate-900">
+                          <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">
                             {schedule.subject}
                           </h3>
 
                           {/* Attendance Status Bar */}
                           {hasClockedIn && (
                             <div className="flex flex-wrap items-center gap-2 pt-0.5 text-[11px]">
-                              <span className="text-slate-500">
-                                Waktu Masuk: <strong className="font-mono text-slate-800">{att.clockInTime}</strong>
+                              <span className="text-slate-500 dark:text-slate-400">
+                                Waktu Masuk: <strong className="font-mono text-slate-800 dark:text-slate-200">{att.clockInTime}</strong>
                               </span>
 
                               {att.lateMinutes > 4 ? (
-                                <span className="text-rose-700 font-medium bg-rose-50 px-1.5 py-0.2 rounded border border-rose-200">
+                                <span className="text-rose-700 dark:text-rose-400 font-medium bg-rose-50 dark:bg-rose-900/20 px-1.5 py-0.2 rounded border border-rose-200 dark:border-rose-800/50">
                                   +{att.lateMinutes}m ({lateInfo?.label.split(' ')[0]})
                                 </span>
                               ) : (
-                                <span className="text-emerald-700 font-medium bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                                <span className="text-emerald-700 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/20 px-1.5 py-0.2 rounded border border-emerald-200 dark:border-emerald-800/50">
                                   Tepat Waktu
                                 </span>
                               )}
 
                               {isCompleted && (
-                                <span className="text-emerald-800 font-medium inline-flex items-center gap-1">
+                                <span className="text-emerald-800 dark:text-emerald-400 font-medium inline-flex items-center gap-1">
                                   <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Jurnal Lengkap
                                 </span>
                               )}
 
                               {isPendingJournal && (
-                                <span className="text-amber-800 font-medium inline-flex items-center gap-1">
+                                <span className="text-amber-800 dark:text-amber-400 font-medium inline-flex items-center gap-1">
                                   <AlertTriangle className="w-3 h-3 text-amber-600" /> Jurnal Belum Diisi
                                 </span>
                               )}
@@ -427,14 +427,14 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
                           {isCompleted && att && (
                             <button
                               onClick={() => setActiveJournalData({ attendance: att, schedule })}
-                              className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors border border-slate-200"
+                              className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors border border-slate-200 dark:border-slate-700"
                             >
                               Lihat Jurnal
                             </button>
                           )}
 
                           {isSubstituted && (
-                            <span className="text-xs text-slate-400 italic">
+                            <span className="text-xs text-slate-400 dark:text-slate-600 italic">
                               Telah dialihkan
                             </span>
                           )}
@@ -443,14 +443,14 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
 
                       {/* Journal Topic Preview if filled */}
                       {att?.journal && (
-                        <div className="mt-2.5 pt-2 border-t border-slate-100 text-xs text-slate-600 bg-slate-50/70 p-2.5 rounded-lg flex items-start justify-between gap-2">
+                        <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 bg-slate-50/70 dark:bg-slate-800/40 p-2.5 rounded-lg flex items-start justify-between gap-2">
                           <div>
-                            <span className="text-[10px] text-slate-400 block">Materi Pembelajaran:</span>
-                            <p className="font-medium text-slate-800 mt-0.5">{att.journal.topic}</p>
+                            <span className="text-[10px] text-slate-400 dark:text-slate-600 block">Materi Pembelajaran:</span>
+                            <p className="font-medium text-slate-800 dark:text-slate-200 mt-0.5">{att.journal.topic}</p>
                           </div>
                           {att.journal.studentAttendance && (
-                            <span className="text-[11px] text-slate-500 whitespace-nowrap">
-                              Santri Hadir: <strong className="text-slate-800">{att.journal.studentAttendance.presentCount}/{att.journal.studentAttendance.totalStudents}</strong>
+                            <span className="text-[11px] text-slate-500 dark:text-slate-500 whitespace-nowrap">
+                              Santri Hadir: <strong className="text-slate-800 dark:text-slate-300">{att.journal.studentAttendance.presentCount}/{att.journal.studentAttendance.totalStudents}</strong>
                             </span>
                           )}
                         </div>
@@ -466,17 +466,17 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
 
       {/* 4. Subtab Content: Jadwal Mengajar Mingguan */}
       {activeSubTab === 'jadwal' && (
-        <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
-          <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs overflow-hidden">
+          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h2 className="font-bold text-sm text-slate-900">
+              <h2 className="font-bold text-sm text-slate-900 dark:text-slate-100">
                 Jadwal Mengajar Mingguan
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Total beban mengajar: <strong className="text-slate-700">{totalWeeklyHours} Jam Pelajaran (JP)</strong> per pekan
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                Total beban mengajar: <strong className="text-slate-700 dark:text-slate-300">{totalWeeklyHours} Jam Pelajaran (JP)</strong> per pekan
               </p>
             </div>
-            <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md self-start sm:self-auto">
+            <span className="text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md self-start sm:self-auto">
               Unit {currentUser?.unit || '-'}
             </span>
           </div>
@@ -487,24 +487,24 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
               const dayHours = scheds.reduce((acc, s) => acc + s.hours, 0);
 
               return (
-                <div key={day} className="bg-slate-50/70 rounded-lg border border-slate-200/80 p-3 space-y-2">
-                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-200 text-xs font-semibold text-slate-800">
+                <div key={day} className="bg-slate-50/70 dark:bg-slate-800/40 rounded-lg border border-slate-200/80 dark:border-slate-800 p-3 space-y-2">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200">
                     <span>{day}</span>
-                    <span className="text-[11px] text-slate-500 font-normal">{dayHours} JP</span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-500 font-normal">{dayHours} JP</span>
                   </div>
 
                   {scheds.length === 0 ? (
-                    <p className="text-[11px] text-slate-400 italic py-1">Tidak ada jadwal</p>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-600 italic py-1">Tidak ada jadwal</p>
                   ) : (
                     <div className="space-y-1.5">
                       {scheds.map((s) => (
-                        <div key={s.id} className="bg-white p-2 rounded-md border border-slate-200/70 text-xs space-y-0.5 shadow-2xs">
-                          <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono">
+                        <div key={s.id} className="bg-white dark:bg-slate-900 p-2 rounded-md border border-slate-200/70 dark:border-slate-800 text-xs space-y-0.5 shadow-2xs">
+                          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-500 font-mono">
                             <span>{s.startTime} - {s.endTime}</span>
-                            <span className="font-semibold text-emerald-800">{s.hours} JP</span>
+                            <span className="font-semibold text-emerald-800 dark:text-emerald-500">{s.hours} JP</span>
                           </div>
-                          <p className="font-semibold text-slate-900">{s.subject}</p>
-                          <p className="text-[11px] text-slate-500">Kelas {s.className} • {s.room}</p>
+                          <p className="font-semibold text-slate-900 dark:text-slate-100">{s.subject}</p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-500">Kelas {s.className} • {s.room}</p>
                         </div>
                       ))}
                     </div>
