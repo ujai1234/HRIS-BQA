@@ -87,7 +87,6 @@ export const Header: React.FC<HeaderProps> = ({
             { path: '/dashboard/kepsek', label: 'Ringkasan Eksekutif', icon: LayoutDashboard, desc: 'Statistik kehadiran & KBM' },
             { path: '/dashboard/kepsek/audit', label: 'Monitoring Jurnal', icon: GraduationCap, desc: 'Ketaatan pengisian jurnal' },
             { path: '/dashboard/kepsek/laporan', label: 'Laporan Gaji', icon: CreditCard, desc: 'Pengesahan penggajian' },
-            { path: '/dashboard/kepsek/audit-log', label: 'Log Audit Keamanan', icon: ShieldCheck, desc: 'Rekam jejak audit keamanan' },
           ]
         }
       ];

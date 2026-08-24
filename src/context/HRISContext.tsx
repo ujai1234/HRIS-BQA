@@ -63,6 +63,7 @@ interface HRISContextType {
   addSchedule: (schedule: Omit<ClassSchedule, 'id'>) => void;
   updateSchedule: (id: string, updates: Partial<ClassSchedule>) => void;
   deleteSchedule: (id: string) => void;
+  addSchedulesBulk: (schedules: Omit<ClassSchedule, 'id'>[]) => Promise<{ success: boolean; count: number }>;
   
   // Payroll Engine
   calculateTeacherPayroll: (teacherId: string, period?: string) => TeacherPayrollItem;
@@ -617,6 +618,42 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   };
 
+  const addSchedulesBulk = async (newSchedules: Omit<ClassSchedule, 'id'>[]) => {
+    try {
+      const res = await fetch('/api/schedules/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newSchedules)
+      });
+      
+      if (res.ok) {
+        await fetchAllData();
+      } else {
+        // Fallback to sequential if bulk fails
+        for (const s of newSchedules) {
+          await fetch('/api/schedules', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(s)
+          });
+        }
+        await fetchAllData();
+      }
+
+      await logActivity(
+        'BULK_IMPORT_SCHEDULES',
+        'KBM',
+        `Impor massal jadwal KBM: Berhasil mengunggah ${newSchedules.length} entri jadwal pelajaran baru dari spreadsheet`,
+        'INFO'
+      );
+
+      return { success: true, count: newSchedules.length };
+    } catch (err) {
+      console.error('Bulk schedules import error:', err);
+      throw err;
+    }
+  };
+
   const updateSchedule = (id: string, updates: Partial<ClassSchedule>) => {
     fetch(`/api/schedules/${id}`, {
       method: 'PATCH',
@@ -815,6 +852,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         approveBadalAssignment,
         addTeacher,
         addTeachersBulk,
+        addSchedulesBulk,
         updateTeacher,
         deleteTeacher,
         addSchedule,

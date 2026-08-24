@@ -65,9 +65,6 @@ const MainContent: React.FC = () => {
       if (currentPath === '/dashboard/kepsek/laporan') {
         return <KepsekView initialTab="laporan_payroll" key="kepsek-laporan" />;
       }
-      if (currentPath === '/dashboard/kepsek/audit-log') {
-        return <KepsekView initialTab="audit_log" key="kepsek-audit-log" />;
-      }
       return <KepsekView initialTab="ringkasan_kehadiran" key="kepsek-overview" />;
     }
 

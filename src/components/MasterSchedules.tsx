@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Search, Plus, Edit3, Trash2 } from 'lucide-react';
+import { Search, Plus, Edit3, Trash2, UploadCloud } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
 import { ClassSchedule } from '../types';
+import { BulkScheduleUploadModal } from './BulkScheduleUploadModal';
 
 export const MasterSchedules: React.FC = () => {
   const { schedules, teachers, addSchedule, updateSchedule, deleteSchedule } = useHRIS();
@@ -12,6 +13,7 @@ export const MasterSchedules: React.FC = () => {
 
   const [editingSchedule, setEditingSchedule] = useState<ClassSchedule | null>(null);
   const [isAddingSchedule, setIsAddingSchedule] = useState(false);
+  const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
 
   const [formData, setFormData] = useState<Omit<ClassSchedule, 'id'>>({
     teacherId: teachers[0]?.id || 'T-01',
@@ -132,13 +134,23 @@ export const MasterSchedules: React.FC = () => {
           </div>
         </div>
 
-        <button
-          onClick={handleOpenAdd}
-          className="inline-flex items-center justify-center gap-1 bg-emerald-700 dark:bg-emerald-600 hover:bg-emerald-800 dark:hover:bg-emerald-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors cursor-pointer shrink-0 self-start sm:self-auto"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>Tambah Jadwal</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsBulkUploadOpen(true)}
+            className="inline-flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+          >
+            <UploadCloud className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+            <span>Upload CSV</span>
+          </button>
+          
+          <button
+            onClick={handleOpenAdd}
+            className="inline-flex items-center justify-center gap-1 bg-emerald-700 dark:bg-emerald-600 hover:bg-emerald-800 dark:hover:bg-emerald-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors cursor-pointer shrink-0 self-start sm:self-auto"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Tambah Jadwal</span>
+          </button>
+        </div>
       </div>
 
       {/* Schedules Table */}
@@ -362,6 +374,14 @@ export const MasterSchedules: React.FC = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Bulk Upload Modal */}
+      {isBulkUploadOpen && (
+        <BulkScheduleUploadModal 
+          isOpen={isBulkUploadOpen} 
+          onClose={() => setIsBulkUploadOpen(false)} 
+        />
       )}
     </div>
   );

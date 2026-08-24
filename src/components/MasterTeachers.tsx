@@ -428,7 +428,10 @@ export const MasterTeachers: React.FC = () => {
 
       {/* Bulk Upload Modal */}
       {isBulkUploadOpen && (
-        <BulkTeacherUploadModal onClose={() => setIsBulkUploadOpen(false)} />
+        <BulkTeacherUploadModal 
+          isOpen={isBulkUploadOpen} 
+          onClose={() => setIsBulkUploadOpen(false)} 
+        />
       )}
     </div>
   );
