@@ -182,7 +182,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Trigger path change based on role
     if (role === 'GURU') setCurrentPath('/dashboard/guru/clockin');
-    else if (role === 'ADMIN') setCurrentPath('/dashboard/admin/guru');
+    else if (role === 'ADMIN') setCurrentPath('/dashboard/admin');
     else if (role === 'KEPALA_PESANTREN') setCurrentPath('/dashboard/kepsek/audit');
   };
 

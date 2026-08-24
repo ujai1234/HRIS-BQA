@@ -39,6 +39,9 @@ const MainContent: React.FC = () => {
     }
 
     if (currentRole === 'ADMIN' || currentPath.startsWith('/dashboard/admin')) {
+      if (currentPath === '/dashboard/admin/guru') {
+        return <AdminView initialTab="guru_gaji" key="admin-guru" />;
+      }
       if (currentPath === '/dashboard/admin/jadwal') {
         return <AdminView initialTab="master_jadwal" key="admin-jadwal" />;
       }
@@ -48,7 +51,7 @@ const MainContent: React.FC = () => {
       if (currentPath === '/dashboard/admin/payroll') {
         return <AdminView initialTab="generate_payroll" key="admin-payroll" />;
       }
-      return <AdminView initialTab="guru_gaji" key="admin-guru" />;
+      return <AdminView initialTab="dashboard" key="admin-dashboard" />;
     }
 
     if (currentRole === 'KEPALA_PESANTREN' || currentPath.startsWith('/dashboard/kepsek')) {

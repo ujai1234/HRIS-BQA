@@ -1,19 +1,9 @@
 import React, { useState } from 'react';
 import { 
-  CreditCard, 
   Download, 
   Printer, 
   Search, 
-  Filter, 
-  ChevronRight, 
-  FileSpreadsheet, 
-  Building2, 
-  TrendingUp, 
-  Calendar,
-  AlertTriangle,
-  FileText,
-  DollarSign,
-  CheckCircle2
+  FileText
 } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
 import { TeacherPayrollItem } from '../types';
@@ -65,7 +55,7 @@ export const PayrollRecap: React.FC = () => {
       'Potongan Jurnal Kosong',
       'Potongan Alpa',
       'Total Potongan',
-      'Gaji Bersih (Take Home Pay)',
+      'Gaji Bersih',
       'Periode'
     ];
 
@@ -88,7 +78,6 @@ export const PayrollRecap: React.FC = () => {
       item.period,
     ]);
 
-    // Summary row
     rows.push([
       'TOTAL',
       '',
@@ -108,7 +97,7 @@ export const PayrollRecap: React.FC = () => {
       payrollSummary.period,
     ]);
 
-    exportToCSV(`Rekapitulasi_Gaji_Pesantren_Baitul_Quran_${selectedPeriod.replace(/\s+/g, '_')}.csv`, [
+    exportToCSV(`Rekapitulasi_Gaji_${selectedPeriod.replace(/\s+/g, '_')}.csv`, [
       headers,
       ...rows,
     ]);
@@ -119,265 +108,219 @@ export const PayrollRecap: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Header Bar */}
-      <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-          <CreditCard className="w-5 h-5 text-emerald-600" />
-          <span>Laporan & Rekapitulasi Gaji</span>
-        </h2>
+    <div className="space-y-4">
+      {/* Top Controls & Metrics */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <select
+            value={selectedPeriod}
+            onChange={(e) => setSelectedPeriod(e.target.value)}
+            className="bg-white border border-slate-200 text-slate-800 font-semibold text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-600 shadow-2xs cursor-pointer"
+          >
+            <option value="Agustus 2026">Periode: Agustus 2026</option>
+            <option value="Juli 2026">Periode: Juli 2026</option>
+            <option value="Juni 2026">Periode: Juni 2026</option>
+          </select>
+        </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          {/* Period Selector */}
-          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-700">
-            <Calendar className="w-4 h-4 text-emerald-600" />
-            <select
-              value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="bg-transparent focus:outline-none cursor-pointer text-slate-800 font-bold"
-            >
-              <option value="Agustus 2026">Agustus 2026</option>
-              <option value="Juli 2026">Juli 2026</option>
-              <option value="Juni 2026">Juni 2026</option>
-            </select>
-          </div>
-
+        <div className="flex items-center gap-2">
           <button
             onClick={handleExportExcel}
-            className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-all shadow-xs"
+            className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 transition-colors shadow-2xs"
           >
-            <FileSpreadsheet className="w-4 h-4" />
-            <span>Ekspor Excel</span>
+            <Download className="w-3.5 h-3.5 text-slate-500" />
+            <span>Ekspor CSV</span>
           </button>
 
           <button
             onClick={handlePrint}
-            className="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-all shadow-xs"
+            className="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-2xs"
           >
-            <Printer className="w-4 h-4" />
+            <Printer className="w-3.5 h-3.5 text-slate-300" />
             <span>Cetak</span>
           </button>
         </div>
       </div>
 
-      {/* Aggregate Payroll Metrics Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-            Total Gaji Pokok
-          </span>
-          <p className="text-lg sm:text-xl font-bold text-slate-900 mt-1">
+      {/* Aggregate Payroll Metrics */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+        <div className="bg-white p-3 rounded-lg border border-slate-200/80 shadow-2xs">
+          <span className="text-[11px] text-slate-500 block">Total Gaji Pokok</span>
+          <p className="text-sm sm:text-base font-bold text-slate-900 mt-0.5">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.baseSalary, 0))}
           </p>
-          <span className="text-[10px] text-slate-400">23 Guru / Asatidz</span>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-            Total Honor Mengajar
-          </span>
-          <p className="text-lg sm:text-xl font-bold text-emerald-700 mt-1">
+        <div className="bg-white p-3 rounded-lg border border-slate-200/80 shadow-2xs">
+          <span className="text-[11px] text-slate-500 block">Honor Mengajar</span>
+          <p className="text-sm sm:text-base font-bold text-emerald-800 mt-0.5">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.teachingHonorarium, 0))}
           </p>
-          <span className="text-[10px] text-slate-400">
-            {payrollSummary.totalTeachingHours} Total Jam Pelajaran (JP)
-          </span>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-            Total Uang Transport
-          </span>
-          <p className="text-lg sm:text-xl font-bold text-teal-700 mt-1">
+        <div className="bg-white p-3 rounded-lg border border-slate-200/80 shadow-2xs">
+          <span className="text-[11px] text-slate-500 block">Transport</span>
+          <p className="text-sm sm:text-base font-bold text-slate-800 mt-0.5">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.totalTransport, 0))}
           </p>
-          <span className="text-[10px] text-slate-400">Rp 10.000 per hari hadir</span>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-            Total Potongan Denda
-          </span>
-          <p className={`text-lg sm:text-xl font-bold mt-1 ${payrollSummary.totalDeductions > 0 ? 'text-rose-600' : 'text-slate-700'}`}>
+        <div className="bg-white p-3 rounded-lg border border-slate-200/80 shadow-2xs">
+          <span className="text-[11px] text-slate-500 block">Potongan</span>
+          <p className={`text-sm sm:text-base font-bold mt-0.5 ${payrollSummary.totalDeductions > 0 ? 'text-rose-600' : 'text-slate-700'}`}>
             {payrollSummary.totalDeductions > 0 ? `-${formatRupiah(payrollSummary.totalDeductions)}` : 'Rp 0'}
           </p>
-          <span className="text-[10px] text-slate-400">Terlambat & Jurnal Kosong</span>
         </div>
 
-        <div className="col-span-2 sm:col-span-2 lg:col-span-1 bg-slate-900 p-4 rounded-xl text-white shadow-xs border border-slate-800">
-          <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider block">
-            Total Gaji Bersih
-          </span>
-          <p className="text-lg sm:text-xl font-bold text-white mt-1">
+        <div className="col-span-2 sm:col-span-1 bg-white p-3 rounded-lg border border-emerald-200 shadow-2xs bg-emerald-50/20">
+          <span className="text-[11px] font-semibold text-emerald-800 block">Total Gaji Bersih</span>
+          <p className="text-sm sm:text-base font-bold text-emerald-900 mt-0.5">
             {formatRupiah(payrollSummary.totalNet)}
           </p>
-          <span className="text-[10px] text-slate-400">Anggaran Payroll Periode Ini</span>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
-        {/* Search */}
-        <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari nama guru, NIP, atau jabatan..."
-            className="w-full pl-9 pr-4 py-2 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+            className="w-full pl-9 pr-3 py-1.5 text-xs bg-white rounded-lg border border-slate-200 focus:outline-none focus:border-emerald-600 shadow-2xs"
           />
         </div>
 
-        {/* Unit Filters */}
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto">
-          <span className="text-xs text-slate-400 font-medium whitespace-nowrap mr-1">Unit:</span>
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
           {['ALL', 'SMP', 'MA', 'PESANTREN', 'UMUM'].map((unit) => (
             <button
               key={unit}
               onClick={() => setUnitFilter(unit)}
-              className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-colors ${
+              className={`px-2.5 py-1 rounded-md text-xs font-semibold whitespace-nowrap transition-colors ${
                 unitFilter === unit
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-white text-slate-900 shadow-2xs'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              {unit === 'ALL' ? 'Semua Unit' : unit}
+              {unit === 'ALL' ? 'Semua' : unit}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Full Payroll Table of 23 Teachers */}
-      <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+      {/* Payroll Table */}
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-xs">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
-                <th className="py-3 px-3 text-center w-10">No</th>
-                <th className="py-3 px-4 min-w-[200px]">NIP & Nama Guru</th>
-                <th className="py-3 px-3 min-w-[140px]">Jabatan & Unit</th>
-                <th className="py-3 px-3 text-right">Gaji Pokok</th>
-                <th className="py-3 px-3 text-center">Jam (JP)</th>
-                <th className="py-3 px-3 text-right">Honor Jam</th>
-                <th className="py-3 px-3 text-center">Hadir</th>
-                <th className="py-3 px-3 text-right">Transport</th>
-                <th className="py-3 px-3 text-right text-rose-600">Potongan</th>
-                <th className="py-3 px-4 text-right text-emerald-800 bg-emerald-50/50 font-bold">
+              <tr className="bg-slate-50/75 border-b border-slate-200/80 text-slate-500 font-semibold">
+                <th className="py-2.5 px-3 text-center w-10">No</th>
+                <th className="py-2.5 px-4 min-w-[170px]">Nama & NIP</th>
+                <th className="py-2.5 px-3">Jabatan & Unit</th>
+                <th className="py-2.5 px-3 text-right">Gaji Pokok</th>
+                <th className="py-2.5 px-3 text-center">JP</th>
+                <th className="py-2.5 px-3 text-right">Honor</th>
+                <th className="py-2.5 px-3 text-center">Hadir</th>
+                <th className="py-2.5 px-3 text-right">Transport</th>
+                <th className="py-2.5 px-3 text-right">Potongan</th>
+                <th className="py-2.5 px-3 text-right font-bold text-slate-900">
                   Gaji Bersih
                 </th>
-                <th className="py-3 px-3 text-center">Aksi</th>
+                <th className="py-2.5 px-3 text-center w-16">Slip</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {filteredItems.map((item, index) => (
                 <tr
                   key={item.teacher.id}
-                  className="hover:bg-slate-50/70 transition-colors group"
+                  className="hover:bg-slate-50/60 transition-colors"
                 >
-                  <td className="py-3 px-3 text-center text-slate-400 font-mono">
+                  <td className="py-2.5 px-3 text-center text-slate-400 font-mono">
                     {index + 1}
                   </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-2.5">
-                      <div className={`w-7 h-7 rounded-lg ${item.teacher?.avatarColor || 'bg-emerald-600'} flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-xs`}>
-                        {item.teacher?.name ? item.teacher.name.split(' ')[0]?.[0] : 'U'}
-                        {item.teacher?.name ? (item.teacher.name.split(' ')[1]?.[0] || 'A') : 'A'}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">
-                          {item.teacher?.name || '-'}
-                        </p>
-                        <p className="text-[11px] text-slate-400 font-mono">
-                          {item.teacher?.nip || '-'}
-                        </p>
-                      </div>
-                    </div>
+                  <td className="py-2.5 px-4">
+                    <p className="font-semibold text-slate-900">
+                      {item.teacher?.name || '-'}
+                    </p>
+                    <p className="text-[11px] text-slate-400 font-mono">
+                      {item.teacher?.nip || '-'}
+                    </p>
                   </td>
-                  <td className="py-3 px-3">
-                    <span className="font-medium text-slate-800 block">{item.teacher.position}</span>
-                    <span className="text-[10px] text-emerald-800 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80">
-                      {item.teacher.unit}
-                    </span>
+                  <td className="py-2.5 px-3">
+                    <p className="font-medium text-slate-800">{item.teacher.position}</p>
+                    <p className="text-[10px] text-slate-400">{item.teacher.unit}</p>
                   </td>
-                  <td className="py-3 px-3 text-right font-medium text-slate-800">
+                  <td className="py-2.5 px-3 text-right font-medium text-slate-900">
                     {formatRupiah(item.baseSalary)}
                   </td>
-                  <td className="py-3 px-3 text-center font-mono font-bold text-slate-800">
-                    {item.totalTaughtHours} JP
+                  <td className="py-2.5 px-3 text-center font-mono font-medium">
+                    {item.totalTaughtHours}
                     {item.totalBadalHours > 0 && (
-                      <span className="block text-[10px] text-purple-600 font-semibold">
-                        (+{item.totalBadalHours} Badal)
+                      <span className="text-[10px] text-purple-700 block">
+                        (+{item.totalBadalHours})
                       </span>
                     )}
                   </td>
-                  <td className="py-3 px-3 text-right font-semibold text-emerald-700">
+                  <td className="py-2.5 px-3 text-right font-semibold text-emerald-800">
                     {formatRupiah(item.teachingHonorarium)}
                   </td>
-                  <td className="py-3 px-3 text-center font-mono font-semibold text-slate-700">
+                  <td className="py-2.5 px-3 text-center font-mono">
                     {item.totalPresentDays} hr
                   </td>
-                  <td className="py-3 px-3 text-right font-medium text-teal-700">
+                  <td className="py-2.5 px-3 text-right font-medium text-slate-700">
                     {formatRupiah(item.totalTransport)}
                   </td>
-                  <td className="py-3 px-3 text-right">
+                  <td className="py-2.5 px-3 text-right">
                     {item.totalDeductions > 0 ? (
-                      <div>
-                        <span className="font-bold text-rose-600">
-                          -{formatRupiah(item.totalDeductions)}
-                        </span>
-                        <span className="block text-[10px] text-slate-400">
-                          {item.latePenaltyTotal > 0 && `T:${formatNumber(item.latePenaltyTotal)} `}
-                          {item.emptyJournalPenalty > 0 && `J:${formatNumber(item.emptyJournalPenalty)} `}
-                          {item.alphaPenalty > 0 && `A:${formatNumber(item.alphaPenalty)}`}
-                        </span>
-                      </div>
+                      <span className="font-semibold text-rose-600">
+                        -{formatRupiah(item.totalDeductions)}
+                      </span>
                     ) : (
-                      <span className="text-slate-400">-</span>
+                      <span className="text-slate-300">-</span>
                     )}
                   </td>
-                  <td className="py-3 px-4 text-right font-bold text-emerald-900 bg-emerald-50/30 text-xs">
+                  <td className="py-2.5 px-3 text-right font-bold text-emerald-900">
                     {formatRupiah(item.netSalary)}
                   </td>
-                  <td className="py-3 px-3 text-center">
+                  <td className="py-2.5 px-3 text-center">
                     <button
                       onClick={() => setSelectedTeacherPayroll(item)}
-                      className="inline-flex items-center gap-1 bg-white hover:bg-slate-50 text-slate-700 px-2.5 py-1 rounded-md border border-slate-200 font-semibold text-xs transition-colors shadow-2xs"
-                      title="Lihat & Cetak Slip Gaji"
+                      className="p-1 text-slate-500 hover:text-slate-900 rounded transition-colors"
+                      title="Lihat Slip Gaji"
                     >
-                      <Printer className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Slip</span>
+                      <FileText className="w-3.5 h-3.5" />
                     </button>
                   </td>
                 </tr>
               ))}
             </tbody>
-            {/* Table Footer / Aggregates */}
+            {/* Table Footer */}
             <tfoot>
-              <tr className="bg-slate-50 font-bold text-slate-900 border-t border-slate-200">
-                <td colSpan={3} className="py-3.5 px-4 text-left uppercase tracking-wider text-xs">
-                  TOTAL KESELURUHAN ({filteredItems.length} GURU)
+              <tr className="bg-slate-50/90 font-bold text-slate-900 border-t border-slate-200/80">
+                <td colSpan={3} className="py-2.5 px-4 text-left text-xs">
+                  Total ({filteredItems.length} Guru)
                 </td>
-                <td className="py-3.5 px-3 text-right">
+                <td className="py-2.5 px-3 text-right">
                   {formatRupiah(filteredItems.reduce((s, i) => s + i.baseSalary, 0))}
                 </td>
-                <td className="py-3.5 px-3 text-center font-mono">
-                  {filteredItems.reduce((s, i) => s + i.totalTaughtHours, 0)} JP
+                <td className="py-2.5 px-3 text-center font-mono">
+                  {filteredItems.reduce((s, i) => s + i.totalTaughtHours, 0)}
                 </td>
-                <td className="py-3.5 px-3 text-right text-emerald-800">
+                <td className="py-2.5 px-3 text-right text-emerald-800">
                   {formatRupiah(filteredItems.reduce((s, i) => s + i.teachingHonorarium, 0))}
                 </td>
-                <td className="py-3.5 px-3 text-center font-mono">
+                <td className="py-2.5 px-3 text-center font-mono">
                   {filteredItems.reduce((s, i) => s + i.totalPresentDays, 0)} hr
                 </td>
-                <td className="py-3.5 px-3 text-right text-teal-800">
+                <td className="py-2.5 px-3 text-right text-slate-800">
                   {formatRupiah(filteredItems.reduce((s, i) => s + i.totalTransport, 0))}
                 </td>
-                <td className="py-3.5 px-3 text-right text-rose-700">
+                <td className="py-2.5 px-3 text-right text-rose-700">
                   -{formatRupiah(filteredItems.reduce((s, i) => s + i.totalDeductions, 0))}
                 </td>
-                <td className="py-3.5 px-4 text-right text-emerald-950 font-bold text-xs bg-emerald-100/60">
+                <td className="py-2.5 px-3 text-right text-emerald-950 font-bold">
                   {formatRupiah(filteredItems.reduce((s, i) => s + i.netSalary, 0))}
                 </td>
                 <td></td>
@@ -386,7 +329,6 @@ export const PayrollRecap: React.FC = () => {
           </table>
         </div>
       </div>
-
 
       {/* Salary Slip Modal */}
       {selectedTeacherPayroll && (

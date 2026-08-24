@@ -65,9 +65,10 @@ export const Header: React.FC<HeaderProps> = ({
         {
           title: 'DATA & PENGGAJIAN',
           items: [
-            { path: '/dashboard/admin', label: 'Data Guru & Tarif', icon: Users, desc: 'Data asatidz & honorarium' },
+            { path: '/dashboard/admin', label: 'Dashboard Monitoring', icon: LayoutDashboard, desc: 'Pemantauan kegiatan & gaji' },
+            { path: '/dashboard/admin/guru', label: "Data Guru & Kafa'ah", icon: Users, desc: 'Data asatidz & kafa’ah honorarium' },
             { path: '/dashboard/admin/jadwal', label: 'Jadwal Pelajaran', icon: CalendarDays, desc: 'Jadwal KBM SMP, MA & Ponpes' },
-            { path: '/dashboard/admin/badal', label: 'Guru Pengganti (Badal)', icon: UserCheck, desc: 'Penggantian guru berhalangan' },
+            { path: '/dashboard/admin/badal', label: 'Guru Pengganti', icon: UserCheck, desc: 'Penggantian guru berhalangan' },
             { path: '/dashboard/admin/payroll', label: 'Rekapitulasi Gaji', icon: CreditCard, desc: 'Perhitungan gaji bulanan' },
           ]
         }
