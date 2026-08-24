@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
-import { 
-  Download, 
-  Printer, 
-  Search, 
-  FileText
-} from 'lucide-react';
+import { Download, Printer, Search } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
-import { TeacherPayrollItem } from '../types';
-import { SalarySlipModal } from './SalarySlipModal';
-import { formatRupiah, formatNumber, exportToCSV } from '../utils/formatters';
+import { formatRupiah, exportToCSV } from '../utils/formatters';
 
 export const PayrollRecap: React.FC = () => {
   const { 
@@ -19,7 +12,6 @@ export const PayrollRecap: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [unitFilter, setUnitFilter] = useState<string>('ALL');
-  const [selectedTeacherPayroll, setSelectedTeacherPayroll] = useState<TeacherPayrollItem | null>(null);
 
   const payrollSummary = calculateAllPayroll(selectedPeriod);
 
@@ -109,72 +101,39 @@ export const PayrollRecap: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {/* Top Controls & Metrics */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <select
-            value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value)}
-            className="bg-white border border-slate-200 text-slate-800 font-semibold text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-600 shadow-2xs cursor-pointer"
-          >
-            <option value="Agustus 2026">Periode: Agustus 2026</option>
-            <option value="Juli 2026">Periode: Juli 2026</option>
-            <option value="Juni 2026">Periode: Juni 2026</option>
-          </select>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleExportExcel}
-            className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 transition-colors shadow-2xs"
-          >
-            <Download className="w-3.5 h-3.5 text-slate-500" />
-            <span>Ekspor CSV</span>
-          </button>
-
-          <button
-            onClick={handlePrint}
-            className="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-2xs"
-          >
-            <Printer className="w-3.5 h-3.5 text-slate-300" />
-            <span>Cetak</span>
-          </button>
-        </div>
-      </div>
-
       {/* Aggregate Payroll Metrics */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
-        <div className="bg-white p-3 rounded-lg border border-slate-200/80 shadow-2xs">
-          <span className="text-[11px] text-slate-500 block">Total Gaji Pokok</span>
-          <p className="text-sm sm:text-base font-bold text-slate-900 mt-0.5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
+          <span className="text-[11px] text-slate-500 font-medium block">Total Gaji Pokok</span>
+          <p className="text-base font-bold text-slate-900 mt-1">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.baseSalary, 0))}
           </p>
         </div>
 
-        <div className="bg-white p-3 rounded-lg border border-slate-200/80 shadow-2xs">
-          <span className="text-[11px] text-slate-500 block">Honor Mengajar</span>
-          <p className="text-sm sm:text-base font-bold text-emerald-800 mt-0.5">
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
+          <span className="text-[11px] text-slate-500 font-medium block">Honor Mengajar</span>
+          <p className="text-base font-bold text-emerald-800 mt-1">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.teachingHonorarium, 0))}
           </p>
         </div>
 
-        <div className="bg-white p-3 rounded-lg border border-slate-200/80 shadow-2xs">
-          <span className="text-[11px] text-slate-500 block">Transport</span>
-          <p className="text-sm sm:text-base font-bold text-slate-800 mt-0.5">
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
+          <span className="text-[11px] text-slate-500 font-medium block">Transport</span>
+          <p className="text-base font-bold text-slate-800 mt-1">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.totalTransport, 0))}
           </p>
         </div>
 
-        <div className="bg-white p-3 rounded-lg border border-slate-200/80 shadow-2xs">
-          <span className="text-[11px] text-slate-500 block">Potongan</span>
-          <p className={`text-sm sm:text-base font-bold mt-0.5 ${payrollSummary.totalDeductions > 0 ? 'text-rose-600' : 'text-slate-700'}`}>
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
+          <span className="text-[11px] text-slate-500 font-medium block">Potongan Disiplin</span>
+          <p className={`text-base font-bold mt-1 ${payrollSummary.totalDeductions > 0 ? 'text-rose-600' : 'text-slate-700'}`}>
             {payrollSummary.totalDeductions > 0 ? `-${formatRupiah(payrollSummary.totalDeductions)}` : 'Rp 0'}
           </p>
         </div>
 
-        <div className="col-span-2 sm:col-span-1 bg-white p-3 rounded-lg border border-emerald-200 shadow-2xs bg-emerald-50/20">
-          <span className="text-[11px] font-semibold text-emerald-800 block">Total Gaji Bersih</span>
-          <p className="text-sm sm:text-base font-bold text-emerald-900 mt-0.5">
+        <div className="col-span-2 sm:col-span-1 bg-emerald-50/50 p-3.5 rounded-xl border border-emerald-200/80 shadow-2xs">
+          <span className="text-[11px] font-semibold text-emerald-900 block">Total Gaji Bersih</span>
+          <p className="text-base font-bold text-emerald-950 mt-1">
             {formatRupiah(payrollSummary.totalNet)}
           </p>
         </div>
@@ -182,23 +141,43 @@ export const PayrollRecap: React.FC = () => {
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari nama guru, NIP, atau jabatan..."
-            className="w-full pl-9 pr-3 py-1.5 text-xs bg-white rounded-lg border border-slate-200 focus:outline-none focus:border-emerald-600 shadow-2xs"
-          />
+        <div className="flex flex-1 items-center gap-2">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari nama guru, NIP, atau jabatan..."
+              className="w-full pl-8 pr-3 py-1.5 text-xs bg-white rounded-lg border border-slate-200 focus:outline-none focus:border-emerald-600 shadow-2xs"
+            />
+          </div>
+
+          <select
+            value={selectedPeriod}
+            onChange={(e) => setSelectedPeriod(e.target.value)}
+            className="bg-white border border-slate-200 text-slate-800 font-semibold text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-600 shadow-2xs cursor-pointer"
+          >
+            <option value="Agustus 2026">Agustus 2026</option>
+            <option value="Juli 2026">Juli 2026</option>
+            <option value="Juni 2026">Juni 2026</option>
+          </select>
+
+          <button
+            onClick={handleExportExcel}
+            className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 transition-colors shadow-2xs"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-500" />
+            <span>Ekspor</span>
+          </button>
         </div>
 
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+        <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
           {['ALL', 'SMP', 'MA', 'PESANTREN', 'UMUM'].map((unit) => (
             <button
               key={unit}
               onClick={() => setUnitFilter(unit)}
-              className={`px-2.5 py-1 rounded-md text-xs font-semibold whitespace-nowrap transition-colors ${
+              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold whitespace-nowrap transition-colors ${
                 unitFilter === unit
                   ? 'bg-white text-slate-900 shadow-2xs'
                   : 'text-slate-500 hover:text-slate-800'
@@ -210,7 +189,7 @@ export const PayrollRecap: React.FC = () => {
         </div>
       </div>
 
-      {/* Payroll Table */}
+      {/* Payroll Table without Slip Column */}
       <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
@@ -225,10 +204,9 @@ export const PayrollRecap: React.FC = () => {
                 <th className="py-2.5 px-3 text-center">Hadir</th>
                 <th className="py-2.5 px-3 text-right">Transport</th>
                 <th className="py-2.5 px-3 text-right">Potongan</th>
-                <th className="py-2.5 px-3 text-right font-bold text-slate-900">
+                <th className="py-2.5 px-4 text-right font-bold text-slate-900">
                   Gaji Bersih
                 </th>
-                <th className="py-2.5 px-3 text-center w-16">Slip</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -281,17 +259,8 @@ export const PayrollRecap: React.FC = () => {
                       <span className="text-slate-300">-</span>
                     )}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-bold text-emerald-900">
+                  <td className="py-2.5 px-4 text-right font-bold text-emerald-900">
                     {formatRupiah(item.netSalary)}
-                  </td>
-                  <td className="py-2.5 px-3 text-center">
-                    <button
-                      onClick={() => setSelectedTeacherPayroll(item)}
-                      className="p-1 text-slate-500 hover:text-slate-900 rounded transition-colors"
-                      title="Lihat Slip Gaji"
-                    >
-                      <FileText className="w-3.5 h-3.5" />
-                    </button>
                   </td>
                 </tr>
               ))}
@@ -320,23 +289,14 @@ export const PayrollRecap: React.FC = () => {
                 <td className="py-2.5 px-3 text-right text-rose-700">
                   -{formatRupiah(filteredItems.reduce((s, i) => s + i.totalDeductions, 0))}
                 </td>
-                <td className="py-2.5 px-3 text-right text-emerald-950 font-bold">
+                <td className="py-2.5 px-4 text-right text-emerald-950 font-bold">
                   {formatRupiah(filteredItems.reduce((s, i) => s + i.netSalary, 0))}
                 </td>
-                <td></td>
               </tr>
             </tfoot>
           </table>
         </div>
       </div>
-
-      {/* Salary Slip Modal */}
-      {selectedTeacherPayroll && (
-        <SalarySlipModal
-          payroll={selectedTeacherPayroll}
-          onClose={() => setSelectedTeacherPayroll(null)}
-        />
-      )}
     </div>
   );
 };

@@ -141,37 +141,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
 
   return (
     <div className="space-y-6">
-      {/* 1. Header & Period Filter */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-xl border border-slate-200/80 shadow-2xs">
-        <div>
-          <h1 className="text-lg font-bold text-slate-900">
-            Dashboard Monitoring
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Ringkasan kegiatan KBM, kehadiran guru, dan kafa'ah honorarium
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <select
-            value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value)}
-            className="bg-slate-50 border border-slate-200 text-slate-800 font-semibold text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-600 shadow-2xs cursor-pointer"
-          >
-            <option value="Agustus 2026">Periode: Agustus 2026</option>
-            <option value="Juli 2026">Periode: Juli 2026</option>
-            <option value="Juni 2026">Periode: Juni 2026</option>
-          </select>
-        </div>
-      </div>
-
-      {/* 2. Key Metrics Summary (4 Clean Cards) */}
+      {/* 1. Key Metrics Summary (4 Clean Cards) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Total Tenaga Pendidik */}
         <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-2xs">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-xs font-medium">Total Guru</span>
-            <Users className="w-4 h-4 text-slate-400" />
           </div>
           <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-2">
             {totalTeachers} <span className="text-xs font-normal text-slate-500">Orang</span>
@@ -185,7 +160,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
         <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-2xs">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-xs font-medium">Beban KBM</span>
-            <CalendarDays className="w-4 h-4 text-slate-400" />
           </div>
           <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-2">
             {totalWeeklyJP} <span className="text-xs font-normal text-slate-500">JP /pekan</span>
@@ -199,7 +173,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
         <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-2xs">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-xs font-medium">Ketaatan Jurnal</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           </div>
           <p className="text-xl sm:text-2xl font-bold text-emerald-800 mt-2">
             {complianceRate}%
@@ -213,7 +186,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
         <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-2xs">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-xs font-medium">Estimasi Kafa'ah</span>
-            <CreditCard className="w-4 h-4 text-slate-400" />
           </div>
           <p className="text-lg sm:text-xl font-bold text-slate-900 mt-2 truncate">
             {formatRupiah(payrollSummary.totalNet)}
@@ -333,11 +305,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
                       <td className="py-2.5 px-3">
                         {att.status === 'SELESAI' ? (
                           <span className="text-[10px] font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/80 inline-flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" /> Lengkap
+                            Lengkap
                           </span>
                         ) : att.status === 'HADIR_JURNAL_KOSONG' ? (
                           <span className="text-[10px] font-medium text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 inline-flex items-center gap-1">
-                            <AlertTriangle className="w-3 h-3" /> Jurnal Kosong
+                            Jurnal Kosong
                           </span>
                         ) : (
                           <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
@@ -363,7 +335,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
         <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200/80 shadow-2xs">
           <div className="pb-3 border-b border-slate-100">
             <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-emerald-700" />
               <span>Beban Jam Pelajaran (JP) per Unit</span>
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
@@ -390,7 +361,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
         <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200/80 shadow-2xs">
           <div className="pb-3 border-b border-slate-100">
             <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-emerald-700" />
               <span>Struktur Komponen Kafa'ah per Unit</span>
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
@@ -424,7 +394,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
         <div className="pb-3 border-b border-slate-100 flex items-center justify-between">
           <div>
             <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-slate-700" />
               <span>Transparansi Penegakan SOP & Potongan Disiplin</span>
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">

@@ -85,50 +85,48 @@ export const MasterSchedules: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {/* Search and Filters Bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-        <div className="flex flex-wrap flex-1 items-center gap-2.5">
-          <div className="relative flex-1 min-w-[200px] max-w-xs">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+      {/* Top Actions & Filters */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex flex-wrap flex-1 items-center gap-2">
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari mapel, guru, kelas, ruang..."
-              className="w-full pl-9 pr-3 py-1.5 text-xs bg-white rounded-lg border border-slate-200 focus:outline-none focus:border-emerald-600 shadow-2xs"
+              placeholder="Cari mapel, guru, kelas..."
+              className="w-full pl-8 pr-3 py-1.5 text-xs bg-white rounded-lg border border-slate-200 focus:outline-none focus:border-emerald-600 shadow-2xs"
             />
           </div>
 
-          {/* Day Filter */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
             {['ALL', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].map((day) => (
               <button
                 key={day}
                 onClick={() => setSelectedDayFilter(day)}
-                className={`px-2.5 py-1 rounded-md text-xs font-semibold whitespace-nowrap transition-colors ${
+                className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${
                   selectedDayFilter === day
                     ? 'bg-white text-slate-900 shadow-2xs'
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                {day === 'ALL' ? 'Semua Hari' : day}
+                {day === 'ALL' ? 'Harian' : day.substring(0, 3)}
               </button>
             ))}
           </div>
 
-          {/* Unit Filter */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
             {['ALL', 'SMP', 'MA', 'PESANTREN'].map((unit) => (
               <button
                 key={unit}
                 onClick={() => setSelectedUnitFilter(unit)}
-                className={`px-2.5 py-1 rounded-md text-xs font-semibold whitespace-nowrap transition-colors ${
+                className={`px-2.5 py-1 rounded-md text-[10px] font-semibold transition-colors ${
                   selectedUnitFilter === unit
                     ? 'bg-white text-slate-900 shadow-2xs'
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                {unit === 'ALL' ? 'Semua Unit' : unit}
+                {unit === 'ALL' ? 'Unit' : unit}
               </button>
             ))}
           </div>
@@ -136,7 +134,7 @@ export const MasterSchedules: React.FC = () => {
 
         <button
           onClick={handleOpenAdd}
-          className="inline-flex items-center justify-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors shadow-2xs shrink-0"
+          className="inline-flex items-center justify-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors shadow-2xs shrink-0 self-start sm:self-auto"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Tambah Jadwal</span>

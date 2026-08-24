@@ -169,32 +169,9 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
     }, 350);
   };
 
-  const tabs: { id: GuruTabType; label: string }[] = [
-    { id: 'clockin_journal', label: 'Presensi & Jurnal KBM' },
-    { id: 'jadwal', label: 'Jadwal Mengajar' },
-    { id: 'slip_gaji', label: 'Slip Gaji Pribadi' },
-  ];
-
   return (
     <div className="space-y-4">
-      {/* 1. Subtab Navigation Bar */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 bg-slate-200/60 p-1 rounded-xl w-fit max-w-full text-xs">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => handleTabChange(tab.id)}
-            className={`px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap transition-all ${
-              activeSubTab === tab.id
-                ? 'bg-white text-slate-900 shadow-2xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* 2. Minimalist Teacher Overview Card (Strictly Non-Financial Educational Stats) */}
+      {/* 1. Minimalist Teacher Overview Card (Strictly Non-Financial Educational Stats) */}
       <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200/80 shadow-2xs">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>

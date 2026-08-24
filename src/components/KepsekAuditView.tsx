@@ -1,36 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
-  GraduationCap, 
-  CheckCircle2, 
-  AlertCircle, 
-  TrendingUp, 
-  Users, 
-  FileText, 
-  Clock, 
-  Calendar, 
   Printer, 
-  Download,
-  AlertTriangle,
-  Building2,
-  Award,
-  ShieldCheck
+  Search
 } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
-import { SalarySlipModal } from './SalarySlipModal';
-import { TeacherPayrollItem } from '../types';
-import { formatRupiah, formatNumber } from '../utils/formatters';
+import { formatRupiah } from '../utils/formatters';
 
 export const KepsekAuditView: React.FC = () => {
   const { 
-    teachers, 
     attendances, 
-    schedules, 
     selectedPeriod, 
-    calculateAllPayroll,
-    currentUser 
+    calculateAllPayroll
   } = useHRIS();
 
-  const [selectedSlip, setSelectedSlip] = useState<TeacherPayrollItem | null>(null);
   const payrollSummary = calculateAllPayroll(selectedPeriod);
 
   // Analytics
@@ -43,111 +25,60 @@ export const KepsekAuditView: React.FC = () => {
   const punctualityRate = totalRecorded > 0 ? Math.round((onTimeAttendance / totalRecorded) * 100) : 92;
 
   return (
-    <div className="space-y-6">
-      {/* Header Bar */}
-      <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-xs flex items-center justify-between gap-4">
-        <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-          <GraduationCap className="w-5 h-5 text-emerald-600" />
-          <span>Monitoring Jurnal Mengajar</span>
-        </h2>
-
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={() => window.print()}
-            className="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-xs"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            <span>Cetak</span>
-          </button>
-        </div>
-      </div>
-
+    <div className="space-y-4">
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Tingkat Ketaatan Jurnal</p>
-            <p className="text-2xl font-bold text-emerald-700 mt-1">
-              {journalComplianceRate}%
-            </p>
-            <span className="text-[11px] text-slate-400">
-              {completedJournals} terisi dari {totalRecorded} sesi
-            </span>
-          </div>
-          <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
+          <span className="text-[11px] font-medium text-slate-500 block">Tingkat Ketaatan Jurnal</span>
+          <p className="text-xl font-bold text-emerald-800 mt-1">
+            {journalComplianceRate}%
+          </p>
+          <span className="text-[10px] text-slate-400 mt-0.5 block">
+            {completedJournals} terisi dari {totalRecorded} sesi
+          </span>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Kedisiplinan Waktu</p>
-            <p className="text-2xl font-bold text-teal-700 mt-1">
-              {punctualityRate}%
-            </p>
-            <span className="text-[11px] text-slate-400">
-              {onTimeAttendance} sesi tepat waktu (≤4 min)
-            </span>
-          </div>
-          <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center font-bold">
-            <Clock className="w-5 h-5" />
-          </div>
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
+          <span className="text-[11px] font-medium text-slate-500 block">Kedisiplinan Waktu</span>
+          <p className="text-xl font-bold text-slate-900 mt-1">
+            {punctualityRate}%
+          </p>
+          <span className="text-[10px] text-slate-400 mt-0.5 block">
+            {onTimeAttendance} sesi tepat waktu (≤4 min)
+          </span>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Jurnal Tertunda</p>
-            <p className={`text-2xl font-bold mt-1 ${pendingJournals > 0 ? 'text-amber-600' : 'text-slate-700'}`}>
-              {pendingJournals} Sesi
-            </p>
-            <span className="text-[11px] text-slate-400">Potensi potongan 50% honor</span>
-          </div>
-          <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-            <AlertTriangle className="w-5 h-5" />
-          </div>
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
+          <span className="text-[11px] font-medium text-slate-500 block">Jurnal Tertunda</span>
+          <p className={`text-xl font-bold mt-1 ${pendingJournals > 0 ? 'text-amber-700' : 'text-slate-700'}`}>
+            {pendingJournals} Sesi
+          </p>
+          <span className="text-[10px] text-slate-400 mt-0.5 block">Potensi denda 50% honor KBM</span>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Anggaran Payroll</p>
-            <p className="text-xl font-bold text-slate-900 mt-1">
-              {formatRupiah(payrollSummary.totalNet)}
-            </p>
-            <span className="text-[11px] text-slate-400">23 Tenaga Pendidik</span>
-          </div>
-          <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center font-bold">
-            <Building2 className="w-5 h-5" />
-          </div>
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
+          <span className="text-[11px] font-medium text-slate-500 block">Total Kafa'ah Terhitung</span>
+          <p className="text-lg sm:text-xl font-bold text-slate-900 mt-1 truncate">
+            {formatRupiah(payrollSummary.totalNet)}
+          </p>
+          <span className="text-[10px] text-slate-400 mt-0.5 block">23 Tenaga Pendidik</span>
         </div>
       </div>
 
-      {/* Leadership Audit Table */}
-      <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-xs overflow-hidden space-y-4 p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
-          <div>
-            <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-emerald-600" />
-              <span>Daftar Kepatuhan & Disiplin Guru (23 Asatidz)</span>
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Evaluasi kinerja asatidz: beban mengajar, kehadiran, pengisian jurnal, dan gaji bersih.
-            </p>
-          </div>
-        </div>
-
+      {/* Leadership Audit Table without Slip Column */}
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-xs">
             <thead>
-              <tr className="bg-slate-50/80 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200 text-[11px]">
-                <th className="py-3 px-3 text-center w-10">No</th>
-                <th className="py-3 px-4">Nama Asatidz & NIP</th>
-                <th className="py-3 px-3">Jabatan & Unit</th>
-                <th className="py-3 px-3 text-center">Beban Jam (JP)</th>
-                <th className="py-3 px-3 text-center">Kehadiran</th>
-                <th className="py-3 px-3 text-center">Kepatuhan Jurnal</th>
-                <th className="py-3 px-3 text-right">Potongan Denda</th>
-                <th className="py-3 px-4 text-right">Gaji Bersih</th>
-                <th className="py-3 px-3 text-center">Slip Gaji</th>
+              <tr className="bg-slate-50/75 text-slate-500 font-semibold border-b border-slate-200/80">
+                <th className="py-2.5 px-3 text-center w-10">No</th>
+                <th className="py-2.5 px-4">Nama Asatidz & NIP</th>
+                <th className="py-2.5 px-3">Jabatan & Unit</th>
+                <th className="py-2.5 px-3 text-center">Beban (JP)</th>
+                <th className="py-2.5 px-3 text-center">Kehadiran</th>
+                <th className="py-2.5 px-3 text-center">Kepatuhan Jurnal</th>
+                <th className="py-2.5 px-3 text-right">Potongan Disiplin</th>
+                <th className="py-2.5 px-4 text-right">Gaji Bersih</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -155,66 +86,46 @@ export const KepsekAuditView: React.FC = () => {
                 const hasPendingJournal = item.emptyJournalCount > 0;
 
                 return (
-                  <tr key={item.teacher?.id || index} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="py-3 px-3 text-center text-slate-400 font-mono">
+                  <tr key={item.teacher?.id || index} className="hover:bg-slate-50/60 transition-colors">
+                    <td className="py-2.5 px-3 text-center text-slate-400 font-mono">
                       {index + 1}
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2.5">
-                        <div className={`w-7 h-7 rounded-lg ${item.teacher?.avatarColor || 'bg-emerald-600'} flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-xs`}>
-                          {item.teacher?.name ? item.teacher.name.split(' ')[0]?.[0] : 'U'}
-                          {item.teacher?.name ? (item.teacher.name.split(' ')[1]?.[0] || 'A') : 'A'}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-slate-900">{item.teacher?.name || 'Guru'}</p>
-                          <p className="text-[11px] text-slate-400 font-mono">{item.teacher?.nip || '-'}</p>
-                        </div>
-                      </div>
+                    <td className="py-2.5 px-4">
+                      <p className="font-semibold text-slate-900">{item.teacher?.name || 'Guru'}</p>
+                      <p className="text-[11px] text-slate-400 font-mono">{item.teacher?.nip || '-'}</p>
                     </td>
-                    <td className="py-3 px-3">
-                      <span className="font-medium text-slate-800 block">{item.teacher?.position || '-'}</span>
-                      <span className="text-[10px] text-emerald-800 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/80">
-                        {item.teacher?.unit || '-'}
-                      </span>
+                    <td className="py-2.5 px-3">
+                      <p className="font-medium text-slate-800">{item.teacher?.position || '-'}</p>
+                      <p className="text-[10px] text-slate-400">{item.teacher?.unit || '-'}</p>
                     </td>
-                    <td className="py-3 px-3 text-center font-mono font-semibold text-slate-800">
+                    <td className="py-2.5 px-3 text-center font-mono font-medium text-slate-800">
                       {item.totalTaughtHours} JP
                     </td>
-                    <td className="py-3 px-3 text-center font-medium text-slate-700">
+                    <td className="py-2.5 px-3 text-center font-medium text-slate-700">
                       {item.totalPresentDays} Hari
                     </td>
-                    <td className="py-3 px-3 text-center">
+                    <td className="py-2.5 px-3 text-center">
                       {hasPendingJournal ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200/80">
-                          <AlertCircle className="w-3 h-3 text-amber-600" />
+                        <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-800 border border-amber-200">
                           {item.emptyJournalCount} Tertunda
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                          100% Taat
+                        <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+                          Lengkap
                         </span>
                       )}
                     </td>
-                    <td className="py-3 px-3 text-right font-medium">
+                    <td className="py-2.5 px-3 text-right font-medium">
                       {item.totalDeductions > 0 ? (
                         <span className="text-rose-600 font-semibold">
                           -{formatRupiah(item.totalDeductions)}
                         </span>
                       ) : (
-                        <span className="text-slate-400 font-medium">Rp 0</span>
+                        <span className="text-slate-300">-</span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-right font-semibold text-emerald-950 bg-emerald-50/40">
+                    <td className="py-2.5 px-4 text-right font-bold text-emerald-950">
                       {formatRupiah(item.netSalary)}
-                    </td>
-                    <td className="py-3 px-3 text-center">
-                      <button
-                        onClick={() => setSelectedSlip(item)}
-                        className="inline-flex items-center gap-1 bg-white hover:bg-slate-50 text-slate-700 px-2.5 py-1 rounded-md border border-slate-200 text-xs font-semibold shadow-xs"
-                      >
-                        <span>Lihat Slip</span>
-                      </button>
                     </td>
                   </tr>
                 );
@@ -223,14 +134,6 @@ export const KepsekAuditView: React.FC = () => {
           </table>
         </div>
       </div>
-
-      {/* Salary Slip Modal */}
-      {selectedSlip && (
-        <SalarySlipModal
-          payroll={selectedSlip}
-          onClose={() => setSelectedSlip(null)}
-        />
-      )}
     </div>
   );
 };
