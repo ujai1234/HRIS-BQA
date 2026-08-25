@@ -319,17 +319,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
       <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 gap-3">
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                Tren Kehadiran Guru
-              </h2>
-              <span className="text-[11px] font-mono font-medium text-emerald-800 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-200/60 dark:border-emerald-800/50">
-                {weeklyStatsSummary.avgRate}% Rata-rata
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-              Presensi tepat waktu, toleransi keterlambatan, dan guru pengganti
-            </p>
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              Tren Kehadiran Guru
+            </h2>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -387,45 +379,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
               margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
               barSize={weeklyViewMode === 'daily_week' ? 24 : 32}
             >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#f1f5f9" className="dark:opacity-10" />
               <XAxis 
                 dataKey="periodLabel" 
-                tick={{ fontSize: 11, fill: '#64748b' }} 
-                axisLine={{ stroke: '#e2e8f0' }} 
-                tickLine={false}
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
               />
               <YAxis 
-                tick={{ fontSize: 11, fill: '#64748b' }} 
-                axisLine={{ stroke: '#e2e8f0' }} 
-                tickLine={false}
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
                 allowDecimals={false}
               />
               <Tooltip content={<AttendanceTooltip />} />
               <Legend 
                 verticalAlign="top"
                 align="right"
-                wrapperStyle={{ fontSize: 11, paddingBottom: 8 }}
-                iconType="rect"
+                wrapperStyle={{ fontSize: 10, fontWeight: 600, paddingBottom: 15 }}
+                iconType="circle"
                 iconSize={8}
               />
               <Bar 
                 dataKey="tepatWaktu" 
-                name="Tepat Waktu" 
-                fill="#047857" 
+                name="Hadir" 
+                fill="#10b981" 
                 stackId="attendanceStack" 
               />
               <Bar 
                 dataKey="terlambat" 
-                name="Terlambat" 
+                name="Late" 
                 fill="#f59e0b" 
                 stackId="attendanceStack" 
               />
               <Bar 
                 dataKey="badal" 
-                name="Guru Badal" 
+                name="Badal" 
                 fill="#6366f1" 
                 stackId="attendanceStack" 
-                radius={[3, 3, 0, 0]}
+                radius={[4, 4, 0, 0]}
               />
             </BarChart>
           </ResponsiveContainer>
@@ -439,9 +431,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
             <h2 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
               Aktivitas Presensi Terkini
             </h2>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-              Catatan presensi harian dan status pengisian jurnal
-            </p>
           </div>
 
           <div className="relative w-full sm:w-60">
@@ -548,27 +537,29 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
             <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
               Komposisi Kafa'ah per Unit
             </h3>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-              Gaji pokok, honor mengajar, dan transport
-            </p>
           </div>
 
           <div className="h-52 w-full pt-1">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={unitStats} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="unit" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} />
+            <BarChart data={unitStats} margin={{ top: 20, right: 0, left: 10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#f1f5f9" className="dark:opacity-10" />
+                <XAxis 
+                  dataKey="unit" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                />
                 <YAxis 
-                  tick={{ fontSize: 10, fill: '#64748b' }} 
-                  axisLine={{ stroke: '#e2e8f0' }} 
-                  tickLine={false}
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 9, fontWeight: 600, fill: '#94a3b8' }} 
                   tickFormatter={(val) => `Rp${(val / 1000000).toFixed(1)}jt`}
                 />
                 <Tooltip content={<CurrencyTooltip />} />
-                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 4 }} iconType="rect" iconSize={8} />
-                <Bar dataKey="baseSalary" name="Gaji Pokok" fill="#334155" stackId="a" />
-                <Bar dataKey="honor" name="Honor Mengajar" fill="#047857" stackId="a" />
-                <Bar dataKey="transport" name="Transport" fill="#0f766e" stackId="a" radius={[3, 3, 0, 0]} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: 10, fontWeight: 600, paddingTop: 15 }} />
+                <Bar dataKey="baseSalary" name="Gapok" fill="#334155" stackId="a" barSize={32} />
+                <Bar dataKey="honor" name="Honor JP" fill="#10b981" stackId="a" barSize={32} />
+                <Bar dataKey="transport" name="Transport" fill="#0d9488" stackId="a" radius={[4, 4, 0, 0]} barSize={32} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -581,9 +572,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
               <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
                 Penegakan SOP & Potongan Disiplin
               </h3>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                Denda keterlambatan dan jurnal tidak lengkap
-              </p>
             </div>
             <span className="text-[11px] font-medium text-emerald-800 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/50">
               Otomatis

@@ -82,9 +82,9 @@ export const Header: React.FC<HeaderProps> = ({
       // KEPALA PESANTREN
       return [
         {
-          title: 'MONITORING EKSEKUTIF',
+          title: 'Dashboard',
           items: [
-            { path: '/dashboard/kepsek', label: 'Ringkasan Eksekutif', icon: LayoutDashboard, desc: 'Statistik kehadiran & KBM' },
+            { path: '/dashboard/kepsek', label: 'Dashboard', icon: LayoutDashboard, desc: 'Statistik kehadiran & KBM' },
             { path: '/dashboard/kepsek/audit', label: 'Monitoring Jurnal', icon: GraduationCap, desc: 'Ketaatan pengisian jurnal' },
             { path: '/dashboard/kepsek/laporan', label: 'Laporan Gaji', icon: CreditCard, desc: 'Pengesahan penggajian' },
           ]

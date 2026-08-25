@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Search, Plus, Edit3, Trash2, UploadCloud } from 'lucide-react';
+import { Search, Plus, Edit3, Trash2, UploadCloud, RotateCcw } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
 import { ClassSchedule } from '../types';
 import { BulkScheduleUploadModal } from './BulkScheduleUploadModal';
 
 export const MasterSchedules: React.FC = () => {
-  const { schedules, teachers, addSchedule, updateSchedule, deleteSchedule } = useHRIS();
+  const { schedules, teachers, addSchedule, updateSchedule, deleteSchedule, resetSchedules } = useHRIS();
 
   const [selectedDayFilter, setSelectedDayFilter] = useState<string>('ALL');
   const [selectedUnitFilter, setSelectedUnitFilter] = useState<string>('ALL');
@@ -26,6 +26,12 @@ export const MasterSchedules: React.FC = () => {
     hours: 2,
     room: 'Kelas 7A',
   });
+
+  const handleReset = () => {
+    if (window.confirm('PERINGATAN: Anda akan menghapus SELURUH jadwal pelajaran. Tindakan ini tidak dapat dibatalkan. Lanjutkan?')) {
+      resetSchedules();
+    }
+  };
 
   const filteredSchedules = schedules.filter((s) => {
     const teacher = teachers.find((t) => t.id === s.teacherId);
@@ -135,6 +141,15 @@ export const MasterSchedules: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleReset}
+            className="inline-flex items-center justify-center gap-1.5 bg-white dark:bg-slate-900 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-600 dark:text-rose-400 text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer"
+            title="Hapus Semua Jadwal"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Reset Jadwal</span>
+          </button>
+
           <button
             onClick={() => setIsBulkUploadOpen(true)}
             className="inline-flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"

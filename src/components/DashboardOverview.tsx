@@ -150,106 +150,101 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
     return null;
   };
 
+  //  tertiary. Chart Data: Monthly Attendance Trend (Last 6 Months) - Mocked for visualization
+  const monthlyTrendData = [
+    { month: 'Mar', attendance: 85, compliance: 78 },
+    { month: 'Apr', attendance: 88, compliance: 82 },
+    { month: 'Mei', attendance: 92, compliance: 85 },
+    { month: 'Jun', attendance: 90, compliance: 88 },
+    { month: 'Jul', attendance: 94, compliance: 91 },
+    { month: 'Agu', attendance: 96, compliance: complianceRate || 94 },
+  ];
+
   return (
     <div className="space-y-6" id="dashboard-main-view">
-      {/* Top Header Bar */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
-          <Activity className="w-5 h-5 text-emerald-600 dark:text-emerald-500" />
-          <span>Statistik & Kinerja KBM</span>
-        </h2>
-
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg">
-            Periode: <strong className="text-slate-900 dark:text-slate-100">{selectedPeriod}</strong>
-          </span>
-        </div>
-      </div>
-
-      {/* KPI Cards Row */}
+      {/* KPI Cards Row - Simplified Minimalist */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div 
           onClick={() => {
             if (!isReadOnly && setActiveTab) setActiveTab('master_teachers');
           }}
-          className={`bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs transition-all ${!isReadOnly ? 'hover:border-emerald-500 dark:hover:border-emerald-600 cursor-pointer group' : ''}`}
+          className={`bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm transition-all ${!isReadOnly ? 'hover:shadow-md cursor-pointer' : ''}`}
         >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Total Tenaga Pendidik
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold">
-              <Users className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-2">{totalTeachers} Asatidz</p>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block mt-1">
-            SMP, MA & Pesantren
-          </span>
+          <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Asatidz</p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">{totalTeachers}</p>
         </div>
 
         <div 
           onClick={() => {
             if (!isReadOnly && setActiveTab) setActiveTab('master_schedules');
           }}
-          className={`bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs transition-all ${!isReadOnly ? 'hover:border-teal-500 dark:hover:border-teal-600 cursor-pointer group' : ''}`}
+          className={`bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm transition-all ${!isReadOnly ? 'hover:shadow-md cursor-pointer' : ''}`}
         >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Total Beban KBM
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-400 flex items-center justify-center font-bold">
-              <Calendar className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-2">{totalScheduledHours} JP / Pekan</p>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block mt-1">
-            {totalSchedules} Sesi Mengajar
-          </span>
+          <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Beban KBM</p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">{totalScheduledHours} JP</p>
         </div>
 
         <div 
           onClick={() => {
             if (setActiveTab) setActiveTab('kepsek_audit');
           }}
-          className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs hover:border-emerald-500 dark:hover:border-emerald-600 transition-all cursor-pointer group"
+          className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Ketaatan Jurnal PBM
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold group-hover:bg-emerald-600 dark:group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-500 mt-2">{complianceRate}%</p>
-          <span className="text-[11px] text-emerald-700 dark:text-emerald-500 font-medium flex items-center gap-1 mt-1">
-            <span>{completedJournals} Selesai Terisi</span>
-            <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-          </span>
+          <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Ketaatan Jurnal</p>
+          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-500 mt-1">{complianceRate}%</p>
         </div>
 
         <div 
           onClick={() => {
             if (setActiveTab) setActiveTab('payroll');
           }}
-          className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs hover:border-emerald-500 dark:hover:border-emerald-600 transition-all cursor-pointer group"
+          className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Total Anggaran Payroll
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-400 flex items-center justify-center font-bold group-hover:bg-emerald-700 dark:group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-              <CreditCard className="w-4 h-4" />
+          <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Payroll</p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1 truncate">
+            {formatRupiah(payrollSummary.totalNet).replace(',00', '')}
+          </p>
+        </div>
+      </div>
+
+      {/* Monthly Trend Chart - New Visual Component */}
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200 uppercase tracking-wide">Tren Performa Kehadiran & Jurnal</h3>
+          <div className="flex gap-4">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="text-[10px] font-bold text-slate-500">Kehadiran</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-blue-500" />
+              <span className="text-[10px] font-bold text-slate-500">Jurnal</span>
             </div>
           </div>
-          <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 mt-2">
-            {formatRupiah(payrollSummary.totalNet)}
-          </p>
-          <span className="text-[11px] text-emerald-700 dark:text-emerald-500 font-medium flex items-center gap-1 mt-1">
-            <span>Alokasi {selectedPeriod}</span>
-            <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-          </span>
+        </div>
+        <div className="h-64 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={monthlyTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorAttendance" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/>
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorCompliance" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" className="dark:opacity-10" />
+              <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} />
+              <YAxis domain={[60, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} />
+              <Tooltip 
+                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontSize: '10px', fontWeight: 'bold' }}
+              />
+              <Area type="monotone" dataKey="attendance" name="Kehadiran (%)" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorAttendance)" />
+              <Area type="monotone" dataKey="compliance" name="Jurnal (%)" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorCompliance)" />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
@@ -259,26 +254,31 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
         <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
             <div>
-              <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-emerald-600 dark:text-emerald-500" />
-                <span>Beban Jam Pelajaran (JP) & Sesi per Unit</span>
+              <h3 className="font-bold text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                JP & Sesi per Unit
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Perbandingan volume KBM antara unit SMP, MA, dan Pesantren
-              </p>
             </div>
           </div>
 
           <div className="h-72 w-full pt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={unitStats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" className="dark:opacity-10" />
-                <XAxis dataKey="unit" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} className="dark:opacity-20" />
-                <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} className="dark:opacity-20" />
+              <BarChart data={unitStats} margin={{ top: 20, right: 0, left: -25, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#f1f5f9" className="dark:opacity-10" />
+                <XAxis 
+                  dataKey="unit" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                />
                 <Tooltip content={<CountTooltip />} />
-                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
-                <Bar dataKey="totalHours" name="Total Jam Pelajaran (JP)" fill="#059669" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="totalSchedules" name="Jumlah Sesi / Rombel" fill="#0d9488" radius={[4, 4, 0, 0]} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: 10, fontWeight: 600, paddingTop: 20, color: '#64748b' }} />
+                <Bar dataKey="totalHours" name="JP" fill="#10b981" radius={[4, 4, 0, 0]} barSize={32} />
+                <Bar dataKey="totalSchedules" name="Sesi" fill="#0d9488" radius={[4, 4, 0, 0]} barSize={32} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -288,13 +288,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
         <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
             <div>
-              <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <PieChartIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-500" />
-                <span>Distribusi Status Ketaatan Jurnal & Presensi</span>
+              <h3 className="font-bold text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                Status Jurnal & Presensi
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Rasio sesi berstatus Selesai, Jurnal Tertunda, Badal, dan Izin
-              </p>
             </div>
           </div>
 
@@ -305,19 +301,18 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
                   data={attendanceStatusData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={55}
-                  outerRadius={85}
-                  paddingAngle={4}
+                  innerRadius={60}
+                  outerRadius={80}
+                  paddingAngle={8}
                   dataKey="value"
-                  label={({ name, percent }: any) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                  labelLine={false}
+                  stroke="none"
                 >
                   {attendanceStatusData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip content={<CountTooltip />} />
-                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
+                <Legend iconType="circle" layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ fontSize: 10, fontWeight: 600, paddingLeft: 20 }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -330,32 +325,33 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
         <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
             <div>
-              <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-emerald-600 dark:text-emerald-500" />
-                <span>Komposisi Penggajian per Unit (Rp)</span>
+              <h3 className="font-bold text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                Komposisi Penggajian per Unit
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Rincian Gaji Pokok, Honor Mengajar (JP), dan Uang Transport
-              </p>
             </div>
           </div>
 
           <div className="h-72 w-full pt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={unitStats} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" className="dark:opacity-10" />
-                <XAxis dataKey="unit" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} className="dark:opacity-20" />
+              <BarChart data={unitStats} margin={{ top: 20, right: 0, left: 10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#f1f5f9" className="dark:opacity-10" />
+                <XAxis 
+                  dataKey="unit" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                />
                 <YAxis 
-                  tick={{ fontSize: 10, fill: '#64748b' }} 
-                  axisLine={{ stroke: '#e2e8f0' }} 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 9, fontWeight: 600, fill: '#94a3b8' }} 
                   tickFormatter={(val) => `Rp${(val / 1000000).toFixed(1)}jt`}
-                  className="dark:opacity-20"
                 />
                 <Tooltip content={<CurrencyTooltip />} />
-                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
-                <Bar dataKey="baseSalary" name="Gaji Pokok" fill="#334155" stackId="a" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="honor" name="Honor Jam Mengajar" fill="#059669" stackId="a" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="transport" name="Transport Kehadiran" fill="#0d9488" stackId="a" radius={[4, 4, 0, 0]} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: 10, fontWeight: 600, paddingTop: 20 }} />
+                <Bar dataKey="baseSalary" name="Gapok" fill="#334155" stackId="a" radius={[0, 0, 0, 0]} barSize={40} />
+                <Bar dataKey="honor" name="Honor JP" fill="#10b981" stackId="a" radius={[0, 0, 0, 0]} barSize={40} />
+                <Bar dataKey="transport" name="Transport" fill="#0d9488" stackId="a" radius={[4, 4, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -365,13 +361,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
         <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
             <div>
-              <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-500" />
-                <span>Beban Mengajar Asatidz Terbanyak (Top 6 Guru)</span>
+              <h3 className="font-bold text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                Top 6 Asatidz (JP)
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Total Jam Pelajaran (JP) mengajar reguler dan jam badal
-              </p>
             </div>
           </div>
 
@@ -380,22 +372,27 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
               <BarChart
                 layout="vertical"
                 data={topTeachersData}
-                margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
+                margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" className="dark:opacity-10" />
-                <XAxis type="number" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} className="dark:opacity-20" />
+                <CartesianGrid strokeDasharray="4 4" horizontal={false} stroke="#f1f5f9" className="dark:opacity-10" />
+                <XAxis 
+                  type="number" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                />
                 <YAxis 
                   dataKey="name" 
                   type="category" 
-                  tick={{ fontSize: 11, fill: '#64748b', fontWeight: 500 }} 
-                  axisLine={{ stroke: '#e2e8f0' }}
-                  width={100}
-                  className="dark:opacity-20"
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fontWeight: 700, fill: '#475569' }} 
+                  width={90}
                 />
                 <Tooltip content={<CountTooltip />} />
-                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
-                <Bar dataKey="taughtHours" name="Total Jam Mengajar (JP)" fill="#059669" radius={[0, 4, 4, 0]} />
-                <Bar dataKey="badalHours" name="Jam Badal (JP)" fill="#7c3aed" radius={[0, 4, 4, 0]} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: 10, fontWeight: 600, paddingTop: 15 }} />
+                <Bar dataKey="taughtHours" name="JP" fill="#10b981" radius={[0, 4, 4, 0]} barSize={12} />
+                <Bar dataKey="badalHours" name="Badal" fill="#8b5cf6" radius={[0, 4, 4, 0]} barSize={12} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -406,27 +403,29 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
       <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 gap-2">
           <div>
-            <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-500" />
-              <span>Monitoring Kedisiplinan Waktu Presensi (Punctuality)</span>
+            <h3 className="font-bold text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+              Kedisiplinan Waktu (Punctuality)
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Sebaran presensi asatidz: Tepat Waktu (≤4 min) vs Keterlambatan Berjenjang
-            </p>
           </div>
-          <span className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded-md border border-emerald-200/80 dark:border-emerald-800/50">
-            Kepatuhan Waktu: {Math.round((onTimeCount / Math.max(1, onTimeCount + lateLightCount + lateMediumCount + lateHeavyCount)) * 100)}%
-          </span>
         </div>
 
         <div className="h-56 w-full pt-4">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={punctualityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" className="dark:opacity-10" />
-              <XAxis dataKey="bracket" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} className="dark:opacity-20" />
-              <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} className="dark:opacity-20" />
+            <BarChart data={punctualityData} margin={{ top: 20, right: 0, left: -25, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#f1f5f9" className="dark:opacity-10" />
+              <XAxis 
+                dataKey="bracket" 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+              />
+              <YAxis 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+              />
               <Tooltip content={<CountTooltip />} />
-              <Bar dataKey="count" name="Jumlah Sesi" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="count" name="Sesi" radius={[4, 4, 0, 0]} barSize={40}>
                 {punctualityData.map((entry, index) => (
                   <Cell key={`cell-punctuality-${index}`} fill={entry.fill} />
                 ))}

@@ -64,6 +64,8 @@ interface HRISContextType {
   updateSchedule: (id: string, updates: Partial<ClassSchedule>) => void;
   deleteSchedule: (id: string) => void;
   addSchedulesBulk: (schedules: Omit<ClassSchedule, 'id'>[]) => Promise<{ success: boolean; count: number }>;
+  resetTeachers: () => Promise<void>;
+  resetSchedules: () => Promise<void>;
   
   // Payroll Engine
   calculateTeacherPayroll: (teacherId: string, period?: string) => TeacherPayrollItem;
@@ -561,6 +563,40 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const resetTeachers = async () => {
+    try {
+      const res = await fetch('/api/teachers/all', { method: 'DELETE' });
+      if (res.ok) {
+        await fetchAllData();
+        await logActivity(
+          'RESET_TEACHERS',
+          'SYSTEM',
+          'Admin melakukan reset total data guru (menghapus seluruh asatidz)',
+          'CRITICAL'
+        );
+      }
+    } catch (err) {
+      console.error('Reset teachers error:', err);
+    }
+  };
+
+  const resetSchedules = async () => {
+    try {
+      const res = await fetch('/api/schedules/all', { method: 'DELETE' });
+      if (res.ok) {
+        await fetchAllData();
+        await logActivity(
+          'RESET_SCHEDULES',
+          'SYSTEM',
+          'Admin melakukan reset total jadwal pelajaran (menghapus seluruh sesi KBM)',
+          'CRITICAL'
+        );
+      }
+    } catch (err) {
+      console.error('Reset schedules error:', err);
+    }
+  };
+
   const updateTeacher = (id: string, updates: Partial<Teacher>) => {
     const origTeacher = teachers.find(t => t.id === id);
     fetch(`/api/teachers/${id}`, {
@@ -853,6 +889,8 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addTeacher,
         addTeachersBulk,
         addSchedulesBulk,
+        resetTeachers,
+        resetSchedules,
         updateTeacher,
         deleteTeacher,
         addSchedule,

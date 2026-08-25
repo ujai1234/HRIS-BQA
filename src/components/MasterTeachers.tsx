@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, Edit3, Trash2, UploadCloud } from 'lucide-react';
+import { Search, Plus, Edit3, Trash2, UploadCloud, RotateCcw } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
 import { Teacher } from '../types';
 import { formatRupiah, formatCurrencyInput, parseCurrencyInput, validateCurrencyRate, terbilang } from '../utils/formatters';
@@ -7,7 +7,7 @@ import { BulkTeacherUploadModal } from './BulkTeacherUploadModal';
 import { KafaahManagementView } from './KafaahManagementView';
 
 export const MasterTeachers: React.FC = () => {
-  const { teachers, addTeacher, updateTeacher, deleteTeacher } = useHRIS();
+  const { teachers, addTeacher, updateTeacher, deleteTeacher, resetTeachers } = useHRIS();
 
   const [activeSubView, setActiveSubView] = useState<'profil_guru' | 'tarif_kafaah'>('profil_guru');
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,6 +35,12 @@ export const MasterTeachers: React.FC = () => {
   const [baseSalaryInput, setBaseSalaryInput] = useState('700.000');
   const [hourlyRateInput, setHourlyRateInput] = useState('40.000');
   const [dailyTransportInput, setDailyTransportInput] = useState('10.000');
+
+  const handleReset = () => {
+    if (window.confirm('PERINGATAN: Anda akan menghapus SELURUH data guru. Tindakan ini tidak dapat dibatalkan. Lanjutkan?')) {
+      resetTeachers();
+    }
+  };
 
   const filteredTeachers = teachers.filter((t) => {
     const tName = t.name || '';
@@ -181,6 +187,15 @@ export const MasterTeachers: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2">
+              <button
+                onClick={handleReset}
+                className="inline-flex items-center justify-center gap-1.5 bg-white dark:bg-slate-900 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-600 dark:text-rose-400 text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer"
+                title="Hapus Semua Data Guru"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Reset Data</span>
+              </button>
+
               <button
                 id="bulk-upload-teacher-btn"
                 onClick={() => setIsBulkUploadOpen(true)}
