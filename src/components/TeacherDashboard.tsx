@@ -317,10 +317,11 @@ export const TeacherDashboard: React.FC = () => {
                     {isClockedInNoJournal && att && (
                       <button
                         onClick={() => setActiveJournalData({ attendance: att, schedule })}
-                        className="w-full inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition-all shadow-xs"
+                        disabled={att.date < todayStr}
+                        className="w-full inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 disabled:bg-slate-400 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition-all shadow-xs"
                       >
                         <FileText className="w-4 h-4" />
-                        <span>Wajib Isi Jurnal Mengajar</span>
+                        <span>{att.date < todayStr ? 'Gagal Isi (Batas Lewat)' : 'Wajib Isi Jurnal Mengajar'}</span>
                       </button>
                     )}
 
@@ -417,9 +418,13 @@ export const TeacherDashboard: React.FC = () => {
                         {sched && (
                           <button
                             onClick={() => setActiveJournalData({ attendance: att, schedule: sched })}
-                            className="text-xs font-semibold text-emerald-700 dark:text-emerald-500 hover:text-emerald-800 dark:hover:text-emerald-400 hover:underline"
+                            className={`text-xs font-semibold ${
+                              !isDone && att.date < todayStr 
+                                ? 'text-rose-600 dark:text-rose-400 cursor-not-allowed' 
+                                : 'text-emerald-700 dark:text-emerald-500 hover:text-emerald-800 dark:hover:text-emerald-400 hover:underline'
+                            }`}
                           >
-                            {isDone ? 'Lihat Jurnal' : 'Isi Jurnal'}
+                            {isDone ? (att.date < todayStr ? 'Lihat Jurnal' : 'Lihat / Edit') : (att.date < todayStr ? 'Terkunci (Lewat Batas)' : 'Isi Jurnal')}
                           </button>
                         )}
                       </td>

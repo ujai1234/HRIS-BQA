@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { 
   X, 
-  Sparkles
+  Sparkles,
+  AlertTriangle,
+  CheckCircle2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { AttendanceRecord, ClassSchedule, Teacher, StudentAttendance } from '../types';
@@ -32,7 +34,9 @@ export const JournalModal: React.FC<JournalModalProps> = ({
   const todayStr = new Date().toISOString().split('T')[0];
   const isPastShift = resolvedAttendance?.date ? resolvedAttendance.date < todayStr : false;
   const existingJournal = resolvedAttendance?.journal;
-  const isExpiredUnfilled = isPastShift && !existingJournal;
+  const isExpired = isPastShift; // Strictly block if date is before today
+  const isExpiredUnfilled = isExpired && !existingJournal;
+  const isExpiredFilled = isExpired && existingJournal;
 
   const [topic, setTopic] = useState(existingJournal?.topic || '');
   const [learningObjectives, setLearningObjectives] = useState(
@@ -41,6 +45,9 @@ export const JournalModal: React.FC<JournalModalProps> = ({
   const [classNotes, setClassNotes] = useState(existingJournal?.classNotes || '');
   const [assignmentGiven, setAssignmentGiven] = useState(
     existingJournal?.assignmentGiven || ''
+  );
+  const [learningNeeds, setLearningNeeds] = useState(
+    existingJournal?.learningNeeds || ''
   );
 
   const [studentAttendance, setStudentAttendance] = useState<StudentAttendance>(
@@ -115,6 +122,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({
           classNotes,
           studentAttendance,
           assignmentGiven,
+          learningNeeds,
         });
       }
 
@@ -164,8 +172,17 @@ export const JournalModal: React.FC<JournalModalProps> = ({
           {/* Top Info Banner / Expired Warning */}
           {isExpiredUnfilled ? (
             <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800">
-              <span className="font-semibold">Batas Pengisian Terlewat: </span>
-              Sesi {formatIndonesianDate(resolvedAttendance?.date || '')} telah melewati batas waktu pengisian 1 hari (hari H) dan otomatis dikenakan potongan 50%.
+              <span className="font-semibold text-rose-900 flex items-center gap-1.5 mb-1">
+                <AlertTriangle className="w-4 h-4" /> Batas Pengisian Terkunci
+              </span>
+              Sesi {formatIndonesianDate(resolvedAttendance?.date || '')} telah melewati batas waktu pengisian (Hari H). Jurnal tidak dapat diisi lagi dan otomatis dikenakan potongan honor mengajar 50% untuk sesi ini.
+            </div>
+          ) : isExpiredFilled ? (
+            <div className="p-3 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-600">
+              <span className="font-semibold text-slate-900 flex items-center gap-1.5 mb-1">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Jurnal Terkunci (Sudah Terisi)
+              </span>
+              Sesi ini sudah lewat batas waktu edit. Anda hanya dapat melihat isi jurnal yang telah disimpan sebelumnya.
             </div>
           ) : (
             <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border border-slate-200/80 text-xs">
@@ -303,6 +320,23 @@ export const JournalModal: React.FC<JournalModalProps> = ({
             </div>
           </div>
 
+          {/* Pengajuan Kebutuhan Pembelajaran */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Pengajuan Kebutuhan Pembelajaran (Tampil di Admin)
+            </label>
+            <textarea
+              rows={2}
+              value={learningNeeds}
+              onChange={(e) => setLearningNeeds(e.target.value)}
+              placeholder="Ajukan kebutuhan buku, alat tulis, sarana kelas, atau masukan kurikulum..."
+              className="w-full text-xs p-2.5 rounded-lg border border-rose-100 bg-rose-50/30 focus:outline-none focus:border-rose-400 placeholder:text-slate-400"
+            />
+            <p className="text-[10px] text-slate-500 mt-1 italic">
+              * Catatan ini akan diteruskan langsung ke Dashboard Admin untuk ditindaklanjuti.
+            </p>
+          </div>
+
           {/* Action Buttons */}
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
             <button
@@ -314,10 +348,10 @@ export const JournalModal: React.FC<JournalModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="px-4 py-1.5 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-lg transition-colors shadow-2xs disabled:opacity-50"
+              disabled={isSubmitting || isExpired}
+              className="px-4 py-1.5 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-lg transition-colors shadow-2xs disabled:opacity-50 disabled:bg-slate-400"
             >
-              {isSubmitting ? 'Menyimpan...' : 'Simpan Jurnal'}
+              {isSubmitting ? 'Menyimpan...' : isExpired ? 'Terkunci' : 'Simpan Jurnal'}
             </button>
           </div>
         </form>

@@ -199,6 +199,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
       .slice(0, 8);
   }, [attendances, schedules, teachers, unitFilter, searchActivity]);
 
+  // Learning Needs Requests
+  const learningNeedsRequests = useMemo(() => {
+    return attendances
+      .filter(a => a.journal?.learningNeeds && a.journal.learningNeeds.trim() !== '')
+      .map(a => ({
+        id: a.id,
+        date: a.date,
+        teacher: teachers.find(t => t.id === a.actualTeacherId || t.id === a.teacherId)?.name || 'Guru',
+        unit: schedules.find(s => s.id === a.scheduleId)?.unit || 'UMUM',
+        subject: schedules.find(s => s.id === a.scheduleId)?.subject || 'KBM',
+        className: schedules.find(s => s.id === a.scheduleId)?.className || '-',
+        needs: a.journal?.learningNeeds || '',
+        timestamp: a.journal?.filledAt || a.date
+      }))
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }, [attendances, teachers, schedules]);
+
   // Minimalist Tooltip
   const AttendanceTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -610,6 +627,62 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* 6. Pengajuan Kebutuhan Pembelajaran (New Section) */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
+        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
+            <h2 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+              Pengajuan Kebutuhan Pembelajaran dari Guru
+            </h2>
+          </div>
+          <span className="text-[10px] font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded uppercase tracking-wider">
+            Prioritas
+          </span>
+        </div>
+
+        <div className="p-0">
+          {learningNeedsRequests.length === 0 ? (
+            <div className="p-8 text-center">
+              <p className="text-xs text-slate-400">Belum ada pengajuan kebutuhan pembelajaran terbaru.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              {learningNeedsRequests.slice(0, 5).map((req) => (
+                <div key={req.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                        {req.teacher}
+                      </h4>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                        {req.unit} • {req.subject} ({req.className}) • {formatIndonesianDate(req.date)}
+                      </p>
+                    </div>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono italic">
+                      {new Date(req.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <div className="bg-rose-50/50 dark:bg-rose-950/20 p-3 rounded-lg border border-rose-100/50 dark:border-rose-900/30">
+                    <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed italic">
+                      "{req.needs}"
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        
+        {learningNeedsRequests.length > 5 && (
+          <div className="p-3 bg-slate-50 dark:bg-slate-800/50 text-center border-t border-slate-100 dark:border-slate-800">
+            <button className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors">
+              Lihat Semua Pengajuan ({learningNeedsRequests.length})
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Official Report Modal */}

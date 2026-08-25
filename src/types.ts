@@ -84,6 +84,7 @@ export interface TeachingJournal {
   classNotes?: string; // Catatan Kendala / Keaktifan Kelas
   studentAttendance: StudentAttendance;
   assignmentGiven?: string; // Tugas Rumah / Hafalan
+  learningNeeds?: string; // Kebutuhan Pembelajaran (Pengajuan ke Admin)
   filledAt: string; // ISO Timestamp
 }
 
