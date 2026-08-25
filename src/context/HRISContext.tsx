@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { 
   Teacher, 
   ClassSchedule, 
@@ -282,6 +283,8 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (role === 'GURU') setCurrentPath('/dashboard/guru/clockin');
     else if (role === 'ADMIN') setCurrentPath('/dashboard/admin');
     else if (role === 'KEPALA_PESANTREN') setCurrentPath('/dashboard/kepsek/audit');
+
+    toast.success(`Selamat datang, ${targetUser.name}!`);
   };
 
   const logout = () => {
@@ -298,6 +301,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem(STORAGE_KEYS.CURRENT_USER_ID);
     localStorage.removeItem(STORAGE_KEYS.CURRENT_ROLE);
     localStorage.setItem('hris_pbq_auth_v1', 'false');
+    toast.info('Anda telah keluar dari sistem');
   };
 
   const toggleDarkMode = () => {
@@ -364,7 +368,10 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newRecord)
-    }).then(res => res.json()).then(() => fetchAllData());
+    }).then(res => res.json()).then(() => {
+      fetchAllData();
+      toast.success(`Presensi Berhasil: ${schedule.subject} (${schedule.className})`);
+    });
 
     logActivity(
       'CLOCK_IN',
@@ -407,7 +414,10 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newJournal)
-    }).then(res => res.json()).then(() => fetchAllData());
+    }).then(res => res.json()).then(() => {
+      fetchAllData();
+      toast.success('Jurnal KBM berhasil disimpan');
+    });
 
     logActivity(
       'SUBMIT_JOURNAL',
@@ -443,7 +453,10 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newRecord)
-    }).then(res => res.json()).then(() => fetchAllData());
+    }).then(res => res.json()).then(() => {
+      fetchAllData();
+      toast.success(`Status presensi diperbarui menjadi ${status}`);
+    });
 
     const tName = teachers.find(t => t.id === teacherId)?.name || teacherId;
     logActivity(
@@ -504,7 +517,10 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newTeacher)
-    }).then(() => fetchAllData());
+    }).then(() => {
+      fetchAllData();
+      toast.success(`Data guru ${newTeacher.name} berhasil ditambahkan`);
+    });
 
     logActivity(
       'CREATE_TEACHER',
@@ -538,6 +554,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       if (res.ok) {
         await fetchAllData();
+        toast.success(`Berhasil mengimpor ${newTeachers.length} data asatidz`);
       } else {
         for (const t of newTeachers) {
           await fetch('/api/teachers', {
@@ -547,6 +564,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
         }
         await fetchAllData();
+        toast.success(`Berhasil memproses ${newTeachers.length} data asatidz (fallback mode)`);
       }
 
       await logActivity(
@@ -568,6 +586,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await fetch('/api/teachers/all', { method: 'DELETE' });
       if (res.ok) {
         await fetchAllData();
+        toast.success('Data asatidz berhasil di-reset');
         await logActivity(
           'RESET_TEACHERS',
           'SYSTEM',
@@ -577,6 +596,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (err) {
       console.error('Reset teachers error:', err);
+      toast.error('Gagal melakukan reset data guru');
     }
   };
 
@@ -585,6 +605,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await fetch('/api/schedules/all', { method: 'DELETE' });
       if (res.ok) {
         await fetchAllData();
+        toast.success('Seluruh jadwal KBM berhasil di-reset');
         await logActivity(
           'RESET_SCHEDULES',
           'SYSTEM',
@@ -594,6 +615,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (err) {
       console.error('Reset schedules error:', err);
+      toast.error('Gagal melakukan reset jadwal');
     }
   };
 
@@ -622,7 +644,10 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const origTeacher = teachers.find(t => t.id === id);
     fetch(`/api/teachers/${id}`, {
       method: 'DELETE'
-    }).then(() => fetchAllData());
+    }).then(() => {
+      fetchAllData();
+      toast.success('Data guru berhasil dihapus');
+    });
 
     logActivity(
       'DELETE_TEACHER',
@@ -643,7 +668,10 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newSched)
-    }).then(() => fetchAllData());
+    }).then(() => {
+      fetchAllData();
+      toast.success('Jadwal baru berhasil ditambahkan');
+    });
 
     const tName = teachers.find(t => t.id === schedInput.teacherId)?.name || schedInput.teacherId;
     logActivity(
@@ -664,6 +692,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (res.ok) {
         await fetchAllData();
+        toast.success(`Berhasil mengunggah ${newSchedules.length} jadwal KBM`);
       } else {
         // Fallback to sequential if bulk fails
         for (const s of newSchedules) {
@@ -674,6 +703,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
         }
         await fetchAllData();
+        toast.success(`Berhasil memproses ${newSchedules.length} jadwal KBM (fallback mode)`);
       }
 
       await logActivity(
@@ -708,7 +738,10 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteSchedule = (id: string) => {
     fetch(`/api/schedules/${id}`, {
       method: 'DELETE'
-    }).then(() => fetchAllData());
+    }).then(() => {
+      fetchAllData();
+      toast.success('Jadwal berhasil dihapus');
+    });
 
     logActivity(
       'DELETE_SCHEDULE',

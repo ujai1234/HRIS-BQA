@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Toaster } from 'sonner';
 import { HRISProvider, useHRIS } from './context/HRISContext';
 import { LoginPage } from './components/LoginPage';
 import { Header } from './components/Header';
@@ -117,6 +118,7 @@ const MainContent: React.FC = () => {
 export default function App() {
   return (
     <HRISProvider>
+      <Toaster position="top-center" richColors />
       <SessionTimeoutManager />
       <MainContent />
     </HRISProvider>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Download, Printer, Search } from 'lucide-react';
+import { toast } from 'sonner';
 import { useHRIS } from '../context/HRISContext';
 import { formatRupiah, exportToCSV } from '../utils/formatters';
 import { AdminOfficialReportModal } from './AdminOfficialReportModal';
@@ -94,6 +95,8 @@ export const PayrollRecap: React.FC = () => {
       headers,
       ...rows,
     ]);
+
+    toast.success('Laporan penggajian berhasil diekspor ke CSV');
   };
 
   return (
