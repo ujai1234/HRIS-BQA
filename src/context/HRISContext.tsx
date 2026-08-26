@@ -158,33 +158,20 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   });
 
-  const currentUser = Array.isArray(teachers) 
-    ? (teachers.find((t) => t.id === currentUserId) || teachers[0] || INITIAL_TEACHERS[0])
-    : INITIAL_TEACHERS[0];
+  const currentUser = Array.isArray(teachers) && teachers.length > 0
+    ? (teachers.find((t) => t.id === currentUserId) || INITIAL_TEACHERS.find((t) => t.id === currentUserId) || teachers[0] || INITIAL_TEACHERS[0])
+    : (INITIAL_TEACHERS.find((t) => t.id === currentUserId) || INITIAL_TEACHERS[0]);
 
   const fetchAllData = async () => {
     setIsLoading(true);
     try {
-      const isGuru = currentRole === 'GURU';
-      const isKepsek = isKepsekRole(currentRole);
-      const unit = getRoleUnit(currentRole, currentUser?.unit);
-
-      let teacherIdParam = isGuru ? `?teacherId=${currentUserId}` : '';
-      let unitParam = (isKepsek || isGuru) && unit !== 'ALL' ? `unit=${unit}` : '';
-      
-      // Combine params
-      let queryParams = '';
-      if (teacherIdParam && unitParam) queryParams = `${teacherIdParam}&${unitParam}`;
-      else if (teacherIdParam) queryParams = teacherIdParam;
-      else if (unitParam) queryParams = `?${unitParam}`;
-
       const [tRes, sRes, aRes, bRes, lRes, lnRes] = await Promise.all([
-        fetch(`/api/teachers${unitParam ? `?${unitParam}` : ''}`),
-        fetch(`/api/schedules${queryParams}`),
-        fetch(`/api/attendances${queryParams}`),
-        fetch(`/api/badal${unitParam ? `?${unitParam}` : ''}`),
+        fetch('/api/teachers'),
+        fetch('/api/schedules'),
+        fetch('/api/attendances'),
+        fetch('/api/badal'),
         fetch('/api/audit-logs'),
-        fetch(`/api/learning-needs${unitParam ? `?${unitParam}` : ''}`)
+        fetch('/api/learning-needs')
       ]);
 
       const [t, s, a, b, l, ln] = await Promise.all([
@@ -310,7 +297,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCurrentRoleState(role);
     if (teacherId) setCurrentUserId(teacherId);
 
-    const targetUser = teachers.find((t) => t.id === teacherId) || currentUser;
+    const targetUser = (teacherId ? (teachers.find((t) => t.id === teacherId) || INITIAL_TEACHERS.find((t) => t.id === teacherId)) : null) || currentUser;
     logActivity(
       'LOGIN',
       'AUTH',

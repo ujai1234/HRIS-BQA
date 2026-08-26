@@ -69,49 +69,49 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {/* Header Section */}
-        <div className="text-center mb-10">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
             Baitul Qur'an Al-Ikhwan
           </h1>
-          <div className="h-1 w-8 bg-emerald-500 mx-auto mt-3 rounded-full" />
-          <p className="text-slate-400 dark:text-slate-500 text-[10px] font-bold mt-4 tracking-[0.2em] uppercase">
+          <div className="h-1 w-10 bg-emerald-500 mx-auto mt-3 rounded-full" />
+          <p className="text-slate-500 dark:text-slate-400 text-xs font-bold mt-3 tracking-widest uppercase">
             Human Resources Management
           </p>
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} className="w-full space-y-6">
+        <form onSubmit={handleSubmit} className="w-full space-y-5">
           {error && (
-            <div className="bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-xs font-medium py-3 px-4 rounded-xl border border-red-100 dark:border-red-900/30 text-center animate-shake">
+            <div className="bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-xs font-semibold py-3 px-4 rounded-xl border border-red-100 dark:border-red-900/30 text-center animate-shake">
               {error}
             </div>
           )}
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Username</label>
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider ml-1">Username</label>
             <div className="relative group">
-              <User className="w-4 h-4 text-slate-400 dark:text-slate-600 absolute left-4 top-4 group-focus-within:text-emerald-600 transition-colors" />
+              <User className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-4 top-4 group-focus-within:text-emerald-600 transition-colors" />
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Username Anda"
-                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-2xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 dark:text-slate-100 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600"
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-2xl pl-11 pr-4 py-3.5 text-base focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 dark:text-slate-100 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
                 required
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Password</label>
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider ml-1">Password</label>
             <div className="relative group">
-              <Lock className="w-4 h-4 text-slate-400 dark:text-slate-600 absolute left-4 top-4 group-focus-within:text-emerald-600 transition-colors" />
+              <Lock className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-4 top-4 group-focus-within:text-emerald-600 transition-colors" />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-2xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 dark:text-slate-100 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600"
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-2xl pl-11 pr-4 py-3.5 text-base focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 dark:text-slate-100 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
                 required
               />
             </div>
@@ -120,21 +120,21 @@ export const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-emerald-200/50 dark:shadow-none flex items-center justify-center gap-3 disabled:opacity-70 mt-8 active:scale-[0.98] cursor-pointer"
+            className="w-full bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white font-bold text-base py-3.5 rounded-2xl transition-all shadow-lg shadow-emerald-200/50 dark:shadow-none flex items-center justify-center gap-3 disabled:opacity-70 mt-6 active:scale-[0.98] cursor-pointer"
           >
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                <LogIn className="w-4 h-4" />
+                <LogIn className="w-5 h-5" />
                 <span>Masuk Sekarang</span>
               </>
             )}
           </button>
         </form>
 
-        <div className="mt-12 text-center">
-          <p className="text-[10px] text-slate-400 dark:text-slate-600 font-medium">
+        <div className="mt-8 text-center">
+          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
             &copy; 2026 Baitul Qur'an Al-Ikhwan. All rights reserved.
           </p>
         </div>
