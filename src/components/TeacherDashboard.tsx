@@ -75,18 +75,25 @@ export const TeacherDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Teacher Profile & Monthly Summary Card */}
-      <div className="bg-slate-900 dark:bg-slate-950 rounded-xl sm:rounded-2xl p-6 text-white border border-slate-800 shadow-sm">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+      <div className="bg-pesantren-dark dark:bg-slate-950 rounded-xl sm:rounded-2xl p-6 text-white border border-white/5 shadow-xl relative overflow-hidden">
+        {/* Subtle Brand Pattern Overlay */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-pesantren-lime/5 rounded-full -mr-20 -mt-20 blur-3xl" />
+        
+        <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className={`w-14 h-14 rounded-xl ${currentUser?.avatarColor || 'bg-emerald-600'} flex items-center justify-center font-bold text-xl text-white shadow-md border border-emerald-500/30`}>
-              {currentUser?.name ? currentUser.name.split(' ')[0]?.[0] : 'U'}
-              {currentUser?.name ? (currentUser.name.split(' ')[1]?.[0] || 'A') : 'A'}
+            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg border-2 border-pesantren-lime/20 p-1.5 shrink-0 transform -rotate-1">
+              <img 
+                src="/assets/logo_bqa.jpg" 
+                alt="BQA Logo" 
+                className="w-full h-full object-contain"
+                referrerPolicy="no-referrer"
+              />
             </div>
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+              <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white leading-none">
                 {currentUser?.name || 'Guru'}
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-pesantren-lime font-bold mt-2 uppercase tracking-widest">
                 {currentUser?.position || 'Guru'} • Unit {currentUser?.unit || '-'}
               </p>
             </div>
@@ -95,10 +102,10 @@ export const TeacherDashboard: React.FC = () => {
           <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
             <button
               onClick={() => setShowSlipModal(true)}
-              className="flex-1 lg:flex-none inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg font-semibold text-xs shadow-xs transition-all"
+              className="flex-1 lg:flex-none inline-flex items-center justify-center gap-2 bg-pesantren-emerald hover:bg-pesantren-emerald/90 text-white px-5 py-3 rounded-xl font-bold text-xs shadow-lg transition-all active:scale-95"
             >
-              <Printer className="w-4 h-4 text-emerald-200" />
-              <span>Lihat Slip Gaji ({selectedPeriod})</span>
+              <Printer className="w-4 h-4 text-pesantren-lime" />
+              <span>Cetak Slip Gaji {selectedPeriod}</span>
             </button>
           </div>
         </div>

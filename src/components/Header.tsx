@@ -115,12 +115,17 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Logo and Brand Header */}
           <div className="p-5 border-b border-white/5 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-emerald-600 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-emerald-900/20">
-                <span className="text-sm font-extrabold tracking-tighter">BQA</span>
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg overflow-hidden border border-white/10 p-0.5">
+                <img 
+                  src="/assets/logo_bqa.jpg" 
+                  alt="BQA Logo" 
+                  className="w-full h-full object-contain"
+                  referrerPolicy="no-referrer"
+                />
               </div>
               <div className="leading-tight">
-                <h1 className="font-semibold text-sm text-slate-100 tracking-tight">HRIS Pesantren</h1>
-                <p className="text-[10px] text-slate-500 truncate uppercase tracking-wider font-medium">Baitul Qur'an</p>
+                <h1 className="font-bold text-[13px] text-slate-100 tracking-tight leading-none mb-1">Baitul Qur'an</h1>
+                <p className="text-[9px] text-pesantren-lime uppercase tracking-[0.15em] font-black">Al-Ikhwan HRIS</p>
               </div>
             </div>
             <button 

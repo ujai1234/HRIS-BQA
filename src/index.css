@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@theme {
+  --color-pesantren-lime: #D4E157;
+  --color-pesantren-emerald: #00966B;
+  --color-pesantren-dark: #1B5E20;
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer utilities {

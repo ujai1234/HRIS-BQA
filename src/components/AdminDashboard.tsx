@@ -420,13 +420,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
               <Bar 
                 dataKey="tepatWaktu" 
                 name="Hadir" 
-                fill="#10b981" 
+                fill="var(--color-pesantren-emerald)" 
                 stackId="attendanceStack" 
               />
               <Bar 
                 dataKey="terlambat" 
                 name="Late" 
-                fill="#f59e0b" 
+                fill="var(--color-pesantren-lime)" 
                 stackId="attendanceStack" 
               />
               <Bar 
@@ -575,8 +575,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
                 <Tooltip content={<CurrencyTooltip />} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 10, fontWeight: 600, paddingTop: 15 }} />
                 <Bar dataKey="baseSalary" name="Gapok" fill="#334155" stackId="a" barSize={32} />
-                <Bar dataKey="honor" name="Honor JP" fill="#10b981" stackId="a" barSize={32} />
-                <Bar dataKey="transport" name="Transport" fill="#0d9488" stackId="a" radius={[4, 4, 0, 0]} barSize={32} />
+                <Bar dataKey="honor" name="Honor JP" fill="var(--color-pesantren-emerald)" stackId="a" barSize={32} />
+                <Bar dataKey="transport" name="Transport" fill="var(--color-pesantren-lime)" stackId="a" radius={[4, 4, 0, 0]} barSize={32} />
               </BarChart>
             </ResponsiveContainer>
           </div>

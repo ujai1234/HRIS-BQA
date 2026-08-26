@@ -58,22 +58,31 @@ export const LoginPage: React.FC = () => {
 
       {/* Islamic Pattern Background Overlay */}
       <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/islamic-art.png")' }} />
-      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-[#00966b]/10 to-transparent" />
+      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-pesantren-emerald/10 to-transparent" />
       
-      <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-[2rem] shadow-[0_20px_50px_rgba(0,150,107,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-8 sm:p-12 flex flex-col items-center relative z-10 border border-emerald-50 dark:border-slate-800">
+      <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,150,107,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-8 sm:p-12 flex flex-col items-center relative z-10 border border-pesantren-lime/20 dark:border-slate-800">
         
         {/* Logo Section */}
-        <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#00966b] to-[#007a57] flex items-center justify-center mb-8 shadow-lg shadow-emerald-200/50 transform -rotate-3">
-          <span className="text-white text-3xl font-extrabold tracking-tighter drop-shadow-sm">BQA</span>
+        <div className="w-24 h-24 rounded-[2rem] bg-white flex items-center justify-center mb-8 shadow-xl border-4 border-pesantren-lime/30 transform -rotate-2 p-1.5">
+          <img 
+            src="/assets/logo_bqa.jpg" 
+            alt="BQA Logo" 
+            className="w-full h-full object-contain"
+            referrerPolicy="no-referrer"
+          />
         </div>
 
         {/* Header Section */}
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight leading-tight">
-            Baitul Qur'an <span className="text-[#00966b]">Al-Ikhwan</span>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tighter leading-none">
+            BAITUL QUR'AN
           </h1>
-          <p className="text-slate-400 dark:text-slate-500 text-sm font-medium mt-2 tracking-wide uppercase text-[10px]">
-            Sistem HRIS & Penggajian Terpadu
+          <h2 className="text-xl font-bold text-pesantren-emerald mt-1 tracking-tight">
+            AL-IKHWAN
+          </h2>
+          <div className="h-1 w-12 bg-pesantren-lime mx-auto mt-4 rounded-full" />
+          <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black mt-4 tracking-[0.2em] uppercase">
+            Sistem HRIS Terpadu
           </p>
         </div>
 
@@ -88,13 +97,13 @@ export const LoginPage: React.FC = () => {
           <div className="space-y-2">
             <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Username</label>
             <div className="relative group">
-              <User className="w-5 h-5 text-slate-300 dark:text-slate-600 absolute left-4 top-3.5 group-focus-within:text-[#00966b] transition-colors" />
+              <User className="w-5 h-5 text-slate-300 dark:text-slate-600 absolute left-4 top-3.5 group-focus-within:text-pesantren-emerald transition-colors" />
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Masukkan username"
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl pl-12 pr-4 py-4 text-sm focus:outline-none focus:ring-4 focus:ring-[#00966b]/5 focus:border-[#00966b] dark:text-slate-100 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600"
+                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl pl-12 pr-4 py-4 text-sm focus:outline-none focus:ring-4 focus:ring-pesantren-emerald/5 focus:border-pesantren-emerald dark:text-slate-100 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600"
                 required
               />
             </div>
@@ -103,13 +112,13 @@ export const LoginPage: React.FC = () => {
           <div className="space-y-2">
             <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Kata Sandi</label>
             <div className="relative group">
-              <Lock className="w-5 h-5 text-slate-300 dark:text-slate-600 absolute left-4 top-3.5 group-focus-within:text-[#00966b] transition-colors" />
+              <Lock className="w-5 h-5 text-slate-300 dark:text-slate-600 absolute left-4 top-3.5 group-focus-within:text-pesantren-emerald transition-colors" />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Masukkan kata sandi"
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl pl-12 pr-4 py-4 text-sm focus:outline-none focus:ring-4 focus:ring-[#00966b]/5 focus:border-[#00966b] dark:text-slate-100 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600"
+                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl pl-12 pr-4 py-4 text-sm focus:outline-none focus:ring-4 focus:ring-pesantren-emerald/5 focus:border-pesantren-emerald dark:text-slate-100 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600"
                 required
               />
             </div>
@@ -118,7 +127,7 @@ export const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-[#00966b] to-[#00b380] hover:from-[#007a57] hover:to-[#00966b] text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-emerald-200/50 dark:shadow-none flex items-center justify-center gap-3 disabled:opacity-70 mt-6 active:scale-[0.98]"
+            className="w-full bg-gradient-to-r from-pesantren-emerald to-pesantren-dark hover:from-pesantren-dark hover:to-pesantren-emerald text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-emerald-200/50 dark:shadow-none flex items-center justify-center gap-3 disabled:opacity-70 mt-6 active:scale-[0.98]"
           >
             {loading ? (
               <Loader2 className="w-6 h-6 animate-spin" />
