@@ -7,6 +7,9 @@ import { GuruView } from './components/GuruView';
 import { AdminView } from './components/AdminView';
 import { KepsekView } from './components/KepsekView';
 import { SessionTimeoutManager } from './components/SessionTimeoutManager';
+import { LearningNeedManagement } from './components/LearningNeedManagement';
+import { BadalManagement } from './components/BadalManagement';
+import { GuruDeviceNotificationToast } from './components/GuruDeviceNotificationToast';
 
 const MainContent: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -37,6 +40,9 @@ const MainContent: React.FC = () => {
       if (currentPath === '/dashboard/guru/jadwal') {
         return <GuruView initialTab="jadwal" key="guru-jadwal" />;
       }
+      if (currentPath === '/dashboard/guru/kebutuhan') {
+        return <LearningNeedManagement key="guru-kebutuhan" />;
+      }
       return <GuruView initialTab="clockin_journal" key="guru-clockin" />;
     }
 
@@ -56,6 +62,9 @@ const MainContent: React.FC = () => {
       if (currentPath === '/dashboard/admin/audit') {
         return <AdminView initialTab="audit_logs" key="admin-audit" />;
       }
+      if (currentPath === '/dashboard/admin/kebutuhan') {
+        return <LearningNeedManagement key="admin-kebutuhan" />;
+      }
       return <AdminView initialTab="dashboard" key="admin-dashboard" />;
     }
 
@@ -63,8 +72,11 @@ const MainContent: React.FC = () => {
       if (currentPath === '/dashboard/kepsek/audit') {
         return <KepsekView initialTab="ketaatan_jurnal" key="kepsek-audit" />;
       }
-      if (currentPath === '/dashboard/kepsek/laporan') {
-        return <KepsekView initialTab="laporan_payroll" key="kepsek-laporan" />;
+      if (currentPath === '/dashboard/kepsek/badal') {
+        return <BadalManagement key="kepsek-badal" />;
+      }
+      if (currentPath === '/dashboard/kepsek/kebutuhan') {
+        return <LearningNeedManagement key="kepsek-kebutuhan" />;
       }
       return <KepsekView initialTab="ringkasan_kehadiran" key="kepsek-overview" />;
     }
@@ -79,6 +91,9 @@ const MainContent: React.FC = () => {
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
       />
+
+      {/* Real-time Guru Device Push Notification Floating Toast */}
+      <GuruDeviceNotificationToast />
 
       {/* Main Workspace Area */}
       <div className="flex-1 flex flex-col min-w-0 lg:pl-64">

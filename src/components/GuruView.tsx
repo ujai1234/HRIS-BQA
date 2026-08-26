@@ -187,31 +187,6 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
               NIP: {currentUser?.nip || '-'} • {currentUser?.position || 'Guru Pengampu'} • Semester Ganjil 2026/2027
             </p>
           </div>
-
-          {/* Quick Metrics Strip (Non-Financial: Jam Pelajaran, Hari Hadir, Jurnal Selesai, Jurnal Pending) */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2.5 border border-slate-100 dark:border-slate-800 min-w-[105px]">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 block">Total Beban KBM</span>
-              <span className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5 block">{totalWeeklyHours} JP /pekan</span>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2.5 border border-slate-100 dark:border-slate-800 min-w-[105px]">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 block">Hari Hadir</span>
-              <span className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5 block">{teacherPayroll.totalPresentDays} Hari</span>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2.5 border border-slate-100 dark:border-slate-800 min-w-[105px]">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 block">Jurnal Selesai</span>
-              <span className="text-sm font-bold text-emerald-800 dark:text-emerald-400 mt-0.5 block">{completedJournalsCount} Sesi</span>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2.5 border border-slate-100 dark:border-slate-800 min-w-[105px]">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 block">Jurnal Pending</span>
-              <span className={`text-sm font-bold mt-0.5 block ${pendingJournalsCount > 0 ? 'text-amber-600 dark:text-amber-500' : 'text-slate-900 dark:text-slate-100'}`}>
-                {pendingJournalsCount} Sesi
-              </span>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -219,21 +194,6 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
       {activeSubTab === 'clockin_journal' && (
         <div className="space-y-4">
           
-          {/* Simple Workflow Explainer Banner */}
-          <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-600 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded">
-                Alur KBM
-              </span>
-              <p className="text-xs text-slate-700 dark:text-slate-300">
-                1. Klik <strong>Presensi Masuk</strong> (waktu terkunci otomatis) ➔ 2. Form <strong>Isi Jurnal</strong> akan terbuka langsung ➔ 3. Selesai.
-              </p>
-            </div>
-            <span className="text-[11px] text-slate-400 dark:text-slate-500 font-mono self-start sm:self-auto">
-              Hari ini: {formatIndonesianDate(todayStr)}
-            </span>
-          </div>
-
           {/* Dedicated Section: Jurnal Hari Ini yang Perlu Diisi (if any) */}
           {todayPendingJournals.length > 0 && (
             <div className="bg-amber-50/90 dark:bg-amber-950/20 border border-amber-200/90 dark:border-amber-900/30 rounded-xl p-4 space-y-3 shadow-2xs">
@@ -273,8 +233,7 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
                       className="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1.5 shadow-2xs self-start sm:self-auto"
                     >
                       <BookOpen className="w-3.5 h-3.5" />
-                      <span>Isi Jurnal Sekarang</span>
-                      <ArrowRight className="w-3 h-3" />
+                      <span>Isi Jurnal</span>
                     </button>
                   </div>
                 ))}
@@ -386,7 +345,7 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
 
                               {isCompleted && (
                                 <span className="text-emerald-800 dark:text-emerald-400 font-medium inline-flex items-center gap-1">
-                                  <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Jurnal Lengkap
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Selesai & Tersimpan
                                 </span>
                               )}
 
@@ -399,9 +358,9 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
                           )}
                         </div>
 
-                        {/* Right: Actions */}
+                        {/* Right: Single Consolidated Action Button / Hidden if completed */}
                         <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                          {/* 1. Belum Presensi */}
+                          {/* 1. Belum Presensi: Single Button Presensi Masuk */}
                           {!hasClockedIn && !isSubstituted && (
                             <button
                               onClick={() => setActiveClockInSchedule(schedule)}
@@ -412,7 +371,7 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
                             </button>
                           )}
 
-                          {/* 2. Sudah Presensi, Belum Isi Jurnal */}
+                          {/* 2. Sudah Presensi, Belum Isi Jurnal: Single Button Isi Jurnal */}
                           {isPendingJournal && att && (
                             <button
                               onClick={() => setActiveJournalData({ attendance: att, schedule })}
@@ -423,14 +382,12 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
                             </button>
                           )}
 
-                          {/* 3. Jurnal Selesai */}
-                          {isCompleted && att && (
-                            <button
-                              onClick={() => setActiveJournalData({ attendance: att, schedule })}
-                              className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors border border-slate-200 dark:border-slate-700"
-                            >
-                              Lihat Jurnal
-                            </button>
+                          {/* 3. Selesai: Hidden from filling again, badge only */}
+                          {isCompleted && (
+                            <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded-md border border-emerald-200/80 dark:border-emerald-800/50 inline-flex items-center gap-1">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>Selesai</span>
+                            </span>
                           )}
 
                           {isSubstituted && (

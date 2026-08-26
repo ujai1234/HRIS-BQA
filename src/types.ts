@@ -1,4 +1,31 @@
-export type UserRole = 'ADMIN' | 'GURU' | 'KEPALA_PESANTREN' | 'SYSTEM';
+export type UserRole = 
+  | 'ADMIN' 
+  | 'GURU' 
+  | 'KEPALA_SMP' 
+  | 'KEPALA_MA' 
+  | 'KEPALA_PESANTREN' 
+  | 'SYSTEM';
+
+export const isKepsekRole = (role?: UserRole): boolean => {
+  return role === 'KEPALA_SMP' || role === 'KEPALA_MA' || role === 'KEPALA_PESANTREN';
+};
+
+export const getRoleUnit = (role?: UserRole, userUnit?: UnitType): UnitType | 'ALL' => {
+  if (role === 'KEPALA_SMP') return 'SMP';
+  if (role === 'KEPALA_MA') return 'MA';
+  if (role === 'KEPALA_PESANTREN') return 'PESANTREN';
+  if (role === 'ADMIN') return 'ALL';
+  return userUnit || 'UMUM';
+};
+
+export const getRoleDisplayName = (role?: UserRole, position?: string): string => {
+  if (role === 'ADMIN') return 'Administrator';
+  if (role === 'KEPALA_SMP') return 'Kepala Sekolah SMP';
+  if (role === 'KEPALA_MA') return 'Kepala Madrasah Aliyah';
+  if (role === 'KEPALA_PESANTREN') return 'Mudir / Kepala Pesantren';
+  if (role === 'GURU') return 'Guru / Asatidz';
+  return position || 'Pengguna';
+};
 
 export type PositionCategory = 
   | 'Kepsek SMP'
@@ -84,7 +111,6 @@ export interface TeachingJournal {
   classNotes?: string; // Catatan Kendala / Keaktifan Kelas
   studentAttendance: StudentAttendance;
   assignmentGiven?: string; // Tugas Rumah / Hafalan
-  learningNeeds?: string; // Kebutuhan Pembelajaran (Pengajuan ke Admin)
   filledAt: string; // ISO Timestamp
 }
 
@@ -130,6 +156,9 @@ export interface TeacherPayrollItem {
   totalTransport: number; // totalPresentDays * dailyTransport
   
   // Potongan
+  lateCountLight: number;
+  lateCountMedium: number;
+  lateCountHeavy: number;
   latePenaltyTotal: number;
   emptyJournalCount: number;
   emptyJournalPenalty: number; // 50% x (hours x rate)
@@ -170,4 +199,19 @@ export interface AuditLog {
   severity: AuditSeverity;
   ipAddress?: string;
   timestamp: string; // ISO String
+}
+
+export type LearningNeedStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED';
+export type LearningNeedCategory = 'Buku' | 'Alat Tulis' | 'Sarana' | 'Kurikulum' | 'Lainnya';
+
+export interface LearningNeedRequest {
+  id: string;
+  teacherId: string;
+  title: string;
+  description: string;
+  category: LearningNeedCategory;
+  status: LearningNeedStatus;
+  adminComment?: string;
+  createdAt: string;
+  updatedAt: string;
 }

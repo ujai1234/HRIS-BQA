@@ -46,9 +46,6 @@ export const JournalModal: React.FC<JournalModalProps> = ({
   const [assignmentGiven, setAssignmentGiven] = useState(
     existingJournal?.assignmentGiven || ''
   );
-  const [learningNeeds, setLearningNeeds] = useState(
-    existingJournal?.learningNeeds || ''
-  );
 
   const [studentAttendance, setStudentAttendance] = useState<StudentAttendance>(
     existingJournal?.studentAttendance || {
@@ -122,7 +119,6 @@ export const JournalModal: React.FC<JournalModalProps> = ({
           classNotes,
           studentAttendance,
           assignmentGiven,
-          learningNeeds,
         });
       }
 
@@ -318,23 +314,6 @@ export const JournalModal: React.FC<JournalModalProps> = ({
                 className="w-full text-xs p-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-600"
               />
             </div>
-          </div>
-
-          {/* Pengajuan Kebutuhan Pembelajaran */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Pengajuan Kebutuhan Pembelajaran (Tampil di Admin)
-            </label>
-            <textarea
-              rows={2}
-              value={learningNeeds}
-              onChange={(e) => setLearningNeeds(e.target.value)}
-              placeholder="Ajukan kebutuhan buku, alat tulis, sarana kelas, atau masukan kurikulum..."
-              className="w-full text-xs p-2.5 rounded-lg border border-rose-100 bg-rose-50/30 focus:outline-none focus:border-rose-400 placeholder:text-slate-400"
-            />
-            <p className="text-[10px] text-slate-500 mt-1 italic">
-              * Catatan ini akan diteruskan langsung ke Dashboard Admin untuk ditindaklanjuti.
-            </p>
           </div>
 
           {/* Action Buttons */}

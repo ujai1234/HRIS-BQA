@@ -369,17 +369,28 @@ export const MasterTeachers: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-slate-600 dark:text-slate-400 font-medium block">Hak Akses</label>
-                  <select
-                    value={formData.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
+                  <label className="text-slate-600 dark:text-slate-400 font-medium block">Nomor WhatsApp</label>
+                  <input
+                    type="text"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="Contoh: 628123456789"
                     className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-slate-100"
-                  >
-                    <option value="GURU">Guru Pengajar</option>
-                    <option value="ADMIN">Administrator TU</option>
-                    <option value="KEPALA_PESANTREN">Kepala Pesantren</option>
-                  </select>
+                  />
                 </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-slate-600 dark:text-slate-400 font-medium block">Hak Akses</label>
+                <select
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-slate-100"
+                >
+                  <option value="GURU">Guru Pengajar</option>
+                  <option value="ADMIN">Administrator TU</option>
+                  <option value="KEPALA_PESANTREN">Kepala Pesantren</option>
+                </select>
               </div>
 
               <div className="border-t border-slate-100 dark:border-slate-800 pt-3 space-y-2.5">

@@ -60,65 +60,58 @@ export const LoginPage: React.FC = () => {
       <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/islamic-art.png")' }} />
       <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-pesantren-emerald/10 to-transparent" />
       
-      <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,150,107,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] p-8 sm:p-12 flex flex-col items-center relative z-10 border border-pesantren-lime/20 dark:border-slate-800">
+      <div className="max-w-[400px] w-full bg-white dark:bg-slate-900 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.05)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-10 flex flex-col items-center relative z-10 border border-slate-100 dark:border-slate-800/60">
         
         {/* Logo Section */}
-        <div className="w-24 h-24 rounded-[2rem] bg-white flex items-center justify-center mb-8 shadow-xl border-4 border-pesantren-lime/30 transform -rotate-2 p-1.5">
-          <img 
-            src="/assets/logo_bqa.jpg" 
-            alt="BQA Logo" 
-            className="w-full h-full object-contain"
-            referrerPolicy="no-referrer"
-          />
+        <div className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-emerald-600 to-emerald-800 flex items-center justify-center mb-8 shadow-xl border-4 border-white dark:border-slate-800 relative group overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-30" />
+          <span className="text-white text-3xl font-black tracking-tight">BQA</span>
         </div>
 
         {/* Header Section */}
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tighter leading-none">
-            BAITUL QUR'AN
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
+            Baitul Qur'an Al-Ikhwan
           </h1>
-          <h2 className="text-xl font-bold text-pesantren-emerald mt-1 tracking-tight">
-            AL-IKHWAN
-          </h2>
-          <div className="h-1 w-12 bg-pesantren-lime mx-auto mt-4 rounded-full" />
-          <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black mt-4 tracking-[0.2em] uppercase">
-            Sistem HRIS Terpadu
+          <div className="h-1 w-8 bg-emerald-500 mx-auto mt-3 rounded-full" />
+          <p className="text-slate-400 dark:text-slate-500 text-[10px] font-bold mt-4 tracking-[0.2em] uppercase">
+            Human Resources Management
           </p>
         </div>
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="w-full space-y-6">
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-[11px] font-semibold py-2.5 px-4 rounded-xl border border-red-100 dark:border-red-900/30 text-center animate-shake">
+            <div className="bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-xs font-medium py-3 px-4 rounded-xl border border-red-100 dark:border-red-900/30 text-center animate-shake">
               {error}
             </div>
           )}
 
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Username</label>
+            <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Username</label>
             <div className="relative group">
-              <User className="w-5 h-5 text-slate-300 dark:text-slate-600 absolute left-4 top-3.5 group-focus-within:text-pesantren-emerald transition-colors" />
+              <User className="w-4 h-4 text-slate-400 dark:text-slate-600 absolute left-4 top-4 group-focus-within:text-emerald-600 transition-colors" />
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Masukkan username"
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl pl-12 pr-4 py-4 text-sm focus:outline-none focus:ring-4 focus:ring-pesantren-emerald/5 focus:border-pesantren-emerald dark:text-slate-100 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600"
+                placeholder="Username Anda"
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-2xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 dark:text-slate-100 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600"
                 required
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Kata Sandi</label>
+            <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Password</label>
             <div className="relative group">
-              <Lock className="w-5 h-5 text-slate-300 dark:text-slate-600 absolute left-4 top-3.5 group-focus-within:text-pesantren-emerald transition-colors" />
+              <Lock className="w-4 h-4 text-slate-400 dark:text-slate-600 absolute left-4 top-4 group-focus-within:text-emerald-600 transition-colors" />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Masukkan kata sandi"
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl pl-12 pr-4 py-4 text-sm focus:outline-none focus:ring-4 focus:ring-pesantren-emerald/5 focus:border-pesantren-emerald dark:text-slate-100 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600"
+                placeholder="••••••••"
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-2xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 dark:text-slate-100 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600"
                 required
               />
             </div>
@@ -127,40 +120,23 @@ export const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-pesantren-emerald to-pesantren-dark hover:from-pesantren-dark hover:to-pesantren-emerald text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-emerald-200/50 dark:shadow-none flex items-center justify-center gap-3 disabled:opacity-70 mt-6 active:scale-[0.98]"
+            className="w-full bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-emerald-200/50 dark:shadow-none flex items-center justify-center gap-3 disabled:opacity-70 mt-8 active:scale-[0.98] cursor-pointer"
           >
             {loading ? (
-              <Loader2 className="w-6 h-6 animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                <LogIn className="w-5 h-5" />
-                <span>Masuk ke Sistem</span>
+                <LogIn className="w-4 h-4" />
+                <span>Masuk Sekarang</span>
               </>
             )}
           </button>
         </form>
 
-        {/* Demo Account Info */}
-        <div className="w-full mt-12 pt-8 border-t border-slate-50 dark:border-slate-800">
-          <div className="text-center">
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-[0.2em] mb-4">
-              Akses Cepat Demo
-            </p>
-            <div className="grid grid-cols-1 gap-2">
-              <div className="flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/30 px-4 py-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
-                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">ADMIN</span>
-                <code className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">admin / admin123</code>
-              </div>
-              <div className="flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/30 px-4 py-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
-                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">KEPSEK</span>
-                <code className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">kepsek / kepsek123</code>
-              </div>
-              <div className="flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/30 px-4 py-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
-                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">GURU</span>
-                <code className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">ustfuadaroqomm / guru123</code>
-              </div>
-            </div>
-          </div>
+        <div className="mt-12 text-center">
+          <p className="text-[10px] text-slate-400 dark:text-slate-600 font-medium">
+            &copy; 2026 Baitul Qur'an Al-Ikhwan. All rights reserved.
+          </p>
         </div>
       </div>
     </div>

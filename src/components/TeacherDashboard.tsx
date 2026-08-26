@@ -81,13 +81,9 @@ export const TeacherDashboard: React.FC = () => {
         
         <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg border-2 border-pesantren-lime/20 p-1.5 shrink-0 transform -rotate-1">
-              <img 
-                src="/assets/logo_bqa.jpg" 
-                alt="BQA Logo" 
-                className="w-full h-full object-contain"
-                referrerPolicy="no-referrer"
-              />
+            <div className="w-16 h-16 bg-gradient-to-br from-pesantren-emerald to-pesantren-dark rounded-2xl flex items-center justify-center shadow-lg border-2 border-pesantren-lime/20 shrink-0 transform -rotate-1 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-30" />
+              <span className="text-white text-2xl font-black tracking-tighter drop-shadow-md">BQA</span>
             </div>
             <div>
               <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white leading-none">

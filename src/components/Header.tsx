@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Building2, 
   UserCheck, 
@@ -22,10 +22,15 @@ import {
   LogOut,
   ArrowRight,
   Sun,
-  Moon
+  Moon,
+  ClipboardList,
+  Bell,
+  Check,
+  RefreshCw
 } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
-import { UserRole } from '../types';
+import { UserRole, isKepsekRole } from '../types';
+import { useGuruNotifications, GuruNotificationItem, GuruNotifType } from '../hooks/useGuruNotifications';
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -37,7 +42,6 @@ export const Header: React.FC<HeaderProps> = ({
   setSidebarOpen 
 }) => {
   const { 
-    teachers, 
     currentUser, 
     currentRole, 
     currentPath,
@@ -45,11 +49,90 @@ export const Header: React.FC<HeaderProps> = ({
     logout,
     toggleDarkMode,
     setCurrentPath,
-    setCurrentUserById, 
     selectedPeriod, 
     setSelectedPeriod, 
-    resetToDefault 
+    resetToDefault,
+    refreshData,
+    isLoading
   } = useHRIS();
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    if (isRefreshing || isLoading) return;
+    setIsRefreshing(true);
+    try {
+      await refreshData();
+    } finally {
+      setTimeout(() => {
+        setIsRefreshing(false);
+      }, 500);
+    }
+  };
+
+  const { 
+    notifications, 
+    unreadCount, 
+    markAsRead, 
+    markAllAsRead 
+  } = useGuruNotifications();
+
+  const [showNotifPopover, setShowNotifPopover] = useState(false);
+  const [filterType, setFilterType] = useState<'ALL' | 'BADAL' | 'KBM' | 'REQUEST'>('ALL');
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  // Close popover when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setShowNotifPopover(false);
+      }
+    };
+    if (showNotifPopover) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showNotifPopover]);
+
+  const filteredNotifications = notifications.filter(item => {
+    if (filterType === 'ALL') return true;
+    if (filterType === 'BADAL') return item.type === 'BADAL';
+    if (filterType === 'KBM') return item.type === 'ATTENDANCE_OPEN' || item.type === 'JOURNAL_PENDING';
+    if (filterType === 'REQUEST') return item.type === 'REQUEST_UPDATE';
+    return true;
+  });
+
+  const getTagStyle = (type: GuruNotifType) => {
+    switch (type) {
+      case 'BADAL':
+        return 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-900';
+      case 'ATTENDANCE_OPEN':
+        return 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900';
+      case 'JOURNAL_PENDING':
+        return 'bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 border-sky-200 dark:border-sky-900';
+      case 'REQUEST_UPDATE':
+        return 'bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-900';
+      default:
+        return 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+    }
+  };
+
+  const getTagLabel = (type: GuruNotifType) => {
+    switch (type) {
+      case 'BADAL':
+        return 'Tugas Badal';
+      case 'ATTENDANCE_OPEN':
+        return 'Presensi';
+      case 'JOURNAL_PENDING':
+        return 'Jurnal';
+      case 'REQUEST_UPDATE':
+        return 'Pengajuan';
+      default:
+        return 'Info';
+    }
+  };
 
   // Role-specific navigation items
   const getNavItems = () => {
@@ -61,6 +144,7 @@ export const Header: React.FC<HeaderProps> = ({
             { path: '/dashboard/guru', label: 'Presensi & Jurnal', icon: Clock, desc: 'Catat kehadiran & PBM harian' },
             { path: '/dashboard/guru/slip', label: 'Slip Gaji', icon: CreditCard, desc: 'Rincian penghasilan bulanan' },
             { path: '/dashboard/guru/jadwal', label: 'Jadwal Mengajar', icon: CalendarDays, desc: 'Jadwal tatap muka mingguan' },
+            { path: '/dashboard/guru/kebutuhan', label: 'Pengajuan Kebutuhan', icon: ClipboardList, desc: 'Fasilitas pembelajaran' },
           ]
         }
       ];
@@ -72,24 +156,28 @@ export const Header: React.FC<HeaderProps> = ({
             { path: '/dashboard/admin', label: 'Dashboard Monitoring', icon: LayoutDashboard, desc: 'Pemantauan kegiatan & gaji' },
             { path: '/dashboard/admin/guru', label: "Data Guru & Kafa'ah", icon: Users, desc: 'Data asatidz & kafa’ah honorarium' },
             { path: '/dashboard/admin/jadwal', label: 'Jadwal Pelajaran', icon: CalendarDays, desc: 'Jadwal KBM SMP, MA & Ponpes' },
-            { path: '/dashboard/admin/badal', label: 'Guru Pengganti', icon: UserCheck, desc: 'Penggantian guru berhalangan' },
+            { path: '/dashboard/admin/badal', label: 'Guru Pengganti', icon: UserCheck, desc: 'Monitoring badal SMP, MA & Ponpes' },
+            { path: '/dashboard/admin/kebutuhan', label: 'Monitoring Kebutuhan', icon: ClipboardList, desc: 'Data ajuan guru & disposisi' },
             { path: '/dashboard/admin/payroll', label: 'Rekapitulasi Gaji', icon: CreditCard, desc: 'Perhitungan gaji bulanan' },
             { path: '/dashboard/admin/audit', label: 'Log Audit Keamanan', icon: ShieldCheck, desc: 'Rekam aktivitas & keamanan' },
           ]
         }
       ];
-    } else {
-      // KEPALA PESANTREN
+    } else if (isKepsekRole(currentRole)) {
+      const unit = currentRole === 'KEPALA_SMP' ? 'SMP' : currentRole === 'KEPALA_MA' ? 'MA' : 'PESANTREN';
       return [
         {
-          title: 'Dashboard',
+          title: `DASHBOARD ${unit}`,
           items: [
             { path: '/dashboard/kepsek', label: 'Dashboard', icon: LayoutDashboard, desc: 'Statistik kehadiran & KBM' },
             { path: '/dashboard/kepsek/audit', label: 'Monitoring Jurnal', icon: GraduationCap, desc: 'Ketaatan pengisian jurnal' },
-            { path: '/dashboard/kepsek/laporan', label: 'Laporan Gaji', icon: CreditCard, desc: 'Pengesahan penggajian' },
+            { path: '/dashboard/kepsek/badal', label: 'Guru Pengganti', icon: UserCheck, desc: 'Pencarian & penugasan badal' },
+            { path: '/dashboard/kepsek/kebutuhan', label: 'Persetujuan Kebutuhan', icon: ClipboardList, desc: 'Verifikasi ajuan guru unit' },
           ]
         }
       ];
+    } else {
+      return [];
     }
   };
 
@@ -115,13 +203,8 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Logo and Brand Header */}
           <div className="p-5 border-b border-white/5 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg overflow-hidden border border-white/10 p-0.5">
-                <img 
-                  src="/assets/logo_bqa.jpg" 
-                  alt="BQA Logo" 
-                  className="w-full h-full object-contain"
-                  referrerPolicy="no-referrer"
-                />
+              <div className="w-10 h-10 bg-gradient-to-br from-pesantren-emerald to-pesantren-dark rounded-xl flex items-center justify-center shadow-lg border border-white/10 group-hover:scale-105 transition-transform">
+                <span className="text-white text-sm font-black tracking-tighter drop-shadow-md">BQA</span>
               </div>
               <div className="leading-tight">
                 <h1 className="font-bold text-[13px] text-slate-100 tracking-tight leading-none mb-1">Baitul Qur'an</h1>
@@ -211,6 +294,19 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right: RBAC Persona Simulator & Period Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Manual Refresh Data Button */}
+          <button
+            id="btn-refresh-data"
+            onClick={handleRefresh}
+            disabled={isRefreshing || isLoading}
+            className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-800 text-slate-600 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 py-1.5 px-2.5 sm:px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 shrink-0"
+            title="Refresh Data terbaru dari server tanpa memuat ulang halaman"
+            aria-label="Refresh Data"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 ${isRefreshing || isLoading ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Refresh Data</span>
+          </button>
+
           {/* Reset Database Button (Visible for Admins) */}
           {currentRole === 'ADMIN' && (
             <button
@@ -246,6 +342,170 @@ export const Header: React.FC<HeaderProps> = ({
             </select>
             <ChevronDown className="w-3 h-3 text-slate-400 absolute right-2 top-3 pointer-events-none" />
           </div>
+
+          {/* Notification Bell (Guru Only) */}
+          {currentRole === 'GURU' && (
+            <div className="relative" ref={notifRef}>
+              <button
+                onClick={() => setShowNotifPopover(!showNotifPopover)}
+                className={`p-2 rounded-lg transition-all cursor-pointer relative ${
+                  showNotifPopover 
+                    ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40' 
+                    : 'text-slate-400 hover:text-emerald-600 hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
+                title="Notifikasi Aktivitas Guru"
+                aria-label="Pemberitahuan Guru"
+              >
+                <Bell className="w-4 h-4" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500 text-[8px] font-bold text-white items-center justify-center"></span>
+                  </span>
+                )}
+              </button>
+
+              {/* Minimalist Modern Notification Popover */}
+              {showNotifPopover && (
+                <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+                  {/* Header */}
+                  <div className="p-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                        Notifikasi Guru
+                      </h3>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                        Jadwal badal, waktu presensi & pengisian jurnal
+                      </p>
+                    </div>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={markAllAsRead}
+                        className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer flex items-center gap-1"
+                      >
+                        <Check className="w-3 h-3" />
+                        <span>Tandai Dibaca</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Filter Pills */}
+                  <div className="flex items-center gap-1 px-3 py-2 bg-slate-50/70 dark:bg-slate-800/40 border-b border-slate-100 dark:border-slate-800/80 overflow-x-auto text-[10px]">
+                    <button
+                      onClick={() => setFilterType('ALL')}
+                      className={`px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer shrink-0 ${
+                        filterType === 'ALL'
+                          ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
+                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      Semua ({notifications.length})
+                    </button>
+                    <button
+                      onClick={() => setFilterType('BADAL')}
+                      className={`px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer shrink-0 ${
+                        filterType === 'BADAL'
+                          ? 'bg-amber-600 text-white'
+                          : 'text-slate-500 hover:text-amber-600'
+                      }`}
+                    >
+                      Badal ({notifications.filter(n => n.type === 'BADAL').length})
+                    </button>
+                    <button
+                      onClick={() => setFilterType('KBM')}
+                      className={`px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer shrink-0 ${
+                        filterType === 'KBM'
+                          ? 'bg-emerald-600 text-white'
+                          : 'text-slate-500 hover:text-emerald-600'
+                      }`}
+                    >
+                      Absen & Jurnal ({notifications.filter(n => n.type === 'ATTENDANCE_OPEN' || n.type === 'JOURNAL_PENDING').length})
+                    </button>
+                    <button
+                      onClick={() => setFilterType('REQUEST')}
+                      className={`px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer shrink-0 ${
+                        filterType === 'REQUEST'
+                          ? 'bg-purple-600 text-white'
+                          : 'text-slate-500 hover:text-purple-600'
+                      }`}
+                    >
+                      Ajuan ({notifications.filter(n => n.type === 'REQUEST_UPDATE').length})
+                    </button>
+                  </div>
+
+                  {/* List Content */}
+                  <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 p-1.5 space-y-1">
+                    {filteredNotifications.length === 0 ? (
+                      <div className="p-8 text-center text-xs text-slate-400 dark:text-slate-500">
+                        Tidak ada notifikasi pada kategori ini.
+                      </div>
+                    ) : (
+                      filteredNotifications.map((notif) => (
+                        <div 
+                          key={notif.id}
+                          className={`p-3 rounded-xl transition-all cursor-pointer border ${
+                            notif.isRead 
+                              ? 'bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800/40 border-transparent' 
+                              : 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-100/60 dark:border-emerald-900/40 hover:bg-emerald-50/70'
+                          }`}
+                          onClick={() => {
+                            markAsRead(notif.id);
+                            setCurrentPath(notif.actionPath);
+                            setShowNotifPopover(false);
+                          }}
+                        >
+                          <div className="flex items-start justify-between gap-2 mb-1">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              {!notif.isRead && (
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                              )}
+                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider shrink-0 ${getTagStyle(notif.type)}`}>
+                                {getTagLabel(notif.type)}
+                              </span>
+                              <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
+                                {notif.title}
+                              </p>
+                            </div>
+                            <span className="text-[9px] text-slate-400 shrink-0 whitespace-nowrap">
+                              {notif.timeLabel}
+                            </span>
+                          </div>
+
+                          <p className="text-[11px] text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed mb-2">
+                            {notif.subtitle}
+                          </p>
+
+                          <div className="flex items-center justify-between pt-1">
+                            <span className="text-[9px] text-slate-400">
+                              {notif.type === 'BADAL' ? 'Penugasan Pengganti' : notif.type === 'REQUEST_UPDATE' ? 'Disposisi' : 'KBM Harian'}
+                            </span>
+                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 inline-flex items-center gap-0.5 group-hover:underline">
+                              <span>{notif.actionLabel}</span>
+                              <ChevronRight className="w-2.5 h-2.5" />
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Footer */}
+                  <div className="p-2.5 bg-slate-50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 text-center">
+                    <button
+                      onClick={() => {
+                        setCurrentPath('/dashboard/guru');
+                        setShowNotifPopover(false);
+                      }}
+                      className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 inline-flex items-center gap-1 transition-colors cursor-pointer"
+                    >
+                      <span>Buka Menu Utama Presensi & Jurnal</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Theme Toggle Button */}
           <button

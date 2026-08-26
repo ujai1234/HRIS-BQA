@@ -1,13 +1,16 @@
 import React from 'react';
 import { 
-  Printer, 
-  Search
+  CheckCircle2, 
+  AlertCircle, 
+  Clock, 
+  GraduationCap
 } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
-import { formatRupiah } from '../utils/formatters';
 
 export const KepsekAuditView: React.FC = () => {
   const { 
+    teachers,
+    schedules,
     attendances, 
     selectedPeriod, 
     calculateAllPayroll
@@ -23,6 +26,7 @@ export const KepsekAuditView: React.FC = () => {
 
   const onTimeAttendance = attendances.filter((a) => a.lateCategory === 'TEPAT_WAKTU').length;
   const punctualityRate = totalRecorded > 0 ? Math.round((onTimeAttendance / totalRecorded) * 100) : 92;
+  const totalScheduledHours = schedules.reduce((acc, s) => acc + s.hours, 0);
 
   return (
     <div className="space-y-4">
@@ -53,19 +57,19 @@ export const KepsekAuditView: React.FC = () => {
           <p className={`text-xl font-bold mt-1 ${pendingJournals > 0 ? 'text-amber-700 dark:text-amber-500' : 'text-slate-700 dark:text-slate-300'}`}>
             {pendingJournals} Sesi
           </p>
-          <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 block">Potensi denda 50% honor KBM</span>
+          <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 block">Perlu dilengkapi oleh asatidz</span>
         </div>
 
         <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
-          <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block">Total Kafa'ah Terhitung</span>
-          <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 mt-1 truncate">
-            {formatRupiah(payrollSummary.totalNet)}
+          <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block">Total Tenaga Pendidik</span>
+          <p className="text-xl font-bold text-slate-900 dark:text-slate-100 mt-1 truncate">
+            {teachers.length} Asatidz
           </p>
-          <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 block">23 Tenaga Pendidik</span>
+          <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 block">{totalScheduledHours} JP Terjadwal /pekan</span>
         </div>
       </div>
 
-      {/* Leadership Audit Table without Slip Column */}
+      {/* Leadership Audit Table without Financial Columns */}
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
@@ -77,13 +81,15 @@ export const KepsekAuditView: React.FC = () => {
                 <th className="py-2.5 px-3 text-center">Beban (JP)</th>
                 <th className="py-2.5 px-3 text-center">Kehadiran</th>
                 <th className="py-2.5 px-3 text-center">Kepatuhan Jurnal</th>
-                <th className="py-2.5 px-3 text-right">Potongan Disiplin</th>
-                <th className="py-2.5 px-4 text-right">Gaji Bersih</th>
+                <th className="py-2.5 px-3 text-center">Kedisiplinan Waktu</th>
+                <th className="py-2.5 px-4 text-center">Status Pembelajaran</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
               {payrollSummary.items.map((item, index) => {
                 const hasPendingJournal = item.emptyJournalCount > 0;
+                const hasLate = item.lateCountLight > 0 || item.lateCountMedium > 0 || item.lateCountHeavy > 0;
+                const totalLateCount = item.lateCountLight + item.lateCountMedium + item.lateCountHeavy;
 
                 return (
                   <tr key={item.teacher?.id || index} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/50 transition-colors">
@@ -115,17 +121,29 @@ export const KepsekAuditView: React.FC = () => {
                         </span>
                       )}
                     </td>
-                    <td className="py-2.5 px-3 text-right font-medium">
-                      {item.totalDeductions > 0 ? (
-                        <span className="text-rose-600 dark:text-rose-400 font-semibold">
-                          -{formatRupiah(item.totalDeductions)}
+                    <td className="py-2.5 px-3 text-center">
+                      {hasLate ? (
+                        <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800/50">
+                          {totalLateCount}x Terlambat
                         </span>
                       ) : (
-                        <span className="text-slate-300 dark:text-slate-600">-</span>
+                        <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
+                          Disiplin Tepat Waktu
+                        </span>
                       )}
                     </td>
-                    <td className="py-2.5 px-4 text-right font-bold text-emerald-950 dark:text-emerald-400">
-                      {formatRupiah(item.netSalary)}
+                    <td className="py-2.5 px-4 text-center">
+                      {hasPendingJournal ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100/70 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300">
+                          <AlertCircle className="w-3 h-3 text-amber-600" />
+                          Perlu Supervisi
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100/70 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          KBM Tuntas
+                        </span>
+                      )}
                     </td>
                   </tr>
                 );
@@ -137,3 +155,4 @@ export const KepsekAuditView: React.FC = () => {
     </div>
   );
 };
+

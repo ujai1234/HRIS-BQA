@@ -44,7 +44,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
     badalAssignments, 
     selectedPeriod, 
     calculateAllPayroll,
-    currentUser
+    currentUser,
+    currentRole,
+    setCurrentPath,
+    learningNeedRequests
   } = useHRIS();
 
   const payrollSummary = calculateAllPayroll(selectedPeriod);
@@ -57,6 +60,29 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
   const completedJournals = attendances.filter((a) => a.status === 'SELESAI').length;
   const pendingJournals = attendances.filter((a) => a.status === 'HADIR_JURNAL_KOSONG').length;
   const badalSessions = attendances.filter((a) => a.isBadal).length || badalAssignments.length;
+  
+  const requests = Array.isArray(learningNeedRequests) ? learningNeedRequests : [];
+  
+  const kepsekUnit = currentUser?.unit || 'SMP';
+
+  const pendingNeeds = currentRole === 'ADMIN' 
+    ? requests.filter(r => r.status === 'PENDING').length
+    : currentRole === 'KEPALA_PESANTREN'
+    ? requests.filter(r => {
+        const teacher = teachers.find(t => t.id === r.teacherId);
+        return r.status === 'PENDING' && teacher?.unit === kepsekUnit;
+      }).length
+    : 0;
+
+  const totalNeeds = currentRole === 'ADMIN'
+    ? requests.length
+    : currentRole === 'KEPALA_PESANTREN'
+    ? requests.filter(r => {
+        const teacher = teachers.find(t => t.id === r.teacherId);
+        return teacher?.unit === kepsekUnit;
+      }).length
+    : 0;
+
   const totalRecorded = Math.max(1, completedJournals + pendingJournals);
   const complianceRate = Math.round((completedJournals / totalRecorded) * 100);
 
@@ -187,6 +213,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
         <div 
           onClick={() => {
             if (setActiveTab) setActiveTab('kepsek_audit');
+            else if (currentRole === 'KEPALA_PESANTREN') setCurrentPath('/dashboard/kepsek/audit');
           }}
           className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer"
         >
@@ -194,18 +221,74 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
           <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-500 mt-1">{complianceRate}%</p>
         </div>
 
+        {currentRole === 'KEPALA_PESANTREN' || isReadOnly ? (
+          <div 
+            onClick={() => {
+              if (setActiveTab) setActiveTab('badal');
+              else if (currentRole === 'KEPALA_PESANTREN') setCurrentPath('/dashboard/kepsek/badal');
+            }}
+            className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer"
+          >
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Guru Badal</p>
+            <p className="text-2xl font-bold text-purple-600 dark:text-purple-400 mt-1">{badalSessions} Sesi</p>
+          </div>
+        ) : (
+          <div 
+            onClick={() => {
+              if (setActiveTab) setActiveTab('payroll');
+            }}
+            className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer"
+          >
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Payroll</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1 truncate">
+              {formatRupiah(payrollSummary.totalNet).replace(',00', '')}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Pending Needs Summary Card - Minimalist & Modern */}
+      {(currentRole === 'ADMIN' || currentRole === 'KEPALA_PESANTREN') && (
         <div 
           onClick={() => {
-            if (setActiveTab) setActiveTab('payroll');
+            if (currentRole === 'ADMIN') {
+              setCurrentPath('/dashboard/admin/kebutuhan');
+            } else {
+              setCurrentPath('/dashboard/kepsek/kebutuhan');
+            }
           }}
-          className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer"
+          className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer group shadow-xs"
         >
-          <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Payroll</p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1 truncate">
-            {formatRupiah(payrollSummary.totalNet).replace(',00', '')}
-          </p>
+          <div className="flex items-center gap-3">
+            <div className={`w-2.5 h-2.5 rounded-full ${pendingNeeds > 0 ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                  {currentRole === 'KEPALA_PESANTREN' 
+                    ? `Persetujuan Kebutuhan KBM (Unit ${kepsekUnit})` 
+                    : 'Monitoring Kebutuhan KBM (Seluruh Unit)'}
+                </span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                  pendingNeeds > 0 
+                    ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300' 
+                    : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
+                }`}>
+                  {pendingNeeds > 0 ? `${pendingNeeds} Ajuan Menunggu Persetujuan` : 'Semua Ajuan Terverifikasi'}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                {currentRole === 'KEPALA_PESANTREN'
+                  ? `Total ${totalNeeds} ajuan kebutuhan sarana dari guru Unit ${kepsekUnit}.`
+                  : `Total ${totalNeeds} ajuan dari guru seluruh unit pesantren.`}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-xs font-semibold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors self-end sm:self-auto">
+            <span>Buka Modul Kebutuhan</span>
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Monthly Trend Chart - New Visual Component */}
       <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
@@ -319,43 +402,78 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
         </div>
       </div>
 
-      {/* Secondary Chart Row: Komposisi Anggaran Payroll & Top Asatidz */}
+      {/* Secondary Chart Row: Komposisi Guru/Payroll & Top Asatidz */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Chart 3: Komposisi Komponen Payroll per Unit */}
-        <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-            <div>
-              <h3 className="font-bold text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                Komposisi Penggajian per Unit
-              </h3>
+        {/* Chart 3: Komposisi Guru per Unit (Kepsek) or Penggajian per Unit (Admin) */}
+        {currentRole === 'KEPALA_PESANTREN' || isReadOnly ? (
+          <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <h3 className="font-bold text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                  Distribusi Guru & Jadwal per Unit
+                </h3>
+              </div>
+            </div>
+
+            <div className="h-72 w-full pt-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={unitStats} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#f1f5f9" className="dark:opacity-10" />
+                  <XAxis 
+                    dataKey="unit" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                  />
+                  <Tooltip content={<CountTooltip />} />
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: 10, fontWeight: 600, paddingTop: 20 }} />
+                  <Bar dataKey="guruCount" name="Asatidz" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={32} />
+                  <Bar dataKey="totalSchedules" name="Jadwal KBM" fill="#10b981" radius={[4, 4, 0, 0]} barSize={32} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
+        ) : (
+          <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <h3 className="font-bold text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                  Komposisi Penggajian per Unit
+                </h3>
+              </div>
+            </div>
 
-          <div className="h-72 w-full pt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={unitStats} margin={{ top: 20, right: 0, left: 10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#f1f5f9" className="dark:opacity-10" />
-                <XAxis 
-                  dataKey="unit" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 9, fontWeight: 600, fill: '#94a3b8' }} 
-                  tickFormatter={(val) => `Rp${(val / 1000000).toFixed(1)}jt`}
-                />
-                <Tooltip content={<CurrencyTooltip />} />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: 10, fontWeight: 600, paddingTop: 20 }} />
-                <Bar dataKey="baseSalary" name="Gapok" fill="#334155" stackId="a" radius={[0, 0, 0, 0]} barSize={40} />
-                <Bar dataKey="honor" name="Honor JP" fill="#10b981" stackId="a" radius={[0, 0, 0, 0]} barSize={40} />
-                <Bar dataKey="transport" name="Transport" fill="#0d9488" stackId="a" radius={[4, 4, 0, 0]} barSize={40} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="h-72 w-full pt-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={unitStats} margin={{ top: 20, right: 0, left: 10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#f1f5f9" className="dark:opacity-10" />
+                  <XAxis 
+                    dataKey="unit" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 9, fontWeight: 600, fill: '#94a3b8' }} 
+                    tickFormatter={(val) => `Rp${(val / 1000000).toFixed(1)}jt`}
+                  />
+                  <Tooltip content={<CurrencyTooltip />} />
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: 10, fontWeight: 600, paddingTop: 20 }} />
+                  <Bar dataKey="baseSalary" name="Gapok" fill="#334155" stackId="a" radius={[0, 0, 0, 0]} barSize={40} />
+                  <Bar dataKey="honor" name="Honor JP" fill="#10b981" stackId="a" radius={[0, 0, 0, 0]} barSize={40} />
+                  <Bar dataKey="transport" name="Transport" fill="#0d9488" stackId="a" radius={[4, 4, 0, 0]} barSize={40} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Chart 4: Top 6 Guru dengan Beban Mengajar Terbanyak */}
         <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">

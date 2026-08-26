@@ -1,4 +1,4 @@
-import { Teacher, ClassSchedule, AttendanceRecord, BadalAssignment, AuditLog } from '../types';
+import { Teacher, ClassSchedule, AttendanceRecord, BadalAssignment, AuditLog, LearningNeedRequest } from '../types';
 
 export const INITIAL_TEACHERS: Teacher[] = [
   {
@@ -10,11 +10,11 @@ export const INITIAL_TEACHERS: Teacher[] = [
     baseSalary: 1000000,
     hourlyRate: 40000,
     dailyTransport: 10000,
-    role: 'KEPALA_PESANTREN',
+    role: 'KEPALA_SMP',
     phone: '0812-3456-7801',
     avatarColor: 'bg-emerald-600',
     isActive: true,
-    username: 'kepsek',
+    username: 'kepseksmp',
     password: 'kepsek123',
   },
   {
@@ -26,12 +26,12 @@ export const INITIAL_TEACHERS: Teacher[] = [
     baseSalary: 1100000,
     hourlyRate: 40000,
     dailyTransport: 10000,
-    role: 'KEPALA_PESANTREN',
+    role: 'KEPALA_MA',
     phone: '0812-3456-7802',
     avatarColor: 'bg-teal-600',
     isActive: true,
-    username: 'tofanhasan',
-    password: 'guru123',
+    username: 'kepsekma',
+    password: 'kepsek123',
   },
   {
     id: 'T-03',
@@ -46,7 +46,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     phone: '0812-3456-7803',
     avatarColor: 'bg-cyan-700',
     isActive: true,
-    username: 'cahyono',
+    username: 'kepsekpesantren',
     password: 'kepsek123',
   },
   {
@@ -909,10 +909,10 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
     id: 'LOG-006',
     userId: 'T-01',
     userName: 'Ust Idwan Rizqi R',
-    userRole: 'KEPALA_PESANTREN',
+    userRole: 'KEPALA_SMP',
     action: 'LOGIN',
     category: 'AUTH',
-    details: 'Login berhasil ke panel Eksekutif Kepala Pesantren',
+    details: 'Login berhasil ke panel Kepala Sekolah SMP',
     severity: 'INFO',
     ipAddress: '192.168.1.55',
     timestamp: '2026-08-24T09:30:00.000Z',
@@ -930,4 +930,76 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
     timestamp: '2026-08-24T09:45:00.000Z',
   },
 ];
+
+export const INITIAL_LEARNING_NEEDS: LearningNeedRequest[] = [
+  // SMP Unit Requests
+  {
+    id: 'REQ-SMP-01',
+    teacherId: 'T-18', // Ust Farhan (Guru SMP)
+    title: 'Pengadaan Buku Paket Durusul Lughah Jilid 1 & 2',
+    description: 'Dibutuhkan 30 eksemplar buku cetak panduan santri baru kelas VII SMP untuk menunjang KBM Bahasa Arab.',
+    category: 'Buku',
+    status: 'APPROVED',
+    adminComment: 'Disetujui oleh Kepala Sekolah SMP untuk semester ganjil.',
+    createdAt: '2026-08-18T08:00:00.000Z',
+    updatedAt: '2026-08-19T10:00:00.000Z',
+  },
+  {
+    id: 'REQ-SMP-02',
+    teacherId: 'T-04', // Ust Syuhada AA (Wakasek SMP)
+    title: 'Spidol Whiteboard, Penghapus & Refill Tinta Hitam/Biru Kelas 7-9 SMP',
+    description: 'Stok ATK spidol habis di ruang kelas SMP, diperlukan 2 dus spidol dan 5 botol tinta isi ulang.',
+    category: 'Alat Tulis',
+    status: 'PENDING',
+    createdAt: '2026-08-22T09:15:00.000Z',
+    updatedAt: '2026-08-22T09:15:00.000Z',
+  },
+
+  // MA Unit Requests
+  {
+    id: 'REQ-MA-01',
+    teacherId: 'T-19', // Ustz Masyithoh NH (Guru MA)
+    title: 'Papan Tulis Whiteboard Grid Matematika & Jangka Sorong Praktikum',
+    description: 'Untuk mendukung pembelajaran Matematika dan Fisika Terapan MA kelas X-IPA.',
+    category: 'Sarana',
+    status: 'APPROVED',
+    adminComment: 'Disetujui oleh Kepala MA, dikoordinasikan dengan bagian sarpras.',
+    createdAt: '2026-08-15T11:00:00.000Z',
+    updatedAt: '2026-08-16T14:30:00.000Z',
+  },
+  {
+    id: 'REQ-MA-02',
+    teacherId: 'T-09', // Ust A Rosyid (Guru MA)
+    title: 'Kitab Kuning Balaghah (Al-Jauharul Maknun) & Syarah untuk Kelas XII MA',
+    description: 'Pengadaan 25 kitab rujukan kurikulum keagamaan MA tingkat akhir.',
+    category: 'Kurikulum',
+    status: 'PENDING',
+    createdAt: '2026-08-23T07:45:00.000Z',
+    updatedAt: '2026-08-23T07:45:00.000Z',
+  },
+
+  // Pesantren Unit Requests
+  {
+    id: 'REQ-PONPES-01',
+    teacherId: 'T-08', // Ust Fuad Arqom (Guru Pesantren)
+    title: 'Mushaf Al-Qur\'an Rasm Utsmani Mujazza 30 Juz untuk Halaqah Tahfidz',
+    description: 'Pengadaan 50 mushaf saku terpisah per juz untuk memudahkan santri menghafal di halaqah.',
+    category: 'Buku',
+    status: 'APPROVED',
+    adminComment: 'Disetujui Mudir Pesantren, segera dibelanjakan via bendahara yayasan.',
+    createdAt: '2026-08-12T13:20:00.000Z',
+    updatedAt: '2026-08-13T09:00:00.000Z',
+  },
+  {
+    id: 'REQ-PONPES-02',
+    teacherId: 'T-14', // Ustz Mu'minatul Haq (Guru Tahfidz Pesantren)
+    title: 'Mikrofon Wireless Portable & Baterai Rechargable Halaqah Tahfidz Putri',
+    description: 'Diperlukan untuk kegiatan tasmi akbar dan talaqqi santriwati di Aula Maryam.',
+    category: 'Sarana',
+    status: 'PENDING',
+    createdAt: '2026-08-24T10:00:00.000Z',
+    updatedAt: '2026-08-24T10:00:00.000Z',
+  }
+];
+
 

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Printer } from 'lucide-react';
+import { Search, Printer, ArrowRight } from 'lucide-react';
 import {
   ResponsiveContainer,
   BarChart,
@@ -24,8 +24,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
     schedules, 
     attendances, 
     badalAssignments, 
+    learningNeedRequests,
     selectedPeriod,
-    calculateAllPayroll 
+    calculateAllPayroll,
+    setCurrentPath
   } = useHRIS();
 
   const [unitFilter, setUnitFilter] = useState<'ALL' | 'SMP' | 'MA' | 'PESANTREN'>('ALL');
@@ -48,6 +50,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
   const pendingJournals = attendances.filter((a) => a.status === 'HADIR_JURNAL_KOSONG').length;
   const totalRecorded = Math.max(1, completedJournals + pendingJournals);
   const complianceRate = Math.round((completedJournals / totalRecorded) * 100);
+
+  // Learning Need Status Calculations for Admin
+  const requests = Array.isArray(learningNeedRequests) ? learningNeedRequests : [];
+  const pendingLearningNeeds = requests.filter(r => r.status === 'PENDING').length;
+  const pendingSMP = requests.filter(r => r.status === 'PENDING' && teachers.find(t => t.id === r.teacherId)?.unit === 'SMP').length;
+  const pendingMA = requests.filter(r => r.status === 'PENDING' && teachers.find(t => t.id === r.teacherId)?.unit === 'MA').length;
+  const pendingPesantren = requests.filter(r => r.status === 'PENDING' && teachers.find(t => t.id === r.teacherId)?.unit === 'PESANTREN').length;
 
   // Weekly Attendance Trend Data
   const weeklyAttendanceData = useMemo(() => {
@@ -199,22 +208,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
       .slice(0, 8);
   }, [attendances, schedules, teachers, unitFilter, searchActivity]);
 
-  // Learning Needs Requests
-  const learningNeedsRequests = useMemo(() => {
-    return attendances
-      .filter(a => a.journal?.learningNeeds && a.journal.learningNeeds.trim() !== '')
-      .map(a => ({
-        id: a.id,
-        date: a.date,
-        teacher: teachers.find(t => t.id === a.actualTeacherId || t.id === a.teacherId)?.name || 'Guru',
-        unit: schedules.find(s => s.id === a.scheduleId)?.unit || 'UMUM',
-        subject: schedules.find(s => s.id === a.scheduleId)?.subject || 'KBM',
-        className: schedules.find(s => s.id === a.scheduleId)?.className || '-',
-        needs: a.journal?.learningNeeds || '',
-        timestamp: a.journal?.filledAt || a.date
-      }))
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-  }, [attendances, teachers, schedules]);
+  // Learning Needs Requests Summary (Top 5 Pending)
+  const pendingRequests = useMemo(() => {
+    return (learningNeedRequests || [])
+      .filter(r => r.status === 'PENDING')
+      .slice(0, 5);
+  }, [learningNeedRequests]);
 
   // Minimalist Tooltip
   const AttendanceTooltip = ({ active, payload, label }: any) => {
@@ -329,6 +328,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
           <span className="text-[11px] text-slate-500 dark:text-slate-500 block mt-1 font-mono">
             Potongan: -{formatRupiah(payrollSummary.totalDeductions)}
           </span>
+        </div>
+      </div>
+
+      {/* 2.2 Pending Learning Needs Summary Card (Minimalist & Modern) */}
+      <div 
+        onClick={() => setCurrentPath('/dashboard/admin/kebutuhan')}
+        className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer group shadow-xs"
+      >
+        <div className="flex items-center gap-3">
+          <div className={`w-2.5 h-2.5 rounded-full ${pendingLearningNeeds > 0 ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                Pengajuan Kebutuhan Pembelajaran
+              </span>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                pendingLearningNeeds > 0 
+                  ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300' 
+                  : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
+              }`}>
+                {pendingLearningNeeds > 0 ? `${pendingLearningNeeds} Menunggu Persetujuan Kepsek` : 'Semua Ajuan Terverifikasi'}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              Rincian ajuan pending: SMP ({pendingSMP}), MA ({pendingMA}), Ponpes ({pendingPesantren})
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 text-xs font-semibold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors self-end sm:self-auto">
+          <span>Kelola Modul Kebutuhan</span>
+          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
         </div>
       </div>
 
@@ -629,60 +659,72 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
         </div>
       </div>
 
-      {/* 6. Pengajuan Kebutuhan Pembelajaran (New Section) */}
+      {/* 6. Pengajuan Kebutuhan Pembelajaran (New) */}
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
         <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
+            <div className={`w-2 h-2 rounded-full ${pendingRequests.length > 0 ? 'bg-rose-500 animate-pulse' : 'bg-slate-300'}`}></div>
             <h2 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
-              Pengajuan Kebutuhan Pembelajaran dari Guru
+              Antrean Pengajuan Kebutuhan Guru
             </h2>
           </div>
-          <span className="text-[10px] font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded uppercase tracking-wider">
-            Prioritas
-          </span>
+          <button 
+            onClick={() => setCurrentPath('/dashboard/admin/kebutuhan')}
+            className="text-[10px] font-bold text-pesantren-emerald hover:text-pesantren-emerald/80 uppercase tracking-widest transition-colors"
+          >
+            Lihat Semua
+          </button>
         </div>
 
         <div className="p-0">
-          {learningNeedsRequests.length === 0 ? (
+          {pendingRequests.length === 0 ? (
             <div className="p-8 text-center">
-              <p className="text-xs text-slate-400">Belum ada pengajuan kebutuhan pembelajaran terbaru.</p>
+              <p className="text-xs text-slate-400">Semua pengajuan telah ditindaklanjuti.</p>
             </div>
           ) : (
             <div className="divide-y divide-slate-100 dark:divide-slate-800">
-              {learningNeedsRequests.slice(0, 5).map((req) => (
-                <div key={req.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
-                    <div>
-                      <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                        {req.teacher}
-                      </h4>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                        {req.unit} • {req.subject} ({req.className}) • {formatIndonesianDate(req.date)}
+              {pendingRequests.map((req) => {
+                const teacher = teachers.find(t => t.id === req.teacherId);
+                return (
+                  <div key={req.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-6 h-6 rounded-lg ${teacher?.avatarColor || 'bg-emerald-700'} flex items-center justify-center text-[10px] font-bold text-white`}>
+                          {teacher?.name?.charAt(0)}
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                            {req.title}
+                          </h4>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                            Oleh: {teacher?.name} • {req.category}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono italic">
+                        {formatIndonesianDate(req.createdAt)}
+                      </span>
+                    </div>
+                    <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800/50">
+                      <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
+                        {req.description}
                       </p>
                     </div>
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono italic">
-                      {new Date(req.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
                   </div>
-                  <div className="bg-rose-50/50 dark:bg-rose-950/20 p-3 rounded-lg border border-rose-100/50 dark:border-rose-900/30">
-                    <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed italic">
-                      "{req.needs}"
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
         
-        {learningNeedsRequests.length > 5 && (
-          <div className="p-3 bg-slate-50 dark:bg-slate-800/50 text-center border-t border-slate-100 dark:border-slate-800">
-            <button className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors">
-              Lihat Semua Pengajuan ({learningNeedsRequests.length})
-            </button>
-          </div>
-        )}
+        <div className="p-3 bg-slate-50 dark:bg-slate-800/50 text-center border-t border-slate-100 dark:border-slate-800">
+          <button 
+            onClick={() => setCurrentPath('/dashboard/admin/kebutuhan')}
+            className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors"
+          >
+            Kelola {learningNeedRequests.length} Pengajuan
+          </button>
+        </div>
       </div>
 
       {/* Official Report Modal */}

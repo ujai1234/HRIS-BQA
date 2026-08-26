@@ -1,6 +1,6 @@
 import { pgTable, text, integer, boolean, timestamp, uuid, doublePrecision, pgEnum } from 'drizzle-orm/pg-core';
 
-export const userRoleEnum = pgEnum('user_role', ['ADMIN', 'GURU', 'KEPALA_PESANTREN', 'SYSTEM']);
+export const userRoleEnum = pgEnum('user_role', ['ADMIN', 'GURU', 'KEPALA_SMP', 'KEPALA_MA', 'KEPALA_PESANTREN', 'SYSTEM']);
 export const unitTypeEnum = pgEnum('unit_type', ['SMP', 'MA', 'PESANTREN', 'UMUM']);
 export const dayOfWeekEnum = pgEnum('day_of_week', ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Ahad']);
 export const attendanceStatusEnum = pgEnum('attendance_status', [
@@ -105,4 +105,16 @@ export const auditLogs = pgTable('audit_logs', {
   severity: text('severity').notNull().default('INFO'),
   ipAddress: text('ip_address'),
   timestamp: text('timestamp').notNull(),
+});
+
+export const learningNeedRequests = pgTable('learning_need_requests', {
+  id: text('id').primaryKey(),
+  teacherId: text('teacher_id').references(() => teachers.id).notNull(),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  category: text('category').notNull(), // Buku, Alat Tulis, Sarana, Kurikulum, Lainnya
+  status: text('status').notNull().default('PENDING'), // PENDING, APPROVED, REJECTED, COMPLETED
+  adminComment: text('admin_comment'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });

@@ -11,7 +11,12 @@ import {
   UserRole,
   AuditLog,
   AuditCategory,
-  AuditSeverity
+  AuditSeverity,
+  LearningNeedRequest,
+  LearningNeedStatus,
+  isKepsekRole,
+  getRoleUnit,
+  getRoleDisplayName
 } from '../types';
 import { 
   INITIAL_TEACHERS, 
@@ -28,6 +33,7 @@ interface HRISContextType {
   attendances: AttendanceRecord[];
   badalAssignments: BadalAssignment[];
   auditLogs: AuditLog[];
+  learningNeedRequests: LearningNeedRequest[];
   currentUser: Teacher;
   currentRole: UserRole;
   selectedPeriod: string;
@@ -55,6 +61,7 @@ interface HRISContextType {
   // Guru Badal
   createBadalAssignment: (data: Omit<BadalAssignment, 'id' | 'createdAt' | 'status'>) => void;
   approveBadalAssignment: (badalId: string) => void;
+  deleteBadalAssignment: (badalId: string) => void;
   
   // Master Data
   addTeacher: (teacher: Omit<Teacher, 'id'>) => void;
@@ -81,7 +88,14 @@ interface HRISContextType {
     userOverride?: { id: string; name: string; role: UserRole }
   ) => Promise<void>;
 
-  // Reset
+  // Learning Needs
+  addLearningNeedRequest: (request: Omit<LearningNeedRequest, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => void;
+  updateLearningNeedRequestStatus: (id: string, status: LearningNeedStatus, adminComment?: string) => void;
+  deleteLearningNeedRequest: (id: string) => void;
+
+  // Reset & Sync
+  refreshData: () => Promise<void>;
+  isLoading: boolean;
   resetToDefault: () => void;
 }
 
@@ -102,51 +116,11 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [schedules, setSchedules] = useState<ClassSchedule[]>([]);
   const [attendances, setAttendances] = useState<AttendanceRecord[]>([]);
   const [badalAssignments, setBadalAssignments] = useState<BadalAssignment[]>([]);
+  const [learningNeedRequests, setLearningNeedRequests] = useState<LearningNeedRequest[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchAllData = async () => {
-    setIsLoading(true);
-    try {
-      // Get current user from state to determine filtering
-      const isGuru = currentRole === 'GURU';
-      const teacherIdParam = isGuru ? `?teacherId=${currentUserId}` : '';
-
-      const [tRes, sRes, aRes, bRes, lRes] = await Promise.all([
-        fetch('/api/teachers'),
-        fetch(`/api/schedules${teacherIdParam}`),
-        fetch(`/api/attendances${teacherIdParam}`),
-        fetch('/api/badal'),
-        fetch('/api/audit-logs')
-      ]);
-
-      const [t, s, a, b, l] = await Promise.all([
-        tRes.json(),
-        sRes.json(),
-        aRes.json(),
-        bRes.json(),
-        lRes.ok ? lRes.json() : []
-      ]);
-
-      if (t.length === 0) {
-        await fetch('/api/seed', { method: 'POST' });
-        return fetchAllData();
-      }
-
-      setTeachers(t);
-      setSchedules(s);
-      setAttendances(a);
-      setBadalAssignments(b);
-      if (Array.isArray(l) && l.length > 0) {
-        setAuditLogs(l);
-      }
-    } catch (error) {
-      console.error('Failed to fetch data', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // Derived current user object - with array check safety
   const [currentUserId, setCurrentUserId] = useState<string>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.CURRENT_USER_ID);
     return saved || '';
@@ -183,6 +157,77 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     }
   });
+
+  const currentUser = Array.isArray(teachers) 
+    ? (teachers.find((t) => t.id === currentUserId) || teachers[0] || INITIAL_TEACHERS[0])
+    : INITIAL_TEACHERS[0];
+
+  const fetchAllData = async () => {
+    setIsLoading(true);
+    try {
+      const isGuru = currentRole === 'GURU';
+      const isKepsek = isKepsekRole(currentRole);
+      const unit = getRoleUnit(currentRole, currentUser?.unit);
+
+      let teacherIdParam = isGuru ? `?teacherId=${currentUserId}` : '';
+      let unitParam = (isKepsek || isGuru) && unit !== 'ALL' ? `unit=${unit}` : '';
+      
+      // Combine params
+      let queryParams = '';
+      if (teacherIdParam && unitParam) queryParams = `${teacherIdParam}&${unitParam}`;
+      else if (teacherIdParam) queryParams = teacherIdParam;
+      else if (unitParam) queryParams = `?${unitParam}`;
+
+      const [tRes, sRes, aRes, bRes, lRes, lnRes] = await Promise.all([
+        fetch(`/api/teachers${unitParam ? `?${unitParam}` : ''}`),
+        fetch(`/api/schedules${queryParams}`),
+        fetch(`/api/attendances${queryParams}`),
+        fetch(`/api/badal${unitParam ? `?${unitParam}` : ''}`),
+        fetch('/api/audit-logs'),
+        fetch(`/api/learning-needs${unitParam ? `?${unitParam}` : ''}`)
+      ]);
+
+      const [t, s, a, b, l, ln] = await Promise.all([
+        tRes.json(),
+        sRes.json(),
+        aRes.json(),
+        bRes.json(),
+        lRes.ok ? lRes.json() : [],
+        lnRes.json()
+      ]);
+
+      if (t.length === 0) {
+        await fetch('/api/seed', { method: 'POST' });
+        return fetchAllData();
+      }
+
+      setTeachers(Array.isArray(t) ? t : []);
+      setSchedules(Array.isArray(s) ? s : []);
+      setAttendances(Array.isArray(a) ? a : []);
+      setBadalAssignments(Array.isArray(b) ? b : []);
+      setLearningNeedRequests(Array.isArray(ln) ? ln : []);
+      if (Array.isArray(l) && l.length > 0) {
+        setAuditLogs(l);
+      }
+    } catch (error) {
+      console.error('Failed to fetch data', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const refreshData = async () => {
+    setIsLoading(true);
+    try {
+      await fetchAllData();
+      toast.success('Data sistem berhasil diperbarui dari server');
+    } catch (error) {
+      console.error('Failed to refresh data', error);
+      toast.error('Gagal memperbarui data dari server');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchAllData();
@@ -221,11 +266,6 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.PERIOD, selectedPeriod);
   }, [selectedPeriod]);
-
-  // Derived current user object - with array check safety
-  const currentUser = Array.isArray(teachers) 
-    ? (teachers.find((t) => t.id === currentUserId) || teachers[0] || INITIAL_TEACHERS[0])
-    : INITIAL_TEACHERS[0];
 
   const logActivity = async (
     action: string,
@@ -274,7 +314,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logActivity(
       'LOGIN',
       'AUTH',
-      `Login berhasil ke sistem sebagai ${role === 'ADMIN' ? 'Administrator' : role === 'KEPALA_PESANTREN' ? 'Kepala Pesantren' : 'Guru / Asatidz'} (${targetUser.name})`,
+      `Login berhasil ke sistem sebagai ${getRoleDisplayName(role, targetUser.position)} (${targetUser.name})`,
       'INFO',
       { id: targetUser.id, name: targetUser.name, role }
     );
@@ -282,7 +322,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Trigger path change based on role
     if (role === 'GURU') setCurrentPath('/dashboard/guru/clockin');
     else if (role === 'ADMIN') setCurrentPath('/dashboard/admin');
-    else if (role === 'KEPALA_PESANTREN') setCurrentPath('/dashboard/kepsek/audit');
+    else if (isKepsekRole(role)) setCurrentPath('/dashboard/kepsek/audit');
 
     toast.success(`Selamat datang, ${targetUser.name}!`);
   };
@@ -320,7 +360,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCurrentRoleState(role);
     if (role === 'GURU') setCurrentPath('/dashboard/guru');
     else if (role === 'ADMIN') setCurrentPath('/dashboard/admin');
-    else if (role === 'KEPALA_PESANTREN') setCurrentPath('/dashboard/kepsek');
+    else if (isKepsekRole(role)) setCurrentPath('/dashboard/kepsek');
   };
 
   // Clock In Action
@@ -496,13 +536,32 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'APPROVED' })
-    }).then(() => fetchAllData());
+    }).then(() => {
+      fetchAllData();
+      toast.success('Penugasan guru badal berhasil disetujui');
+    });
 
     logActivity(
       'APPROVE_BADAL',
       'BADAL',
       `Persetujuan penugasan badal ID ${badalId} oleh ${currentUser.name}`,
       'INFO'
+    );
+  };
+
+  const deleteBadalAssignment = (badalId: string) => {
+    fetch(`/api/badal/${badalId}`, {
+      method: 'DELETE'
+    }).then(() => {
+      fetchAllData();
+      toast.success('Penugasan guru badal berhasil dibatalkan');
+    });
+
+    logActivity(
+      'DELETE_BADAL',
+      'BADAL',
+      `Pembatalan penugasan badal ID ${badalId} oleh ${currentUser.name}`,
+      'WARNING'
     );
   };
 
@@ -796,6 +855,9 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const lateRecords = attendances.filter((a) => a.actualTeacherId === teacherId && a.latePenalty > 0);
     const recordedLatePenalty = lateRecords.reduce((sum, a) => sum + a.latePenalty, 0);
     const latePenaltyTotal = recordedLatePenalty;
+    const lateCountLight = lateRecords.filter(a => a.lateCategory === 'TERLAMBAT_RINGAN').length;
+    const lateCountMedium = lateRecords.filter(a => a.lateCategory === 'TERLAMBAT_SEDANG').length;
+    const lateCountHeavy = lateRecords.filter(a => a.lateCategory === 'TERLAMBAT_BERAT').length;
 
     // 2. Empty Journal Penalty: 50% x (Jam Mengajar x Rp 40.000)
     const emptyJournalRecords = attendances.filter(
@@ -845,6 +907,9 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       totalPresentDays,
       dailyTransport: teacher.dailyTransport,
       totalTransport,
+      lateCountLight,
+      lateCountMedium,
+      lateCountHeavy,
       latePenaltyTotal,
       emptyJournalCount,
       emptyJournalPenalty,
@@ -879,6 +944,92 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   };
 
+  const addLearningNeedRequest = async (requestInput: Omit<LearningNeedRequest, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => {
+    const newId = `REQ-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const newRequest: LearningNeedRequest = {
+      ...requestInput,
+      id: newId,
+      status: 'PENDING',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Optimistic UI update
+    setLearningNeedRequests((prev) => [newRequest, ...prev]);
+
+    try {
+      const res = await fetch('/api/learning-needs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newRequest)
+      });
+      if (!res.ok) {
+        throw new Error('Failed to create learning need request on server');
+      }
+      const saved = await res.json();
+      setLearningNeedRequests((prev) => prev.map(r => r.id === newId ? saved : r));
+      toast.success('Pengajuan kebutuhan pembelajaran berhasil dikirim');
+    } catch (err) {
+      console.error('Error creating learning need:', err);
+      toast.error('Gagal menyimpan pengajuan ke database');
+      fetchAllData();
+    }
+
+    logActivity(
+      'SUBMIT_LEARNING_NEED',
+      'SYSTEM',
+      `Pengajuan kebutuhan: ${requestInput.title} (${requestInput.category})`,
+      'INFO'
+    );
+  };
+
+  const updateLearningNeedRequestStatus = async (id: string, status: LearningNeedStatus, adminComment?: string) => {
+    // Optimistic UI update
+    setLearningNeedRequests((prev) =>
+      prev.map((r) =>
+        r.id === id ? { ...r, status, adminComment: adminComment !== undefined ? adminComment : r.adminComment, updatedAt: new Date().toISOString() } : r
+      )
+    );
+
+    try {
+      const res = await fetch(`/api/learning-needs/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, adminComment })
+      });
+      if (!res.ok) throw new Error('Failed to update status');
+      const updated = await res.json();
+      setLearningNeedRequests((prev) => prev.map(r => r.id === id ? updated : r));
+      toast.success(`Status pengajuan diperbarui menjadi ${status}`);
+    } catch (err) {
+      console.error('Error updating learning need:', err);
+      toast.error('Gagal memperbarui status pengajuan');
+      fetchAllData();
+    }
+
+    logActivity(
+      'UPDATE_LEARNING_NEED_STATUS',
+      'SYSTEM',
+      `Status pengajuan kebutuhan ID ${id} diperbarui menjadi ${status}${adminComment ? `: ${adminComment}` : ''}`,
+      'INFO'
+    );
+  };
+
+  const deleteLearningNeedRequest = async (id: string) => {
+    setLearningNeedRequests((prev) => prev.filter(r => r.id !== id));
+    try {
+      const res = await fetch(`/api/learning-needs/${id}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) throw new Error('Failed to delete');
+      toast.success('Pengajuan berhasil dihapus');
+    } catch (err) {
+      console.error('Error deleting learning need:', err);
+      toast.error('Gagal menghapus pengajuan');
+      fetchAllData();
+    }
+  };
+
   const resetToDefault = () => {
     logActivity(
       'RESET_DATABASE',
@@ -901,6 +1052,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         attendances,
         badalAssignments,
         auditLogs,
+        learningNeedRequests,
         currentUser,
         currentRole,
         selectedPeriod,
@@ -919,6 +1071,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         markAttendanceDirect,
         createBadalAssignment,
         approveBadalAssignment,
+        deleteBadalAssignment,
         addTeacher,
         addTeachersBulk,
         addSchedulesBulk,
@@ -932,6 +1085,11 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         calculateTeacherPayroll,
         calculateAllPayroll,
         logActivity,
+        addLearningNeedRequest,
+        updateLearningNeedRequestStatus,
+        deleteLearningNeedRequest,
+        refreshData,
+        isLoading,
         resetToDefault,
       }}
     >
