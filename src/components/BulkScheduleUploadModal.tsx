@@ -278,27 +278,27 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
   const invalidCount = parsedRows.length - validCount;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-2xs animate-in fade-in duration-150">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 dark:border-slate-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/50 backdrop-blur-2xs animate-in fade-in duration-150">
+      <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-stone-200 dark:border-stone-800">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
+        <div className="px-6 py-4 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between bg-stone-50/50 dark:bg-stone-800/50">
           <div className="flex items-center gap-2.5">
             <div className="bg-emerald-100 dark:bg-emerald-950/50 p-2 rounded-xl text-emerald-800 dark:text-emerald-400">
               <Calendar className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100">
+              <h3 className="font-bold text-sm sm:text-base text-stone-900 dark:text-stone-100">
                 Unggah Jadwal Pelajaran Massal
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-stone-500 dark:text-stone-400">
                 Import berkas spreadsheet jadwal KBM dari Excel/CSV
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -320,7 +320,7 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
             </div>
             <button
               onClick={handleDownloadTemplate}
-              className="inline-flex items-center justify-center gap-1.5 bg-white dark:bg-slate-800 text-emerald-800 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-slate-700 border border-emerald-300 dark:border-emerald-800 px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-colors shrink-0 cursor-pointer"
+              className="inline-flex items-center justify-center gap-1.5 bg-white dark:bg-stone-800 text-emerald-800 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-stone-700 border border-emerald-300 dark:border-emerald-800 px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-colors shrink-0 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Unduh Template</span>
@@ -338,7 +338,7 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
               className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${
                 dragActive
                   ? 'border-emerald-500 bg-emerald-50/50 scale-[0.99]'
-                  : 'border-slate-300 dark:border-slate-700 hover:border-emerald-500 hover:bg-slate-50/70 dark:hover:bg-slate-800/50'
+                  : 'border-stone-300 dark:border-stone-700 hover:border-emerald-500 hover:bg-stone-50/70 dark:hover:bg-stone-800/50'
               }`}
             >
               <input
@@ -353,10 +353,10 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
                   <UploadCloud className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                  <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">
                     Klik untuk memilih berkas atau seret berkas ke sini
                   </p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                  <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
                     Pastikan format jam menggunakan HH:mm (contoh: 07:30)
                   </p>
                 </div>
@@ -365,10 +365,10 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
           ) : (
             <div className="space-y-4">
               {/* File Info & Stats */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-stone-50 dark:bg-stone-800/50 p-3 rounded-xl border border-stone-200 dark:border-stone-800">
                 <div className="flex items-center gap-2">
                   <FileSpreadsheet className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                  <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 font-mono truncate max-w-xs">
+                  <span className="text-xs font-semibold text-stone-800 dark:text-stone-200 font-mono truncate max-w-xs">
                     {fileName}
                   </span>
                 </div>
@@ -388,7 +388,7 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
                       setParsedRows([]);
                       setFileName(null);
                     }}
-                    className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 underline font-medium text-xs ml-2 cursor-pointer"
+                    className="text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 underline font-medium text-xs ml-2 cursor-pointer"
                   >
                     Ganti Berkas
                   </button>
@@ -396,9 +396,9 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
               </div>
 
               {/* Preview Table */}
-              <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden max-h-80 overflow-y-auto">
+              <div className="border border-stone-200 dark:border-stone-800 rounded-xl overflow-hidden max-h-80 overflow-y-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-100/80 dark:bg-slate-800 sticky top-0 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold">
+                  <thead className="bg-stone-100/80 dark:bg-stone-800 sticky top-0 border-b border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 font-semibold">
                     <tr>
                       <th className="py-2 px-3 w-10 text-center">Baris</th>
                       <th className="py-2 px-3">Guru</th>
@@ -408,17 +408,17 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
                       <th className="py-2 px-3 text-center">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-400">
+                  <tbody className="divide-y divide-stone-100 dark:divide-stone-800 text-stone-700 dark:text-stone-400">
                     {parsedRows.map((row) => (
-                      <tr key={row.rowNum} className={row.isValid ? 'hover:bg-slate-50 dark:hover:bg-slate-800/30' : 'bg-rose-50/50 dark:bg-rose-950/20'}>
-                        <td className="py-2 px-3 text-center text-slate-400 dark:text-slate-500 font-mono">
+                      <tr key={row.rowNum} className={row.isValid ? 'hover:bg-stone-50 dark:hover:bg-stone-800/30' : 'bg-rose-50/50 dark:bg-rose-950/20'}>
+                        <td className="py-2 px-3 text-center text-stone-400 dark:text-stone-500 font-mono">
                           {row.rowNum}
                         </td>
                         <td className="py-2 px-3">
-                          <div className="font-semibold text-slate-900 dark:text-slate-200">{row.teacherName || 'Tidak Ditemukan'}</div>
-                          <div className="text-[10px] font-mono text-slate-500">{row.nip}</div>
+                          <div className="font-semibold text-stone-900 dark:text-stone-200">{row.teacherName || 'Tidak Ditemukan'}</div>
+                          <div className="text-[10px] font-mono text-stone-500">{row.nip}</div>
                         </td>
-                        <td className="py-2 px-3 font-medium text-slate-800 dark:text-slate-300">
+                        <td className="py-2 px-3 font-medium text-stone-800 dark:text-stone-300">
                           {row.subject}
                         </td>
                         <td className="py-2 px-3">
@@ -426,7 +426,7 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
                         </td>
                         <td className="py-2 px-3">
                           <div className="font-medium">{row.dayOfWeek}</div>
-                          <div className="text-[10px] text-slate-500">{row.startTime} - {row.endTime} ({row.hours} JP)</div>
+                          <div className="text-[10px] text-stone-500">{row.startTime} - {row.endTime} ({row.hours} JP)</div>
                         </td>
                         <td className="py-2 px-3 text-center">
                           {row.isValid ? (
@@ -463,11 +463,11 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
+        <div className="px-6 py-4 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between bg-stone-50/50 dark:bg-stone-800/50">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 font-semibold text-xs hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
           >
             Batal
           </button>
@@ -481,7 +481,7 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
                 className={`inline-flex items-center justify-center gap-1.5 px-5 py-2 rounded-xl text-white text-xs font-semibold transition-all shadow-2xs cursor-pointer ${
                   validCount > 0 && !isProcessing && successCount === null
                     ? 'bg-emerald-700 hover:bg-emerald-800 shadow-emerald-700/20'
-                    : 'bg-slate-300 dark:bg-slate-700 cursor-not-allowed text-slate-500 dark:text-slate-400'
+                    : 'bg-stone-300 dark:bg-stone-700 cursor-not-allowed text-stone-500 dark:text-stone-400'
                 }`}
               >
                 {isProcessing ? (

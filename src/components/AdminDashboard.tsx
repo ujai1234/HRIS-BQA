@@ -220,22 +220,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
     if (active && payload && payload.length) {
       const data = payload[0]?.payload;
       return (
-        <div className="bg-slate-900 text-white px-3 py-2 rounded-lg text-xs space-y-1 border border-slate-800 shadow-md">
-          <div className="flex items-center justify-between gap-3 border-b border-slate-800 pb-1">
-            <span className="font-medium text-slate-200">{label}</span>
+        <div className="bg-stone-900 text-white px-3 py-2 rounded-lg text-xs space-y-1 border border-stone-800 shadow-md">
+          <div className="flex items-center justify-between gap-3 border-b border-stone-800 pb-1">
+            <span className="font-medium text-stone-200">{label}</span>
             <span className="font-mono text-emerald-400 font-bold">{data?.rate}%</span>
           </div>
-          <div className="text-slate-300 space-y-0.5 pt-0.5">
+          <div className="text-stone-300 space-y-0.5 pt-0.5">
             <div className="flex justify-between gap-4">
-              <span className="text-slate-400">Tepat Waktu:</span>
+              <span className="text-stone-400">Tepat Waktu:</span>
               <span className="font-mono text-white font-medium">{data?.tepatWaktu}</span>
             </div>
             <div className="flex justify-between gap-4">
-              <span className="text-slate-400">Terlambat:</span>
+              <span className="text-stone-400">Terlambat:</span>
               <span className="font-mono text-white font-medium">{data?.terlambat}</span>
             </div>
             <div className="flex justify-between gap-4">
-              <span className="text-slate-400">Badal:</span>
+              <span className="text-stone-400">Badal:</span>
               <span className="font-mono text-white font-medium">{data?.badal}</span>
             </div>
           </div>
@@ -248,11 +248,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
   const CurrencyTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-slate-900 text-white px-3 py-2 rounded-lg text-xs space-y-1 border border-slate-800 shadow-md">
-          <p className="font-medium text-slate-200 border-b border-slate-800 pb-1">{label}</p>
+        <div className="bg-stone-900 text-white px-3 py-2 rounded-lg text-xs space-y-1 border border-stone-800 shadow-md">
+          <p className="font-medium text-stone-200 border-b border-stone-800 pb-1">{label}</p>
           {payload.map((entry: any, index: number) => (
             <div key={`tooltip-${index}`} className="flex justify-between gap-3">
-              <span className="text-slate-400">{entry.name}:</span>
+              <span className="text-stone-400">{entry.name}:</span>
               <span className="font-mono text-white font-medium">{formatRupiah(entry.value)}</span>
             </div>
           ))}
@@ -265,12 +265,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
   return (
     <div className="space-y-5">
       {/* 1. Clean Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 px-5 py-4 rounded-xl border border-slate-200/80 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-stone-900 px-5 py-4 rounded-xl border border-stone-200/80 dark:border-stone-800">
         <div>
-          <h1 className="text-base font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
+          <h1 className="text-base font-semibold text-stone-900 dark:text-stone-100 tracking-tight">
             Dashboard Administrasi
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
             Periode {selectedPeriod} • Pesantren Baitul Qur'an
           </p>
         </div>
@@ -281,7 +281,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
             setOfficialReportType('executive_summary');
             setShowOfficialReportModal(true);
           }}
-          className="inline-flex items-center gap-1.5 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white text-xs font-medium px-3.5 py-2 rounded-lg transition-colors cursor-pointer self-start sm:self-auto"
+          className="inline-flex items-center gap-1.5 bg-stone-900 dark:bg-stone-800 hover:bg-stone-800 dark:hover:bg-stone-700 text-white text-xs font-medium px-3.5 py-2 rounded-lg transition-colors cursor-pointer self-start sm:self-auto"
         >
           <Printer className="w-3.5 h-3.5 text-emerald-400" />
           <span>Cetak Laporan PDF</span>
@@ -290,9 +290,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
 
       {/* 2. Key Metrics (4 Clean Cards) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800">
-          <span className="text-xs text-slate-500 dark:text-slate-400 block">Total Guru</span>
-          <p className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mt-1 font-mono">
+        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800">
+          <span className="text-xs text-stone-500 dark:text-stone-400 block">Total Guru</span>
+          <p className="text-2xl font-semibold text-stone-900 dark:text-stone-100 mt-1 font-mono">
             {totalTeachers}
           </p>
           <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium block mt-1">
@@ -300,32 +300,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
           </span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800">
-          <span className="text-xs text-slate-500 dark:text-slate-400 block">Beban KBM</span>
-          <p className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mt-1 font-mono">
-            {totalWeeklyJP} <span className="text-xs font-normal text-slate-500 dark:text-slate-400 font-sans">JP/mgg</span>
+        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800">
+          <span className="text-xs text-stone-500 dark:text-stone-400 block">Beban KBM</span>
+          <p className="text-2xl font-semibold text-stone-900 dark:text-stone-100 mt-1 font-mono">
+            {totalWeeklyJP} <span className="text-xs font-normal text-stone-500 dark:text-stone-400 font-sans">JP/mgg</span>
           </p>
-          <span className="text-[11px] text-slate-500 dark:text-slate-500 block mt-1 font-mono">
+          <span className="text-[11px] text-stone-500 dark:text-stone-500 block mt-1 font-mono">
             {totalSchedules} Sesi
           </span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800">
-          <span className="text-xs text-slate-500 dark:text-slate-400 block">Kepatuhan Jurnal</span>
+        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800">
+          <span className="text-xs text-stone-500 dark:text-stone-400 block">Kepatuhan Jurnal</span>
           <p className="text-2xl font-semibold text-emerald-700 dark:text-emerald-400 mt-1 font-mono">
             {complianceRate}%
           </p>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-1 font-mono">
+          <span className="text-[11px] text-stone-500 dark:text-stone-400 block mt-1 font-mono">
             {completedJournals} Selesai • {pendingJournals} Pending
           </span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800">
-          <span className="text-xs text-slate-500 dark:text-slate-400 block">Estimasi Kafa'ah</span>
-          <p className="text-xl font-semibold text-slate-900 dark:text-slate-100 mt-1 font-mono truncate">
+        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800">
+          <span className="text-xs text-stone-500 dark:text-stone-400 block">Estimasi Kafa'ah</span>
+          <p className="text-xl font-semibold text-stone-900 dark:text-stone-100 mt-1 font-mono truncate">
             {formatRupiah(payrollSummary.totalNet)}
           </p>
-          <span className="text-[11px] text-slate-500 dark:text-slate-500 block mt-1 font-mono">
+          <span className="text-[11px] text-stone-500 dark:text-stone-500 block mt-1 font-mono">
             Potongan: -{formatRupiah(payrollSummary.totalDeductions)}
           </span>
         </div>
@@ -334,13 +334,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
       {/* 2.2 Pending Learning Needs Summary Card (Minimalist & Modern) */}
       <div 
         onClick={() => setCurrentPath('/dashboard/admin/kebutuhan')}
-        className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer group shadow-xs"
+        className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-stone-300 dark:hover:border-stone-700 transition-all cursor-pointer group shadow-xs"
       >
         <div className="flex items-center gap-3">
           <div className={`w-2.5 h-2.5 rounded-full ${pendingLearningNeeds > 0 ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+              <span className="text-xs font-semibold text-stone-800 dark:text-stone-200">
                 Pengajuan Kebutuhan Pembelajaran
               </span>
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
@@ -351,36 +351,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
                 {pendingLearningNeeds > 0 ? `${pendingLearningNeeds} Menunggu Persetujuan Kepsek` : 'Semua Ajuan Terverifikasi'}
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
               Rincian ajuan pending: SMP ({pendingSMP}), MA ({pendingMA}), Ponpes ({pendingPesantren})
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1 text-xs font-semibold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors self-end sm:self-auto">
+        <div className="flex items-center gap-1 text-xs font-semibold text-stone-600 dark:text-stone-300 group-hover:text-stone-900 dark:group-hover:text-white transition-colors self-end sm:self-auto">
           <span>Kelola Modul Kebutuhan</span>
-          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          <ArrowRight className="w-3.5 h-3.5 group-hover:transtone-x-0.5 transition-transform" />
         </div>
       </div>
 
       {/* 3. Trend Kehadiran Mingguan (Minimalist Stacked Bar) */}
-      <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 gap-3">
+      <div className="bg-white dark:bg-stone-900 p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800 gap-3">
           <div>
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">
               Tren Kehadiran Guru
             </h2>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             {/* View Mode */}
-            <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs">
+            <div className="flex items-center bg-stone-100 dark:bg-stone-800 p-0.5 rounded-lg text-xs">
               <button
                 type="button"
                 onClick={() => setWeeklyViewMode('daily_week')}
                 className={`px-2.5 py-1 rounded-md transition-all cursor-pointer font-medium ${
                   weeklyViewMode === 'daily_week'
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-2xs'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-2xs'
+                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
                 }`}
               >
                 Harian
@@ -390,8 +390,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
                 onClick={() => setWeeklyViewMode('monthly_weeks')}
                 className={`px-2.5 py-1 rounded-md transition-all cursor-pointer font-medium ${
                   weeklyViewMode === 'monthly_weeks'
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-2xs'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-2xs'
+                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
                 }`}
               >
                 4 Pekan
@@ -399,7 +399,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
             </div>
 
             {/* Unit Filter */}
-            <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs">
+            <div className="flex items-center bg-stone-100 dark:bg-stone-800 p-0.5 rounded-lg text-xs">
               {(['ALL', 'SMP', 'MA', 'PESANTREN'] as const).map((unit) => (
                 <button
                   key={unit}
@@ -407,8 +407,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
                   onClick={() => setUnitFilter(unit)}
                   className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
                     unitFilter === unit
-                      ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-2xs'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                      ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-2xs'
+                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
                   }`}
                 >
                   {unit === 'ALL' ? 'Semua' : unit}
@@ -472,22 +472,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
       </div>
 
       {/* 4. Monitoring Aktivitas KBM (Clean Table) */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
-        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 overflow-hidden">
+        <div className="p-4 border-b border-stone-100 dark:border-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+            <h2 className="font-semibold text-sm text-stone-900 dark:text-stone-100">
               Aktivitas Presensi Terkini
             </h2>
           </div>
 
           <div className="relative w-full sm:w-60">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" />
+            <Search className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 top-2.5 pointer-events-none" />
             <input
               type="text"
               value={searchActivity}
               onChange={(e) => setSearchActivity(e.target.value)}
               placeholder="Cari guru atau mata pelajaran..."
-              className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-slate-100"
+              className="w-full pl-8 pr-3 py-1.5 text-xs bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-stone-900 dark:text-stone-100"
             />
           </div>
         </div>
@@ -495,7 +495,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-medium border-b border-slate-200/70 dark:border-slate-700">
+              <tr className="bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 font-medium border-b border-stone-200/70 dark:border-stone-700">
                 <th className="py-2.5 px-4">Tanggal & Sesi</th>
                 <th className="py-2.5 px-4">Mata Pelajaran</th>
                 <th className="py-2.5 px-4">Guru</th>
@@ -505,10 +505,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
                 <th className="py-2.5 px-4 text-right">Honor Sesi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+            <tbody className="divide-y divide-stone-100 dark:divide-stone-800 text-stone-700 dark:text-stone-300">
               {recentActivities.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-6 text-center text-slate-400 dark:text-slate-600">
+                  <td colSpan={7} className="py-6 text-center text-stone-400 dark:text-stone-600">
                     Tidak ada aktivitas yang sesuai
                   </td>
                 </tr>
@@ -522,17 +522,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
                   const hours = sched ? sched.hours : 2;
 
                   return (
-                    <tr key={att.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                    <tr key={att.id} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/30 transition-colors">
                       <td className="py-2.5 px-4 whitespace-nowrap">
-                        <p className="font-medium text-slate-800 dark:text-slate-200">{formatIndonesianDate(att.date)}</p>
-                        <p className="text-[11px] text-slate-400 dark:text-slate-500 font-mono">{sched?.startTime} - {sched?.endTime}</p>
+                        <p className="font-medium text-stone-800 dark:text-stone-200">{formatIndonesianDate(att.date)}</p>
+                        <p className="text-[11px] text-stone-400 dark:text-stone-500 font-mono">{sched?.startTime} - {sched?.endTime}</p>
                       </td>
                       <td className="py-2.5 px-4">
-                        <p className="font-medium text-slate-900 dark:text-slate-100">{sched?.subject || 'KBM Reguler'}</p>
-                        <p className="text-[11px] text-slate-400 dark:text-slate-500">{sched?.className} • {sched?.unit}</p>
+                        <p className="font-medium text-stone-900 dark:text-stone-100">{sched?.subject || 'KBM Reguler'}</p>
+                        <p className="text-[11px] text-stone-400 dark:text-stone-500">{sched?.className} • {sched?.unit}</p>
                       </td>
                       <td className="py-2.5 px-4">
-                        <p className="font-medium text-slate-900 dark:text-slate-100">
+                        <p className="font-medium text-stone-900 dark:text-stone-100">
                           {actualTeacher?.name || origTeacher?.name || 'Guru'}
                         </p>
                         {isBadal && (
@@ -541,7 +541,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
                           </span>
                         )}
                       </td>
-                      <td className="py-2.5 px-3 font-mono text-slate-800 dark:text-slate-200">
+                      <td className="py-2.5 px-3 font-mono text-stone-800 dark:text-stone-200">
                         {att.clockInTime || '-'}
                       </td>
                       <td className="py-2.5 px-3">
@@ -559,7 +559,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
                             Pending
                           </span>
                         ) : (
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                          <span className="text-[10px] text-stone-500 dark:text-stone-400">
                             {att.status}
                           </span>
                         )}
@@ -579,9 +579,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
       {/* 5. Analisis Unit & Potongan Disiplin */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Struktur Komponen Kafa'ah */}
-        <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-3">
-          <div className="pb-2 border-b border-slate-100 dark:border-slate-800">
-            <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 space-y-3">
+          <div className="pb-2 border-b border-stone-100 dark:border-stone-800">
+            <h3 className="font-semibold text-sm text-stone-900 dark:text-stone-100">
               Komposisi Kafa'ah per Unit
             </h3>
           </div>
@@ -613,10 +613,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
         </div>
 
         {/* Transparansi Penegakan SOP */}
-        <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-3">
-          <div className="pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 space-y-3">
+          <div className="pb-2 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+              <h3 className="font-semibold text-sm text-stone-900 dark:text-stone-100">
                 Penegakan SOP & Potongan Disiplin
               </h3>
             </div>
@@ -626,20 +626,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
           </div>
 
           <div className="space-y-2.5 pt-1">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-stone-50 dark:bg-stone-800 border border-stone-100 dark:border-stone-800">
               <div>
-                <span className="text-xs font-medium text-slate-800 dark:text-slate-200 block">Denda Keterlambatan</span>
-                <span className="text-[11px] text-slate-400 dark:text-slate-500 block">Potongan waktu presensi KBM</span>
+                <span className="text-xs font-medium text-stone-800 dark:text-stone-200 block">Denda Keterlambatan</span>
+                <span className="text-[11px] text-stone-400 dark:text-stone-500 block">Potongan waktu presensi KBM</span>
               </div>
               <span className="font-mono font-medium text-rose-600 dark:text-rose-400 text-xs">
                 -{formatRupiah(payrollSummary.items.reduce((s, i) => s + i.latePenaltyTotal, 0))}
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-stone-50 dark:bg-stone-800 border border-stone-100 dark:border-stone-800">
               <div>
-                <span className="text-xs font-medium text-slate-800 dark:text-slate-200 block">Penalti Jurnal Belum Lengkap</span>
-                <span className="text-[11px] text-slate-400 dark:text-slate-500 block">50% honor sesi KBM</span>
+                <span className="text-xs font-medium text-stone-800 dark:text-stone-200 block">Penalti Jurnal Belum Lengkap</span>
+                <span className="text-[11px] text-stone-400 dark:text-stone-500 block">50% honor sesi KBM</span>
               </div>
               <span className="font-mono font-medium text-rose-600 dark:text-rose-400 text-xs">
                 -{formatRupiah(payrollSummary.items.reduce((s, i) => s + i.emptyJournalPenalty, 0))}
@@ -660,11 +660,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
       </div>
 
       {/* 6. Pengajuan Kebutuhan Pembelajaran (New) */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
-        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+      <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 overflow-hidden">
+        <div className="p-4 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${pendingRequests.length > 0 ? 'bg-rose-500 animate-pulse' : 'bg-slate-300'}`}></div>
-            <h2 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+            <div className={`w-2 h-2 rounded-full ${pendingRequests.length > 0 ? 'bg-rose-500 animate-pulse' : 'bg-stone-300'}`}></div>
+            <h2 className="font-semibold text-sm text-stone-900 dark:text-stone-100">
               Antrean Pengajuan Kebutuhan Guru
             </h2>
           </div>
@@ -679,34 +679,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
         <div className="p-0">
           {pendingRequests.length === 0 ? (
             <div className="p-8 text-center">
-              <p className="text-xs text-slate-400">Semua pengajuan telah ditindaklanjuti.</p>
+              <p className="text-xs text-stone-400">Semua pengajuan telah ditindaklanjuti.</p>
             </div>
           ) : (
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            <div className="divide-y divide-stone-100 dark:divide-stone-800">
               {pendingRequests.map((req) => {
                 const teacher = teachers.find(t => t.id === req.teacherId);
                 return (
-                  <div key={req.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                  <div key={req.id} className="p-4 hover:bg-stone-50 dark:hover:bg-stone-800/30 transition-colors">
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
                       <div className="flex items-center gap-2">
                         <div className={`w-6 h-6 rounded-lg ${teacher?.avatarColor || 'bg-emerald-700'} flex items-center justify-center text-[10px] font-bold text-white`}>
                           {teacher?.name?.charAt(0)}
                         </div>
                         <div>
-                          <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                          <h4 className="text-xs font-bold text-stone-900 dark:text-stone-100">
                             {req.title}
                           </h4>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                          <p className="text-[10px] text-stone-500 dark:text-stone-400">
                             Oleh: {teacher?.name} • {req.category}
                           </p>
                         </div>
                       </div>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono italic">
+                      <span className="text-[10px] text-stone-400 dark:text-stone-500 font-mono italic">
                         {formatIndonesianDate(req.createdAt)}
                       </span>
                     </div>
-                    <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800/50">
-                      <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
+                    <div className="bg-stone-50 dark:bg-stone-800/50 p-3 rounded-lg border border-stone-100 dark:border-stone-800/50">
+                      <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed line-clamp-2">
                         {req.description}
                       </p>
                     </div>
@@ -717,10 +717,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
           )}
         </div>
         
-        <div className="p-3 bg-slate-50 dark:bg-slate-800/50 text-center border-t border-slate-100 dark:border-slate-800">
+        <div className="p-3 bg-stone-50 dark:bg-stone-800/50 text-center border-t border-stone-100 dark:border-stone-800">
           <button 
             onClick={() => setCurrentPath('/dashboard/admin/kebutuhan')}
-            className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors"
+            className="text-[11px] font-semibold text-stone-600 dark:text-stone-400 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors"
           >
             Kelola {learningNeedRequests.length} Pengajuan
           </button>

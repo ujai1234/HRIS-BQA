@@ -146,8 +146,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
   const CurrencyTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-slate-900 dark:bg-slate-950 text-white p-3 rounded-lg shadow-lg text-xs space-y-1 border border-slate-700 dark:border-slate-800">
-          <p className="font-semibold text-slate-200">{label}</p>
+        <div className="bg-stone-900 dark:bg-stone-950 text-white p-3 rounded-lg shadow-lg text-xs space-y-1 border border-stone-700 dark:border-stone-800">
+          <p className="font-semibold text-stone-200">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={`tooltip-${index}`} style={{ color: entry.color || entry.fill }}>
               {entry.name}: <span className="font-mono font-bold text-white">{formatRupiah(entry.value)}</span>
@@ -163,8 +163,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
   const CountTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-slate-900 dark:bg-slate-950 text-white p-3 rounded-lg shadow-lg text-xs space-y-1 border border-slate-700 dark:border-slate-800">
-          <p className="font-semibold text-slate-200">{label || payload[0]?.name}</p>
+        <div className="bg-stone-900 dark:bg-stone-950 text-white p-3 rounded-lg shadow-lg text-xs space-y-1 border border-stone-700 dark:border-stone-800">
+          <p className="font-semibold text-stone-200">{label || payload[0]?.name}</p>
           {payload.map((entry: any, index: number) => (
             <p key={`count-${index}`} style={{ color: entry.color || entry.fill }}>
               {entry.name}: <span className="font-mono font-bold text-white">{entry.value}</span>
@@ -194,20 +194,20 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
           onClick={() => {
             if (!isReadOnly && setActiveTab) setActiveTab('master_teachers');
           }}
-          className={`bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm transition-all ${!isReadOnly ? 'hover:shadow-md cursor-pointer' : ''}`}
+          className={`bg-white dark:bg-stone-900 p-5 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm transition-all ${!isReadOnly ? 'hover:shadow-md cursor-pointer' : ''}`}
         >
-          <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Asatidz</p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">{totalTeachers}</p>
+          <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Asatidz</p>
+          <p className="text-2xl font-bold text-stone-900 dark:text-stone-100 mt-1">{totalTeachers}</p>
         </div>
 
         <div 
           onClick={() => {
             if (!isReadOnly && setActiveTab) setActiveTab('master_schedules');
           }}
-          className={`bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm transition-all ${!isReadOnly ? 'hover:shadow-md cursor-pointer' : ''}`}
+          className={`bg-white dark:bg-stone-900 p-5 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm transition-all ${!isReadOnly ? 'hover:shadow-md cursor-pointer' : ''}`}
         >
-          <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Beban KBM</p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">{totalScheduledHours} JP</p>
+          <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Beban KBM</p>
+          <p className="text-2xl font-bold text-stone-900 dark:text-stone-100 mt-1">{totalScheduledHours} JP</p>
         </div>
 
         <div 
@@ -215,9 +215,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
             if (setActiveTab) setActiveTab('kepsek_audit');
             else if (currentRole === 'KEPALA_PESANTREN') setCurrentPath('/dashboard/kepsek/audit');
           }}
-          className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer"
+          className="bg-white dark:bg-stone-900 p-5 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm hover:shadow-md transition-all cursor-pointer"
         >
-          <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Ketaatan Jurnal</p>
+          <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Ketaatan Jurnal</p>
           <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-500 mt-1">{complianceRate}%</p>
         </div>
 
@@ -227,9 +227,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
               if (setActiveTab) setActiveTab('badal');
               else if (currentRole === 'KEPALA_PESANTREN') setCurrentPath('/dashboard/kepsek/badal');
             }}
-            className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer"
+            className="bg-white dark:bg-stone-900 p-5 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm hover:shadow-md transition-all cursor-pointer"
           >
-            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Guru Badal</p>
+            <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Guru Badal</p>
             <p className="text-2xl font-bold text-purple-600 dark:text-purple-400 mt-1">{badalSessions} Sesi</p>
           </div>
         ) : (
@@ -237,10 +237,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
             onClick={() => {
               if (setActiveTab) setActiveTab('payroll');
             }}
-            className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer"
+            className="bg-white dark:bg-stone-900 p-5 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm hover:shadow-md transition-all cursor-pointer"
           >
-            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Payroll</p>
-            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1 truncate">
+            <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Total Payroll</p>
+            <p className="text-2xl font-bold text-stone-900 dark:text-stone-100 mt-1 truncate">
               {formatRupiah(payrollSummary.totalNet).replace(',00', '')}
             </p>
           </div>
@@ -257,13 +257,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
               setCurrentPath('/dashboard/kepsek/kebutuhan');
             }
           }}
-          className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer group shadow-xs"
+          className="bg-white dark:bg-stone-900 p-4 rounded-2xl border border-stone-200/80 dark:border-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-stone-300 dark:hover:border-stone-700 transition-all cursor-pointer group shadow-xs"
         >
           <div className="flex items-center gap-3">
             <div className={`w-2.5 h-2.5 rounded-full ${pendingNeeds > 0 ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                <span className="text-xs font-semibold text-stone-800 dark:text-stone-200">
                   {currentRole === 'KEPALA_PESANTREN' 
                     ? `Persetujuan Kebutuhan KBM (Unit ${kepsekUnit})` 
                     : 'Monitoring Kebutuhan KBM (Seluruh Unit)'}
@@ -276,32 +276,32 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
                   {pendingNeeds > 0 ? `${pendingNeeds} Ajuan Menunggu Persetujuan` : 'Semua Ajuan Terverifikasi'}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
                 {currentRole === 'KEPALA_PESANTREN'
                   ? `Total ${totalNeeds} ajuan kebutuhan sarana dari guru Unit ${kepsekUnit}.`
                   : `Total ${totalNeeds} ajuan dari guru seluruh unit pesantren.`}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1 text-xs font-semibold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors self-end sm:self-auto">
+          <div className="flex items-center gap-1 text-xs font-semibold text-stone-600 dark:text-stone-300 group-hover:text-stone-900 dark:group-hover:text-white transition-colors self-end sm:self-auto">
             <span>Buka Modul Kebutuhan</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight className="w-3.5 h-3.5 group-hover:transtone-x-0.5 transition-transform" />
           </div>
         </div>
       )}
 
       {/* Monthly Trend Chart - New Visual Component */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+      <div className="bg-white dark:bg-stone-900 p-6 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200 uppercase tracking-wide">Tren Performa Kehadiran & Jurnal</h3>
+          <h3 className="font-bold text-sm text-stone-800 dark:text-stone-200 uppercase tracking-wide">Tren Performa Kehadiran & Jurnal</h3>
           <div className="flex gap-4">
             <div className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span className="text-[10px] font-bold text-slate-500">Kehadiran</span>
+              <span className="text-[10px] font-bold text-stone-500">Kehadiran</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full bg-blue-500" />
-              <span className="text-[10px] font-bold text-slate-500">Jurnal</span>
+              <span className="text-[10px] font-bold text-stone-500">Jurnal</span>
             </div>
           </div>
         </div>
@@ -334,10 +334,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
       {/* Primary Chart Row: Jam KBM per Unit & Status Ketaatan Jurnal */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Chart 1: Beban Jam Mengajar per Unit */}
-        <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="bg-white dark:bg-stone-900 p-5 sm:p-6 rounded-xl border border-stone-200 dark:border-stone-800 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
             <div>
-              <h3 className="font-bold text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+              <h3 className="font-bold text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest">
                 JP & Sesi per Unit
               </h3>
             </div>
@@ -368,10 +368,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
         </div>
 
         {/* Chart 2: Donut Status Pengisian Jurnal Mengajar */}
-        <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="bg-white dark:bg-stone-900 p-5 sm:p-6 rounded-xl border border-stone-200 dark:border-stone-800 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
             <div>
-              <h3 className="font-bold text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+              <h3 className="font-bold text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest">
                 Status Jurnal & Presensi
               </h3>
             </div>
@@ -406,10 +406,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Chart 3: Komposisi Guru per Unit (Kepsek) or Penggajian per Unit (Admin) */}
         {currentRole === 'KEPALA_PESANTREN' || isReadOnly ? (
-          <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div className="bg-white dark:bg-stone-900 p-5 sm:p-6 rounded-xl border border-stone-200 dark:border-stone-800 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
               <div>
-                <h3 className="font-bold text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                <h3 className="font-bold text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest">
                   Distribusi Guru & Jadwal per Unit
                 </h3>
               </div>
@@ -439,10 +439,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
             </div>
           </div>
         ) : (
-          <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div className="bg-white dark:bg-stone-900 p-5 sm:p-6 rounded-xl border border-stone-200 dark:border-stone-800 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
               <div>
-                <h3 className="font-bold text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                <h3 className="font-bold text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest">
                   Komposisi Penggajian per Unit
                 </h3>
               </div>
@@ -476,10 +476,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
         )}
 
         {/* Chart 4: Top 6 Guru dengan Beban Mengajar Terbanyak */}
-        <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="bg-white dark:bg-stone-900 p-5 sm:p-6 rounded-xl border border-stone-200 dark:border-stone-800 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
             <div>
-              <h3 className="font-bold text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+              <h3 className="font-bold text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest">
                 Top 6 Asatidz (JP)
               </h3>
             </div>
@@ -518,10 +518,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
       </div>
 
       {/* Tertiary Chart Row: Kedisiplinan Waktu Clock-In */}
-      <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 gap-2">
+      <div className="bg-white dark:bg-stone-900 p-5 sm:p-6 rounded-xl border border-stone-200 dark:border-stone-800 shadow-xs">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800 gap-2">
           <div>
-            <h3 className="font-bold text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+            <h3 className="font-bold text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest">
               Kedisiplinan Waktu (Punctuality)
             </h3>
           </div>

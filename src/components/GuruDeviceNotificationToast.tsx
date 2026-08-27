@@ -30,7 +30,7 @@ export const GuruDeviceNotificationToast: React.FC = () => {
       case 'JOURNAL_PENDING':
         return 'bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 border-sky-200 dark:border-sky-900';
       default:
-        return 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+        return 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700';
     }
   };
 
@@ -49,7 +49,7 @@ export const GuruDeviceNotificationToast: React.FC = () => {
 
   return (
     <div className="fixed top-18 right-4 left-4 sm:left-auto sm:right-6 z-40 max-w-md w-auto animate-in fade-in slide-in-from-top-3 duration-200 print:hidden pointer-events-auto">
-      <div className="bg-slate-900/95 dark:bg-slate-900/95 backdrop-blur-md text-white rounded-xl p-3 sm:p-3.5 shadow-2xl border border-slate-800 flex items-start gap-3">
+      <div className="bg-stone-900/95 dark:bg-stone-900/95 backdrop-blur-md text-white rounded-xl p-3 sm:p-3.5 shadow-2xl border border-stone-800 flex items-start gap-3">
         {/* Minimalist Indicator Dot */}
         <div className="mt-1 flex-shrink-0">
           <span className="relative flex h-2.5 w-2.5">
@@ -64,24 +64,24 @@ export const GuruDeviceNotificationToast: React.FC = () => {
             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${getBadgeStyle(alert.type)}`}>
               {getTypeLabel(alert.type)}
             </span>
-            <span className="text-[11px] font-semibold text-slate-200 truncate">
+            <span className="text-[11px] font-semibold text-stone-200 truncate">
               {alert.title}
             </span>
             {count > 1 && (
-              <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.2 rounded-full font-medium ml-auto">
+              <span className="text-[10px] bg-stone-800 text-stone-400 px-1.5 py-0.2 rounded-full font-medium ml-auto">
                 +{count - 1} lainnya
               </span>
             )}
           </div>
 
-          <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed mb-2.5">
+          <p className="text-xs text-stone-300 line-clamp-2 leading-relaxed mb-2.5">
             {alert.subtitle}
           </p>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => handleAction(alert)}
-              className="inline-flex items-center gap-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-[11px] px-3 py-1.5 rounded-lg transition-colors cursor-pointer active:scale-95"
+              className="inline-flex items-center gap-1 bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold text-[11px] px-3 py-1.5 rounded-lg transition-colors cursor-pointer active:scale-95"
             >
               <span>{alert.actionLabel}</span>
               <ChevronRight className="w-3 h-3" />
@@ -89,7 +89,7 @@ export const GuruDeviceNotificationToast: React.FC = () => {
 
             <button
               onClick={() => dismissToast(alert.id)}
-              className="text-[11px] text-slate-400 hover:text-white px-2 py-1.5 transition-colors cursor-pointer"
+              className="text-[11px] text-stone-400 hover:text-white px-2 py-1.5 transition-colors cursor-pointer"
             >
               Nanti Saja
             </button>
@@ -99,7 +99,7 @@ export const GuruDeviceNotificationToast: React.FC = () => {
         {/* Dismiss Button */}
         <button
           onClick={() => dismissToast(alert.id)}
-          className="text-slate-400 hover:text-white p-1 rounded-md transition-colors cursor-pointer shrink-0"
+          className="text-stone-400 hover:text-white p-1 rounded-md transition-colors cursor-pointer shrink-0"
           title="Tutup Notifikasi"
           aria-label="Tutup"
         >

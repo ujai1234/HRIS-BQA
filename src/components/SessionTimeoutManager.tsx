@@ -83,7 +83,7 @@ export const SessionTimeoutManager: React.FC = () => {
       {isAuthenticated && showWarning && (
         <div 
           id="session-warning-overlay"
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-stone-900/50 backdrop-blur-xs"
         >
           <motion.div
             id="session-warning-modal"
@@ -91,7 +91,7 @@ export const SessionTimeoutManager: React.FC = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ duration: 0.2 }}
-            className="bg-white rounded-2xl shadow-2xl border border-slate-200/90 w-full max-w-md overflow-hidden"
+            className="bg-white rounded-2xl shadow-2xl border border-stone-200/90 w-full max-w-md overflow-hidden"
           >
             {/* Header Peringatan */}
             <div id="session-warning-header" className="bg-amber-50/90 p-5 flex items-center gap-3.5 border-b border-amber-200/70">
@@ -99,26 +99,26 @@ export const SessionTimeoutManager: React.FC = () => {
                 <ShieldAlert className="w-5 h-5 text-amber-800" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-900">Peringatan Sesi Berakhir</h3>
+                <h3 className="text-sm font-bold text-stone-900">Peringatan Sesi Berakhir</h3>
                 <p className="text-xs text-amber-900/80 mt-0.5">Sesi Anda akan ditutup secara otomatis untuk menjaga keamanan data.</p>
               </div>
             </div>
 
             {/* Konten & Countdown */}
             <div className="p-6 text-center">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-50 border-2 border-slate-200/80 mb-4 shadow-2xs">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-stone-50 border-2 border-stone-200/80 mb-4 shadow-2xs">
                 <div className="flex flex-col items-center">
-                  <Clock className="w-4 h-4 text-slate-400 mb-0.5" />
+                  <Clock className="w-4 h-4 text-stone-400 mb-0.5" />
                   <span 
                     id="session-countdown-timer" 
-                    className="text-xl font-black text-slate-900 font-mono tracking-tight"
+                    className="text-xl font-black text-stone-900 font-mono tracking-tight"
                   >
                     {formatCountdown(secondsRemaining)}
                   </span>
                 </div>
               </div>
 
-              <p className="text-slate-600 text-xs max-w-xs mx-auto mb-6">
+              <p className="text-stone-600 text-xs max-w-xs mx-auto mb-6">
                 Tidak ada aktivitas terdeteksi. Apakah Anda ingin memperpanjang sesi login ini atau keluar?
               </p>
 
@@ -127,7 +127,7 @@ export const SessionTimeoutManager: React.FC = () => {
                 <button
                   id="btn-session-logout"
                   onClick={() => logout()}
-                  className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
+                  className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl border border-stone-200 text-stone-700 font-semibold text-xs hover:bg-stone-50 transition-colors shadow-2xs cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Keluar</span>
@@ -135,7 +135,7 @@ export const SessionTimeoutManager: React.FC = () => {
                 <button
                   id="btn-session-extend"
                   onClick={extendSession}
-                  className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800 transition-colors shadow-2xs cursor-pointer"
+                  className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-stone-900 text-white font-semibold text-xs hover:bg-stone-800 transition-colors shadow-2xs cursor-pointer"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   <span>Perpanjang Sesi</span>
@@ -144,8 +144,8 @@ export const SessionTimeoutManager: React.FC = () => {
             </div>
 
             {/* Footer Sistem */}
-            <div className="bg-slate-50/70 px-5 py-2.5 border-t border-slate-100 text-center">
-              <span className="text-[10px] text-slate-400 font-medium">
+            <div className="bg-stone-50/70 px-5 py-2.5 border-t border-stone-100 text-center">
+              <span className="text-[10px] text-stone-400 font-medium">
                 Proteksi Akses Terenkripsi HRIS Pesantren
               </span>
             </div>

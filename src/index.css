@@ -1,16 +1,20 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Newsreader', Georgia, Cambria, serif;
+  --color-spruce: #1B4332;
+  --color-ochre: #B08968;
+  --color-chalk: #FBFBFA;
   --color-pesantren-lime: #D4E157;
-  --color-pesantren-emerald: #00966B;
-  --color-pesantren-dark: #1B5E20;
+  --color-pesantren-emerald: #1B4332;
+  --color-pesantren-dark: #141A17;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 html, body, button, input, select, textarea {
-  font-family: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 @layer utilities {
@@ -55,11 +59,11 @@ html, body, button, input, select, textarea {
 
   @keyframes bounceSubtle {
     0%, 100% {
-      transform: translateY(-2%);
+      transform: transtoneY(-2%);
       animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
     }
     50% {
-      transform: translateY(0);
+      transform: transtoneY(0);
       animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
     }
   }

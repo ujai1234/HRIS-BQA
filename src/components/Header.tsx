@@ -115,7 +115,7 @@ export const Header: React.FC<HeaderProps> = ({
       case 'REQUEST_UPDATE':
         return 'bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-900';
       default:
-        return 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+        return 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700';
     }
   };
 
@@ -189,44 +189,44 @@ export const Header: React.FC<HeaderProps> = ({
       {sidebarOpen && (
         <div 
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 lg:hidden print:hidden"
+          className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-40 lg:hidden print:hidden"
         />
       )}
 
       {/* Desktop & Mobile Slideout Sidebar */}
       <aside 
-        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-slate-950 border-r border-slate-900 flex flex-col justify-between transition-transform duration-200 ease-in-out lg:translate-x-0 print:hidden ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-[#141A17] border-r border-stone-800/80 flex flex-col justify-between transition-transform duration-200 ease-in-out lg:transtone-x-0 print:hidden ${
+          sidebarOpen ? 'transtone-x-0' : '-transtone-x-full'
         }`}
       >
         <div className="flex flex-col flex-1 overflow-y-auto">
           {/* Logo and Brand Header */}
-          <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between">
+          <div className="p-4 sm:p-5 border-b border-white/5 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-pesantren-emerald to-pesantren-dark rounded-xl flex items-center justify-center shadow-lg border border-white/10 shrink-0">
-                <span className="text-white text-base font-black tracking-tighter drop-shadow-md">BQA</span>
+              <div className="w-9 h-9 bg-[#1B4332] rounded-lg flex items-center justify-center border border-white/10 shrink-0">
+                <span className="text-white text-sm font-bold tracking-tight">BQA</span>
               </div>
               <div className="leading-tight">
-                <h1 className="font-bold text-base text-slate-100 tracking-tight leading-snug">Baitul Qur'an</h1>
-                <p className="text-xs text-pesantren-lime uppercase tracking-widest font-extrabold">Al-Ikhwan HRIS</p>
+                <h1 className="font-bold text-sm text-stone-100 tracking-tight leading-snug">Baitul Qur'an</h1>
+                <p className="text-[10px] text-[#B08968] uppercase tracking-wider font-bold">Al-Ikhwan HRIS</p>
               </div>
             </div>
             <button 
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+              className="lg:hidden text-stone-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Navigation Links Grouped */}
-          <div className="p-3.5 space-y-6 flex-1 pt-5">
+          <div className="p-3 space-y-5 flex-1 pt-4">
             {navSections.map((section, sIdx) => (
-              <div key={sIdx} className="space-y-2">
-                <p className="px-3 text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+              <div key={sIdx} className="space-y-1">
+                <p className="px-3 text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1">
                   {section.title}
                 </p>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   {section.items.map((item) => {
                     const IconComponent = item.icon;
                     const isActive = currentPath === item.path || (item.path.endsWith('guru') && currentPath === '/dashboard/guru');
@@ -237,17 +237,17 @@ export const Header: React.FC<HeaderProps> = ({
                           setCurrentPath(item.path);
                           setSidebarOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all text-left group ${
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all text-left group cursor-pointer ${
                           isActive
-                            ? 'bg-emerald-600/15 text-emerald-400 font-bold border border-emerald-500/20'
-                            : 'text-slate-300 hover:text-white hover:bg-white/5 font-medium'
+                            ? 'bg-[#1B4332] text-white font-semibold'
+                            : 'text-stone-300 hover:text-white hover:bg-white/5 font-medium'
                         }`}
                       >
-                        <div className="flex items-center gap-3">
-                          <IconComponent className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-emerald-400' : 'text-slate-400 group-hover:text-slate-200'}`} />
+                        <div className="flex items-center gap-2.5">
+                          <IconComponent className={`w-4 h-4 shrink-0 ${isActive ? 'text-emerald-300' : 'text-stone-400 group-hover:text-stone-200'}`} strokeWidth={1.5} />
                           <span className="truncate leading-snug">{item.label}</span>
                         </div>
-                        {isActive && <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />}
+                        {isActive && <div className="w-1 h-1 rounded-full bg-emerald-300" />}
                       </button>
                     );
                   })}
@@ -258,36 +258,36 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Current Active User Profile */}
-        <div className="p-4 border-t border-white/10 bg-slate-900/50">
-          <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10">
-            <div className={`w-9 h-9 rounded-lg ${currentUser?.avatarColor || 'bg-emerald-700'} flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-sm`}>
+        <div className="p-3 border-t border-white/5 bg-black/20">
+          <div className="flex items-center gap-2.5 p-2 rounded-lg bg-white/5 border border-white/5">
+            <div className={`w-7 h-7 rounded-md ${currentUser?.avatarColor || 'bg-[#1B4332]'} flex items-center justify-center font-bold text-[11px] text-white shrink-0`}>
               {currentUser?.name ? currentUser.name.split(' ')[0]?.[0] : 'U'}
               {currentUser?.name ? (currentUser.name.split(' ')[1]?.[0] || 'A') : 'A'}
             </div>
             <div className="overflow-hidden flex-1 leading-tight">
-              <p className="text-xs sm:text-sm font-bold text-slate-100 truncate">{currentUser?.name || 'Pengguna'}</p>
-              <p className="text-xs text-slate-400 truncate mt-0.5">{currentUser?.position || ''}</p>
+              <p className="text-xs font-semibold text-stone-100 truncate">{currentUser?.name || 'Pengguna'}</p>
+              <p className="text-[10px] text-stone-400 truncate mt-0.5">{currentUser?.position || ''}</p>
             </div>
           </div>
         </div>
       </aside>
 
       {/* Top Header Bar for Desktop & Mobile */}
-      <header className="fixed top-0 right-0 left-0 lg:left-64 z-30 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between px-4 sm:px-6 print:hidden transition-colors duration-300">
+      <header className="fixed top-0 right-0 left-0 lg:left-64 z-30 h-16 bg-[#FBFBFA]/90 dark:bg-[#141A17]/90 backdrop-blur-md border-b border-stone-200 dark:border-stone-800/80 flex items-center justify-between px-4 sm:px-6 print:hidden transition-colors duration-200">
         {/* Left: Mobile Toggle & Breadcrumbs */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+            className="lg:hidden p-1.5 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-4 h-4" />
           </button>
 
           <div>
-            <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 text-[11px] font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider">
               <span>HRIS</span>
-              <ChevronRight className="w-3 h-3 text-slate-400" />
-              <span className="text-slate-900 dark:text-slate-100 font-bold">{currentPath.split('/').pop()?.replace('_', ' ')}</span>
+              <ChevronRight className="w-3 h-3 text-stone-400" />
+              <span className="text-stone-900 dark:text-stone-100 font-bold">{currentPath.split('/').pop()?.replace('_', ' ') || 'Guru'}</span>
             </div>
           </div>
         </div>
@@ -299,7 +299,7 @@ export const Header: React.FC<HeaderProps> = ({
             id="btn-refresh-data"
             onClick={handleRefresh}
             disabled={isRefreshing || isLoading}
-            className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-800 text-slate-600 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 py-1.5 px-2.5 sm:px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 shrink-0"
+            className="flex items-center gap-1.5 bg-stone-50 dark:bg-stone-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-stone-200 dark:border-stone-700 hover:border-emerald-200 dark:hover:border-emerald-800 text-stone-600 dark:text-stone-300 hover:text-emerald-700 dark:hover:text-emerald-400 py-1.5 px-2.5 sm:px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 shrink-0"
             title="Refresh Data terbaru dari server tanpa memuat ulang halaman"
             aria-label="Refresh Data"
           >
@@ -315,7 +315,7 @@ export const Header: React.FC<HeaderProps> = ({
                   resetToDefault();
                 }
               }}
-              className="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-400 hover:text-rose-600 py-1.5 px-3 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
+              className="flex items-center gap-2 bg-stone-50 hover:bg-stone-100 border border-stone-200 text-stone-400 hover:text-rose-600 py-1.5 px-3 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
               title="Reset Sinkronisasi Data"
             >
               <RotateCcw className="w-3 h-3" />
@@ -324,7 +324,7 @@ export const Header: React.FC<HeaderProps> = ({
           )}
 
           {/* Logged in User Pill */}
-          <div className="hidden sm:flex items-center gap-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 py-1.5 px-3 rounded-lg">
+          <div className="hidden sm:flex items-center gap-2 bg-stone-50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-700 text-xs font-medium text-stone-700 dark:text-stone-300 py-1.5 px-3 rounded-lg">
             <div className={`w-1.5 h-1.5 rounded-full ${currentRole === 'GURU' ? 'bg-emerald-500' : currentRole === 'ADMIN' ? 'bg-blue-500' : 'bg-amber-500'}`} />
             <span className="max-w-[150px] truncate">{currentUser.name}</span>
           </div>
@@ -334,13 +334,13 @@ export const Header: React.FC<HeaderProps> = ({
             <select
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 py-1.5 pl-2.5 pr-7 rounded-lg appearance-none cursor-pointer focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500"
+              className="bg-stone-50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-700 text-xs font-medium text-stone-700 dark:text-stone-300 py-1.5 pl-2.5 pr-7 rounded-lg appearance-none cursor-pointer focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500"
             >
               <option value="Agustus 2026">Agustus 2026</option>
               <option value="Juli 2026">Juli 2026</option>
               <option value="Juni 2026">Juni 2026</option>
             </select>
-            <ChevronDown className="w-3 h-3 text-slate-400 absolute right-2 top-3 pointer-events-none" />
+            <ChevronDown className="w-3 h-3 text-stone-400 absolute right-2 top-3 pointer-events-none" />
           </div>
 
           {/* Notification Bell (Guru Only) */}
@@ -351,7 +351,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className={`p-2 rounded-lg transition-all cursor-pointer relative ${
                   showNotifPopover 
                     ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40' 
-                    : 'text-slate-400 hover:text-emerald-600 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    : 'text-stone-400 hover:text-emerald-600 hover:bg-stone-100 dark:hover:bg-stone-800'
                 }`}
                 title="Notifikasi Aktivitas Guru"
                 aria-label="Pemberitahuan Guru"
@@ -367,14 +367,14 @@ export const Header: React.FC<HeaderProps> = ({
 
               {/* Minimalist Modern Notification Popover */}
               {showNotifPopover && (
-                <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+                <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
                   {/* Header */}
-                  <div className="p-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <div className="p-3.5 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between">
                     <div>
-                      <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                      <h3 className="text-xs font-bold text-stone-900 dark:text-stone-100">
                         Notifikasi Guru
                       </h3>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                      <p className="text-[10px] text-stone-400 dark:text-stone-500">
                         Jadwal badal, waktu presensi & pengisian jurnal
                       </p>
                     </div>
@@ -390,13 +390,13 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
 
                   {/* Filter Pills */}
-                  <div className="flex items-center gap-1 px-3 py-2 bg-slate-50/70 dark:bg-slate-800/40 border-b border-slate-100 dark:border-slate-800/80 overflow-x-auto text-[10px]">
+                  <div className="flex items-center gap-1 px-3 py-2 bg-stone-50/70 dark:bg-stone-800/40 border-b border-stone-100 dark:border-stone-800/80 overflow-x-auto text-[10px]">
                     <button
                       onClick={() => setFilterType('ALL')}
                       className={`px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer shrink-0 ${
                         filterType === 'ALL'
-                          ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
+                          ? 'bg-stone-900 text-white dark:bg-white dark:text-stone-900'
+                          : 'text-stone-500 hover:text-stone-900 dark:hover:text-stone-200'
                       }`}
                     >
                       Semua ({notifications.length})
@@ -406,7 +406,7 @@ export const Header: React.FC<HeaderProps> = ({
                       className={`px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer shrink-0 ${
                         filterType === 'BADAL'
                           ? 'bg-amber-600 text-white'
-                          : 'text-slate-500 hover:text-amber-600'
+                          : 'text-stone-500 hover:text-amber-600'
                       }`}
                     >
                       Badal ({notifications.filter(n => n.type === 'BADAL').length})
@@ -416,7 +416,7 @@ export const Header: React.FC<HeaderProps> = ({
                       className={`px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer shrink-0 ${
                         filterType === 'KBM'
                           ? 'bg-emerald-600 text-white'
-                          : 'text-slate-500 hover:text-emerald-600'
+                          : 'text-stone-500 hover:text-emerald-600'
                       }`}
                     >
                       Absen & Jurnal ({notifications.filter(n => n.type === 'ATTENDANCE_OPEN' || n.type === 'JOURNAL_PENDING').length})
@@ -426,7 +426,7 @@ export const Header: React.FC<HeaderProps> = ({
                       className={`px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer shrink-0 ${
                         filterType === 'REQUEST'
                           ? 'bg-purple-600 text-white'
-                          : 'text-slate-500 hover:text-purple-600'
+                          : 'text-stone-500 hover:text-purple-600'
                       }`}
                     >
                       Ajuan ({notifications.filter(n => n.type === 'REQUEST_UPDATE').length})
@@ -434,9 +434,9 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
 
                   {/* List Content */}
-                  <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 p-1.5 space-y-1">
+                  <div className="max-h-80 overflow-y-auto divide-y divide-stone-100 dark:divide-stone-800/60 p-1.5 space-y-1">
                     {filteredNotifications.length === 0 ? (
-                      <div className="p-8 text-center text-xs text-slate-400 dark:text-slate-500">
+                      <div className="p-8 text-center text-xs text-stone-400 dark:text-stone-500">
                         Tidak ada notifikasi pada kategori ini.
                       </div>
                     ) : (
@@ -445,7 +445,7 @@ export const Header: React.FC<HeaderProps> = ({
                           key={notif.id}
                           className={`p-3 rounded-xl transition-all cursor-pointer border ${
                             notif.isRead 
-                              ? 'bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800/40 border-transparent' 
+                              ? 'bg-transparent hover:bg-stone-50 dark:hover:bg-stone-800/40 border-transparent' 
                               : 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-100/60 dark:border-emerald-900/40 hover:bg-emerald-50/70'
                           }`}
                           onClick={() => {
@@ -462,21 +462,21 @@ export const Header: React.FC<HeaderProps> = ({
                               <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider shrink-0 ${getTagStyle(notif.type)}`}>
                                 {getTagLabel(notif.type)}
                               </span>
-                              <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
+                              <p className="text-xs font-semibold text-stone-800 dark:text-stone-200 truncate">
                                 {notif.title}
                               </p>
                             </div>
-                            <span className="text-[9px] text-slate-400 shrink-0 whitespace-nowrap">
+                            <span className="text-[9px] text-stone-400 shrink-0 whitespace-nowrap">
                               {notif.timeLabel}
                             </span>
                           </div>
 
-                          <p className="text-[11px] text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed mb-2">
+                          <p className="text-[11px] text-stone-600 dark:text-stone-400 line-clamp-2 leading-relaxed mb-2">
                             {notif.subtitle}
                           </p>
 
                           <div className="flex items-center justify-between pt-1">
-                            <span className="text-[9px] text-slate-400">
+                            <span className="text-[9px] text-stone-400">
                               {notif.type === 'BADAL' ? 'Penugasan Pengganti' : notif.type === 'REQUEST_UPDATE' ? 'Disposisi' : 'KBM Harian'}
                             </span>
                             <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 inline-flex items-center gap-0.5 group-hover:underline">
@@ -490,7 +490,7 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
 
                   {/* Footer */}
-                  <div className="p-2.5 bg-slate-50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 text-center">
+                  <div className="p-2.5 bg-stone-50 dark:bg-stone-800/40 border-t border-stone-100 dark:border-stone-800 text-center">
                     <button
                       onClick={() => {
                         setCurrentPath('/dashboard/guru');
@@ -511,20 +511,20 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={toggleDarkMode}
             title={isDarkMode ? 'Aktifkan Mode Terang' : 'Aktifkan Mode Malam'}
-            className="p-2 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
+            className="p-2 text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-all cursor-pointer"
           >
             {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
 
           {/* Logout Button */}
-          <div className="h-6 w-[1px] bg-slate-200 dark:bg-slate-700 mx-0.5 hidden sm:block" />
+          <div className="h-6 w-[1px] bg-stone-200 dark:bg-stone-700 mx-0.5 hidden sm:block" />
           
           <button
             onClick={logout}
             title="Keluar ke Halaman Login"
             className="flex items-center gap-2 py-1.5 px-3 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 border border-rose-100 dark:border-rose-900/30 rounded-lg text-xs font-bold transition-all cursor-pointer group"
           >
-            <LogOut className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            <LogOut className="w-3.5 h-3.5 group-hover:transtone-x-0.5 transition-transform" />
             <span className="hidden sm:inline">LOGOUT</span>
           </button>
         </div>

@@ -103,36 +103,36 @@ export const PayrollRecap: React.FC = () => {
     <div className="space-y-4">
       {/* Aggregate Payroll Metrics */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800">
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">Gaji Pokok</span>
-          <p className="text-base font-semibold text-slate-900 dark:text-slate-100 mt-1 font-mono">
+        <div className="bg-white dark:bg-stone-900 p-3.5 rounded-xl border border-stone-200/80 dark:border-stone-800">
+          <span className="text-[11px] text-stone-500 dark:text-stone-400 font-medium block">Gaji Pokok</span>
+          <p className="text-base font-semibold text-stone-900 dark:text-stone-100 mt-1 font-mono">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.baseSalary, 0))}
           </p>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800">
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">Honor Mengajar</span>
+        <div className="bg-white dark:bg-stone-900 p-3.5 rounded-xl border border-stone-200/80 dark:border-stone-800">
+          <span className="text-[11px] text-stone-500 dark:text-stone-400 font-medium block">Honor Mengajar</span>
           <p className="text-base font-semibold text-emerald-800 dark:text-emerald-400 mt-1 font-mono">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.teachingHonorarium, 0))}
           </p>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800">
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">Uang Transport</span>
-          <p className="text-base font-semibold text-slate-900 dark:text-slate-100 mt-1 font-mono">
+        <div className="bg-white dark:bg-stone-900 p-3.5 rounded-xl border border-stone-200/80 dark:border-stone-800">
+          <span className="text-[11px] text-stone-500 dark:text-stone-400 font-medium block">Uang Transport</span>
+          <p className="text-base font-semibold text-stone-900 dark:text-stone-100 mt-1 font-mono">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.totalTransport, 0))}
           </p>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800">
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">Potongan SOP</span>
+        <div className="bg-white dark:bg-stone-900 p-3.5 rounded-xl border border-stone-200/80 dark:border-stone-800">
+          <span className="text-[11px] text-stone-500 dark:text-stone-400 font-medium block">Potongan SOP</span>
           <p className="text-base font-semibold text-rose-600 dark:text-rose-400 mt-1 font-mono">
             -{formatRupiah(payrollSummary.totalDeductions)}
           </p>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 col-span-2 sm:col-span-1">
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">Total Bersih</span>
+        <div className="bg-white dark:bg-stone-900 p-3.5 rounded-xl border border-stone-200/80 dark:border-stone-800 col-span-2 sm:col-span-1">
+          <span className="text-[11px] text-stone-500 dark:text-stone-400 font-medium block">Total Bersih</span>
           <p className="text-base font-semibold text-emerald-800 dark:text-emerald-400 mt-1 font-mono">
             {formatRupiah(payrollSummary.totalNet)}
           </p>
@@ -143,25 +143,25 @@ export const PayrollRecap: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex flex-1 items-center gap-2.5">
           <div className="relative flex-1 max-w-xs">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" />
+            <Search className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 top-2.5 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari guru..."
-              className="w-full pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-slate-100"
+              className="w-full pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-stone-900 rounded-lg border border-stone-200 dark:border-stone-800 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-stone-900 dark:text-stone-100"
             />
           </div>
 
-          <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg">
+          <div className="flex items-center gap-0.5 bg-stone-100 dark:bg-stone-800 p-0.5 rounded-lg">
             {['ALL', 'SMP', 'MA', 'PESANTREN'].map((unit) => (
               <button
                 key={unit}
                 onClick={() => setUnitFilter(unit)}
                 className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                   unitFilter === unit
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-2xs'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-2xs'
+                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
                 }`}
               >
                 {unit === 'ALL' ? 'Semua' : unit}
@@ -173,9 +173,9 @@ export const PayrollRecap: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={handleExportExcel}
-            className="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs font-medium px-3 py-1.5 rounded-lg border border-stone-200 dark:border-stone-700 transition-colors cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+            <Download className="w-3.5 h-3.5 text-stone-500 dark:text-stone-400" />
             <span>Ekspor CSV</span>
           </button>
 
@@ -190,11 +190,11 @@ export const PayrollRecap: React.FC = () => {
       </div>
 
       {/* Payroll Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
+      <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-medium border-b border-slate-200/70 dark:border-slate-700">
+              <tr className="bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 font-medium border-b border-stone-200/70 dark:border-stone-700">
                 <th className="py-2.5 px-3 text-center w-9">No</th>
                 <th className="py-2.5 px-4">Nama & NIP</th>
                 <th className="py-2.5 px-3">Unit</th>
@@ -207,34 +207,34 @@ export const PayrollRecap: React.FC = () => {
                 <th className="py-2.5 px-4 text-right">Gaji Bersih</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+            <tbody className="divide-y divide-stone-100 dark:divide-stone-800 text-stone-700 dark:text-stone-300">
               {filteredItems.map((item, idx) => (
-                <tr key={item.teacher.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                  <td className="py-2.5 px-3 text-center text-slate-400 dark:text-slate-500 font-mono">
+                <tr key={item.teacher.id} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/30 transition-colors">
+                  <td className="py-2.5 px-3 text-center text-stone-400 dark:text-stone-500 font-mono">
                     {idx + 1}
                   </td>
                   <td className="py-2.5 px-4">
-                    <p className="font-medium text-slate-900 dark:text-slate-100">{item.teacher.name}</p>
-                    <p className="text-[11px] text-slate-400 dark:text-slate-500 font-mono">{item.teacher.nip}</p>
+                    <p className="font-medium text-stone-900 dark:text-stone-100">{item.teacher.name}</p>
+                    <p className="text-[11px] text-stone-400 dark:text-stone-500 font-mono">{item.teacher.nip}</p>
                   </td>
                   <td className="py-2.5 px-3">
-                    <span className="text-[11px] text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                    <span className="text-[11px] text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 px-2 py-0.5 rounded border border-stone-200 dark:border-stone-700">
                       {item.teacher.unit}
                     </span>
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono text-slate-800 dark:text-slate-200">
+                  <td className="py-2.5 px-3 text-right font-mono text-stone-800 dark:text-stone-200">
                     {formatRupiah(item.baseSalary)}
                   </td>
-                  <td className="py-2.5 px-3 text-center font-mono font-medium text-slate-900 dark:text-slate-100">
+                  <td className="py-2.5 px-3 text-center font-mono font-medium text-stone-900 dark:text-stone-100">
                     {item.totalTaughtHours}
                   </td>
                   <td className="py-2.5 px-3 text-right font-mono text-emerald-800 dark:text-emerald-400 font-medium">
                     {formatRupiah(item.teachingHonorarium)}
                   </td>
-                  <td className="py-2.5 px-3 text-center font-mono text-slate-900 dark:text-slate-100">
+                  <td className="py-2.5 px-3 text-center font-mono text-stone-900 dark:text-stone-100">
                     {item.totalPresentDays}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono text-slate-700 dark:text-slate-300">
+                  <td className="py-2.5 px-3 text-right font-mono text-stone-700 dark:text-stone-300">
                     {formatRupiah(item.totalTransport)}
                   </td>
                   <td className="py-2.5 px-3 text-right font-mono text-rose-600 dark:text-rose-400">

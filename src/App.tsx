@@ -10,6 +10,7 @@ import { SessionTimeoutManager } from './components/SessionTimeoutManager';
 import { LearningNeedManagement } from './components/LearningNeedManagement';
 import { BadalManagement } from './components/BadalManagement';
 import { GuruDeviceNotificationToast } from './components/GuruDeviceNotificationToast';
+import { isKepsekRole } from './types';
 
 const MainContent: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -17,10 +18,16 @@ const MainContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-slate-600 dark:text-slate-400 font-medium animate-pulse">Menyiapkan Data HRIS...</p>
+      <div className="min-h-screen bg-[#FBFBFA] dark:bg-[#111614] flex items-center justify-center font-sans">
+        <div className="flex flex-col items-center gap-5">
+          <div className="relative">
+            <div className="w-12 h-12 border-2 border-stone-200 dark:border-stone-800 rounded-full"></div>
+            <div className="w-12 h-12 border-t-2 border-[#1B4332] dark:border-emerald-500 rounded-full animate-spin absolute top-0 left-0"></div>
+          </div>
+          <div className="text-center space-y-1">
+            <p className="text-stone-900 dark:text-stone-100 font-bold text-sm tracking-tight">Baitul Qur'an Al-Ikhwan</p>
+            <p className="text-stone-400 dark:text-stone-500 text-[10px] uppercase tracking-widest font-bold">HRIS & Kafa'ah System</p>
+          </div>
         </div>
       </div>
     );
@@ -68,7 +75,7 @@ const MainContent: React.FC = () => {
       return <AdminView initialTab="dashboard" key="admin-dashboard" />;
     }
 
-    if (currentRole === 'KEPALA_PESANTREN' || currentPath.startsWith('/dashboard/kepsek')) {
+    if (isKepsekRole(currentRole) || currentPath.startsWith('/dashboard/kepsek')) {
       if (currentPath === '/dashboard/kepsek/audit') {
         return <KepsekView initialTab="ketaatan_jurnal" key="kepsek-audit" />;
       }
@@ -85,7 +92,7 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex font-sans antialiased transition-colors duration-300">
+    <div className="min-h-screen bg-[#FBFBFA] dark:bg-[#111614] text-stone-900 dark:text-stone-100 flex font-sans antialiased transition-colors duration-200">
       {/* Sidebar & Topbar Shell */}
       <Header 
         sidebarOpen={sidebarOpen}
@@ -106,22 +113,22 @@ const MainContent: React.FC = () => {
         </main>
 
         {/* Professional Institutional Footer */}
-        <footer className="bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800/80 py-4 text-xs text-slate-500 dark:text-slate-400 mt-auto print:hidden">
+        <footer className="bg-white dark:bg-[#141A17] border-t border-stone-200 dark:border-stone-800/80 py-3.5 text-xs text-stone-500 dark:text-stone-400 mt-auto print:hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded bg-emerald-700 text-white flex items-center justify-center font-bold text-[10px]">
+              <div className="w-5 h-5 rounded bg-[#1B4332] text-white flex items-center justify-center font-bold text-[10px]">
                 BQ
               </div>
-              <span className="font-semibold text-slate-700 dark:text-slate-300">
+              <span className="font-semibold text-stone-800 dark:text-stone-200">
                 Pesantren Baitul Qur'an Al-Ikhwan
               </span>
-              <span className="text-slate-400 dark:text-slate-500 hidden md:inline">• HRIS & Kafa'ah Asatidz</span>
+              <span className="text-stone-400 dark:text-stone-500 hidden md:inline">• HRIS & Kafa'ah Asatidz</span>
             </div>
 
-            <div className="flex items-center gap-2 text-slate-400 text-[11px]">
+            <div className="flex items-center gap-2 text-stone-400 text-[11px]">
               <span>Tahun Ajaran 2026/2027</span>
               <span>•</span>
-              <span className="text-emerald-700 font-medium">Sistem Aktif</span>
+              <span className="text-[#1B4332] dark:text-emerald-400 font-medium">Sistem Aktif</span>
             </div>
           </div>
         </footer>

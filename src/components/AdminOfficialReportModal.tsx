@@ -164,27 +164,27 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/70 backdrop-blur-xs overflow-y-auto print:p-0 print:bg-white print:static"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-stone-950/70 backdrop-blur-xs overflow-y-auto print:p-0 print:bg-white print:static"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div 
-        className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-4xl w-full overflow-hidden border border-slate-200 dark:border-slate-800 my-auto print:border-none print:shadow-none print:m-0 print:max-w-none animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[94vh] print:max-h-none"
+        className="bg-white dark:bg-stone-900 rounded-xl shadow-2xl max-w-4xl w-full overflow-hidden border border-stone-200 dark:border-stone-800 my-auto print:border-none print:shadow-none print:m-0 print:max-w-none animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[94vh] print:max-h-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Minimalist Top Action & Configuration Bar */}
-        <div className="bg-slate-900 text-white px-4 py-3 print:hidden border-b border-slate-800 shrink-0 space-y-3">
+        <div className="bg-stone-900 text-white px-4 py-3 print:hidden border-b border-stone-800 shrink-0 space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <span className="w-6 h-6 rounded bg-emerald-600 flex items-center justify-center font-bold text-[11px] text-white">
                 BQ
               </span>
               <div>
-                <h2 className="font-semibold text-xs text-slate-100 leading-tight">
+                <h2 className="font-semibold text-xs text-stone-100 leading-tight">
                   Cetak Dokumen Resmi Pesantren (PDF)
                 </h2>
-                <p className="text-[10px] text-slate-400">
+                <p className="text-[10px] text-stone-400">
                   Format resmi tata usaha & kepegawaian
                 </p>
               </div>
@@ -195,7 +195,7 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
               <select
                 value={reportType}
                 onChange={(e) => setReportType(e.target.value as AdminReportType)}
-                className="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-hidden focus:border-emerald-500 cursor-pointer font-medium"
+                className="bg-stone-800 border border-stone-700 text-stone-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-hidden focus:border-emerald-500 cursor-pointer font-medium"
               >
                 <option value="payroll">Rekapitulasi Kafa'ah & Gaji</option>
                 <option value="attendance_kbm">Rekapitulasi Presensi & KBM</option>
@@ -209,7 +209,7 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
               <select
                 value={unitFilter}
                 onChange={(e) => setUnitFilter(e.target.value as any)}
-                className="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-hidden focus:border-emerald-500 cursor-pointer font-medium"
+                className="bg-stone-800 border border-stone-700 text-stone-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-hidden focus:border-emerald-500 cursor-pointer font-medium"
               >
                 <option value="ALL">Semua Unit (SMP, MA, Ponpes)</option>
                 <option value="SMP">Unit SMP</option>
@@ -223,8 +223,8 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
                 onClick={() => setShowConfigDrawer(!showConfigDrawer)}
                 className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-lg border transition-colors cursor-pointer ${
                   showConfigDrawer 
-                    ? 'bg-slate-800 border-emerald-500 text-emerald-400' 
-                    : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
+                    ? 'bg-stone-800 border-emerald-500 text-emerald-400' 
+                    : 'bg-stone-800 border-stone-700 text-stone-300 hover:text-white'
                 }`}
               >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -245,7 +245,7 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex items-center justify-center p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg transition-colors cursor-pointer"
+                className="inline-flex items-center justify-center p-1.5 bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-white rounded-lg transition-colors cursor-pointer"
                 title="Tutup (Esc)"
               >
                 <X className="w-4 h-4" />
@@ -255,16 +255,16 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
 
           {/* Collapsible Customization Options Panel */}
           {showConfigDrawer && (
-            <div className="pt-3 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs bg-slate-950/40 p-3 rounded-lg">
+            <div className="pt-3 border-t border-stone-800/80 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs bg-stone-950/40 p-3 rounded-lg">
               {/* 1. Rentang Tanggal / Periode */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-slate-300 block">
+                <label className="text-[11px] font-semibold text-stone-300 block">
                   Rentang Tanggal Pelaporan:
                 </label>
                 <select
                   value={dateRangePreset}
                   onChange={(e) => setDateRangePreset(e.target.value as DateRangePreset)}
-                  className="w-full bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-md px-2 py-1 focus:outline-hidden"
+                  className="w-full bg-stone-800 border border-stone-700 text-stone-200 text-xs rounded-md px-2 py-1 focus:outline-hidden"
                 >
                   <option value="FULL_MONTH">Satu Bulan Penuh ({selectedPeriod})</option>
                   <option value="PEKAN_1">Pekan I (Tgl 01 - 07)</option>
@@ -280,14 +280,14 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
                       type="date"
                       value={customStartDate}
                       onChange={(e) => setCustomStartDate(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 text-slate-200 text-[11px] rounded px-1.5 py-0.5 w-1/2"
+                      className="bg-stone-800 border border-stone-700 text-stone-200 text-[11px] rounded px-1.5 py-0.5 w-1/2"
                     />
-                    <span className="text-slate-500 text-[10px]">s/d</span>
+                    <span className="text-stone-500 text-[10px]">s/d</span>
                     <input
                       type="date"
                       value={customEndDate}
                       onChange={(e) => setCustomEndDate(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 text-slate-200 text-[11px] rounded px-1.5 py-0.5 w-1/2"
+                      className="bg-stone-800 border border-stone-700 text-stone-200 text-[11px] rounded px-1.5 py-0.5 w-1/2"
                     />
                   </div>
                 )}
@@ -295,11 +295,11 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
 
               {/* 2. Format Tanda Tangan */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-slate-300 block">
+                <label className="text-[11px] font-semibold text-stone-300 block">
                   Struktur Pengesahan & Tanda Tangan:
                 </label>
                 <div className="flex items-center gap-2">
-                  <label className="flex items-center gap-1.5 text-slate-300 cursor-pointer text-[11px]">
+                  <label className="flex items-center gap-1.5 text-stone-300 cursor-pointer text-[11px]">
                     <input
                       type="radio"
                       name="sigCount"
@@ -311,7 +311,7 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
                   </label>
                 </div>
                 <div className="flex items-center gap-2">
-                  <label className="flex items-center gap-1.5 text-slate-300 cursor-pointer text-[11px]">
+                  <label className="flex items-center gap-1.5 text-stone-300 cursor-pointer text-[11px]">
                     <input
                       type="radio"
                       name="sigCount"
@@ -326,11 +326,11 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
 
               {/* 3. Elemen Tampilan Dokumen */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-slate-300 block">
+                <label className="text-[11px] font-semibold text-stone-300 block">
                   Elemen Tambahan Dokumen:
                 </label>
                 <div className="grid grid-cols-2 gap-1.5 text-[11px]">
-                  <label className="flex items-center gap-1.5 text-slate-300 cursor-pointer">
+                  <label className="flex items-center gap-1.5 text-stone-300 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={showNIP}
@@ -339,7 +339,7 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
                     />
                     NIP & Jabatan
                   </label>
-                  <label className="flex items-center gap-1.5 text-slate-300 cursor-pointer">
+                  <label className="flex items-center gap-1.5 text-stone-300 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={showDeductions}
@@ -348,7 +348,7 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
                     />
                     Potongan Disiplin
                   </label>
-                  <label className="flex items-center gap-1.5 text-slate-300 cursor-pointer">
+                  <label className="flex items-center gap-1.5 text-stone-300 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={showSignatures}
@@ -357,7 +357,7 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
                     />
                     Lembar Tanda Tangan
                   </label>
-                  <label className="flex items-center gap-1.5 text-slate-300 cursor-pointer">
+                  <label className="flex items-center gap-1.5 text-stone-300 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={showNotes}
@@ -373,41 +373,41 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
         </div>
 
         {/* Official Paper Document Area (Scrollable in UI, Full-page on Print) */}
-        <div className="overflow-y-auto p-6 sm:p-10 text-slate-900 bg-white dark:bg-white font-serif print:p-0 print:overflow-visible">
-          <div id="official-pesantren-report" className="max-w-3xl mx-auto space-y-6 text-[13px] leading-relaxed dark:text-slate-900">
+        <div className="overflow-y-auto p-6 sm:p-10 text-stone-900 bg-white dark:bg-white font-serif print:p-0 print:overflow-visible">
+          <div id="official-pesantren-report" className="max-w-3xl mx-auto space-y-6 text-[13px] leading-relaxed dark:text-stone-900">
             
             {/* 1. Official Pesantren Letterhead (KOP SURAT RESMI) */}
-            <div className="border-b-2 border-slate-900 pb-3 font-sans">
+            <div className="border-b-2 border-stone-900 pb-3 font-sans">
               <div className="flex items-center justify-between gap-4">
-                <div className="w-16 h-16 rounded-xl bg-slate-900 text-white flex items-center justify-center font-extrabold text-2xl shrink-0 shadow-lg shadow-slate-200">
+                <div className="w-16 h-16 rounded-xl bg-stone-900 text-white flex items-center justify-center font-extrabold text-2xl shrink-0 shadow-lg shadow-stone-200">
                   BQA
                 </div>
                 <div className="text-center flex-1 space-y-0.5">
                   <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-widest">Yayasan Al-Ikhwan Mandiri Sejahtera</p>
-                  <h1 className="text-base sm:text-xl font-extrabold tracking-tight text-slate-950 uppercase leading-none">
+                  <h1 className="text-base sm:text-xl font-extrabold tracking-tight text-stone-950 uppercase leading-none">
                     PONDOK PESANTREN BAITUL QUR'AN AL-IKHWAN
                   </h1>
-                  <p className="text-xs font-semibold text-slate-700">
+                  <p className="text-xs font-semibold text-stone-700">
                     Lembaga Pendidikan Islam & Tahfiz Quran • SMP • MA • Ma'had Aly
                   </p>
-                  <p className="text-[10px] text-slate-500 font-medium">
+                  <p className="text-[10px] text-stone-500 font-medium">
                     Jl. Sungai Kendal No.21, RT.8/RW.5, Marunda, Cilincing, Jakarta Utara 14150
                   </p>
-                  <p className="text-[9px] text-slate-400 font-mono">
+                  <p className="text-[9px] text-stone-400 font-mono">
                     Hotline: 0858-8302-2643 / 0812-8294-9922 • Email: sekretariat@bqa.sch.id
                   </p>
                 </div>
                 <div className="w-16 text-right hidden sm:block">
-                  <span className="text-[9px] font-bold text-slate-900 block uppercase">Jakarta Utara</span>
-                  <span className="text-[8px] font-mono text-slate-400 block">NSPP: 510032</span>
+                  <span className="text-[9px] font-bold text-stone-900 block uppercase">Jakarta Utara</span>
+                  <span className="text-[8px] font-mono text-stone-400 block">NSPP: 510032</span>
                 </div>
               </div>
-              <div className="mt-2 border-t border-slate-300" />
+              <div className="mt-2 border-t border-stone-300" />
             </div>
 
             {/* 2. Document Title & Metadata Info */}
             <div className="text-center font-sans space-y-1 pt-1">
-              <h2 className="text-sm sm:text-base font-bold text-slate-950 underline underline-offset-4 tracking-wide uppercase">
+              <h2 className="text-sm sm:text-base font-bold text-stone-950 underline underline-offset-4 tracking-wide uppercase">
                 {reportType === 'payroll' && `REKAPITULASI LAPORAN KAFA'AH & PENGGAJIAN ASATIDZ`}
                 {reportType === 'attendance_kbm' && `LAPORAN REKAPITULASI PRESENSI & KEGIATAN BELAJAR MENGAJAR`}
                 {reportType === 'journal_compliance' && `LAPORAN KETAATAN PENGISIAN JURNAL PEMBELAJARAN (PBM)`}
@@ -415,7 +415,7 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
                 {reportType === 'discipline_deduction' && `REKAPITULASI PENEGAKAN SOP & POTONGAN DISIPLIN ASATIDZ`}
                 {reportType === 'executive_summary' && `LAPORAN EKSEKUTIF MANAJEMEN & SUMBER DAYA ASATIDZ`}
               </h2>
-              <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-slate-600 font-mono pt-1">
+              <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-stone-600 font-mono pt-1">
                 <span>Nomor: <strong>{docNumber}</strong></span>
                 <span>•</span>
                 <span>Rentang: <strong>{dateRangeLabel}</strong></span>
@@ -425,7 +425,7 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
             </div>
 
             {/* 3. Official Introductory Statement */}
-            <div className="font-serif text-slate-800 text-xs sm:text-[13px] leading-relaxed text-justify">
+            <div className="font-serif text-stone-800 text-xs sm:text-[13px] leading-relaxed text-justify">
               <p>
                 Berdasarkan rekapitulasi data sistem HRIS Presensi dan Tata Usaha Pesantren Baitul Qur'an Al-Ikhwan untuk <strong>{dateRangeLabel}</strong>, berikut disampaikan laporan resmi kepegawaian tenaga pendidik (asatidz) untuk menjadi bahan pertanggungjawaban administratif:
               </p>
@@ -437,29 +437,29 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
             {reportType === 'payroll' && (
               <div className="space-y-3 font-sans text-xs">
                 {/* Summary Stat Box */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50 border border-slate-300 p-2.5 rounded">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-stone-50 border border-stone-300 p-2.5 rounded">
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">Total Asatidz</span>
-                    <span className="font-bold text-slate-900 text-sm font-mono">{filteredPayrollItems.length} Orang</span>
+                    <span className="text-[10px] text-stone-500 uppercase block font-medium">Total Asatidz</span>
+                    <span className="font-bold text-stone-900 text-sm font-mono">{filteredPayrollItems.length} Orang</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">Total Jam (JP)</span>
-                    <span className="font-bold text-slate-900 text-sm font-mono">{totalTeachingHours} JP</span>
+                    <span className="text-[10px] text-stone-500 uppercase block font-medium">Total Jam (JP)</span>
+                    <span className="font-bold text-stone-900 text-sm font-mono">{totalTeachingHours} JP</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">Total Potongan</span>
+                    <span className="text-[10px] text-stone-500 uppercase block font-medium">Total Potongan</span>
                     <span className="font-bold text-rose-700 text-sm font-mono">{formatRupiah(totalDeductions)}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">Total Gaji Bersih</span>
+                    <span className="text-[10px] text-stone-500 uppercase block font-medium">Total Gaji Bersih</span>
                     <span className="font-bold text-emerald-800 text-sm font-mono">{formatRupiah(totalNet)}</span>
                   </div>
                 </div>
 
                 {/* Table */}
-                <div className="border border-slate-300 rounded overflow-hidden">
-                  <table className="w-full text-left text-[11px] divide-y divide-slate-200">
-                    <thead className="bg-slate-100 font-semibold text-slate-800">
+                <div className="border border-stone-300 rounded overflow-hidden">
+                  <table className="w-full text-left text-[11px] divide-y divide-stone-200">
+                    <thead className="bg-stone-100 font-semibold text-stone-800">
                       <tr>
                         <th className="py-2 px-2 text-center w-7">No</th>
                         <th className="py-2 px-2.5">Nama Asatidz {showNIP && '& NIP'}</th>
@@ -472,36 +472,36 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
                         <th className="py-2 px-2.5 text-right font-bold">Gaji Bersih</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 text-slate-700">
+                    <tbody className="divide-y divide-stone-200 text-stone-700">
                       {filteredPayrollItems.map((item, idx) => (
-                        <tr key={item.teacher.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                          <td className="py-1.5 px-2 text-center text-slate-500 font-mono">{idx + 1}</td>
+                        <tr key={item.teacher.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-stone-50/50'}>
+                          <td className="py-1.5 px-2 text-center text-stone-500 font-mono">{idx + 1}</td>
                           <td className="py-1.5 px-2.5">
-                            <span className="font-semibold text-slate-900 block">{item.teacher.name}</span>
+                            <span className="font-semibold text-stone-900 block">{item.teacher.name}</span>
                             {showNIP && (
-                              <span className="text-[10px] text-slate-400 font-mono">{item.teacher.nip} • {item.teacher.position}</span>
+                              <span className="text-[10px] text-stone-400 font-mono">{item.teacher.nip} • {item.teacher.position}</span>
                             )}
                           </td>
-                          <td className="py-1.5 px-2 text-center font-medium text-slate-600">{item.teacher.unit}</td>
+                          <td className="py-1.5 px-2 text-center font-medium text-stone-600">{item.teacher.unit}</td>
                           <td className="py-1.5 px-2 text-right font-mono">{formatRupiah(item.baseSalary)}</td>
-                          <td className="py-1.5 px-2 text-center font-mono font-semibold text-slate-800">
+                          <td className="py-1.5 px-2 text-center font-mono font-semibold text-stone-800">
                             {item.totalTaughtHours}
                             {item.totalBadalHours > 0 && <span className="text-[9px] text-purple-700 block">(+{item.totalBadalHours} bdl)</span>}
                           </td>
                           <td className="py-1.5 px-2 text-right font-mono text-emerald-900">{formatRupiah(item.teachingHonorarium)}</td>
-                          <td className="py-1.5 px-2 text-right font-mono text-slate-700">{formatRupiah(item.totalTransport)}</td>
+                          <td className="py-1.5 px-2 text-right font-mono text-stone-700">{formatRupiah(item.totalTransport)}</td>
                           {showDeductions && (
                             <td className="py-1.5 px-2 text-right font-mono text-rose-700">
                               {item.totalDeductions > 0 ? `-${formatRupiah(item.totalDeductions)}` : '-'}
                             </td>
                           )}
-                          <td className="py-1.5 px-2.5 text-right font-bold font-mono text-slate-950">
+                          <td className="py-1.5 px-2.5 text-right font-bold font-mono text-stone-950">
                             {formatRupiah(item.netSalary)}
                           </td>
                         </tr>
                       ))}
                     </tbody>
-                    <tfoot className="bg-slate-100 font-bold text-slate-900 border-t-2 border-slate-300">
+                    <tfoot className="bg-stone-100 font-bold text-stone-900 border-t-2 border-stone-300">
                       <tr>
                         <td colSpan={3} className="py-2 px-2 text-center uppercase tracking-wider text-[10px]">
                           TOTAL KESELURUHAN ({filteredPayrollItems.length} GURU)
@@ -513,7 +513,7 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
                         {showDeductions && (
                           <td className="py-2 px-2 text-right font-mono text-rose-700">-{formatRupiah(totalDeductions)}</td>
                         )}
-                        <td className="py-2 px-2.5 text-right font-mono text-slate-950 font-extrabold">{formatRupiah(totalNet)}</td>
+                        <td className="py-2 px-2.5 text-right font-mono text-stone-950 font-extrabold">{formatRupiah(totalNet)}</td>
                       </tr>
                     </tfoot>
                   </table>
@@ -521,9 +521,9 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
 
                 {/* Terbilang Note */}
                 {showTerbilang && (
-                  <div className="p-2.5 bg-slate-50 border border-slate-200 rounded text-slate-800 text-xs">
-                    <span className="font-semibold text-slate-600 text-[10px] uppercase block">Terbilang Total Pembayaran:</span>
-                    <p className="italic font-serif font-medium text-slate-900 mt-0.5">
+                  <div className="p-2.5 bg-stone-50 border border-stone-200 rounded text-stone-800 text-xs">
+                    <span className="font-semibold text-stone-600 text-[10px] uppercase block">Terbilang Total Pembayaran:</span>
+                    <p className="italic font-serif font-medium text-stone-900 mt-0.5">
                       "{terbilang(totalNet)}"
                     </p>
                   </div>
@@ -534,28 +534,28 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
             {/* REPORT TYPE 2: ATTENDANCE & KBM */}
             {reportType === 'attendance_kbm' && (
               <div className="space-y-3 font-sans text-xs">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50 border border-slate-300 p-2.5 rounded">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-stone-50 border border-stone-300 p-2.5 rounded">
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">Beban KBM Terdaftar</span>
-                    <span className="font-bold text-slate-900 text-sm font-mono">{totalWeeklyJP} JP / Pekan</span>
+                    <span className="text-[10px] text-stone-500 uppercase block font-medium">Beban KBM Terdaftar</span>
+                    <span className="font-bold text-stone-900 text-sm font-mono">{totalWeeklyJP} JP / Pekan</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">Jumlah Sesi KBM</span>
-                    <span className="font-bold text-slate-900 text-sm font-mono">{filteredSchedules.length} Sesi</span>
+                    <span className="text-[10px] text-stone-500 uppercase block font-medium">Jumlah Sesi KBM</span>
+                    <span className="font-bold text-stone-900 text-sm font-mono">{filteredSchedules.length} Sesi</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">Tugas Badal (Pengganti)</span>
+                    <span className="text-[10px] text-stone-500 uppercase block font-medium">Tugas Badal (Pengganti)</span>
                     <span className="font-bold text-indigo-800 text-sm font-mono">{filteredBadalAssignments.length} Penugasan</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">Tingkat Kehadiran</span>
+                    <span className="text-[10px] text-stone-500 uppercase block font-medium">Tingkat Kehadiran</span>
                     <span className="font-bold text-emerald-800 text-sm font-mono">98.4% Sesuai Jadwal</span>
                   </div>
                 </div>
 
-                <div className="border border-slate-300 rounded overflow-hidden">
-                  <table className="w-full text-left text-[11px] divide-y divide-slate-200">
-                    <thead className="bg-slate-100 font-semibold text-slate-800">
+                <div className="border border-stone-300 rounded overflow-hidden">
+                  <table className="w-full text-left text-[11px] divide-y divide-stone-200">
+                    <thead className="bg-stone-100 font-semibold text-stone-800">
                       <tr>
                         <th className="py-2 px-2 text-center w-7">No</th>
                         <th className="py-2 px-2.5">Mata Pelajaran & Kelas</th>
@@ -566,25 +566,25 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
                         <th className="py-2 px-2 text-center">Status SOP</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 text-slate-700">
+                    <tbody className="divide-y divide-stone-200 text-stone-700">
                       {filteredSchedules.slice(0, 16).map((sched, idx) => {
                         const teacher = teachers.find(t => t.id === sched.teacherId);
                         return (
-                          <tr key={sched.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                            <td className="py-1.5 px-2 text-center text-slate-500 font-mono">{idx + 1}</td>
-                            <td className="py-1.5 px-2.5 font-semibold text-slate-900">
+                          <tr key={sched.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-stone-50/50'}>
+                            <td className="py-1.5 px-2 text-center text-stone-500 font-mono">{idx + 1}</td>
+                            <td className="py-1.5 px-2.5 font-semibold text-stone-900">
                               {sched.subject}
-                              <span className="text-[10px] text-slate-500 block font-normal">Kelas {sched.classRoom}</span>
+                              <span className="text-[10px] text-stone-500 block font-normal">Kelas {sched.classRoom}</span>
                             </td>
                             <td className="py-1.5 px-2 font-mono text-[10px]">
-                              <span className="font-semibold text-slate-800">{sched.dayOfWeek}</span>
-                              <span className="text-slate-500 block">{sched.startTime} - {sched.endTime}</span>
+                              <span className="font-semibold text-stone-800">{sched.dayOfWeek}</span>
+                              <span className="text-stone-500 block">{sched.startTime} - {sched.endTime}</span>
                             </td>
-                            <td className="py-1.5 px-2 text-slate-800">
+                            <td className="py-1.5 px-2 text-stone-800">
                               {teacher?.name || '-'}
                             </td>
-                            <td className="py-1.5 px-2 text-center font-medium text-slate-600">{sched.unit}</td>
-                            <td className="py-1.5 px-2 text-center font-mono font-bold text-slate-900">{sched.hours} JP</td>
+                            <td className="py-1.5 px-2 text-center font-medium text-stone-600">{sched.unit}</td>
+                            <td className="py-1.5 px-2 text-center font-mono font-bold text-stone-900">{sched.hours} JP</td>
                             <td className="py-1.5 px-2 text-center">
                               <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold bg-emerald-100 text-emerald-800 font-mono">
                                 TERLAKSANA
@@ -602,24 +602,24 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
             {/* REPORT TYPE 3: JOURNAL COMPLIANCE */}
             {reportType === 'journal_compliance' && (
               <div className="space-y-3 font-sans text-xs">
-                <div className="grid grid-cols-3 gap-2 bg-slate-50 border border-slate-300 p-2.5 rounded">
+                <div className="grid grid-cols-3 gap-2 bg-stone-50 border border-stone-300 p-2.5 rounded">
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">Jurnal Lengkap</span>
+                    <span className="text-[10px] text-stone-500 uppercase block font-medium">Jurnal Lengkap</span>
                     <span className="font-bold text-emerald-800 text-sm font-mono">{completedJournals} Sesi (Sesuai)</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">Jurnal Belum Diisi</span>
+                    <span className="text-[10px] text-stone-500 uppercase block font-medium">Jurnal Belum Diisi</span>
                     <span className="font-bold text-amber-700 text-sm font-mono">{pendingJournals} Sesi (Pending)</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">Indeks Kepatuhan</span>
-                    <span className="font-bold text-slate-900 text-sm font-mono">{complianceRate}% Ketaatan</span>
+                    <span className="text-[10px] text-stone-500 uppercase block font-medium">Indeks Kepatuhan</span>
+                    <span className="font-bold text-stone-900 text-sm font-mono">{complianceRate}% Ketaatan</span>
                   </div>
                 </div>
 
-                <div className="border border-slate-300 rounded overflow-hidden">
-                  <table className="w-full text-left text-[11px] divide-y divide-slate-200">
-                    <thead className="bg-slate-100 font-semibold text-slate-800">
+                <div className="border border-stone-300 rounded overflow-hidden">
+                  <table className="w-full text-left text-[11px] divide-y divide-stone-200">
+                    <thead className="bg-stone-100 font-semibold text-stone-800">
                       <tr>
                         <th className="py-2 px-2 text-center w-7">No</th>
                         <th className="py-2 px-2.5">Nama Asatidz</th>
@@ -629,21 +629,21 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
                         <th className="py-2 px-2 text-right">Potongan</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 text-slate-700">
+                    <tbody className="divide-y divide-stone-200 text-stone-700">
                       {filteredAttendances.slice(0, 14).map((att, idx) => {
                         const sched = schedules.find(s => s.id === att.scheduleId);
                         const teacher = teachers.find(t => t.id === (att.actualTeacherId || att.teacherId));
                         return (
-                          <tr key={att.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                            <td className="py-1.5 px-2 text-center text-slate-500 font-mono">{idx + 1}</td>
+                          <tr key={att.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-stone-50/50'}>
+                            <td className="py-1.5 px-2 text-center text-stone-500 font-mono">{idx + 1}</td>
                             <td className="py-1.5 px-2.5">
-                              <span className="font-semibold text-slate-900 block">{teacher?.name || '-'}</span>
-                              <span className="text-[10px] text-slate-500">{sched?.subject} (Kelas {sched?.classRoom})</span>
+                              <span className="font-semibold text-stone-900 block">{teacher?.name || '-'}</span>
+                              <span className="text-[10px] text-stone-500">{sched?.subject} (Kelas {sched?.classRoom})</span>
                             </td>
                             <td className="py-1.5 px-2 font-mono text-[10px]">
                               {att.date} • {att.clockInTime}
                             </td>
-                            <td className="py-1.5 px-2 text-slate-700 italic max-w-xs truncate">
+                            <td className="py-1.5 px-2 text-stone-700 italic max-w-xs truncate">
                               {att.teachingMaterial || <span className="text-amber-700 not-italic font-semibold">[Belum diisi guru]</span>}
                             </td>
                             <td className="py-1.5 px-2 text-center">
@@ -676,24 +676,24 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
             {/* REPORT TYPE 4: BADAL SUMMARY */}
             {reportType === 'badal_summary' && (
               <div className="space-y-3 font-sans text-xs">
-                <div className="grid grid-cols-3 gap-2 bg-slate-50 border border-slate-300 p-2.5 rounded">
+                <div className="grid grid-cols-3 gap-2 bg-stone-50 border border-stone-300 p-2.5 rounded">
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">Total Penggantian</span>
+                    <span className="text-[10px] text-stone-500 uppercase block font-medium">Total Penggantian</span>
                     <span className="font-bold text-indigo-900 text-sm font-mono">{filteredBadalAssignments.length} Sesi</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">Total Beban Mengajar Badal</span>
-                    <span className="font-bold text-slate-900 text-sm font-mono">{filteredBadalAssignments.length * 2} JP</span>
+                    <span className="text-[10px] text-stone-500 uppercase block font-medium">Total Beban Mengajar Badal</span>
+                    <span className="font-bold text-stone-900 text-sm font-mono">{filteredBadalAssignments.length * 2} JP</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">Total Hak Kafa'ah Badal</span>
+                    <span className="text-[10px] text-stone-500 uppercase block font-medium">Total Hak Kafa'ah Badal</span>
                     <span className="font-bold text-emerald-800 text-sm font-mono">{formatRupiah(filteredBadalAssignments.length * 2 * 40000)}</span>
                   </div>
                 </div>
 
-                <div className="border border-slate-300 rounded overflow-hidden">
-                  <table className="w-full text-left text-[11px] divide-y divide-slate-200">
-                    <thead className="bg-slate-100 font-semibold text-slate-800">
+                <div className="border border-stone-300 rounded overflow-hidden">
+                  <table className="w-full text-left text-[11px] divide-y divide-stone-200">
+                    <thead className="bg-stone-100 font-semibold text-stone-800">
                       <tr>
                         <th className="py-2 px-2 text-center w-7">No</th>
                         <th className="py-2 px-2">Tanggal</th>
@@ -704,26 +704,26 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
                         <th className="py-2 px-2 text-right">Kafa'ah Hak</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 text-slate-700">
+                    <tbody className="divide-y divide-stone-200 text-stone-700">
                       {filteredBadalAssignments.map((b, idx) => {
                         const sched = schedules.find(s => s.id === b.scheduleId);
                         const origTeacher = teachers.find(t => t.id === b.originalTeacherId);
                         const badalTeacher = teachers.find(t => t.id === b.badalTeacherId);
                         return (
-                          <tr key={b.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                            <td className="py-1.5 px-2 text-center text-slate-500 font-mono">{idx + 1}</td>
+                          <tr key={b.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-stone-50/50'}>
+                            <td className="py-1.5 px-2 text-center text-stone-500 font-mono">{idx + 1}</td>
                             <td className="py-1.5 px-2 font-mono text-[10px]">{b.date}</td>
-                            <td className="py-1.5 px-2.5 font-semibold text-slate-900">
+                            <td className="py-1.5 px-2.5 font-semibold text-stone-900">
                               {sched?.subject || '-'}
-                              <span className="text-[10px] text-slate-500 block font-normal">Kelas {sched?.classRoom}</span>
+                              <span className="text-[10px] text-stone-500 block font-normal">Kelas {sched?.classRoom}</span>
                             </td>
-                            <td className="py-1.5 px-2 text-slate-600 line-through decoration-slate-400">
+                            <td className="py-1.5 px-2 text-stone-600 line-through decoration-stone-400">
                               {origTeacher?.name || '-'}
                             </td>
                             <td className="py-1.5 px-2 font-semibold text-indigo-900">
                               {badalTeacher?.name || '-'}
                             </td>
-                            <td className="py-1.5 px-2 text-[10px] font-medium text-slate-700">
+                            <td className="py-1.5 px-2 text-[10px] font-medium text-stone-700">
                               {b.reason}
                             </td>
                             <td className="py-1.5 px-2 text-right font-mono font-semibold text-emerald-800">
@@ -741,24 +741,24 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
             {/* REPORT TYPE 5: DISCIPLINE & DEDUCTION SUMMARY */}
             {reportType === 'discipline_deduction' && (
               <div className="space-y-3 font-sans text-xs">
-                <div className="grid grid-cols-3 gap-2 bg-slate-50 border border-slate-300 p-2.5 rounded">
+                <div className="grid grid-cols-3 gap-2 bg-stone-50 border border-stone-300 p-2.5 rounded">
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">Total Akumulasi Denda</span>
+                    <span className="text-[10px] text-stone-500 uppercase block font-medium">Total Akumulasi Denda</span>
                     <span className="font-bold text-rose-700 text-sm font-mono">{formatRupiah(totalDeductions)}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">Kepatuhan Waktu</span>
+                    <span className="text-[10px] text-stone-500 uppercase block font-medium">Kepatuhan Waktu</span>
                     <span className="font-bold text-emerald-800 text-sm font-mono">96.8% Tepat Waktu</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase block font-medium">Penegakan Aturan</span>
-                    <span className="font-bold text-slate-900 text-sm font-mono">Sesuai SOP 2026</span>
+                    <span className="text-[10px] text-stone-500 uppercase block font-medium">Penegakan Aturan</span>
+                    <span className="font-bold text-stone-900 text-sm font-mono">Sesuai SOP 2026</span>
                   </div>
                 </div>
 
-                <div className="border border-slate-300 rounded overflow-hidden">
-                  <table className="w-full text-left text-[11px] divide-y divide-slate-200">
-                    <thead className="bg-slate-100 font-semibold text-slate-800">
+                <div className="border border-stone-300 rounded overflow-hidden">
+                  <table className="w-full text-left text-[11px] divide-y divide-stone-200">
+                    <thead className="bg-stone-100 font-semibold text-stone-800">
                       <tr>
                         <th className="py-2 px-2 text-center w-7">No</th>
                         <th className="py-2 px-2.5">Nama Asatidz & NIP</th>
@@ -768,19 +768,19 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
                         <th className="py-2 px-2.5 text-right font-bold text-rose-700">Total Potongan</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 text-slate-700">
+                    <tbody className="divide-y divide-stone-200 text-stone-700">
                       {filteredPayrollItems.filter(i => i.totalDeductions > 0).map((item, idx) => (
-                        <tr key={item.teacher.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                          <td className="py-1.5 px-2 text-center text-slate-500 font-mono">{idx + 1}</td>
+                        <tr key={item.teacher.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-stone-50/50'}>
+                          <td className="py-1.5 px-2 text-center text-stone-500 font-mono">{idx + 1}</td>
                           <td className="py-1.5 px-2.5">
-                            <span className="font-semibold text-slate-900 block">{item.teacher.name}</span>
-                            <span className="text-[10px] text-slate-400 font-mono">{item.teacher.nip}</span>
+                            <span className="font-semibold text-stone-900 block">{item.teacher.name}</span>
+                            <span className="text-[10px] text-stone-400 font-mono">{item.teacher.nip}</span>
                           </td>
-                          <td className="py-1.5 px-2 text-center font-medium text-slate-600">{item.teacher.unit}</td>
-                          <td className="py-1.5 px-2 text-right font-mono text-slate-700">
+                          <td className="py-1.5 px-2 text-center font-medium text-stone-600">{item.teacher.unit}</td>
+                          <td className="py-1.5 px-2 text-right font-mono text-stone-700">
                             {item.totalLateMinutes > 0 ? formatRupiah(item.totalLateMinutes * 500) : '-'}
                           </td>
-                          <td className="py-1.5 px-2 text-right font-mono text-slate-700">
+                          <td className="py-1.5 px-2 text-right font-mono text-stone-700">
                             {formatRupiah(Math.max(0, item.totalDeductions - (item.totalLateMinutes * 500)))}
                           </td>
                           <td className="py-1.5 px-2.5 text-right font-mono font-bold text-rose-700">
@@ -789,7 +789,7 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
                         </tr>
                       ))}
                     </tbody>
-                    <tfoot className="bg-slate-100 font-bold text-slate-900 border-t-2 border-slate-300">
+                    <tfoot className="bg-stone-100 font-bold text-stone-900 border-t-2 border-stone-300">
                       <tr>
                         <td colSpan={5} className="py-2 px-2 text-center uppercase tracking-wider text-[10px]">
                           TOTAL POTONGAN KESELURUHAN
@@ -807,40 +807,40 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
             {/* REPORT TYPE 6: EXECUTIVE SUMMARY */}
             {reportType === 'executive_summary' && (
               <div className="space-y-3 font-sans text-xs">
-                <div className="border border-slate-300 p-3 rounded bg-slate-50/70 space-y-2.5">
-                  <h3 className="font-bold text-slate-900 text-xs uppercase tracking-wider border-b border-slate-200 pb-1">
+                <div className="border border-stone-300 p-3 rounded bg-stone-50/70 space-y-2.5">
+                  <h3 className="font-bold text-stone-900 text-xs uppercase tracking-wider border-b border-stone-200 pb-1">
                     Ringkasan Capaian & Indikator Utama Pesantren
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                    <div className="bg-white p-2 rounded border border-slate-200">
-                      <span className="text-[10px] text-slate-500 block">Total Tenaga Pendidik</span>
-                      <span className="font-bold text-slate-900 text-sm font-mono">{teachers.length} Asatidz Aktif</span>
+                    <div className="bg-white p-2 rounded border border-stone-200">
+                      <span className="text-[10px] text-stone-500 block">Total Tenaga Pendidik</span>
+                      <span className="font-bold text-stone-900 text-sm font-mono">{teachers.length} Asatidz Aktif</span>
                     </div>
-                    <div className="bg-white p-2 rounded border border-slate-200">
-                      <span className="text-[10px] text-slate-500 block">Total Beban Mengajar</span>
-                      <span className="font-bold text-slate-900 text-sm font-mono">{schedules.reduce((a, s) => a + s.hours, 0)} JP / Pekan</span>
+                    <div className="bg-white p-2 rounded border border-stone-200">
+                      <span className="text-[10px] text-stone-500 block">Total Beban Mengajar</span>
+                      <span className="font-bold text-stone-900 text-sm font-mono">{schedules.reduce((a, s) => a + s.hours, 0)} JP / Pekan</span>
                     </div>
-                    <div className="bg-white p-2 rounded border border-slate-200">
-                      <span className="text-[10px] text-slate-500 block">Rasio Kepatuhan Jurnal</span>
+                    <div className="bg-white p-2 rounded border border-stone-200">
+                      <span className="text-[10px] text-stone-500 block">Rasio Kepatuhan Jurnal</span>
                       <span className="font-bold text-emerald-800 text-sm font-mono">{complianceRate}% Tertib</span>
                     </div>
-                    <div className="bg-white p-2 rounded border border-slate-200">
-                      <span className="text-[10px] text-slate-500 block">Alokasi Anggaran Kafa'ah</span>
-                      <span className="font-bold text-slate-900 text-sm font-mono">{formatRupiah(payrollSummary.totalNet)}</span>
+                    <div className="bg-white p-2 rounded border border-stone-200">
+                      <span className="text-[10px] text-stone-500 block">Alokasi Anggaran Kafa'ah</span>
+                      <span className="font-bold text-stone-900 text-sm font-mono">{formatRupiah(payrollSummary.totalNet)}</span>
                     </div>
-                    <div className="bg-white p-2 rounded border border-slate-200">
-                      <span className="text-[10px] text-slate-500 block">Efisiensi Potongan Disiplin</span>
+                    <div className="bg-white p-2 rounded border border-stone-200">
+                      <span className="text-[10px] text-stone-500 block">Efisiensi Potongan Disiplin</span>
                       <span className="font-bold text-rose-700 text-sm font-mono">{formatRupiah(payrollSummary.totalDeductions)}</span>
                     </div>
-                    <div className="bg-white p-2 rounded border border-slate-200">
-                      <span className="text-[10px] text-slate-500 block">Status Pelaksanaan SOP</span>
+                    <div className="bg-white p-2 rounded border border-stone-200">
+                      <span className="text-[10px] text-stone-500 block">Status Pelaksanaan SOP</span>
                       <span className="font-bold text-emerald-700 text-sm">100% Terverifikasi</span>
                     </div>
                   </div>
                 </div>
 
                 {showNotes && (
-                  <div className="p-2.5 bg-white border border-slate-200 rounded font-serif text-[12px] leading-relaxed text-slate-800">
+                  <div className="p-2.5 bg-white border border-stone-200 rounded font-serif text-[12px] leading-relaxed text-stone-800">
                     <p>
                       <strong>Catatan Pimpinan & Evaluasi:</strong> Seluruh kegiatan belajar mengajar pada unit SMP, MA, dan Pesantren telah berjalan dengan tertib. Penerapan sistem absensi digital dan jurnal KBM berbasis HRIS telah meningkatkan akuntabilitas kehadiran asatidz dan transparansi perhitungan kafa'ah bulanan.
                     </p>
@@ -850,7 +850,7 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
             )}
 
             {/* 5. Formal Legal Closing Statement */}
-            <div className="pt-2 font-serif text-slate-800 text-xs sm:text-[13px] leading-relaxed">
+            <div className="pt-2 font-serif text-stone-800 text-xs sm:text-[13px] leading-relaxed">
               <p>
                 Demikian laporan resmi ini dibuat dengan sebenarnya sesuai dengan data operasional dan catatan elektronik sistem presensi Pesantren Baitul Qur'an Al-Ikhwan untuk dipergunakan sebagaimana mestinya.
               </p>
@@ -859,73 +859,73 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
             {/* 6. Formal Pesantren Signatures (Tanda Tangan Resmi) */}
             {showSignatures && (
               <div className="pt-4 font-sans text-xs">
-                <div className="text-right text-slate-700 mb-3 text-[11px]">
+                <div className="text-right text-stone-700 mb-3 text-[11px]">
                   <span>Jakarta, {currentDate}</span>
                 </div>
 
                 {signatoryRoleCount === '3_SIG' ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 text-center">
                     <div>
-                      <p className="text-[11px] text-slate-600 mb-12">
+                      <p className="text-[11px] text-stone-600 mb-12">
                         Mengetahui / Mengesahkan,<br />
-                        <strong className="text-slate-950 font-bold">Pimpinan Pesantren</strong>
+                        <strong className="text-stone-950 font-bold">Pimpinan Pesantren</strong>
                       </p>
-                      <div className="border-t border-slate-900 pt-1">
-                        <span className="font-bold text-slate-950 text-xs block">Ust. Cahyono, M.Pd.</span>
-                        <span className="text-[10px] text-slate-500 font-mono">NIP. 197805122003121001</span>
+                      <div className="border-t border-stone-900 pt-1">
+                        <span className="font-bold text-stone-950 text-xs block">Ust. Cahyono, M.Pd.</span>
+                        <span className="text-[10px] text-stone-500 font-mono">NIP. 197805122003121001</span>
                       </div>
                     </div>
 
                     <div>
-                      <p className="text-[11px] text-slate-600 mb-12">
+                      <p className="text-[11px] text-stone-600 mb-12">
                         Pemeriksa Data,<br />
-                        <strong className="text-slate-950 font-bold">Kepala Tata Usaha & HR</strong>
+                        <strong className="text-stone-950 font-bold">Kepala Tata Usaha & HR</strong>
                       </p>
-                      <div className="border-t border-slate-900 pt-1">
-                        <span className="font-bold text-slate-950 text-xs block">Ust. Akmal Yaqien, S.E.</span>
-                        <span className="text-[10px] text-slate-500 font-mono">NIP. 198904152012011002</span>
+                      <div className="border-t border-stone-900 pt-1">
+                        <span className="font-bold text-stone-950 text-xs block">Ust. Akmal Yaqien, S.E.</span>
+                        <span className="text-[10px] text-stone-500 font-mono">NIP. 198904152012011002</span>
                       </div>
                     </div>
 
                     <div className="col-span-2 sm:col-span-1">
-                      <p className="text-[11px] text-slate-600 mb-12">
+                      <p className="text-[11px] text-stone-600 mb-12">
                         Disusun Oleh,<br />
-                        <strong className="text-slate-950 font-bold">Bendahara & Penggajian</strong>
+                        <strong className="text-stone-950 font-bold">Bendahara & Penggajian</strong>
                       </p>
-                      <div className="border-t border-slate-900 pt-1">
-                        <span className="font-bold text-slate-950 text-xs block">Ust. M. Zaki, S.Ak.</span>
-                        <span className="text-[10px] text-slate-500 font-mono">NIP. 199307202018041003</span>
+                      <div className="border-t border-stone-900 pt-1">
+                        <span className="font-bold text-stone-950 text-xs block">Ust. M. Zaki, S.Ak.</span>
+                        <span className="text-[10px] text-stone-500 font-mono">NIP. 199307202018041003</span>
                       </div>
                     </div>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-12 text-center max-w-lg mx-auto">
                     <div>
-                      <p className="text-[11px] text-slate-600 mb-12">
+                      <p className="text-[11px] text-stone-600 mb-12">
                         Mengetahui / Mengesahkan,<br />
-                        <strong className="text-slate-950 font-bold">Pimpinan Pesantren</strong>
+                        <strong className="text-stone-950 font-bold">Pimpinan Pesantren</strong>
                       </p>
-                      <div className="border-t border-slate-900 pt-1">
-                        <span className="font-bold text-slate-950 text-xs block">Ust. Cahyono, M.Pd.</span>
-                        <span className="text-[10px] text-slate-500 font-mono">NIP. 197805122003121001</span>
+                      <div className="border-t border-stone-900 pt-1">
+                        <span className="font-bold text-stone-950 text-xs block">Ust. Cahyono, M.Pd.</span>
+                        <span className="text-[10px] text-stone-500 font-mono">NIP. 197805122003121001</span>
                       </div>
                     </div>
 
                     <div>
-                      <p className="text-[11px] text-slate-600 mb-12">
+                      <p className="text-[11px] text-stone-600 mb-12">
                         Pemeriksa Data,<br />
-                        <strong className="text-slate-950 font-bold">Kepala Tata Usaha & HR</strong>
+                        <strong className="text-stone-950 font-bold">Kepala Tata Usaha & HR</strong>
                       </p>
-                      <div className="border-t border-slate-900 pt-1">
-                        <span className="font-bold text-slate-950 text-xs block">Ust. Akmal Yaqien, S.E.</span>
-                        <span className="text-[10px] text-slate-500 font-mono">NIP. 198904152012011002</span>
+                      <div className="border-t border-stone-900 pt-1">
+                        <span className="font-bold text-stone-950 text-xs block">Ust. Akmal Yaqien, S.E.</span>
+                        <span className="text-[10px] text-stone-500 font-mono">NIP. 198904152012011002</span>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {/* Security Timestamp Footer */}
-                <div className="mt-6 pt-2 border-t border-slate-200 flex flex-wrap items-center justify-between text-[9px] text-slate-400 font-mono">
+                <div className="mt-6 pt-2 border-t border-stone-200 flex flex-wrap items-center justify-between text-[9px] text-stone-400 font-mono">
                   <span>Dokumen Sah Elektronik HRIS Baitul Qur'an Al-Ikhwan</span>
                   <span>Dicetak pada: {new Date().toLocaleString('id-ID')}</span>
                   <span>ID: {docNumber}</span>
@@ -937,14 +937,14 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
         </div>
 
         {/* Modal Footer Controls (Hidden on Print) */}
-        <div className="bg-slate-50 px-4 py-2.5 border-t border-slate-200 flex items-center justify-between print:hidden shrink-0">
-          <span className="text-[11px] text-slate-500">
-            Tip: Pada dialog cetak peramban, pilih <strong className="text-slate-700">"Save as PDF"</strong> untuk menyimpan berkas resmi.
+        <div className="bg-stone-50 px-4 py-2.5 border-t border-stone-200 flex items-center justify-between print:hidden shrink-0">
+          <span className="text-[11px] text-stone-500">
+            Tip: Pada dialog cetak peramban, pilih <strong className="text-stone-700">"Save as PDF"</strong> untuk menyimpan berkas resmi.
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 bg-stone-800 hover:bg-stone-900 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
           >
             Tutup
           </button>

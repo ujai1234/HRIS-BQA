@@ -13,7 +13,7 @@ import { calculateLatePenalty, getLateCategoryLabel } from '../utils/formatters'
 
 interface ClockInModalProps {
   schedule: ClassSchedule;
-  teacher: Teacher;
+  teacher?: Teacher | null;
   onClose: () => void;
   onSuccess: (schedule: ClassSchedule) => void;
 }
@@ -24,7 +24,8 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const { clockIn } = useHRIS();
+  const { clockIn, currentUser } = useHRIS();
+  const effectiveTeacher = teacher || currentUser;
 
   const getRealTimeString = () => {
     const now = new Date();
@@ -53,9 +54,9 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
   const penaltyCalculation = calculateLatePenalty(
     currentTime, 
     schedule.startTime,
-    teacher?.dailyTransport || 10000,
+    effectiveTeacher?.dailyTransport || 10000,
     schedule.hours || 2,
-    teacher?.hourlyRate || 40000
+    effectiveTeacher?.hourlyRate || 40000
   );
   const categoryInfo = getLateCategoryLabel(penaltyCalculation.category);
 
@@ -72,7 +73,7 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
           particleCount: 50,
           spread: 50,
           origin: { y: 0.6 },
-          colors: ['#059669', '#10b981', '#34d399', '#f59e0b'],
+          colors: ['#1B4332', '#2D6A4F', '#52B788', '#B08968'],
         });
       } catch (err) {
         console.error(err);
@@ -90,103 +91,91 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-sm animate-in fade-in duration-150">
+      <div className="bg-white dark:bg-[#1A221E] rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-stone-200 dark:border-stone-800">
         {/* Header */}
-        <div className="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+        <div className="bg-[#141A17] text-white px-5 py-3.5 flex items-center justify-between border-b border-stone-800">
           <div>
             <h2 className="font-bold text-sm text-white">Presensi Masuk Sesi KBM</h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-stone-400 mt-0.5">
               {schedule.className} • {schedule.subject} ({schedule.hours} JP)
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-md transition-colors"
+            className="text-stone-400 hover:text-white p-1 rounded-lg hover:bg-stone-800 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
-          {/* Schedule Info */}
-          <div className="bg-slate-50 rounded-lg p-3 border border-slate-200/80 flex items-center justify-between">
-            <div>
-              <span className="text-[10px] text-slate-400 uppercase font-semibold">Jadwal Sesi KBM</span>
-              <p className="font-bold text-slate-800 font-mono mt-0.5">
-                {schedule.startTime} - {schedule.endTime} WIB
-              </p>
-            </div>
-            <div className="text-right">
-              <span className="text-[10px] text-slate-400 uppercase font-semibold">Ruangan</span>
-              <p className="font-medium text-slate-700 mt-0.5">{schedule.room}</p>
-            </div>
-          </div>
-
-          {/* Locked Real-time Clock Display */}
-          <div className="bg-emerald-50/60 border border-emerald-200/80 rounded-xl p-4 text-center space-y-1">
-            <div className="flex items-center justify-center gap-1.5 text-slate-500 text-[11px] font-medium">
-              <Lock className="w-3.5 h-3.5 text-slate-400" />
-              <span>Waktu Presensi Terkunci Otomatis (WIB)</span>
-            </div>
-            <div className="text-3xl font-mono font-bold text-slate-900 tracking-tight">
+        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4">
+          {/* Live Clock Card */}
+          <div className="bg-[#FBFBFA] dark:bg-[#141A17] rounded-xl p-4 text-center border border-stone-200 dark:border-stone-800">
+            <span className="text-[10px] font-semibold uppercase text-stone-400 tracking-wider block">
+              Waktu Server Presensi
+            </span>
+            <div className="text-3xl sm:text-4xl font-mono font-bold text-stone-900 dark:text-stone-100 mt-1 tracking-tight">
               {liveSecondsTime}
             </div>
-            <p className="text-[11px] text-slate-500">
-              Dicatat pada jam aktual saat tombol presensi ditekan
+            <p className="text-xs text-stone-500 mt-1">
+              Jadwal Masuk Mulai: <strong className="font-mono text-stone-800 dark:text-stone-200">{schedule.startTime} WIB</strong>
             </p>
           </div>
 
-          {/* Timeliness & Discipline Status */}
-          <div className={`p-2.5 rounded-lg border ${categoryInfo.badge} flex items-center justify-between text-xs`}>
-            <div className="flex items-center gap-2">
-              {penaltyCalculation.lateMinutes > 4 ? (
-                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-              ) : (
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              )}
-              <div>
-                <p className="font-semibold">{categoryInfo.label}</p>
-                <p className="text-[11px] opacity-75">
-                  {penaltyCalculation.lateMinutes > 0
-                    ? `Selisih masuk +${penaltyCalculation.lateMinutes} menit dari jam mulai (${schedule.startTime})`
-                    : 'Tepat waktu sesuai jadwal sesi'}
-                </p>
-              </div>
+          {/* Real-time Status Card */}
+          <div className={`p-3.5 rounded-xl border flex items-start gap-3 text-xs ${
+            penaltyCalculation.lateMinutes <= 4
+              ? 'bg-emerald-50/70 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/40 text-[#1B4332] dark:text-emerald-300'
+              : 'bg-[#FFFDF5] dark:bg-[#221E14] border-[#E8DCB5] dark:border-[#534720] text-stone-800 dark:text-stone-200'
+          }`}>
+            {penaltyCalculation.lateMinutes <= 4 ? (
+              <CheckCircle2 className="w-4 h-4 text-[#1B4332] dark:text-emerald-400 shrink-0 mt-0.5" strokeWidth={1.5} />
+            ) : (
+              <AlertTriangle className="w-4 h-4 text-[#B08968] shrink-0 mt-0.5" strokeWidth={1.5} />
+            )}
+            <div>
+              <p className="font-bold">
+                {penaltyCalculation.lateMinutes <= 4 ? 'Status: Tepat Waktu' : `Terlambat ${penaltyCalculation.lateMinutes} Menit (${categoryInfo.label})`}
+              </p>
+              <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-0.5">
+                {penaltyCalculation.lateMinutes <= 4 
+                  ? 'Kafa\'ah honorarium dan transport KBM dibayarkan penuh.' 
+                  : `Potongan disiplin: Rp ${penaltyCalculation.penalty.toLocaleString('id-ID')}`}
+              </p>
             </div>
           </div>
 
-          {/* Catatan */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">
+          {/* Notes Input */}
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
               Catatan Kehadiran (Opsional)
             </label>
             <input
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Misal: Sesi dimulai tepat waktu..."
-              className="w-full text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-600"
+              placeholder="Contoh: Mengisi pengantar materi di lab..."
+              className="w-full text-xs px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:border-[#1B4332]"
             />
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          {/* Actions */}
+          <div className="pt-2 flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              className="px-3.5 py-2 rounded-lg text-xs font-medium text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-lg transition-colors shadow-2xs disabled:opacity-50 flex items-center gap-1.5"
+              className="inline-flex items-center gap-1.5 bg-[#1B4332] hover:bg-[#143326] text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
             >
-              <Clock className="w-3.5 h-3.5" />
-              <span>{isSubmitting ? 'Mencatat Presensi...' : 'Konfirmasi Presensi Sekarang'}</span>
+              <Clock className="w-3.5 h-3.5" strokeWidth={1.5} />
+              <span>{isSubmitting ? 'Mencatat...' : 'Konfirmasi Presensi Masuk'}</span>
             </button>
           </div>
         </form>

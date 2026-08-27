@@ -53,9 +53,9 @@ export const AuditLogView: React.FC = () => {
       case 'BADAL':
         return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30">Badal</span>;
       case 'SYSTEM':
-        return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Sistem</span>;
+        return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">Sistem</span>;
       default:
-        return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">{category}</span>;
+        return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300">{category}</span>;
     }
   };
 
@@ -76,7 +76,7 @@ export const AuditLogView: React.FC = () => {
       case 'INFO':
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-800">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-stone-50 dark:bg-stone-800/40 text-stone-600 dark:text-stone-400 border border-stone-100 dark:border-stone-800">
             Info
           </span>
         );
@@ -90,9 +90,9 @@ export const AuditLogView: React.FC = () => {
       case 'KEPALA_PESANTREN':
         return <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30">Kepsek</span>;
       case 'GURU':
-        return <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Guru</span>;
+        return <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">Guru</span>;
       default:
-        return <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-slate-50 dark:bg-slate-800/30 text-slate-500 dark:text-slate-400">Sistem</span>;
+        return <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-stone-50 dark:bg-stone-800/30 text-stone-500 dark:text-stone-400">Sistem</span>;
     }
   };
 
@@ -123,64 +123,64 @@ export const AuditLogView: React.FC = () => {
   return (
     <div className="space-y-5">
       {/* 1. Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 px-5 py-4 rounded-xl border border-slate-200/80 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-stone-900 px-5 py-4 rounded-xl border border-stone-200/80 dark:border-stone-800">
         <div>
-          <h1 className="text-base font-semibold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
+          <h1 className="text-base font-semibold text-stone-900 dark:text-stone-100 tracking-tight flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-700 dark:text-emerald-500" />
             Audit Log & Keamanan
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
             Rekam jejak aktivitas sistem dan perubahan data kafa'ah
           </p>
         </div>
 
         <button
           onClick={handleExportCSV}
-          className="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium px-3.5 py-2 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer self-start sm:self-auto"
+          className="inline-flex items-center gap-1.5 bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs font-medium px-3.5 py-2 rounded-lg border border-stone-200 dark:border-stone-700 transition-colors cursor-pointer self-start sm:self-auto"
         >
-          <Download className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+          <Download className="w-3.5 h-3.5 text-stone-500 dark:text-stone-400" />
           <span>Ekspor CSV</span>
         </button>
       </div>
 
       {/* 2. Key Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800">
-          <span className="text-xs text-slate-500 dark:text-slate-400 block">Total Entri</span>
-          <p className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mt-1 font-mono">{totalLogs}</p>
-          <span className="text-[11px] text-slate-400 dark:text-slate-500 block mt-1">Audit aktif</span>
+        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800">
+          <span className="text-xs text-stone-500 dark:text-stone-400 block">Total Entri</span>
+          <p className="text-2xl font-semibold text-stone-900 dark:text-stone-100 mt-1 font-mono">{totalLogs}</p>
+          <span className="text-[11px] text-stone-400 dark:text-stone-500 block mt-1">Audit aktif</span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800">
-          <span className="text-xs text-slate-500 dark:text-slate-400 block">Perubahan Kafa'ah</span>
+        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800">
+          <span className="text-xs text-stone-500 dark:text-stone-400 block">Perubahan Kafa'ah</span>
           <p className="text-2xl font-semibold text-amber-700 dark:text-amber-500 mt-1 font-mono">{kafaahLogs}</p>
           <span className="text-[11px] text-amber-600 dark:text-amber-500/70 block mt-1">Audit honor/gaji</span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800">
-          <span className="text-xs text-slate-500 dark:text-slate-400 block">Aktivitas KBM</span>
+        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800">
+          <span className="text-xs text-stone-500 dark:text-stone-400 block">Aktivitas KBM</span>
           <p className="text-2xl font-semibold text-emerald-800 dark:text-emerald-400 mt-1 font-mono">{kbmLogs}</p>
           <span className="text-[11px] text-emerald-700 dark:text-emerald-500/70 block mt-1">Presensi & Badal</span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800">
-          <span className="text-xs text-slate-500 dark:text-slate-400 block">Isu Kritis</span>
+        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800">
+          <span className="text-xs text-stone-500 dark:text-stone-400 block">Isu Kritis</span>
           <p className="text-2xl font-semibold text-rose-700 dark:text-rose-500 mt-1 font-mono">{criticalLogs}</p>
           <span className="text-[11px] text-rose-600 dark:text-rose-500/70 block mt-1">Perlu perhatian</span>
         </div>
       </div>
 
       {/* 3. Filters & Search */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-3">
+      <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800 space-y-3">
         <div className="flex flex-col md:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" />
+            <Search className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 top-2.5 pointer-events-none" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Cari pelaksana atau aktivitas..."
-              className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-slate-100"
+              className="w-full pl-8 pr-3 py-1.5 text-xs bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-stone-900 dark:text-stone-100"
             />
           </div>
 
@@ -188,7 +188,7 @@ export const AuditLogView: React.FC = () => {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value as any)}
-              className="px-2.5 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-slate-100"
+              className="px-2.5 py-1.5 text-xs bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-stone-900 dark:text-stone-100"
             >
               <option value="ALL">Semua Kategori</option>
               <option value="AUTH">Autentikasi</option>
@@ -201,7 +201,7 @@ export const AuditLogView: React.FC = () => {
             <select
               value={severityFilter}
               onChange={(e) => setSeverityFilter(e.target.value as any)}
-              className="px-2.5 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-slate-100"
+              className="px-2.5 py-1.5 text-xs bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-stone-900 dark:text-stone-100"
             >
               <option value="ALL">Semua Tingkat</option>
               <option value="INFO">Info</option>
@@ -212,7 +212,7 @@ export const AuditLogView: React.FC = () => {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value as any)}
-              className="px-2.5 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-slate-100"
+              className="px-2.5 py-1.5 text-xs bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-stone-900 dark:text-stone-100"
             >
               <option value="ALL">Semua Role</option>
               <option value="ADMIN">Admin</option>
@@ -225,11 +225,11 @@ export const AuditLogView: React.FC = () => {
       </div>
 
       {/* 4. Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
+      <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-medium border-b border-slate-200/70 dark:border-slate-700">
+              <tr className="bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 font-medium border-b border-stone-200/70 dark:border-stone-700">
                 <th className="py-2.5 px-4 w-32">Waktu</th>
                 <th className="py-2.5 px-4 w-40">Pelaksana</th>
                 <th className="py-2.5 px-3">Kategori & Aksi</th>
@@ -237,10 +237,10 @@ export const AuditLogView: React.FC = () => {
                 <th className="py-2.5 px-3 text-center w-24">Tingkat</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+            <tbody className="divide-y divide-stone-100 dark:divide-stone-800 text-stone-700 dark:text-stone-300">
               {filteredLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-10 text-center text-slate-400 dark:text-slate-600">
+                  <td colSpan={5} className="py-10 text-center text-stone-400 dark:text-stone-600">
                     Tidak ada log audit yang sesuai kriteria
                   </td>
                 </tr>
@@ -251,18 +251,18 @@ export const AuditLogView: React.FC = () => {
                   const formattedDate = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
 
                   return (
-                    <tr key={log.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                    <tr key={log.id} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/30 transition-colors">
                       <td className="py-3 px-4 align-top whitespace-nowrap">
-                        <p className="font-medium text-slate-900 dark:text-slate-100">{formattedTime}</p>
-                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{formattedDate}</p>
+                        <p className="font-medium text-stone-900 dark:text-stone-100">{formattedTime}</p>
+                        <p className="text-[10px] text-stone-400 dark:text-stone-500 font-mono">{formattedDate}</p>
                       </td>
 
                       <td className="py-3 px-4 align-top">
-                        <p className="font-medium text-slate-800 dark:text-slate-200">{log.userName}</p>
+                        <p className="font-medium text-stone-800 dark:text-stone-200">{log.userName}</p>
                         <div className="mt-1 flex items-center gap-1">
                           {getRoleBadge(log.userRole)}
                           {log.ipAddress && (
-                            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+                            <span className="text-[10px] text-stone-400 dark:text-stone-500 font-mono">
                               {log.ipAddress}
                             </span>
                           )}
@@ -271,13 +271,13 @@ export const AuditLogView: React.FC = () => {
 
                       <td className="py-3 px-3 align-top">
                         {getCategoryBadge(log.category)}
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-1 font-medium">
+                        <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono mt-1 font-medium">
                           {log.action}
                         </p>
                       </td>
 
                       <td className="py-3 px-4 align-top">
-                        <p className="text-slate-600 dark:text-slate-400 leading-relaxed max-w-md">{log.details}</p>
+                        <p className="text-stone-600 dark:text-stone-400 leading-relaxed max-w-md">{log.details}</p>
                       </td>
 
                       <td className="py-3 px-3 align-top text-center">

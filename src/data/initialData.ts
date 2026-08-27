@@ -204,7 +204,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     dailyTransport: 10000,
     role: 'GURU',
     phone: '0812-3456-7813',
-    avatarColor: 'bg-slate-700',
+    avatarColor: 'bg-stone-700',
     isActive: true,
     username: 'abdulmufid',
     password: 'guru123',

@@ -1,14 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Clock, 
   Calendar, 
+  CalendarDays,
   FileText, 
   CheckCircle2, 
   AlertTriangle, 
   ChevronRight,
   BookOpen,
+  MapPin,
+  Check,
+  Coffee,
   ArrowRight,
-  Sparkles
+  Printer,
+  ChevronDown,
+  UserCheck
 } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
 import { ClassSchedule, AttendanceRecord } from '../types';
@@ -16,7 +22,7 @@ import { ClockInModal } from './ClockInModal';
 import { JournalModal } from './JournalModal';
 import { SalarySlipModal } from './SalarySlipModal';
 import { SlipGajiView } from './SlipGajiView';
-import { getLateCategoryLabel, formatIndonesianDate } from '../utils/formatters';
+import { getLateCategoryLabel, formatIndonesianDate, formatRupiah } from '../utils/formatters';
 
 export type GuruTabType = 'clockin_journal' | 'jadwal' | 'slip_gaji';
 
@@ -43,20 +49,23 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
 
   const handleTabChange = (tab: GuruTabType) => {
     setActiveSubTab(tab);
-    if (tab === 'clockin_journal') setCurrentPath('/dashboard/guru/clockin');
+    if (tab === 'clockin_journal') setCurrentPath('/dashboard/guru');
     else if (tab === 'jadwal') setCurrentPath('/dashboard/guru/jadwal');
     else if (tab === 'slip_gaji') setCurrentPath('/dashboard/guru/slip');
   };
 
-  // Selected day for KBM view
+  // Days list & determine today
   const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] as const;
+  
   const getTodayDayName = () => {
     const days = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const todayIndex = new Date().getDay();
     const day = days[todayIndex];
     return day === 'Ahad' ? 'Senin' : day;
   };
-  const [selectedDay, setSelectedDay] = useState<string>(getTodayDayName());
+
+  const actualTodayDay = getTodayDayName();
+  const [selectedDay, setSelectedDay] = useState<string>(actualTodayDay);
 
   // Modals state
   const [activeClockInSchedule, setActiveClockInSchedule] = useState<ClassSchedule | null>(null);
@@ -66,21 +75,28 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
   } | null>(null);
   const [showSlipModal, setShowSlipModal] = useState(false);
 
-  const teacherPayroll = calculateTeacherPayroll(currentUser.id, selectedPeriod);
+  const teacherPayroll = calculateTeacherPayroll(currentUser?.id || 'T-08', selectedPeriod);
 
-  // Schedules for the selected day
-  const daySchedules = schedules.filter((s) => {
-    if (s.dayOfWeek !== selectedDay) return false;
-    const isRegular = s.teacherId === currentUser.id;
-    const isBadal = badalAssignments.some(
-      (b) => b.scheduleId === s.id && b.badalTeacherId === currentUser.id && b.status !== 'PENDING'
-    );
-    return isRegular || isBadal;
-  });
+  // Schedules for the selected day (Regular + Badal assigned to this teacher)
+  const daySchedules = useMemo(() => {
+    return schedules.filter((s) => {
+      if (s.dayOfWeek !== selectedDay) return false;
+      const isRegular = s.teacherId === currentUser?.id;
+      const isBadal = badalAssignments.some(
+        (b) => b.scheduleId === s.id && b.badalTeacherId === currentUser?.id && b.status !== 'PENDING'
+      );
+      return isRegular || isBadal;
+    }).sort((a, b) => a.startTime.localeCompare(b.startTime));
+  }, [schedules, selectedDay, currentUser?.id, badalAssignments]);
 
   // All schedules assigned to this teacher across the entire week
-  const allMySchedules = schedules.filter((s) => s.teacherId === currentUser.id);
-  const totalWeeklyHours = allMySchedules.reduce((sum, s) => sum + s.hours, 0);
+  const allMySchedules = useMemo(() => {
+    return schedules.filter((s) => s.teacherId === currentUser?.id);
+  }, [schedules, currentUser?.id]);
+
+  const totalWeeklyHours = useMemo(() => {
+    return allMySchedules.reduce((sum, s) => sum + s.hours, 0);
+  }, [allMySchedules]);
 
   const todayStr = new Date().toISOString().split('T')[0];
 
@@ -96,415 +112,519 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
     );
   };
 
-  // Completed journals by this teacher
-  const completedJournalsCount = attendances.filter((a) => {
-    const isMyRecord = a.teacherId === currentUser.id || a.actualTeacherId === currentUser.id;
-    return isMyRecord && a.status === 'SELESAI';
-  }).length;
-
   // Missed journal entries detection (both today and past)
-  const missedJournalRecords = attendances.filter((a) => {
-    const isMyRecord = a.teacherId === currentUser.id || a.actualTeacherId === currentUser.id;
-    if (!isMyRecord) return false;
-    const isPresentWithoutJournal =
-      a.status === 'HADIR_JURNAL_KOSONG' ||
-      (!!a.clockInTime && !a.journal && a.status !== 'SELESAI' && a.status !== 'IZIN' && a.status !== 'SAKIT' && a.status !== 'ALPA');
-    return isPresentWithoutJournal;
-  });
+  const missedJournalRecords = useMemo(() => {
+    return attendances.filter((a) => {
+      const isMyRecord = a.teacherId === currentUser?.id || a.actualTeacherId === currentUser?.id;
+      if (!isMyRecord) return false;
+      const isPresentWithoutJournal =
+        !a.journal &&
+        a.status !== 'SELESAI' &&
+        (a.status === 'HADIR_JURNAL_KOSONG' ||
+          (!!a.clockInTime && a.status !== 'IZIN' && a.status !== 'SAKIT' && a.status !== 'ALPA'));
+      return isPresentWithoutJournal;
+    });
+  }, [attendances, currentUser?.id]);
 
-  const missedShiftsWithDetails = missedJournalRecords.map((att) => {
-    let sched = schedules.find((s) => s.id === att.scheduleId);
-    if (!sched) {
-      sched = {
-        id: att.scheduleId,
-        teacherId: att.teacherId || currentUser.id,
-        subject: 'KBM Mengajar',
-        className: 'Kelas Terdaftar',
-        unit: currentUser.unit,
-        dayOfWeek: 'Senin',
-        startTime: att.clockInTime || '07:30',
-        endTime: '08:50',
-        hours: 2,
-        room: 'Ruang Kelas',
+  const missedShiftsWithDetails = useMemo(() => {
+    return missedJournalRecords.map((att) => {
+      let sched = schedules.find((s) => s.id === att.scheduleId);
+      if (!sched) {
+        sched = {
+          id: att.scheduleId,
+          teacherId: att.teacherId || currentUser?.id || 'T-08',
+          subject: 'KBM Mengajar',
+          className: 'Kelas Terdaftar',
+          unit: currentUser?.unit || 'SMP',
+          dayOfWeek: 'Senin',
+          startTime: att.clockInTime || '07:30',
+          endTime: '08:50',
+          hours: 2,
+          room: 'Ruang Kelas',
+        };
+      }
+      const hours = sched.hours || 2;
+      const isPastShift = att.date < todayStr;
+      const isTodayShift = att.date === todayStr;
+
+      return {
+        attendance: att,
+        schedule: sched,
+        hours,
+        isPastShift,
+        isTodayShift,
       };
-    }
-    const hours = sched.hours || 2;
-    const isPastShift = att.date < todayStr;
-    const isTodayShift = att.date === todayStr;
+    });
+  }, [missedJournalRecords, schedules, currentUser, todayStr]);
 
-    return {
-      attendance: att,
-      schedule: sched,
-      hours,
-      isPastShift,
-      isTodayShift,
-    };
-  });
-
-  // Specifically journals pending for TODAY
-  const todayPendingJournals = missedShiftsWithDetails.filter((m) => m.isTodayShift);
-  const pendingJournalsCount = missedShiftsWithDetails.length;
+  const todayPendingJournals = useMemo(() => {
+    return missedShiftsWithDetails.filter((m) => m.isTodayShift);
+  }, [missedShiftsWithDetails]);
 
   // Handle automatic transition from ClockIn to Journal Modal
   const handleClockInSuccess = (schedule: ClassSchedule) => {
     const updatedAtt = attendances.find((a) => a.scheduleId === schedule.id && a.date === todayStr) || {
       id: `ATT-${Date.now()}`,
       scheduleId: schedule.id,
-      teacherId: currentUser.id,
-      actualTeacherId: currentUser.id,
+      teacherId: currentUser?.id || 'T-08',
+      actualTeacherId: currentUser?.id || 'T-08',
       date: todayStr,
       clockInTime: `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`,
       lateMinutes: 0,
-      lateCategory: 'ON_TIME' as const,
+      lateCategory: 'TEPAT_WAKTU' as const,
       status: 'HADIR_JURNAL_KOSONG' as const,
       isBadal: false,
     };
 
-    // Open Journal Modal immediately for smooth flow
     setTimeout(() => {
       setActiveJournalData({
         attendance: updatedAtt,
         schedule: schedule,
       });
-    }, 350);
+    }, 200);
   };
+
+  // Schedule count per day of week for calendar strip
+  const scheduleCountByDay = useMemo(() => {
+    const counts: Record<string, { sessions: number; hours: number }> = {};
+    daysOfWeek.forEach((day) => {
+      const dayScheds = schedules.filter((s) => {
+        if (s.dayOfWeek !== day) return false;
+        const isRegular = s.teacherId === currentUser?.id;
+        const isBadal = badalAssignments.some(
+          (b) => b.scheduleId === s.id && b.badalTeacherId === currentUser?.id && b.status !== 'PENDING'
+        );
+        return isRegular || isBadal;
+      });
+      counts[day] = {
+        sessions: dayScheds.length,
+        hours: dayScheds.reduce((sum, s) => sum + s.hours, 0),
+      };
+    });
+    return counts;
+  }, [schedules, currentUser?.id, badalAssignments]);
+
+  const todayCompletedCount = useMemo(() => {
+    const todaySchedIds = schedules
+      .filter((s) => s.dayOfWeek === actualTodayDay && (s.teacherId === currentUser?.id))
+      .map((s) => s.id);
+    return attendances.filter((a) => todaySchedIds.includes(a.scheduleId) && a.date === todayStr && (a.status === 'SELESAI' || !!a.journal)).length;
+  }, [schedules, actualTodayDay, currentUser?.id, attendances, todayStr]);
+
+  const todayTotalCount = scheduleCountByDay[actualTodayDay]?.sessions || 0;
 
   return (
     <div className="space-y-4">
-      {/* 1. Minimalist Teacher Overview Card (Strictly Non-Financial Educational Stats) */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-2xs">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                {currentUser?.name || 'Ustadz / Guru'}
-              </h1>
-              <span className="text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-400 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/50">
-                {currentUser?.unit || 'Unit KBM'}
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              NIP: {currentUser?.nip || '-'} • {currentUser?.position || 'Guru Pengampu'} • Semester Ganjil 2026/2027
-            </p>
-          </div>
+      {/* 1. Concise 1-Line Minimalist Top Header (No Giant Profile Card) */}
+      <div className="bg-white dark:bg-[#1A221E] rounded-xl border border-stone-200 dark:border-stone-800 p-4 sm:px-5 sm:py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-none">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-stone-600 dark:text-stone-300">
+          <span className="font-bold text-stone-900 dark:text-stone-100 text-sm">
+            {currentUser?.name || 'Asatidz'}
+          </span>
+          <span className="text-stone-300 dark:text-stone-700 font-mono">•</span>
+          <span className="font-mono text-stone-500 dark:text-stone-400">
+            NIP: {currentUser?.nip || 'BQ-008'}
+          </span>
+          <span className="text-stone-300 dark:text-stone-700 font-mono">•</span>
+          <span className="px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[11px] font-medium">
+            Unit {currentUser?.unit || 'SMP'}
+          </span>
+          <span className="text-stone-300 dark:text-stone-700 font-mono">•</span>
+          <span className="text-stone-500 dark:text-stone-400">
+            {formatIndonesianDate(todayStr)}
+          </span>
+        </div>
+
+        {/* Tab Navigation Switcher */}
+        <div className="flex items-center bg-[#FBFBFA] dark:bg-[#141A17] p-1 rounded-lg border border-stone-200 dark:border-stone-800 self-start sm:self-auto shrink-0">
+          <button
+            onClick={() => handleTabChange('clockin_journal')}
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeSubTab === 'clockin_journal'
+                ? 'bg-white dark:bg-[#1A221E] text-stone-900 dark:text-stone-100 shadow-none border border-stone-200 dark:border-stone-700'
+                : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200'
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" strokeWidth={1.5} />
+            <span>Presensi & Jurnal</span>
+          </button>
+
+          <button
+            onClick={() => handleTabChange('jadwal')}
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeSubTab === 'jadwal'
+                ? 'bg-white dark:bg-[#1A221E] text-stone-900 dark:text-stone-100 shadow-none border border-stone-200 dark:border-stone-700'
+                : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200'
+            }`}
+          >
+            <CalendarDays className="w-3.5 h-3.5" strokeWidth={1.5} />
+            <span>Jadwal Pekanan</span>
+          </button>
+
+          <button
+            onClick={() => handleTabChange('slip_gaji')}
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeSubTab === 'slip_gaji'
+                ? 'bg-white dark:bg-[#1A221E] text-stone-900 dark:text-stone-100 shadow-none border border-stone-200 dark:border-stone-700'
+                : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200'
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5" strokeWidth={1.5} />
+            <span>Slip Gaji</span>
+          </button>
         </div>
       </div>
 
-      {/* 3. Subtab Content: Presensi & Jurnal KBM */}
+      {/* 2. SUBTAB: PRESENSI & JURNAL KBM */}
       {activeSubTab === 'clockin_journal' && (
         <div className="space-y-4">
           
-          {/* Dedicated Section: Jurnal Hari Ini yang Perlu Diisi (if any) */}
+          {/* Pending Journals Alert Bar (if any) */}
           {todayPendingJournals.length > 0 && (
-            <div className="bg-amber-50/90 dark:bg-amber-950/20 border border-amber-200/90 dark:border-amber-900/30 rounded-xl p-4 space-y-3 shadow-2xs">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0" />
-                  <h3 className="font-bold text-xs text-amber-950 dark:text-amber-200">
-                    Jurnal Mengajar Hari Ini yang Perlu Diisi ({todayPendingJournals.length} Sesi)
-                  </h3>
+            <div className="bg-[#FFFDF5] dark:bg-[#201D14] border border-[#E9DFB8] dark:border-[#524823] rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-lg bg-[#FAF0CA] dark:bg-[#383015] text-[#8C6D1F] dark:text-[#E8C547] flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-4 h-4" strokeWidth={1.5} />
                 </div>
-                <span className="text-[10px] font-semibold bg-amber-200/60 dark:bg-amber-900/40 text-amber-900 dark:text-amber-300 px-2 py-0.5 rounded">
-                  Menunggu Pengisian
-                </span>
+                <div>
+                  <h4 className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                    {todayPendingJournals.length} Jurnal Mengajar Belum Terisi
+                  </h4>
+                  <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-0.5">
+                    Presensi masuk tercatat. Lengkapi materi santri sebelum hari berakhir untuk memastikan honorarium penuh.
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                {todayPendingJournals.map((item) => (
-                  <div 
-                    key={item.attendance.id} 
-                    className="bg-white dark:bg-slate-900 p-3 rounded-lg border border-amber-200 dark:border-amber-900/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-slate-900 dark:text-slate-100">{item.schedule.subject}</span>
-                        <span className="text-[11px] text-slate-500 dark:text-slate-400">Kelas {item.schedule.className} • {item.schedule.unit}</span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        Jam: <strong className="font-mono text-slate-700 dark:text-slate-300">{item.schedule.startTime} - {item.schedule.endTime}</strong> (Presensi masuk: {item.attendance.clockInTime || '-'})
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => setActiveJournalData({
-                        attendance: item.attendance,
-                        schedule: item.schedule
-                      })}
-                      className="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1.5 shadow-2xs self-start sm:self-auto"
-                    >
-                      <BookOpen className="w-3.5 h-3.5" />
-                      <span>Isi Jurnal</span>
-                    </button>
-                  </div>
-                ))}
-              </div>
+              <button
+                onClick={() => {
+                  const first = todayPendingJournals[0];
+                  if (first) {
+                    setActiveJournalData({
+                      attendance: first.attendance,
+                      schedule: first.schedule,
+                    });
+                  }
+                }}
+                className="bg-[#1B4332] hover:bg-[#143326] text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1.5 cursor-pointer self-start sm:self-auto shrink-0"
+              >
+                <BookOpen className="w-3.5 h-3.5" strokeWidth={1.5} />
+                <span>Isi Jurnal Sekarang</span>
+              </button>
             </div>
           )}
 
-          {/* Session List Table & Day Filter Toolbar */}
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs overflow-hidden">
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h2 className="font-bold text-sm text-slate-900 dark:text-slate-100">
-                  Daftar Sesi Mengajar Harian
-                </h2>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                  Pilih hari untuk melihat jadwal, melakukan presensi masuk, atau melengkapi jurnal KBM
-                </p>
-              </div>
+          {/* Segmented Day Switcher / Modern Horizontal Calendar Strip (Senin - Sabtu) */}
+          <div className="bg-white dark:bg-[#1A221E] rounded-xl border border-stone-200 dark:border-stone-800 p-3 sm:p-3.5">
+            <div className="flex items-center justify-between mb-2.5 px-1">
+              <span className="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-[#1B4332] dark:text-emerald-400" strokeWidth={1.5} />
+                <span>Pilih Hari Sesi KBM</span>
+              </span>
+              <button
+                onClick={() => setSelectedDay(actualTodayDay)}
+                className="text-[11px] font-semibold text-[#1B4332] dark:text-emerald-400 hover:underline cursor-pointer"
+              >
+                Hari Ini ({actualTodayDay})
+              </button>
+            </div>
 
-              {/* Day Switcher */}
-              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg">
-                {daysOfWeek.map((day) => (
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {daysOfWeek.map((day) => {
+                const info = scheduleCountByDay[day] || { sessions: 0, hours: 0 };
+                const isSelected = selectedDay === day;
+                const isToday = actualTodayDay === day;
+
+                return (
                   <button
                     key={day}
                     onClick={() => setSelectedDay(day)}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${
-                      selectedDay === day
-                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-2xs'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                    className={`relative p-2.5 rounded-xl text-center transition-all cursor-pointer border ${
+                      isSelected
+                        ? 'bg-[#1B4332] text-white border-[#1B4332]'
+                        : isToday
+                        ? 'bg-[#F4F6F4] dark:bg-[#16201B] text-stone-800 dark:text-stone-200 border-[#1B4332]/40 dark:border-emerald-800/60 hover:bg-[#EEF2EE]'
+                        : 'bg-[#FBFBFA] dark:bg-[#141A17] text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-800/50'
                     }`}
                   >
-                    {day}
+                    {isToday && (
+                      <span className={`absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-emerald-300' : 'bg-[#1B4332] dark:bg-emerald-400'}`} />
+                    )}
+                    
+                    <span className={`text-xs font-bold block ${isSelected ? 'text-white' : 'text-stone-900 dark:text-stone-100'}`}>
+                      {day}
+                    </span>
+                    
+                    <span className={`text-[10px] font-medium block mt-0.5 ${isSelected ? 'text-emerald-100/80' : 'text-stone-400 dark:text-stone-500'}`}>
+                      {info.sessions > 0 ? `${info.sessions} Sesi • ${info.hours} JP` : 'Libur'}
+                    </span>
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
+          </div>
 
-            {/* Sesi List */}
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
-              {daySchedules.length === 0 ? (
-                <div className="py-12 text-center text-slate-400 dark:text-slate-600 text-xs">
-                  Tidak ada jadwal mengajar pada hari {selectedDay}.
+          {/* Interactive Class Schedule Cards List (Flat & Clean) */}
+          <div className="space-y-3">
+            {daySchedules.length === 0 ? (
+              /* Minimalist Empty State */
+              <div className="bg-white dark:bg-[#1A221E] rounded-xl border border-dashed border-stone-200 dark:border-stone-800 p-8 sm:p-12 text-center space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-500 flex items-center justify-center mx-auto">
+                  <Coffee className="w-5 h-5" strokeWidth={1.5} />
                 </div>
-              ) : (
-                daySchedules.map((schedule) => {
+                <div className="max-w-sm mx-auto">
+                  <h3 className="text-sm font-bold text-stone-800 dark:text-stone-200">
+                    Tidak Ada Jadwal Mengajar pada Hari {selectedDay}
+                  </h3>
+                  <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
+                    Ustadz/Ustadzah tidak memiliki jam mengajar terjadwal pada hari {selectedDay}.
+                  </p>
+                </div>
+                <div className="pt-1 flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => setSelectedDay(actualTodayDay)}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 transition-colors cursor-pointer"
+                  >
+                    Buka Jadwal Hari Ini
+                  </button>
+                  <button
+                    onClick={() => handleTabChange('jadwal')}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-stone-50 dark:bg-stone-900 text-[#1B4332] dark:text-emerald-400 hover:bg-stone-100 border border-stone-200 dark:border-stone-700 transition-colors cursor-pointer"
+                  >
+                    Lihat Seluruh Pekan
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {daySchedules.map((schedule) => {
                   const att = getAttendanceForSchedule(schedule.id);
                   const badalInfo = getBadalInfoForSchedule(schedule.id);
-                  const isBadalForMe = badalInfo && badalInfo.badalTeacherId === currentUser.id;
-                  const isSubstituted = badalInfo && badalInfo.originalTeacherId === currentUser.id;
+                  const isBadalForMe = badalInfo && badalInfo.badalTeacherId === currentUser?.id;
+                  const isSubstituted = badalInfo && badalInfo.originalTeacherId === currentUser?.id;
 
                   const hasClockedIn = !!att && !!att.clockInTime;
-                  const isCompleted = att?.status === 'SELESAI';
-                  const isPendingJournal = att?.status === 'HADIR_JURNAL_KOSONG';
+                  const isCompleted = att?.status === 'SELESAI' || !!att?.journal;
+                  const isPendingJournal = hasClockedIn && !isCompleted && (att?.status === 'HADIR_JURNAL_KOSONG' || !att?.journal);
                   const lateInfo = att ? getLateCategoryLabel(att.lateCategory) : null;
 
                   return (
-                    <div key={schedule.id} className="p-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                    <div
+                      key={schedule.id}
+                      className={`bg-white dark:bg-[#1A221E] rounded-xl border transition-all p-4 sm:p-5 ${
+                        isCompleted
+                          ? 'border-emerald-200 dark:border-emerald-900/40 bg-[#FAFDFB] dark:bg-[#151D18]'
+                          : isPendingJournal
+                          ? 'border-[#E9DFB8] dark:border-[#524823] bg-[#FFFDF8] dark:bg-[#1F1D15]'
+                          : isSubstituted
+                          ? 'border-stone-200 dark:border-stone-800 opacity-60 bg-stone-50/50 dark:bg-stone-900/30'
+                          : 'border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700'
+                      }`}
+                    >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        {/* Left: Info */}
-                        <div className="space-y-1">
+                        {/* Left: Class Spec & Details */}
+                        <div className="space-y-1.5 min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300">
-                              {schedule.startTime} - {schedule.endTime}
+                            {/* Time Pill */}
+                            <span className="font-mono text-xs font-bold text-stone-800 dark:text-stone-200 bg-stone-100 dark:bg-stone-800 px-2 py-0.5 rounded-md">
+                              {schedule.startTime} - {schedule.endTime} WIB
                             </span>
-                            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                              ({schedule.hours} JP)
+
+                            {/* JP Badge */}
+                            <span className="text-[11px] font-semibold text-[#1B4332] dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md border border-emerald-200/60 dark:border-emerald-800/40">
+                              {schedule.hours} JP
                             </span>
-                            <span className="text-[11px] text-slate-400 dark:text-slate-600">•</span>
-                            <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400">
+
+                            {/* Class & Unit */}
+                            <span className="text-xs font-medium text-stone-600 dark:text-stone-400">
                               Kelas {schedule.className} • {schedule.unit}
                             </span>
-                            <span className="text-[11px] text-slate-400 dark:text-slate-600">•</span>
-                            <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                              {schedule.room}
+
+                            <span className="text-stone-300 dark:text-stone-700 font-mono">•</span>
+
+                            {/* Room */}
+                            <span className="text-xs text-stone-500 dark:text-stone-400 flex items-center gap-1">
+                              <MapPin className="w-3 h-3 text-stone-400" strokeWidth={1.5} />
+                              <span>{schedule.room}</span>
                             </span>
 
                             {isBadalForMe && (
-                              <span className="text-[10px] font-semibold text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 px-1.5 py-0.2 rounded border border-purple-200 dark:border-purple-800/50">
+                              <span className="text-[10px] font-bold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded-md border border-purple-200 dark:border-purple-800">
                                 Tugas Badal
                               </span>
                             )}
+
                             {isSubstituted && (
-                              <span className="text-[10px] font-semibold text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 px-1.5 py-0.2 rounded border border-rose-200 dark:border-rose-800/50">
+                              <span className="text-[10px] font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-md border border-rose-200 dark:border-rose-800">
                                 Digantikan Badal
                               </span>
                             )}
                           </div>
 
-                          <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                          <h3 className="font-bold text-sm sm:text-base text-stone-900 dark:text-stone-100 tracking-tight">
                             {schedule.subject}
                           </h3>
 
-                          {/* Attendance Status Bar */}
+                          {/* Attendance Status Row */}
                           {hasClockedIn && (
-                            <div className="flex flex-wrap items-center gap-2 pt-0.5 text-[11px]">
-                              <span className="text-slate-500 dark:text-slate-400">
-                                Waktu Masuk: <strong className="font-mono text-slate-800 dark:text-slate-200">{att.clockInTime}</strong>
+                            <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                              <span className="text-stone-500 dark:text-stone-400">
+                                Presensi: <strong className="font-mono text-stone-800 dark:text-stone-200">{att.clockInTime}</strong>
                               </span>
 
                               {att.lateMinutes > 4 ? (
-                                <span className="text-rose-700 dark:text-rose-400 font-medium bg-rose-50 dark:bg-rose-900/20 px-1.5 py-0.2 rounded border border-rose-200 dark:border-rose-800/50">
+                                <span className="text-[11px] font-semibold text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 px-2 py-0.5 rounded-md border border-rose-200 dark:border-rose-800">
                                   +{att.lateMinutes}m ({lateInfo?.label.split(' ')[0]})
                                 </span>
                               ) : (
-                                <span className="text-emerald-700 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/20 px-1.5 py-0.2 rounded border border-emerald-200 dark:border-emerald-800/50">
+                                <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
                                   Tepat Waktu
                                 </span>
                               )}
 
                               {isCompleted && (
-                                <span className="text-emerald-800 dark:text-emerald-400 font-medium inline-flex items-center gap-1">
-                                  <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Selesai & Tersimpan
-                                </span>
-                              )}
-
-                              {isPendingJournal && (
-                                <span className="text-amber-800 dark:text-amber-400 font-medium inline-flex items-center gap-1">
-                                  <AlertTriangle className="w-3 h-3 text-amber-600" /> Jurnal Belum Diisi
+                                <span className="text-[11px] font-semibold text-[#1B4332] dark:text-emerald-400 inline-flex items-center gap-1">
+                                  <Check className="w-3 h-3" strokeWidth={2} /> Jurnal Selesai
                                 </span>
                               )}
                             </div>
                           )}
                         </div>
 
-                        {/* Right: Single Consolidated Action Button / Hidden if completed */}
-                        <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                          {/* 1. Belum Presensi: Single Button Presensi Masuk */}
-                          {!hasClockedIn && !isSubstituted && (
+                        {/* Right: Actions (Presensi Masuk & Isi Jurnal) */}
+                        <div className="flex items-center gap-2 pt-2 sm:pt-0 self-start sm:self-center shrink-0">
+                          {isSubstituted ? (
+                            <span className="text-xs text-stone-400 italic">Sesi telah dialihkan ke badal</span>
+                          ) : !hasClockedIn ? (
                             <button
                               onClick={() => setActiveClockInSchedule(schedule)}
-                              className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-colors shadow-2xs inline-flex items-center gap-1.5"
+                              className="inline-flex items-center gap-1.5 bg-[#1B4332] hover:bg-[#143326] text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-colors cursor-pointer"
                             >
-                              <Clock className="w-3.5 h-3.5" />
+                              <Clock className="w-3.5 h-3.5" strokeWidth={1.5} />
                               <span>Presensi Masuk</span>
                             </button>
-                          )}
-
-                          {/* 2. Sudah Presensi, Belum Isi Jurnal: Single Button Isi Jurnal */}
-                          {isPendingJournal && att && (
+                          ) : !isCompleted ? (
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => {
+                                  setActiveJournalData({
+                                    attendance: att!,
+                                    schedule: schedule,
+                                  });
+                                }}
+                                className="inline-flex items-center gap-1.5 bg-[#1B4332] hover:bg-[#143326] text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-colors cursor-pointer"
+                              >
+                                <BookOpen className="w-3.5 h-3.5" strokeWidth={1.5} />
+                                <span>Isi Jurnal</span>
+                              </button>
+                            </div>
+                          ) : (
                             <button
-                              onClick={() => setActiveJournalData({ attendance: att, schedule })}
-                              className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-colors shadow-2xs inline-flex items-center gap-1.5"
+                              onClick={() => {
+                                setActiveJournalData({
+                                  attendance: att!,
+                                  schedule: schedule,
+                                });
+                              }}
+                              className="inline-flex items-center gap-1 text-stone-600 dark:text-stone-300 hover:text-stone-900 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 transition-colors cursor-pointer"
                             >
-                              <BookOpen className="w-3.5 h-3.5" />
-                              <span>Isi Jurnal</span>
+                              <BookOpen className="w-3 h-3" strokeWidth={1.5} />
+                              <span>Lihat Jurnal</span>
                             </button>
-                          )}
-
-                          {/* 3. Selesai: Hidden from filling again, badge only */}
-                          {isCompleted && (
-                            <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded-md border border-emerald-200/80 dark:border-emerald-800/50 inline-flex items-center gap-1">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                              <span>Selesai</span>
-                            </span>
-                          )}
-
-                          {isSubstituted && (
-                            <span className="text-xs text-slate-400 dark:text-slate-600 italic">
-                              Telah dialihkan
-                            </span>
                           )}
                         </div>
                       </div>
-
-                      {/* Journal Topic Preview if filled */}
-                      {att?.journal && (
-                        <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 bg-slate-50/70 dark:bg-slate-800/40 p-2.5 rounded-lg flex items-start justify-between gap-2">
-                          <div>
-                            <span className="text-[10px] text-slate-400 dark:text-slate-600 block">Materi Pembelajaran:</span>
-                            <p className="font-medium text-slate-800 dark:text-slate-200 mt-0.5">{att.journal.topic}</p>
-                          </div>
-                          {att.journal.studentAttendance && (
-                            <span className="text-[11px] text-slate-500 dark:text-slate-500 whitespace-nowrap">
-                              Santri Hadir: <strong className="text-slate-800 dark:text-slate-300">{att.journal.studentAttendance.presentCount}/{att.journal.studentAttendance.totalStudents}</strong>
-                            </span>
-                          )}
-                        </div>
-                      )}
                     </div>
                   );
-                })
-              )}
-            </div>
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* 4. Subtab Content: Jadwal Mengajar Mingguan */}
+      {/* 3. SUBTAB: JADWAL PEKANAN (Full Weekly Timetable) */}
       {activeSubTab === 'jadwal' && (
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs overflow-hidden">
-          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <h2 className="font-bold text-sm text-slate-900 dark:text-slate-100">
-                Jadwal Mengajar Mingguan
-              </h2>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                Total beban mengajar: <strong className="text-slate-700 dark:text-slate-300">{totalWeeklyHours} Jam Pelajaran (JP)</strong> per pekan
-              </p>
+        <div className="space-y-4">
+          <div className="bg-white dark:bg-[#1A221E] rounded-xl border border-stone-200 dark:border-stone-800 p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-bold text-sm sm:text-base text-stone-900 dark:text-stone-100">
+                  Jadwal Mengajar Lengkap Pekanan
+                </h3>
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                  Total {totalWeeklyHours} Jam Pelajaran (JP) terdaftar atas nama {currentUser?.name}
+                </p>
+              </div>
             </div>
-            <span className="text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md self-start sm:self-auto">
-              Unit {currentUser?.unit || '-'}
-            </span>
-          </div>
 
-          <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {daysOfWeek.map((day) => {
-              const scheds = allMySchedules.filter((s) => s.dayOfWeek === day);
-              const dayHours = scheds.reduce((acc, s) => acc + s.hours, 0);
+            <div className="space-y-4">
+              {daysOfWeek.map((day) => {
+                const dayScheds = schedules.filter((s) => s.teacherId === currentUser?.id && s.dayOfWeek === day);
+                if (dayScheds.length === 0) return null;
 
-              return (
-                <div key={day} className="bg-slate-50/70 dark:bg-slate-800/40 rounded-lg border border-slate-200/80 dark:border-slate-800 p-3 space-y-2">
-                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200">
-                    <span>{day}</span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-500 font-normal">{dayHours} JP</span>
-                  </div>
+                return (
+                  <div key={day} className="border border-stone-200 dark:border-stone-800 rounded-lg overflow-hidden text-xs">
+                    <div className="bg-[#FBFBFA] dark:bg-[#141A17] px-3.5 py-2 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between font-bold text-stone-800 dark:text-stone-200">
+                      <span>Hari {day}</span>
+                      <span className="text-stone-500 text-[11px] font-normal">
+                        {dayScheds.length} Sesi • {dayScheds.reduce((sum, s) => sum + s.hours, 0)} JP
+                      </span>
+                    </div>
 
-                  {scheds.length === 0 ? (
-                    <p className="text-[11px] text-slate-400 dark:text-slate-600 italic py-1">Tidak ada jadwal</p>
-                  ) : (
-                    <div className="space-y-1.5">
-                      {scheds.map((s) => (
-                        <div key={s.id} className="bg-white dark:bg-slate-900 p-2 rounded-md border border-slate-200/70 dark:border-slate-800 text-xs space-y-0.5 shadow-2xs">
-                          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-500 font-mono">
-                            <span>{s.startTime} - {s.endTime}</span>
-                            <span className="font-semibold text-emerald-800 dark:text-emerald-500">{s.hours} JP</span>
+                    <div className="divide-y divide-stone-100 dark:divide-stone-800">
+                      {dayScheds.map((s) => (
+                        <div key={s.id} className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-[#1A221E]">
+                          <div className="flex items-center gap-3">
+                            <span className="font-mono text-xs font-semibold text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 px-2 py-0.5 rounded">
+                              {s.startTime} - {s.endTime}
+                            </span>
+                            <div>
+                              <p className="font-bold text-stone-900 dark:text-stone-100">{s.subject}</p>
+                              <p className="text-[11px] text-stone-500">Kelas {s.className} • Unit {s.unit} • {s.room}</p>
+                            </div>
                           </div>
-                          <p className="font-semibold text-slate-900 dark:text-slate-100">{s.subject}</p>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-500">Kelas {s.className} • {s.room}</p>
+                          <span className="text-[11px] font-semibold text-[#1B4332] dark:text-emerald-400 self-start sm:self-center">
+                            {s.hours} JP
+                          </span>
                         </div>
                       ))}
                     </div>
-                  )}
-                </div>
-              );
-            })}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
 
-      {/* 5. Subtab Content: Slip Gaji Pribadi */}
+      {/* 4. SUBTAB: SLIP GAJI */}
       {activeSubTab === 'slip_gaji' && (
-        <div className="space-y-4">
-          <SlipGajiView />
-        </div>
+        <SlipGajiView />
       )}
 
-      {/* Clock In Modal (Auto locks real-time) */}
+      {/* MODALS */}
       {activeClockInSchedule && (
         <ClockInModal
           schedule={activeClockInSchedule}
           teacher={currentUser}
           onClose={() => setActiveClockInSchedule(null)}
-          onSuccess={(sched) => {
-            setActiveClockInSchedule(null);
-            handleClockInSuccess(sched);
-          }}
+          onSuccess={handleClockInSuccess}
         />
       )}
 
-      {/* Journal Modal */}
       {activeJournalData && (
         <JournalModal
           attendance={activeJournalData.attendance}
           schedule={activeJournalData.schedule}
           teacher={currentUser}
           onClose={() => setActiveJournalData(null)}
-          onSuccess={() => setActiveJournalData(null)}
+          onSuccess={() => {
+            setActiveJournalData(null);
+          }}
         />
       )}
 
-      {/* Salary Slip Modal */}
       {showSlipModal && (
         <SalarySlipModal
           payroll={teacherPayroll}

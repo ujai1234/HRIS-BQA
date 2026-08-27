@@ -118,15 +118,15 @@ export const MasterTeachers: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* Minimalist Sub-View Switcher */}
-      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2.5">
-        <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+      <div className="flex items-center justify-between border-b border-stone-200 dark:border-stone-800 pb-2.5">
+        <div className="flex items-center gap-1.5 bg-stone-100 dark:bg-stone-800 p-1 rounded-lg">
           <button
             id="subtab-profil-guru"
             onClick={() => setActiveSubView('profil_guru')}
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
               activeSubView === 'profil_guru'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-2xs font-semibold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-2xs font-semibold'
+                : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
             }`}
           >
             Data Pokok Guru
@@ -137,15 +137,15 @@ export const MasterTeachers: React.FC = () => {
             onClick={() => setActiveSubView('tarif_kafaah')}
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
               activeSubView === 'tarif_kafaah'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-2xs font-semibold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-2xs font-semibold'
+                : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
             }`}
           >
             Manajemen Tarif Kafa'ah
           </button>
         </div>
 
-        <span className="text-xs text-slate-400 dark:text-slate-500 font-mono hidden sm:inline">
+        <span className="text-xs text-stone-400 dark:text-stone-500 font-mono hidden sm:inline">
           {teachers.length} Guru
         </span>
       </div>
@@ -159,25 +159,25 @@ export const MasterTeachers: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex flex-1 items-center gap-2.5">
               <div className="relative flex-1 max-w-xs">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" />
+                <Search className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 top-2.5 pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Cari nama, NIP, atau mapel..."
-                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-slate-100"
+                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-stone-900 rounded-lg border border-stone-200 dark:border-stone-800 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-stone-900 dark:text-stone-100"
                 />
               </div>
 
-              <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg">
+              <div className="flex items-center gap-0.5 bg-stone-100 dark:bg-stone-800 p-0.5 rounded-lg">
                 {['ALL', 'SMP', 'MA', 'PESANTREN'].map((unit) => (
                   <button
                     key={unit}
                     onClick={() => setUnitFilter(unit)}
                     className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                       unitFilter === unit
-                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-2xs'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                        ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-2xs'
+                        : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
                     }`}
                   >
                     {unit === 'ALL' ? 'Semua' : unit}
@@ -189,7 +189,7 @@ export const MasterTeachers: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleReset}
-                className="inline-flex items-center justify-center gap-1.5 bg-white dark:bg-slate-900 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-600 dark:text-rose-400 text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 bg-white dark:bg-stone-900 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-600 dark:text-rose-400 text-xs font-medium px-3 py-1.5 rounded-lg border border-stone-200 dark:border-stone-800 transition-colors cursor-pointer"
                 title="Hapus Semua Data Guru"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -199,9 +199,9 @@ export const MasterTeachers: React.FC = () => {
               <button
                 id="bulk-upload-teacher-btn"
                 onClick={() => setIsBulkUploadOpen(true)}
-                className="inline-flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs font-medium px-3 py-1.5 rounded-lg border border-stone-200 dark:border-stone-700 transition-colors cursor-pointer"
               >
-                <UploadCloud className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                <UploadCloud className="w-3.5 h-3.5 text-stone-500 dark:text-stone-400" />
                 <span>Upload CSV</span>
               </button>
 
@@ -216,11 +216,11 @@ export const MasterTeachers: React.FC = () => {
           </div>
 
           {/* Clean Teachers Table */}
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
+          <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-medium border-b border-slate-200/70 dark:border-slate-700">
+                  <tr className="bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 font-medium border-b border-stone-200/70 dark:border-stone-700">
                     <th className="py-2.5 px-3 text-center w-9">No</th>
                     <th className="py-2.5 px-4">Nama & NIP</th>
                     <th className="py-2.5 px-3">Jabatan</th>
@@ -232,31 +232,31 @@ export const MasterTeachers: React.FC = () => {
                     <th className="py-2.5 px-3 text-center w-16">Aksi</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+                <tbody className="divide-y divide-stone-100 dark:divide-stone-800 text-stone-700 dark:text-stone-300">
                   {filteredTeachers.map((t, idx) => (
-                    <tr key={t.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                      <td className="py-2.5 px-3 text-center text-slate-400 dark:text-slate-500 font-mono">
+                    <tr key={t.id} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/30 transition-colors">
+                      <td className="py-2.5 px-3 text-center text-stone-400 dark:text-stone-500 font-mono">
                         {idx + 1}
                       </td>
                       <td className="py-2.5 px-4">
-                        <p className="font-medium text-slate-900 dark:text-slate-100">{t.name || '-'}</p>
-                        <p className="text-[11px] text-slate-400 dark:text-slate-500 font-mono">{t.nip || '-'}</p>
+                        <p className="font-medium text-stone-900 dark:text-stone-100">{t.name || '-'}</p>
+                        <p className="text-[11px] text-stone-400 dark:text-stone-500 font-mono">{t.nip || '-'}</p>
                       </td>
-                      <td className="py-2.5 px-3 text-slate-700 dark:text-slate-300">
+                      <td className="py-2.5 px-3 text-stone-700 dark:text-stone-300">
                         {t.position}
                       </td>
                       <td className="py-2.5 px-3">
-                        <span className="text-[11px] text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                        <span className="text-[11px] text-stone-600 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 px-2 py-0.5 rounded">
                           {t.unit}
                         </span>
                       </td>
-                      <td className="py-2.5 px-3 text-right font-mono text-slate-800 dark:text-slate-200">
+                      <td className="py-2.5 px-3 text-right font-mono text-stone-800 dark:text-stone-200">
                         {formatRupiah(t.baseSalary)}
                       </td>
                       <td className="py-2.5 px-3 text-right font-mono text-emerald-800 dark:text-emerald-400 font-medium">
                         {formatRupiah(t.hourlyRate)}
                       </td>
-                      <td className="py-2.5 px-3 text-right font-mono text-slate-700 dark:text-slate-300">
+                      <td className="py-2.5 px-3 text-right font-mono text-stone-700 dark:text-stone-300">
                         {formatRupiah(t.dailyTransport)}
                       </td>
                       <td className="py-2.5 px-3 text-center">
@@ -265,7 +265,7 @@ export const MasterTeachers: React.FC = () => {
                             ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400'
                             : t.role === 'KEPALA_PESANTREN'
                             ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400'
-                            : 'text-slate-500 dark:text-slate-400'
+                            : 'text-stone-500 dark:text-stone-400'
                         }`}>
                           {t.role === 'ADMIN' ? 'Admin' : t.role === 'KEPALA_PESANTREN' ? 'Kepsek' : 'Guru'}
                         </span>
@@ -274,7 +274,7 @@ export const MasterTeachers: React.FC = () => {
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => handleOpenEdit(t)}
-                            className="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 rounded transition-colors cursor-pointer"
+                            className="p-1 text-stone-400 dark:text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 rounded transition-colors cursor-pointer"
                             title="Edit"
                           >
                             <Edit3 className="w-3.5 h-3.5" />
@@ -285,7 +285,7 @@ export const MasterTeachers: React.FC = () => {
                                 deleteTeacher(t.id);
                               }
                             }}
-                            className="p-1 text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 rounded transition-colors cursor-pointer"
+                            className="p-1 text-stone-400 dark:text-stone-500 hover:text-rose-600 dark:hover:text-rose-400 rounded transition-colors cursor-pointer"
                             title="Hapus"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -303,10 +303,10 @@ export const MasterTeachers: React.FC = () => {
 
       {/* Edit / Add Modal */}
       {(editingTeacher || isAddingTeacher) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-2xs">
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-800">
-            <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 dark:bg-stone-950/60 backdrop-blur-2xs">
+          <div className="bg-white dark:bg-stone-900 rounded-xl shadow-lg max-w-md w-full overflow-hidden border border-stone-200 dark:border-stone-800">
+            <div className="px-5 py-3.5 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between">
+              <h3 className="font-semibold text-sm text-stone-900 dark:text-stone-100">
                 {editingTeacher ? 'Edit Data Guru' : 'Tambah Guru Baru'}
               </h3>
               <button
@@ -314,7 +314,7 @@ export const MasterTeachers: React.FC = () => {
                   setEditingTeacher(null);
                   setIsAddingTeacher(false);
                 }}
-                className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 text-sm"
+                className="text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 text-sm"
               >
                 ✕
               </button>
@@ -323,21 +323,21 @@ export const MasterTeachers: React.FC = () => {
             <form onSubmit={handleSave} className="p-5 space-y-3.5 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-slate-600 dark:text-slate-400 font-medium block">NIP Guru</label>
+                  <label className="text-stone-600 dark:text-stone-400 font-medium block">NIP Guru</label>
                   <input
                     type="text"
                     value={formData.nip}
                     onChange={(e) => setFormData({ ...formData, nip: e.target.value })}
-                    className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 font-mono text-slate-900 dark:text-slate-100"
+                    className="w-full px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 font-mono text-stone-900 dark:text-stone-100"
                     required
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-slate-600 dark:text-slate-400 font-medium block">Unit</label>
+                  <label className="text-stone-600 dark:text-stone-400 font-medium block">Unit</label>
                   <select
                     value={formData.unit}
                     onChange={(e) => setFormData({ ...formData, unit: e.target.value as any })}
-                    className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-slate-100"
+                    className="w-full px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-stone-900 dark:text-stone-100"
                   >
                     <option value="SMP">SMP</option>
                     <option value="MA">MA</option>
@@ -347,45 +347,45 @@ export const MasterTeachers: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-600 dark:text-slate-400 font-medium block">Nama Lengkap</label>
+                <label className="text-stone-600 dark:text-stone-400 font-medium block">Nama Lengkap</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Contoh: Ustadz Ahmad, Lc."
-                  className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 font-medium text-slate-900 dark:text-slate-100"
+                  className="w-full px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 font-medium text-stone-900 dark:text-stone-100"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-slate-600 dark:text-slate-400 font-medium block">Jabatan / Tugas</label>
+                  <label className="text-stone-600 dark:text-stone-400 font-medium block">Jabatan / Tugas</label>
                   <input
                     type="text"
                     value={formData.position}
                     onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                    className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-slate-100"
+                    className="w-full px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-stone-900 dark:text-stone-100"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-slate-600 dark:text-slate-400 font-medium block">Nomor WhatsApp</label>
+                  <label className="text-stone-600 dark:text-stone-400 font-medium block">Nomor WhatsApp</label>
                   <input
                     type="text"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="Contoh: 628123456789"
-                    className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-slate-100"
+                    className="w-full px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-stone-900 dark:text-stone-100"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-600 dark:text-slate-400 font-medium block">Hak Akses</label>
+                <label className="text-stone-600 dark:text-stone-400 font-medium block">Hak Akses</label>
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
-                  className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-slate-100"
+                  className="w-full px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-stone-900 dark:text-stone-100"
                 >
                   <option value="GURU">Guru Pengajar</option>
                   <option value="ADMIN">Administrator TU</option>
@@ -393,50 +393,50 @@ export const MasterTeachers: React.FC = () => {
                 </select>
               </div>
 
-              <div className="border-t border-slate-100 dark:border-slate-800 pt-3 space-y-2.5">
-                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-500 uppercase tracking-wider block">
+              <div className="border-t border-stone-100 dark:border-stone-800 pt-3 space-y-2.5">
+                <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-500 uppercase tracking-wider block">
                   Komponen Kafa'ah (Rupiah)
                 </span>
 
                 <div className="grid grid-cols-3 gap-2">
                   <div className="space-y-1">
-                    <label className="text-[11px] text-slate-500 dark:text-slate-500 block">Gaji Pokok</label>
+                    <label className="text-[11px] text-stone-500 dark:text-stone-500 block">Gaji Pokok</label>
                     <input
                       type="text"
                       value={baseSalaryInput}
                       onChange={(e) => setBaseSalaryInput(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none font-mono text-slate-900 dark:text-slate-100"
+                      className="w-full px-2 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none font-mono text-stone-900 dark:text-stone-100"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[11px] text-slate-500 dark:text-slate-500 block">Honor / JP</label>
+                    <label className="text-[11px] text-stone-500 dark:text-stone-500 block">Honor / JP</label>
                     <input
                       type="text"
                       value={hourlyRateInput}
                       onChange={(e) => setHourlyRateInput(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none font-mono text-emerald-800 dark:text-emerald-400 font-medium"
+                      className="w-full px-2 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none font-mono text-emerald-800 dark:text-emerald-400 font-medium"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[11px] text-slate-500 dark:text-slate-500 block">Transport / Hari</label>
+                    <label className="text-[11px] text-stone-500 dark:text-stone-500 block">Transport / Hari</label>
                     <input
                       type="text"
                       value={dailyTransportInput}
                       onChange={(e) => setDailyTransportInput(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none font-mono text-slate-900 dark:text-slate-100"
+                      className="w-full px-2 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none font-mono text-stone-900 dark:text-stone-100"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-stone-100 dark:border-stone-800">
                 <button
                   type="button"
                   onClick={() => {
                     setEditingTeacher(null);
                     setIsAddingTeacher(false);
                   }}
-                  className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  className="px-3 py-1.5 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800"
                 >
                   Batal
                 </button>

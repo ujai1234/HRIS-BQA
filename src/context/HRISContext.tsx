@@ -16,7 +16,8 @@ import {
   LearningNeedStatus,
   isKepsekRole,
   getRoleUnit,
-  getRoleDisplayName
+  getRoleDisplayName,
+  UnitType
 } from '../types';
 import { 
   INITIAL_TEACHERS, 
@@ -77,7 +78,7 @@ interface HRISContextType {
   
   // Payroll Engine
   calculateTeacherPayroll: (teacherId: string, period?: string) => TeacherPayrollItem;
-  calculateAllPayroll: (period?: string) => MonthlyPayrollSummary;
+  calculateAllPayroll: (period?: string, unitFilter?: UnitType | 'ALL') => MonthlyPayrollSummary;
   
   // Audit Logs
   logActivity: (
@@ -391,13 +392,29 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       notes: notes || (isBadal ? `Clock-in sebagai Guru Badal menggantikan ${teachers.find(t => t.id === schedule.teacherId)?.name || 'Guru Asal'}` : undefined),
     };
 
+    // Optimistically update attendance in state
+    setAttendances((prev) => {
+      const idx = prev.findIndex(a => a.scheduleId === scheduleId && a.date === todayStr);
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = { ...copy[idx], ...newRecord };
+        return copy;
+      }
+      return [newRecord, ...prev];
+    });
+
     fetch('/api/attendances', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newRecord)
-    }).then(res => res.json()).then(() => {
+    }).then(res => res.json()).then((savedAtt) => {
+      if (savedAtt && savedAtt.id) {
+        setAttendances((prev) => prev.map(a => (a.scheduleId === scheduleId && a.date === todayStr) ? { ...a, id: savedAtt.id } : a));
+      }
       fetchAllData();
       toast.success(`Presensi Berhasil: ${schedule.subject} (${schedule.className})`);
+    }).catch(err => {
+      console.error('Error clocking in:', err);
     });
 
     logActivity(
@@ -411,7 +428,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Submit Jurnal Mengajar
-  const submitJournal = (
+  const submitJournal = async (
     attendanceId: string,
     journalInput: Omit<TeachingJournal, 'id' | 'attendanceId' | 'filledAt'>
   ) => {
@@ -424,27 +441,67 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     // Optimistically update attendance in state
-    setAttendances((prev) =>
-      prev.map((att) => {
-        if (att.id === attendanceId) {
+    setAttendances((prev) => {
+      let matched = false;
+      const updated = prev.map((att) => {
+        if (att.id === attendanceId || (att.scheduleId === journalInput.scheduleId && att.date === journalInput.date)) {
+          matched = true;
           return {
             ...att,
-            status: 'SELESAI',
+            status: 'SELESAI' as const,
             journal: newJournal,
           };
         }
         return att;
-      })
-    );
+      });
 
-    fetch('/api/journals', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newJournal)
-    }).then(res => res.json()).then(() => {
-      fetchAllData();
-      toast.success('Jurnal KBM berhasil disimpan');
+      if (!matched) {
+        const fallbackAtt: AttendanceRecord = {
+          id: attendanceId,
+          scheduleId: journalInput.scheduleId,
+          teacherId: journalInput.teacherId,
+          actualTeacherId: journalInput.teacherId,
+          isBadal: false,
+          date: journalInput.date,
+          clockInTime: `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`,
+          lateMinutes: 0,
+          lateCategory: 'TEPAT_WAKTU',
+          latePenalty: 0,
+          status: 'SELESAI',
+          journal: newJournal,
+        };
+        return [fallbackAtt, ...prev];
+      }
+
+      return updated;
     });
+
+    try {
+      const res = await fetch('/api/journals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...newJournal,
+          totalStudents: journalInput.studentAttendance?.totalStudents ?? 28,
+          presentCount: journalInput.studentAttendance?.presentCount ?? 27,
+          sickCount: journalInput.studentAttendance?.sickCount ?? 1,
+          permittedCount: journalInput.studentAttendance?.permittedCount ?? 0,
+          absentCount: journalInput.studentAttendance?.absentCount ?? 0,
+        })
+      });
+
+      if (res.ok) {
+        await fetchAllData();
+        toast.success('Jurnal KBM berhasil disimpan & terverifikasi selesai');
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        console.error('Failed to submit journal to server:', errJson);
+        toast.error('Gagal menyimpan jurnal ke server');
+      }
+    } catch (err) {
+      console.error('Error submitting journal:', err);
+      toast.error('Koneksi terputus saat menyimpan jurnal');
+    }
 
     logActivity(
       'SUBMIT_JOURNAL',
@@ -911,9 +968,13 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   };
 
-  // Calculate full payroll table for all teachers
-  const calculateAllPayroll = (period = selectedPeriod): MonthlyPayrollSummary => {
-    const items = teachers.map((t) => calculateTeacherPayroll(t.id, period));
+  // Calculate full payroll table for all teachers or filtered by unit
+  const calculateAllPayroll = (period = selectedPeriod, unitFilter?: UnitType | 'ALL'): MonthlyPayrollSummary => {
+    const targetTeachers = (unitFilter && unitFilter !== 'ALL') 
+      ? teachers.filter(t => t.unit === unitFilter) 
+      : teachers;
+
+    const items = targetTeachers.map((t) => calculateTeacherPayroll(t.id, period));
     const totalGross = items.reduce((sum, item) => sum + item.grossSalary, 0);
     const totalDeductions = items.reduce((sum, item) => sum + item.totalDeductions, 0);
     const totalNet = items.reduce((sum, item) => sum + item.netSalary, 0);
@@ -925,7 +986,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       totalDeductions,
       totalNet,
       totalTeachingHours,
-      totalTeachers: teachers.length,
+      totalTeachers: targetTeachers.length,
       generatedDate: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
       items,
     };

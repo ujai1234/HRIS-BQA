@@ -327,27 +327,27 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
   const invalidCount = parsedRows.length - validCount;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-2xs animate-in fade-in duration-150">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/50 backdrop-blur-2xs animate-in fade-in duration-150">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-stone-200">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="px-6 py-4 border-b border-stone-100 flex items-center justify-between bg-stone-50/50">
           <div className="flex items-center gap-2.5">
             <div className="bg-emerald-100 p-2 rounded-xl text-emerald-800">
               <FileSpreadsheet className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-sm sm:text-base text-slate-900">
+              <h3 className="font-bold text-sm sm:text-base text-stone-900">
                 Unggah Data Guru Massal
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-stone-500">
                 Import berkas spreadsheet asatidz baru untuk tahun ajaran baru
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -387,7 +387,7 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
               className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${
                 dragActive
                   ? 'border-emerald-500 bg-emerald-50/50 scale-[0.99]'
-                  : 'border-slate-300 hover:border-emerald-500 hover:bg-slate-50/70'
+                  : 'border-stone-300 hover:border-emerald-500 hover:bg-stone-50/70'
               }`}
             >
               <input
@@ -402,10 +402,10 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
                   <UploadCloud className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-800">
+                  <p className="text-sm font-semibold text-stone-800">
                     Klik untuk memilih berkas atau seret berkas ke sini
                   </p>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-stone-400 mt-1">
                     Mendukung format CSV (.csv) atau Teks (.txt)
                   </p>
                 </div>
@@ -414,10 +414,10 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
           ) : (
             <div className="space-y-4">
               {/* File Info & Stats */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-stone-50 p-3 rounded-xl border border-stone-200">
                 <div className="flex items-center gap-2">
                   <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
-                  <span className="text-xs font-semibold text-slate-800 font-mono truncate max-w-xs">
+                  <span className="text-xs font-semibold text-stone-800 font-mono truncate max-w-xs">
                     {fileName}
                   </span>
                 </div>
@@ -437,7 +437,7 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
                       setParsedRows([]);
                       setFileName(null);
                     }}
-                    className="text-slate-500 hover:text-slate-800 underline font-medium text-xs ml-2 cursor-pointer"
+                    className="text-stone-500 hover:text-stone-800 underline font-medium text-xs ml-2 cursor-pointer"
                   >
                     Ganti Berkas
                   </button>
@@ -445,9 +445,9 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
               </div>
 
               {/* Preview Table */}
-              <div className="border border-slate-200 rounded-xl overflow-hidden max-h-60 overflow-y-auto">
+              <div className="border border-stone-200 rounded-xl overflow-hidden max-h-60 overflow-y-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-100/80 sticky top-0 border-b border-slate-200 text-slate-700 font-semibold">
+                  <thead className="bg-stone-100/80 sticky top-0 border-b border-stone-200 text-stone-700 font-semibold">
                     <tr>
                       <th className="py-2 px-3 w-10 text-center">Baris</th>
                       <th className="py-2 px-3">NIP</th>
@@ -458,20 +458,20 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
                       <th className="py-2 px-3 text-center">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                  <tbody className="divide-y divide-stone-100 text-stone-700">
                     {parsedRows.map((row) => (
-                      <tr key={row.rowNum} className={row.isValid ? 'hover:bg-slate-50' : 'bg-rose-50/50'}>
-                        <td className="py-2 px-3 text-center text-slate-400 font-mono">
+                      <tr key={row.rowNum} className={row.isValid ? 'hover:bg-stone-50' : 'bg-rose-50/50'}>
+                        <td className="py-2 px-3 text-center text-stone-400 font-mono">
                           {row.rowNum}
                         </td>
-                        <td className="py-2 px-3 font-mono text-slate-800">
+                        <td className="py-2 px-3 font-mono text-stone-800">
                           {row.nip}
                         </td>
-                        <td className="py-2 px-3 font-medium text-slate-900">
+                        <td className="py-2 px-3 font-medium text-stone-900">
                           {row.name || <span className="text-rose-500 italic">Kosong</span>}
                         </td>
                         <td className="py-2 px-3">
-                          <span className="font-semibold text-slate-800">{row.unit}</span> - <span className="text-slate-500">{row.position}</span>
+                          <span className="font-semibold text-stone-800">{row.unit}</span> - <span className="text-stone-500">{row.position}</span>
                         </td>
                         <td className="py-2 px-3 text-right font-mono">
                           {formatRupiah(row.baseSalary)}
@@ -515,11 +515,11 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="px-6 py-4 border-t border-stone-100 flex items-center justify-between bg-stone-50/50">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-100 transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl border border-stone-200 text-stone-700 font-semibold text-xs hover:bg-stone-100 transition-colors cursor-pointer"
           >
             Batal
           </button>
@@ -533,7 +533,7 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
                 className={`inline-flex items-center justify-center gap-1.5 px-5 py-2 rounded-xl text-white text-xs font-semibold transition-all shadow-2xs cursor-pointer ${
                   validCount > 0 && !isProcessing && successCount === null
                     ? 'bg-emerald-700 hover:bg-emerald-800 shadow-emerald-700/20'
-                    : 'bg-slate-300 cursor-not-allowed text-slate-500'
+                    : 'bg-stone-300 cursor-not-allowed text-stone-500'
                 }`}
               >
                 {isProcessing ? (

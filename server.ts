@@ -192,10 +192,10 @@ async function startServer() {
   app.get('/api/attendances', async (req, res) => {
     try {
       const { teacherId, unit } = req.query;
-      let attendances = await db.query.attendances.findMany();
+      let attendancesList = await db.query.attendances.findMany();
 
       if (teacherId && teacherId !== 'ALL' && teacherId !== 'undefined' && teacherId !== '') {
-        attendances = attendances.filter(a => a.teacherId === teacherId || a.actualTeacherId === teacherId);
+        attendancesList = attendancesList.filter(a => a.teacherId === teacherId || a.actualTeacherId === teacherId);
       }
 
       if (unit && unit !== 'ALL' && unit !== 'undefined' && unit !== '') {
@@ -204,70 +204,253 @@ async function startServer() {
           where: eq(schema.schedules.unit, unit as any)
         });
         const unitScheduleIds = new Set(unitSchedules.map(s => s.id));
-        attendances = attendances.filter(a => unitScheduleIds.has(a.scheduleId as string));
+        attendancesList = attendancesList.filter(a => unitScheduleIds.has(a.scheduleId as string));
       }
 
-      // Also fetch journals for each attendance
-      const records = await Promise.all(attendances.map(async (att) => {
-        const journal = await db.query.journals.findFirst({
-          where: eq(schema.journals.attendanceId, att.id as string)
-        });
-        return { ...att, journal };
-      }));
+      const allJournals = await db.query.journals.findMany();
+
+      const records = attendancesList.map((att) => {
+        const journal = allJournals.find(j => 
+          j.attendanceId === att.id || 
+          (j.scheduleId === att.scheduleId && j.date === att.date)
+        );
+
+        let formattedJournal = undefined;
+        let effectiveStatus = att.status;
+
+        if (journal) {
+          effectiveStatus = 'SELESAI';
+          formattedJournal = {
+            id: journal.id,
+            attendanceId: journal.attendanceId,
+            scheduleId: journal.scheduleId,
+            date: journal.date,
+            teacherId: journal.teacherId,
+            topic: journal.topic,
+            learningObjectives: journal.learningObjectives || undefined,
+            classNotes: journal.classNotes || undefined,
+            assignmentGiven: journal.assignmentGiven || undefined,
+            filledAt: journal.filledAt ? new Date(journal.filledAt as string).toISOString() : new Date().toISOString(),
+            studentAttendance: {
+              totalStudents: journal.totalStudents ?? 28,
+              presentCount: journal.presentCount ?? 27,
+              sickCount: journal.sickCount ?? 1,
+              permittedCount: journal.permittedCount ?? 0,
+              absentCount: journal.absentCount ?? 0,
+            }
+          };
+        }
+
+        return { 
+          ...att, 
+          status: effectiveStatus,
+          journal: formattedJournal 
+        };
+      });
+
       res.json(records);
     } catch (error) {
+      console.error('Failed to fetch attendances:', error);
       res.status(500).json({ error: 'Failed to fetch attendances' });
     }
   });
 
   app.post('/api/attendances', async (req, res) => {
     try {
-      const { scheduleId, date } = req.body;
+      const { scheduleId, date, ...rest } = req.body;
       if (scheduleId && date) {
         const existing = await db.query.attendances.findFirst({
-          where: (attendances, { and, eq }) => and(
-            eq(attendances.scheduleId, scheduleId),
-            eq(attendances.date, date)
+          where: and(
+            eq(schema.attendances.scheduleId, scheduleId),
+            eq(schema.attendances.date, date)
           )
         });
         if (existing) {
-          return res.json(existing);
+          const updated = await db.update(schema.attendances)
+            .set(rest)
+            .where(eq(schema.attendances.id, existing.id))
+            .returning();
+          return res.json(updated[0]);
         }
       }
       const result = await db.insert(schema.attendances).values(req.body).returning();
       res.json(result[0]);
     } catch (error) {
+      console.error('Failed to create attendance:', error);
       res.status(500).json({ error: 'Failed to create attendance' });
     }
   });
 
   // Journals
+  app.get('/api/journals', async (req, res) => {
+    try {
+      const journalsList = await db.query.journals.findMany();
+      const formatted = journalsList.map(j => ({
+        id: j.id,
+        attendanceId: j.attendanceId,
+        scheduleId: j.scheduleId,
+        date: j.date,
+        teacherId: j.teacherId,
+        topic: j.topic,
+        learningObjectives: j.learningObjectives || undefined,
+        classNotes: j.classNotes || undefined,
+        assignmentGiven: j.assignmentGiven || undefined,
+        filledAt: j.filledAt ? new Date(j.filledAt as string).toISOString() : new Date().toISOString(),
+        studentAttendance: {
+          totalStudents: j.totalStudents ?? 28,
+          presentCount: j.presentCount ?? 27,
+          sickCount: j.sickCount ?? 1,
+          permittedCount: j.permittedCount ?? 0,
+          absentCount: j.absentCount ?? 0,
+        }
+      }));
+      res.json(formatted);
+    } catch (error) {
+      console.error('Failed to fetch journals:', error);
+      res.status(500).json({ error: 'Failed to fetch journals' });
+    }
+  });
+
   app.post('/api/journals', async (req, res) => {
     try {
-      const { attendanceId, ...journalData } = req.body;
-      // Check if journal already exists for this attendance
-      const existing = await db.query.journals.findFirst({
-        where: eq(schema.journals.attendanceId, attendanceId)
+      const {
+        id,
+        attendanceId,
+        scheduleId,
+        date,
+        teacherId,
+        topic,
+        learningObjectives,
+        classNotes,
+        assignmentGiven,
+        studentAttendance,
+        filledAt,
+        totalStudents,
+        presentCount,
+        sickCount,
+        permittedCount,
+        absentCount
+      } = req.body;
+
+      const journalId = id || `JRN-${Date.now()}`;
+      const totStudents = studentAttendance?.totalStudents ?? totalStudents ?? 28;
+      const presCount = studentAttendance?.presentCount ?? presentCount ?? 27;
+      const sCount = studentAttendance?.sickCount ?? sickCount ?? 1;
+      const permCount = studentAttendance?.permittedCount ?? permittedCount ?? 0;
+      const absCount = studentAttendance?.absentCount ?? absentCount ?? 0;
+      const parsedFilledAt = filledAt ? new Date(filledAt) : new Date();
+
+      // 1. Ensure attendance record exists in DB and is linked
+      let targetAttendance = await db.query.attendances.findFirst({
+        where: eq(schema.attendances.id, attendanceId)
       });
-      let result;
+
+      if (!targetAttendance && scheduleId && date) {
+        targetAttendance = await db.query.attendances.findFirst({
+          where: and(
+            eq(schema.attendances.scheduleId, scheduleId),
+            eq(schema.attendances.date, date)
+          )
+        });
+      }
+
+      // If no attendance record exists in DB yet, create one
+      if (!targetAttendance) {
+        const sched = await db.query.schedules.findFirst({
+          where: eq(schema.schedules.id, scheduleId)
+        });
+        const newAttId = attendanceId || `ATT-${Date.now()}`;
+        const createdAtt = await db.insert(schema.attendances).values({
+          id: newAttId,
+          scheduleId: scheduleId,
+          teacherId: sched?.teacherId || teacherId,
+          actualTeacherId: teacherId || sched?.teacherId,
+          isBadal: false,
+          date: date || new Date().toISOString().split('T')[0],
+          clockInTime: `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`,
+          lateMinutes: 0,
+          lateCategory: 'TEPAT_WAKTU',
+          latePenalty: 0,
+          status: 'SELESAI',
+        }).returning();
+        targetAttendance = createdAtt[0];
+      } else {
+        // Update attendance status to SELESAI
+        await db.update(schema.attendances)
+          .set({ status: 'SELESAI' })
+          .where(eq(schema.attendances.id, targetAttendance.id));
+      }
+
+      const effectiveAttendanceId = targetAttendance.id;
+
+      // 2. Check if journal already exists for this attendance or (scheduleId, date)
+      const existing = await db.query.journals.findFirst({
+        where: or(
+          eq(schema.journals.attendanceId, effectiveAttendanceId),
+          and(
+            eq(schema.journals.scheduleId, scheduleId),
+            eq(schema.journals.date, date)
+          )
+        )
+      });
+
+      const journalDbValues = {
+        attendanceId: effectiveAttendanceId,
+        scheduleId: scheduleId || targetAttendance.scheduleId,
+        date: date || targetAttendance.date,
+        teacherId: teacherId || targetAttendance.actualTeacherId || targetAttendance.teacherId,
+        topic: topic || 'Materi KBM',
+        learningObjectives: learningObjectives || null,
+        classNotes: classNotes || null,
+        totalStudents: totStudents,
+        presentCount: presCount,
+        sickCount: sCount,
+        permittedCount: permCount,
+        absentCount: absCount,
+        assignmentGiven: assignmentGiven || null,
+        filledAt: parsedFilledAt,
+      };
+
+      let resultRecord;
       if (existing) {
         const updated = await db.update(schema.journals)
-          .set(req.body)
+          .set(journalDbValues)
           .where(eq(schema.journals.id, existing.id))
           .returning();
-        result = updated;
+        resultRecord = updated[0];
       } else {
-        result = await db.insert(schema.journals).values(req.body).returning();
+        const inserted = await db.insert(schema.journals).values({
+          id: journalId,
+          ...journalDbValues
+        }).returning();
+        resultRecord = inserted[0];
       }
-      
-      // Update attendance status to SELESAI
-      await db.update(schema.attendances)
-        .set({ status: 'SELESAI' })
-        .where(eq(schema.attendances.id, attendanceId));
-        
-      res.json(result[0]);
+
+      // Format response for frontend
+      const formattedResponse = {
+        id: resultRecord.id,
+        attendanceId: resultRecord.attendanceId,
+        scheduleId: resultRecord.scheduleId,
+        date: resultRecord.date,
+        teacherId: resultRecord.teacherId,
+        topic: resultRecord.topic,
+        learningObjectives: resultRecord.learningObjectives,
+        classNotes: resultRecord.classNotes,
+        assignmentGiven: resultRecord.assignmentGiven,
+        filledAt: resultRecord.filledAt ? new Date(resultRecord.filledAt).toISOString() : new Date().toISOString(),
+        studentAttendance: {
+          totalStudents: resultRecord.totalStudents,
+          presentCount: resultRecord.presentCount,
+          sickCount: resultRecord.sickCount,
+          permittedCount: resultRecord.permittedCount,
+          absentCount: resultRecord.absentCount,
+        }
+      };
+
+      res.json(formattedResponse);
     } catch (error) {
-      res.status(500).json({ error: 'Failed to create journal' });
+      console.error('Failed to create/update journal:', error);
+      res.status(500).json({ error: 'Failed to create journal', details: String(error) });
     }
   });
 
