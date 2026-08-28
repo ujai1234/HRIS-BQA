@@ -254,21 +254,52 @@ export interface PrintSlipData {
   accountNumber?: string;
   period: string;
   isPrivacyMode?: boolean;
+  baseSalary?: number;
+  totalTaughtHours?: number;
+  hourlyRate?: number;
+  teachingHonorarium?: number;
+  totalPresentDays?: number;
+  dailyTransportRate?: number;
+  totalTransport?: number;
+  totalBadalHours?: number;
+  badalHonorarium?: number;
+  latePenaltyTotal?: number;
+  emptyJournalPenalty?: number;
+  alphaPenalty?: number;
+  otherDeductions?: number;
+  totalDeductions?: number;
+  netSalary?: number;
 }
 
-export function printSalarySlipDocument(data: PrintSlipData): void {
+export function generateSalarySlipPDF(data: PrintSlipData): jsPDF {
   const {
     teacherName,
-    nip = 'BQ-008',
-    unit,
-    position,
+    nip = 'BQA-008',
+    unit = 'SMP',
+    position = 'Guru Pengampu',
     bankName = 'BSI (Bank Syariah Indonesia)',
     accountNumber = '7123-4567-89',
     period,
-    isPrivacyMode = false
+    isPrivacyMode = false,
+    baseSalary = 700000,
+    totalTaughtHours = 16,
+    hourlyRate = 40000,
+    teachingHonorarium = 640000,
+    totalPresentDays = 16,
+    dailyTransportRate = 10000,
+    totalTransport = 160000,
+    totalBadalHours = 0,
+    badalHonorarium = 0,
+    latePenaltyTotal = 90000,
+    emptyJournalPenalty = 40000,
+    alphaPenalty = 0,
+    otherDeductions = 0,
+    totalDeductions = 130000,
+    netSalary = 1370000,
   } = data;
 
   const mask = (val: string) => isPrivacyMode ? '••••••••' : val;
+  const maskNumber = (num: number) => isPrivacyMode ? '••••••••' : formatRupiah(num);
 
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -282,324 +313,386 @@ export function printSalarySlipDocument(data: PrintSlipData): void {
     year: 'numeric'
   }).format(new Date());
 
-  // 1. Draw outer border card
-  doc.setDrawColor(226, 232, 240); // slate-200
+  const cleanPeriodId = period.replace(/\s+/g, '-').toUpperCase();
+  const docSlipId = `SLP-${cleanPeriodId}-${nip.replace(/[^A-Za-z0-9]/g, '')}`;
+
+  // 1. Draw outer border card & background accent
+  doc.setDrawColor(203, 213, 225); // slate-300
   doc.setLineWidth(0.4);
-  doc.rect(10, 10, 190, 235); // outer card wrapper
+  doc.rect(12, 12, 186, 260); // outer card wrapper
 
-  // 2. Header logo box
-  doc.setFillColor(27, 67, 50); // Deep green #1B4332
-  doc.rect(15, 15, 16, 16, 'F');
-  
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.text('BQA', 23, 25, { align: 'center' });
-
-  // Header Titles
+  // 2. Official Header Text (Centered, Logo and Code Slip Badge removed as requested)
+  // Header Title & Yayasan
   doc.setTextColor(176, 137, 104); // #B08968 (warm accent)
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8.5);
-  doc.text("YAYASAN BAITUL QUR'AN AL-IKHWAN", 36, 20);
+  doc.setFontSize(8);
+  doc.text("YAYASAN BAITUL QUR'AN AL-IKHWAN", 105, 21, { align: 'center' });
 
   doc.setTextColor(15, 23, 42); // slate-900
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
-  doc.text("Tanda Bukti Penerimaan Kafa'ah Asatidz", 36, 26);
+  doc.setFontSize(12);
+  doc.text("PONDOK PESANTREN BAITUL QUR'AN AL-IKHWAN", 105, 26.5, { align: 'center' });
 
-  // Meta info (Right side)
+  // Address lines (Clean spacing with no overlap)
+  doc.setTextColor(71, 85, 105); // slate-600
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.text("Jl. Sungai Kendal No.21, RT.8/RW.5, Marunda, Cilincing, Kota Jakarta Utara 14150", 105, 31, { align: 'center' });
+  
   doc.setTextColor(100, 116, 139); // slate-500
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.text("Periode & ID Dokumen", 195, 20, { align: "right" });
+  doc.setFontSize(7);
+  doc.text("Hotline: 0858-8302-2643 • Email: sekretariat@bqa.sch.id • NSPP: 510032", 105, 35, { align: 'center' });
 
-  doc.setTextColor(27, 67, 50);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9.5);
-  doc.text(`${period} • SLP-${period.replace(' ', '-').toUpperCase()}-${nip}`, 195, 26, { align: "right" });
-
-  // Divider Line
+  // Double Divider Line (Header separation)
   doc.setDrawColor(27, 67, 50);
-  doc.setLineWidth(0.8);
-  doc.line(15, 36, 195, 36);
+  doc.setLineWidth(0.6);
+  doc.line(18, 39, 192, 39);
+  doc.setDrawColor(176, 137, 104);
+  doc.setLineWidth(0.2);
+  doc.line(18, 40.5, 192, 40.5);
 
-  // 3. Teacher Info Box
-  doc.setFillColor(250, 250, 249); // stone-50
-  doc.setDrawColor(231, 229, 228); // stone-200
+  // 3. Document Title Section
+  doc.setTextColor(15, 23, 42);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text("TANDA BUKTI PENERIMAAN KAFA'AH ASATIDZ", 105, 47, { align: "center" });
+
+  doc.setTextColor(100, 116, 139);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.text(`Periode KBM: ${period} • Unit: ${unit}`, 105, 51.5, { align: "center" });
+
+  // 4. Teacher Profile Info Box (Clean 4-column layout)
+  doc.setFillColor(248, 250, 252); // slate-50
+  doc.setDrawColor(226, 232, 240); // slate-200
   doc.setLineWidth(0.3);
-  doc.rect(15, 41, 180, 25, 'FD');
+  doc.roundedRect(18, 55, 174, 22, 1.5, 1.5, 'FD');
 
-  // Field: Nama Asatidz
+  // Col 1: Nama Asatidz
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(120, 113, 108); // stone-500
-  doc.text("Nama Asatidz", 20, 47);
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text("Nama Asatidz", 22, 60.5);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9.5);
+  doc.setFontSize(9);
   doc.setTextColor(15, 23, 42);
-  doc.text(teacherName, 20, 53);
-
-  // Field: NIP & Unit
+  doc.text(teacherName, 22, 66);
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(120, 113, 108);
-  doc.text("NIP & Unit", 65, 47);
+  doc.setFontSize(7);
+  doc.setTextColor(71, 85, 105);
+  doc.text(`NIP: ${nip}`, 22, 71);
+
+  // Col 2: Unit & Jabatan
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text("Unit & Penugasan", 72, 60.5);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9.5);
+  doc.setFontSize(9);
   doc.setTextColor(15, 23, 42);
-  doc.text(`${nip} • ${unit}`, 65, 53);
-
-  // Field: Jabatan
+  doc.text(unit, 72, 66);
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(120, 113, 108);
-  doc.text("Jabatan", 110, 47);
+  doc.setFontSize(7);
+  doc.setTextColor(71, 85, 105);
+  doc.text(position, 72, 71);
+
+  // Col 3: Beban Mengajar & Kehadiran
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text("Beban Jam & Kehadiran", 116, 60.5);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9.5);
+  doc.setFontSize(9);
   doc.setTextColor(15, 23, 42);
-  doc.text(position, 110, 53);
-
-  // Field: Rekening
+  doc.text(`${totalTaughtHours} JP Terlaksana`, 116, 66);
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(120, 113, 108);
-  doc.text("Rekening Penyaluran", 150, 47);
+  doc.setFontSize(7);
+  doc.setTextColor(71, 85, 105);
+  doc.text(`${totalPresentDays} Hari Hadir Bertugas`, 116, 71);
+
+  // Col 4: Rekening Penyaluran
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text("Rekening Penyaluran", 154, 60.5);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.5);
   doc.setTextColor(15, 23, 42);
-  doc.text(`${bankName.split(' ')[0]} - ${accountNumber}`, 150, 53);
-
-  // 4. Ledger (Two Columns: Income vs Deductions)
-  // Left Column: Income
-  doc.setDrawColor(214, 211, 209); // stone-300
-  doc.setLineWidth(0.6);
-  doc.line(15, 78, 95, 78);
-  
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.setTextColor(27, 67, 50);
-  doc.text("A. Pendapatan", 15, 74);
+  doc.text(bankName.split(' ')[0] || 'BSI', 154, 66);
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(120, 113, 108);
-  doc.text("Jumlah", 95, 74, { align: 'right' });
+  doc.setFontSize(7);
+  doc.setTextColor(71, 85, 105);
+  doc.text(accountNumber, 154, 71);
 
-  // Rows Left:
-  // Row 1: Gaji Pokok
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.setTextColor(64, 64, 64);
-  doc.text("Gaji Pokok", 15, 85);
-  doc.setFont('courier', 'bold');
-  doc.text(mask("Rp 700.000"), 95, 85, { align: 'right' });
-
-  // Row 2: Honor Mengajar
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(64, 64, 64);
-  doc.text("Honor Mengajar", 15, 93);
-  doc.setFont('courier', 'normal');
-  doc.setFontSize(7.5);
-  doc.setTextColor(120, 113, 108);
-  doc.text("16 JP x Rp 40.000", 15, 96.5);
-  doc.setFont('courier', 'bold');
-  doc.setFontSize(9);
-  doc.setTextColor(64, 64, 64);
-  doc.text(mask("Rp 640.000"), 95, 93, { align: 'right' });
-
-  // Row 3: Uang Transport
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(64, 64, 64);
-  doc.text("Uang Transport", 15, 104);
-  doc.setFont('courier', 'normal');
-  doc.setFontSize(7.5);
-  doc.setTextColor(120, 113, 108);
-  doc.text("16 Hari x Rp 10.000", 15, 107.5);
-  doc.setFont('courier', 'bold');
-  doc.setFontSize(9);
-  doc.setTextColor(64, 64, 64);
-  doc.text(mask("Rp 160.000"), 95, 104, { align: 'right' });
-
-  // Divider Left subtotal
-  doc.setDrawColor(231, 229, 228);
+  // 5. Ledger Breakdown (2 Columns: Income vs Deductions)
+  // Left Column Header: A. Pendapatan / Hak Kafa'ah
+  doc.setFillColor(241, 245, 249);
+  doc.rect(18, 81, 84, 6, 'F');
+  doc.setDrawColor(203, 213, 225);
   doc.setLineWidth(0.3);
-  doc.line(15, 114, 95, 114);
+  doc.rect(18, 81, 84, 6, 'S');
 
-  // Subtotal Income
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.setTextColor(27, 67, 50);
-  doc.text("Total Pendapatan", 15, 120);
-  doc.setFont('courier', 'bold');
-  doc.setFontSize(9.5);
-  doc.text(mask("Rp 1.500.000"), 95, 120, { align: 'right' });
-
-
-  // Right Column: Deductions
-  doc.setDrawColor(214, 211, 209);
-  doc.setLineWidth(0.6);
-  doc.line(115, 78, 195, 78);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.setTextColor(176, 137, 104);
-  doc.text("B. Potongan", 115, 74);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(120, 113, 108);
-  doc.text("Jumlah", 195, 74, { align: 'right' });
-
-  // Rows Right:
-  // Row 1: Denda Keterlambatan
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(64, 64, 64);
-  doc.text("Denda Keterlambatan", 115, 85);
-  doc.setFont('courier', 'bold');
-  doc.setTextColor(190, 18, 60); // rose-700
-  doc.text(mask("-Rp 90.000"), 195, 85, { align: 'right' });
-
-  // Row 2: Penalti Jurnal Kosong
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(64, 64, 64);
-  doc.text("Penalti Jurnal Kosong", 115, 93);
-  doc.setFont('courier', 'normal');
-  doc.setFontSize(7.5);
-  doc.setTextColor(120, 113, 108);
-  doc.text("1 sesi belum terisi", 115, 96.5);
-  doc.setFont('courier', 'bold');
-  doc.setFontSize(9);
-  doc.setTextColor(190, 18, 60);
-  doc.text(mask("-Rp 40.000"), 195, 93, { align: 'right' });
-
-  // Row 3: Potongan Izin / Sakit
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(64, 64, 64);
-  doc.text("Potongan Izin / Sakit", 115, 104);
-  doc.setFont('courier', 'normal');
-  doc.setTextColor(120, 113, 108);
-  doc.text(mask("Rp 0"), 195, 104, { align: 'right' });
-
-  // Row 4: Potongan Alpa
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(64, 64, 64);
-  doc.text("Potongan Alpa", 115, 112);
-  doc.setFont('courier', 'normal');
-  doc.text(mask("Rp 0"), 195, 112, { align: 'right' });
-
-  // Divider Right subtotal
-  doc.setDrawColor(231, 229, 228);
-  doc.setLineWidth(0.3);
-  doc.line(115, 116, 195, 116);
-
-  // Subtotal Deduction
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.setTextColor(190, 18, 60);
-  doc.text("Total Potongan", 115, 121);
-  doc.setFont('courier', 'bold');
-  doc.setFontSize(9.5);
-  doc.text(mask("-Rp 130.000"), 195, 121, { align: 'right' });
-
-
-  // 5. Summary dark green bar (THP)
-  doc.setFillColor(27, 67, 50);
-  doc.rect(15, 131, 180, 23, 'F');
-
-  // THP labels (White and Cream)
-  doc.setTextColor(212, 163, 115); // #d4a373 (cream/brown accent)
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.5);
-  doc.text("TOTAL KAFA'AH DITERIMA (TAKE HOME PAY)", 20, 137);
+  doc.setTextColor(27, 67, 50);
+  doc.text("A. KOMPONEN PENDAPATAN", 21, 85.2);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text("Jumlah (Rp)", 98, 85.2, { align: 'right' });
+
+  // Right Column Header: B. Potongan Disiplin & SOP
+  doc.setFillColor(254, 242, 242); // rose-50
+  doc.rect(108, 81, 84, 6, 'F');
+  doc.rect(108, 81, 84, 6, 'S');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(185, 28, 28); // rose-700
+  doc.text("B. POTONGAN & KEDISIPLINAN", 111, 85.2);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text("Jumlah (Rp)", 188, 85.2, { align: 'right' });
+
+  // Rows Left: Pendapatan
+  let yLeft = 93;
+
+  // 1. Gaji Pokok
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(30, 41, 59);
+  doc.text("1. Gaji Pokok Asatidz", 21, yLeft);
+  doc.setFont('helvetica', 'bold');
+  doc.text(maskNumber(baseSalary), 98, yLeft, { align: 'right' });
+
+  // 2. Honor Mengajar
+  yLeft += 8;
+  doc.setFont('helvetica', 'normal');
+  doc.text("2. Honor Mengajar KBM", 21, yLeft);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(100, 116, 139);
+  doc.text(`(${totalTaughtHours} JP × ${formatRupiah(hourlyRate)})`, 21, yLeft + 3.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(30, 41, 59);
+  doc.text(maskNumber(teachingHonorarium), 98, yLeft, { align: 'right' });
+
+  // 3. Uang Transport
+  yLeft += 9;
+  doc.setFont('helvetica', 'normal');
+  doc.text("3. Uang Transport Kehadiran", 21, yLeft);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(100, 116, 139);
+  doc.text(`(${totalPresentDays} Hari × ${formatRupiah(dailyTransportRate)})`, 21, yLeft + 3.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(30, 41, 59);
+  doc.text(maskNumber(totalTransport), 98, yLeft, { align: 'right' });
+
+  // 4. Honor Badal (if any)
+  yLeft += 9;
+  doc.setFont('helvetica', 'normal');
+  doc.text("4. Honor Badal / Pengganti", 21, yLeft);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(100, 116, 139);
+  doc.text(totalBadalHours > 0 ? `(${totalBadalHours} JP Badal)` : "(Tidak ada penugasan)", 21, yLeft + 3.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(30, 41, 59);
+  doc.text(maskNumber(badalHonorarium), 98, yLeft, { align: 'right' });
+
+  // Subtotal Pendapatan Line
+  doc.setDrawColor(203, 213, 225);
+  doc.setLineWidth(0.3);
+  doc.line(18, 126, 102, 126);
+
+  const totalGross = baseSalary + teachingHonorarium + totalTransport + badalHonorarium;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(27, 67, 50);
+  doc.text("Total Pendapatan (Gross)", 21, 131.5);
+  doc.setFontSize(9);
+  doc.text(maskNumber(totalGross), 98, 131.5, { align: 'right' });
+
+  // Rows Right: Potongan
+  let yRight = 93;
+
+  // 1. Denda Keterlambatan
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(30, 41, 59);
+  doc.text("1. Denda Keterlambatan", 111, yRight);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(185, 28, 28);
+  doc.text(latePenaltyTotal > 0 ? mask(`-${formatRupiah(latePenaltyTotal)}`) : mask('Rp 0'), 188, yRight, { align: 'right' });
+
+  // 2. Penalti Jurnal Belum Terisi
+  yRight += 8;
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(30, 41, 59);
+  doc.text("2. Penalti Jurnal Belum Terisi", 111, yRight);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(100, 116, 139);
+  doc.text("Sesuai SOP Administrasi KBM", 111, yRight + 3.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(185, 28, 28);
+  doc.text(emptyJournalPenalty > 0 ? mask(`-${formatRupiah(emptyJournalPenalty)}`) : mask('Rp 0'), 188, yRight, { align: 'right' });
+
+  // 3. Potongan Alpa / Ketidakhadiran
+  yRight += 9;
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(30, 41, 59);
+  doc.text("3. Potongan Alpa / Tanpa Izin", 111, yRight);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(100, 116, 139);
+  doc.text("Potongan KBM & Transport", 111, yRight + 3.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(185, 28, 28);
+  doc.text(alphaPenalty > 0 ? mask(`-${formatRupiah(alphaPenalty)}`) : mask('Rp 0'), 188, yRight, { align: 'right' });
+
+  // 4. Potongan Lain-lain
+  yRight += 9;
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(30, 41, 59);
+  doc.text("4. Potongan Lain-Lain", 111, yRight);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(100, 116, 139);
+  doc.text("Iuran / Kas Wajib / Pinjaman", 111, yRight + 3.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(185, 28, 28);
+  doc.text(otherDeductions > 0 ? mask(`-${formatRupiah(otherDeductions)}`) : mask('Rp 0'), 188, yRight, { align: 'right' });
+
+  // Subtotal Potongan Line
+  doc.setDrawColor(203, 213, 225);
+  doc.setLineWidth(0.3);
+  doc.line(108, 126, 192, 126);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(185, 28, 28);
+  doc.text("Total Potongan", 111, 131.5);
+  doc.setFontSize(9);
+  doc.text(totalDeductions > 0 ? mask(`-${formatRupiah(totalDeductions)}`) : mask('Rp 0'), 188, 131.5, { align: 'right' });
+
+  // 6. Highlight Box: Take Home Pay (Total Kafa'ah Bersih - Transfer status removed as requested)
+  doc.setFillColor(27, 67, 50); // Deep forest green
+  doc.roundedRect(18, 138, 174, 18, 2, 2, 'F');
+
+  doc.setTextColor(212, 163, 115); // #D4A373 Warm gold
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.text("TOTAL KAFA'AH DITERIMA (TAKE HOME PAY)", 24, 144);
 
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(8);
-  doc.text(isPrivacyMode ? 'Nominal Dirahasiakan' : 'Terbilang: "Satu Juta Tiga Ratus Tujuh Puluh Ribu Rupiah"', 20, 143);
+  doc.text(
+    isPrivacyMode ? 'Nominal Dirahasiakan (Mode Privasi Aktif)' : `Terbilang: "${terbilang(netSalary)}"`,
+    24, 150
+  );
 
-  doc.setFont('courier', 'normal');
-  doc.setFontSize(7.5);
-  doc.text("Status: Telah Ditransfer ke Rekening", 20, 148);
-
-  // THP Amount large (white)
+  // Large Net Salary on the right
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18);
-  doc.text(mask("Rp 1.370.000"), 190, 145, { align: 'right' });
+  doc.setFontSize(16);
+  doc.text(mask(formatRupiah(netSalary)), 186, 149, { align: 'right' });
 
-
-  // 6. Signature Sections
-  doc.setDrawColor(231, 229, 228);
+  // 7. Signature / Pengesahan Section (2 Columns)
+  doc.setDrawColor(226, 232, 240);
   doc.setLineWidth(0.3);
-  doc.line(15, 162, 195, 162);
+  doc.line(18, 170, 192, 170);
 
-  // Signature Left (Bendahara)
-  doc.setTextColor(120, 113, 108);
+  // Signature Left: Bendahara Yayasan
+  doc.setTextColor(100, 116, 139);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  doc.text("Diverifikasi oleh,", 55, 170, { align: 'center' });
+  doc.text("Diverifikasi & Disahkan,", 58, 178, { align: 'center' });
   doc.setTextColor(15, 23, 42);
   doc.setFont('helvetica', 'bold');
-  doc.text("Bendahara HRD Pesantren", 55, 174, { align: 'center' });
+  doc.text("Bendahara HRD Pesantren", 58, 183, { align: 'center' });
   
-  doc.setTextColor(27, 67, 50);
-  doc.setFont('helvetica', 'italic');
-  doc.setFontSize(9.5);
-  doc.text("[ Ttd & Cap Digital ]", 55, 190, { align: 'center' });
+  // Digital Stamp Box
+  doc.setFillColor(240, 253, 244);
+  doc.setDrawColor(187, 247, 208);
+  doc.roundedRect(36, 188, 44, 15, 1.5, 1.5, 'FD');
+  doc.setTextColor(22, 101, 52);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.5);
+  doc.text("VERIFIED & TRANSFERRED", 58, 194.5, { align: 'center' });
+  doc.setFontSize(6.5);
+  doc.setFont('helvetica', 'normal');
+  doc.text("Sistem HRIS Terenkripsi", 58, 199.5, { align: 'center' });
 
   doc.setTextColor(15, 23, 42);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
-  doc.text("Ust. Ahmad Syahid, M.Pd.", 55, 202, { align: 'center' });
-  doc.setTextColor(120, 113, 108);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.text("NIP: BQA-2021-003", 55, 206, { align: 'center' });
-
-
-  // Signature Right (Penerima)
-  doc.setTextColor(120, 113, 108);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.text("Penerima Kafa'ah,", 155, 170, { align: 'center' });
-  doc.setTextColor(15, 23, 42);
-  doc.setFont('helvetica', 'bold');
-  doc.text("Asatidz yang bersangkutan", 155, 174, { align: 'center' });
-  
-  doc.setTextColor(27, 67, 50);
-  doc.setFont('helvetica', 'italic');
-  doc.setFontSize(9.5);
-  doc.text("[ Ttd Penerima ]", 155, 190, { align: 'center' });
-
-  doc.setTextColor(15, 23, 42);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.text(teacherName, 155, 202, { align: 'center' });
-  doc.setTextColor(120, 113, 108);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.text(`NIP: ${nip}`, 155, 206, { align: 'center' });
-
-
-  // 7. Footer Bottom Line
-  doc.setDrawColor(231, 229, 228);
-  doc.setLineWidth(0.3);
-  doc.line(15, 218, 195, 218);
-
-  doc.setTextColor(120, 113, 108);
+  doc.text("Ust. Ahmad Syahid, M.Pd.", 58, 211, { align: 'center' });
+  doc.setTextColor(100, 116, 139);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
-  doc.text(`✓ Dokumen Digital Terverifikasi HRIS Pesantren Baitul Qur'an Al-Ikhwan • Dicetak ${currentDate}`, 15, 224);
-  doc.text(`Penerima: ${teacherName} | Bendahara: Ust. Ahmad Syahid, M.Pd.`, 195, 224, { align: 'right' });
+  doc.text("NIP: BQA-2021-003", 58, 215.5, { align: 'center' });
 
+  // Signature Right: Asatidz Penerima
+  doc.setTextColor(100, 116, 139);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.text("Penerima Kafa'ah,", 152, 178, { align: 'center' });
+  doc.setTextColor(15, 23, 42);
+  doc.setFont('helvetica', 'bold');
+  doc.text("Asatidz yang Bersangkutan", 152, 183, { align: 'center' });
 
-  // Save & Download!
-  const safeName = teacherName.replace(/\s+/g, '_').toLowerCase();
-  const safePeriod = period.replace(/\s+/g, '_').toLowerCase();
+  // Digital Signature Box
+  doc.setFillColor(248, 250, 252);
+  doc.setDrawColor(226, 232, 240);
+  doc.roundedRect(130, 188, 44, 15, 1.5, 1.5, 'FD');
+  doc.setTextColor(71, 85, 105);
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(8);
+  doc.text("[ Tanda Tangan Digital ]", 152, 197, { align: 'center' });
+
+  doc.setTextColor(15, 23, 42);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text(teacherName, 152, 211, { align: 'center' });
+  doc.setTextColor(100, 116, 139);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.text(`NIP: ${nip}`, 152, 215.5, { align: 'center' });
+
+  // 8. Footer Bottom Note
+  doc.setDrawColor(226, 232, 240);
+  doc.setLineWidth(0.3);
+  doc.line(18, 226, 192, 226);
+
+  doc.setTextColor(100, 116, 139);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.text(
+    `✓ Dokumen Digital Sah HRIS Pesantren Baitul Qur'an Al-Ikhwan • Dicetak pada ${currentDate}`,
+    18, 232
+  );
+  doc.text(
+    `Sistem Penggajian & Disiplin KBM Terintegrasi`,
+    192, 232, { align: 'right' }
+  );
+
+  return doc;
+}
+
+export function printSalarySlipDocument(data: PrintSlipData): void {
+  const doc = generateSalarySlipPDF(data);
+  const safeName = data.teacherName.replace(/\s+/g, '_').toLowerCase();
+  const safePeriod = data.period.replace(/\s+/g, '_').toLowerCase();
   doc.save(`slip_kafaah_${safeName}_${safePeriod}.pdf`);
 }
 

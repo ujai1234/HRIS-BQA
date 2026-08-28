@@ -135,40 +135,39 @@ export const KepsekAuditView: React.FC = () => {
     switch (unit) {
       case 'MA': return 'MA Al-Ikhwan';
       case 'SMP': return 'SMP IT';
-      case 'PESANTREN': return 'Ponpes Tahfidz';
+      case 'PESANTREN': return 'Pondok Pesantren';
       default: return 'Semua Unit';
     }
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* 1. Header & Scoped Unit Banner */}
-      <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200/90 dark:border-stone-800 p-5 shadow-xs">
+      <div className="bg-white dark:bg-stone-900/90 rounded-xl border border-stone-200/80 dark:border-stone-800 p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                <Building2 className="w-3.5 h-3.5" />
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold bg-stone-100 dark:bg-stone-800 text-[#1B4332] dark:text-emerald-400 border border-stone-200 dark:border-stone-700">
                 Unit: {getUnitBadgeName(effectiveUnit)}
               </span>
-              <span className="text-xs text-stone-400 dark:text-stone-500">• Periode: {selectedPeriod}</span>
+              <span className="text-xs text-stone-400 dark:text-stone-500 font-mono">• Periode: {selectedPeriod}</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight font-sans">
               Monitoring Jurnal & Kedisiplinan KBM
             </h1>
-            <p className="text-xs text-stone-500 dark:text-stone-400">
+            <p className="text-xs text-stone-500 dark:text-stone-400 max-w-2xl leading-relaxed">
               Audit kepatuhan pengisian jurnal mengajar harian, kehadiran santri, dan beban mengajar asatidz unit {getUnitBadgeName(effectiveUnit)}.
             </p>
           </div>
 
           {/* Unit Filter (Only if Admin) */}
           {isAdmin && (
-            <div className="flex items-center bg-stone-50 dark:bg-stone-800/60 p-1 rounded-xl border border-stone-200 dark:border-stone-700 text-xs">
+            <div className="flex items-center bg-stone-50 dark:bg-stone-800/60 p-1 rounded-lg border border-stone-200 dark:border-stone-700 text-xs">
               <button
                 onClick={() => setSelectedUnit('ALL')}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                className={`px-3 py-1 rounded-md font-semibold transition-all cursor-pointer ${
                   selectedUnit === 'ALL'
-                    ? 'bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 shadow-sm'
+                    ? 'bg-white dark:bg-stone-900 text-[#1B4332] dark:text-emerald-400 shadow-xs'
                     : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
                 }`}
               >
@@ -176,9 +175,9 @@ export const KepsekAuditView: React.FC = () => {
               </button>
               <button
                 onClick={() => setSelectedUnit('SMP')}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                className={`px-3 py-1 rounded-md font-semibold transition-all cursor-pointer ${
                   selectedUnit === 'SMP'
-                    ? 'bg-white dark:bg-stone-900 text-emerald-600 dark:text-emerald-400 shadow-sm'
+                    ? 'bg-white dark:bg-stone-900 text-[#1B4332] dark:text-emerald-400 shadow-xs'
                     : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
                 }`}
               >
@@ -186,9 +185,9 @@ export const KepsekAuditView: React.FC = () => {
               </button>
               <button
                 onClick={() => setSelectedUnit('MA')}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                className={`px-3 py-1 rounded-md font-semibold transition-all cursor-pointer ${
                   selectedUnit === 'MA'
-                    ? 'bg-white dark:bg-stone-900 text-emerald-600 dark:text-emerald-400 shadow-sm'
+                    ? 'bg-white dark:bg-stone-900 text-[#1B4332] dark:text-emerald-400 shadow-xs'
                     : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
                 }`}
               >
@@ -196,9 +195,9 @@ export const KepsekAuditView: React.FC = () => {
               </button>
               <button
                 onClick={() => setSelectedUnit('PESANTREN')}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                className={`px-3 py-1 rounded-md font-semibold transition-all cursor-pointer ${
                   selectedUnit === 'PESANTREN'
-                    ? 'bg-white dark:bg-stone-900 text-emerald-600 dark:text-emerald-400 shadow-sm'
+                    ? 'bg-white dark:bg-stone-900 text-[#1B4332] dark:text-emerald-400 shadow-xs'
                     : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
                 }`}
               >
@@ -210,80 +209,68 @@ export const KepsekAuditView: React.FC = () => {
       </div>
 
       {/* 2. Unit-Scoped KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">Ketaatan Jurnal</span>
-            <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-2 font-mono">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Ketaatan Jurnal</span>
+          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-emerald-700 dark:text-emerald-400 mt-1">
             {journalComplianceRate}%
           </p>
-          <span className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 block">
-            {completedJournals} terisi lengkap ({totalEffectiveSessions} sesi)
+          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
+            {completedJournals} terisi ({totalEffectiveSessions} sesi)
           </span>
         </div>
 
-        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">Kedisiplinan Waktu</span>
-            <Clock className="w-4 h-4 text-stone-600 dark:text-stone-400" />
-          </div>
-          <p className="text-2xl font-black text-stone-900 dark:text-stone-100 mt-2 font-mono">
+        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Kedisiplinan Waktu</span>
+          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-stone-900 dark:text-stone-100 mt-1">
             {punctualityRate}%
           </p>
-          <span className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 block">
-            {onTimeAttendance} sesi tepat waktu (≤4 menit)
+          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
+            {onTimeAttendance} sesi tepat waktu
           </span>
         </div>
 
-        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">Jurnal Tertunda</span>
-            <AlertCircle className={`w-4 h-4 ${pendingJournals > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-stone-400'}`} />
-          </div>
-          <p className={`text-2xl font-black mt-2 font-mono ${pendingJournals > 0 ? 'text-amber-700 dark:text-amber-400' : 'text-stone-700 dark:text-stone-300'}`}>
-            {pendingJournals} <span className="text-sm font-normal">Sesi</span>
+        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Jurnal Tertunda</span>
+          <p className={`text-2xl sm:text-3xl font-semibold font-mono tracking-tight mt-1 ${pendingJournals > 0 ? 'text-[#D97706]' : 'text-stone-900 dark:text-stone-100'}`}>
+            {pendingJournals} <span className="text-xs font-normal text-stone-500 font-sans">Sesi</span>
           </p>
-          <span className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 block">
-            {pendingJournals > 0 ? 'Perlu supervisi & pengingat' : 'Semua jurnal KBM tuntas'}
+          <span className={`text-[11px] mt-1.5 block ${pendingJournals > 0 ? 'text-[#D97706]' : 'text-emerald-700 dark:text-emerald-400'}`}>
+            {pendingJournals > 0 ? 'Perlu supervisi harian' : 'Semua jurnal tuntas'}
           </span>
         </div>
 
-        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">Tenaga Pendidik Unit</span>
-            <GraduationCap className="w-4 h-4 text-stone-600 dark:text-stone-400" />
-          </div>
-          <p className="text-2xl font-black text-stone-900 dark:text-stone-100 mt-2 font-mono">
-            {unitTeachers.length} <span className="text-sm font-normal">Asatidz</span>
+        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Pendidik Unit</span>
+          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-stone-900 dark:text-stone-100 mt-1">
+            {unitTeachers.length} <span className="text-xs font-normal text-stone-500 font-sans">Guru</span>
           </p>
-          <span className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 block">
-            {totalScheduledHours} JP Terjadwal per pekan
+          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
+            {totalScheduledHours} JP Terjadwal / Pekan
           </span>
         </div>
       </div>
 
       {/* 3. Search & Filter Bar */}
-      <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 p-3.5 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-1/2 -transtone-y-1/2 w-4 h-4 text-stone-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" strokeWidth={1.5} />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={`Cari nama / NIP guru ${effectiveUnit !== 'ALL' ? effectiveUnit : ''}...`}
-            className="w-full pl-9 pr-3 py-1.5 text-xs bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:text-stone-100"
+            className="w-full pl-9 pr-3 py-1.5 text-xs bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:border-[#1B4332] dark:text-stone-100"
           />
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-          <div className="flex items-center bg-stone-100 dark:bg-stone-800 p-0.5 rounded-lg text-xs">
+          <div className="flex items-center bg-stone-100 dark:bg-stone-800 p-1 rounded-lg text-xs">
             <button
               onClick={() => setStatusFilter('ALL')}
-              className={`px-3 py-1 rounded-md font-medium transition-colors cursor-pointer ${
+              className={`px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer ${
                 statusFilter === 'ALL'
-                  ? 'bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 shadow-2xs'
+                  ? 'bg-white dark:bg-stone-900 text-[#1B4332] dark:text-emerald-400 shadow-xs'
                   : 'text-stone-500 dark:text-stone-400'
               }`}
             >
@@ -291,24 +278,24 @@ export const KepsekAuditView: React.FC = () => {
             </button>
             <button
               onClick={() => setStatusFilter('NEED_SUPERVISION')}
-              className={`px-3 py-1 rounded-md font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
                 statusFilter === 'NEED_SUPERVISION'
-                  ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 font-semibold shadow-2xs'
+                  ? 'bg-white dark:bg-stone-900 text-[#D97706] shadow-xs'
                   : 'text-stone-500 dark:text-stone-400'
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#D97706]"></span>
               Perlu Supervisi ({payrollSummary.items.filter(i => i.emptyJournalCount > 0).length})
             </button>
             <button
               onClick={() => setStatusFilter('COMPLETED')}
-              className={`px-3 py-1 rounded-md font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
                 statusFilter === 'COMPLETED'
-                  ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 font-semibold shadow-2xs'
+                  ? 'bg-white dark:bg-stone-900 text-[#1B4332] shadow-xs'
                   : 'text-stone-500 dark:text-stone-400'
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#1B4332]"></span>
               KBM Tuntas
             </button>
           </div>
@@ -316,27 +303,27 @@ export const KepsekAuditView: React.FC = () => {
       </div>
 
       {/* 4. Leadership Audit Table */}
-      <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-2xs overflow-hidden">
+      <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-stone-50/75 dark:bg-stone-800 text-stone-500 dark:text-stone-400 font-semibold border-b border-stone-200/80 dark:border-stone-700">
-                <th className="py-3 px-3 text-center w-10">No</th>
+              <tr className="bg-stone-50/75 dark:bg-stone-800 text-stone-500 dark:text-stone-400 font-bold border-b border-stone-200/80 dark:border-stone-700 text-[10px] uppercase tracking-wider">
+                <th className="py-3 px-4 text-center w-12">No</th>
                 <th className="py-3 px-4">Nama Asatidz & NIP</th>
-                <th className="py-3 px-3">Jabatan & Unit</th>
-                <th className="py-3 px-3 text-center">Beban (JP)</th>
-                <th className="py-3 px-3 text-center">Kehadiran</th>
-                <th className="py-3 px-3 text-center">Kepatuhan Jurnal</th>
-                <th className="py-3 px-3 text-center">Kedisiplinan Waktu</th>
+                <th className="py-3 px-4">Jabatan & Unit</th>
+                <th className="py-3 px-4 text-center">Beban (JP)</th>
+                <th className="py-3 px-4 text-center">Kehadiran</th>
+                <th className="py-3 px-4 text-center">Kepatuhan Jurnal</th>
+                <th className="py-3 px-4 text-center">Kedisiplinan Waktu</th>
                 <th className="py-3 px-4 text-center">Status Supervisi</th>
-                <th className="py-3 px-3 text-center w-24">Aksi</th>
+                <th className="py-3 px-4 text-center w-28">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100 dark:divide-stone-800 text-stone-700 dark:text-stone-300">
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-8 text-center text-stone-400 dark:text-stone-500">
-                    Tidak ada data asatidz {effectiveUnit !== 'ALL' ? `unit ${effectiveUnit}` : ''} yang sesuai dengan filter.
+                  <td colSpan={9} className="py-12 text-center text-stone-400 dark:text-stone-500 font-medium">
+                    Tidak ada data asatidz yang sesuai dengan filter.
                   </td>
                 </tr>
               ) : (
@@ -346,67 +333,67 @@ export const KepsekAuditView: React.FC = () => {
                   const totalLateCount = item.lateCountLight + item.lateCountMedium + item.lateCountHeavy;
 
                   return (
-                    <tr key={item.teacher?.id || index} className="hover:bg-stone-50/60 dark:hover:bg-stone-800/50 transition-colors">
-                      <td className="py-3 px-3 text-center text-stone-400 dark:text-stone-500 font-mono">
+                    <tr key={item.teacher?.id || index} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/20 transition-colors">
+                      <td className="py-3.5 px-4 text-center text-stone-400 dark:text-stone-500 font-mono font-medium">
                         {index + 1}
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-3.5 px-4">
                         <p className="font-semibold text-stone-900 dark:text-stone-100">{item.teacher?.name || 'Guru'}</p>
-                        <p className="text-[11px] text-stone-400 dark:text-stone-500 font-mono">{item.teacher?.nip || '-'}</p>
+                        <p className="text-[10px] text-stone-400 dark:text-stone-500 font-mono">NIP: {item.teacher?.nip || '-'}</p>
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="py-3.5 px-4">
                         <p className="font-medium text-stone-800 dark:text-stone-200">{item.teacher?.position || '-'}</p>
-                        <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400">
+                        <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-stone-55 dark:bg-stone-800 text-stone-600 dark:text-stone-400 border border-stone-200/40 dark:border-stone-700/40">
                           {item.teacher?.unit || '-'}
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-center font-mono font-bold text-stone-800 dark:text-stone-200">
+                      <td className="py-3.5 px-4 text-center font-mono font-bold text-stone-800 dark:text-stone-200">
                         {item.totalTaughtHours} JP
                       </td>
-                      <td className="py-3 px-3 text-center font-medium text-stone-700 dark:text-stone-300">
+                      <td className="py-3.5 px-4 text-center font-medium text-stone-700 dark:text-stone-300">
                         {item.totalPresentDays} Hari
                       </td>
-                      <td className="py-3 px-3 text-center">
+                      <td className="py-3.5 px-4 text-center">
                         {hasPendingJournal ? (
-                          <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60">
+                          <span className="inline-block px-2.5 py-0.5 rounded text-[10px] font-bold bg-[#D97706]/10 text-[#D97706] border border-[#D97706]/25">
                             {item.emptyJournalCount} Tertunda
                           </span>
                         ) : (
-                          <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
+                          <span className="inline-block px-2.5 py-0.5 rounded text-[10px] font-bold bg-[#1B4332]/10 text-[#1B4332] border border-[#1B4332]/25">
                             Lengkap
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-3 text-center">
+                      <td className="py-3.5 px-4 text-center">
                         {hasLate ? (
-                          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800/50">
+                          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 border border-rose-200/40 dark:border-rose-800/40">
                             {totalLateCount}x Terlambat
                           </span>
                         ) : (
-                          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
-                            Disiplin Tepat Waktu
+                          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-[#1B4332]/10 text-[#1B4332] border border-[#1B4332]/20">
+                            Disiplin
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3.5 px-4 text-center">
                         {hasPendingJournal ? (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                            <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-[#D97706]/10 text-[#D97706] border border-[#D97706]/20">
+                            <AlertCircle className="w-3 h-3" strokeWidth={1.5} />
                             Perlu Supervisi
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-[#1B4332]/10 text-[#1B4332] border border-[#1B4332]/20">
+                            <CheckCircle2 className="w-3 h-3" strokeWidth={1.5} />
                             KBM Tuntas
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-3 text-center">
+                      <td className="py-3.5 px-4 text-center">
                         <button
                           onClick={() => setSelectedTeacherForDetail(item.teacher.id)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-stone-700 dark:text-stone-300 bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-md border border-stone-200 dark:border-stone-700 transition-colors cursor-pointer"
                         >
-                          <Eye className="w-3 h-3" />
+                          <Eye className="w-3.5 h-3.5" strokeWidth={1.5} />
                           Rincian
                         </button>
                       </td>
@@ -421,12 +408,12 @@ export const KepsekAuditView: React.FC = () => {
 
       {/* 5. Detail Modal for Journal Audit */}
       {selectedTeacherData && (
-        <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-stone-900 rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-stone-900 rounded-xl max-w-3xl w-full max-h-[85vh] flex flex-col border border-stone-200 dark:border-stone-800 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header */}
-            <div className="p-5 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between">
+            <div className="p-5 border-b border-stone-150 dark:border-stone-800 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold text-sm">
+                <div className="w-10 h-10 rounded-lg bg-[#1B4332]/10 text-[#1B4332] dark:bg-emerald-950/40 dark:text-emerald-300 flex items-center justify-center font-bold text-sm">
                   {selectedTeacherData.teacher?.name.charAt(0) || 'G'}
                 </div>
                 <div>
@@ -441,31 +428,31 @@ export const KepsekAuditView: React.FC = () => {
 
               <button
                 onClick={() => setSelectedTeacherForDetail(null)}
-                className="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-850 transition-colors cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5" strokeWidth={1.5} />
               </button>
             </div>
 
             {/* Modal Body */}
             <div className="p-5 overflow-y-auto space-y-5">
               {/* Summary Badges */}
-              <div className="grid grid-cols-3 gap-3 bg-stone-50 dark:bg-stone-800/50 p-3.5 rounded-xl border border-stone-200/80 dark:border-stone-700/80 text-xs">
+              <div className="grid grid-cols-3 gap-3 bg-stone-50 dark:bg-stone-850/50 p-4 rounded-lg border border-stone-250/60 dark:border-stone-800 text-xs">
                 <div>
-                  <span className="text-stone-500 dark:text-stone-400 block text-[10px] uppercase font-bold">Total Jam KBM</span>
+                  <span className="text-stone-400 dark:text-stone-500 block text-[10px] uppercase font-bold tracking-wide">Total Jam KBM</span>
                   <span className="text-base font-bold text-stone-900 dark:text-stone-100 font-mono">
                     {selectedTeacherData.payroll?.totalTaughtHours || 0} JP
                   </span>
                 </div>
                 <div>
-                  <span className="text-stone-500 dark:text-stone-400 block text-[10px] uppercase font-bold">Kehadiran Mengajar</span>
-                  <span className="text-base font-bold text-emerald-700 dark:text-emerald-400 font-mono">
+                  <span className="text-stone-400 dark:text-stone-500 block text-[10px] uppercase font-bold tracking-wide">Kehadiran Mengajar</span>
+                  <span className="text-base font-bold text-[#1B4332] dark:text-emerald-400 font-mono">
                     {selectedTeacherData.payroll?.totalPresentDays || 0} Hari
                   </span>
                 </div>
                 <div>
-                  <span className="text-stone-500 dark:text-stone-400 block text-[10px] uppercase font-bold">Jurnal Belum Terisi</span>
-                  <span className={`text-base font-bold font-mono ${selectedTeacherData.payroll?.emptyJournalCount ? 'text-amber-600' : 'text-stone-700 dark:text-stone-300'}`}>
+                  <span className="text-stone-400 dark:text-stone-500 block text-[10px] uppercase font-bold tracking-wide">Jurnal Belum Terisi</span>
+                  <span className={`text-base font-bold font-mono ${selectedTeacherData.payroll?.emptyJournalCount ? 'text-[#D97706]' : 'text-stone-650 dark:text-stone-300'}`}>
                     {selectedTeacherData.payroll?.emptyJournalCount || 0} Sesi
                   </span>
                 </div>
@@ -474,16 +461,16 @@ export const KepsekAuditView: React.FC = () => {
               {/* Journal Entries List */}
               <div className="space-y-3">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 flex items-center gap-1.5">
-                  <BookOpen className="w-3.5 h-3.5" />
+                  <BookOpen className="w-3.5 h-3.5 text-[#52796F]" strokeWidth={1.5} />
                   Riwayat & Jurnal Pembelajaran KBM
                 </h3>
 
                 {selectedTeacherData.records.length === 0 ? (
-                  <p className="text-xs text-stone-400 dark:text-stone-500 py-4 text-center">
+                  <p className="text-xs text-stone-400 dark:text-stone-500 py-4 text-center font-medium">
                     Belum ada rekaman sesi tatap muka pada periode ini.
                   </p>
                 ) : (
-                  <div className="space-y-2.5">
+                  <div className="space-y-3">
                     {selectedTeacherData.records.map((rec) => {
                       const sched = schedules.find(s => s.id === rec.scheduleId);
                       const hasJournal = !!rec.journal || rec.status === 'SELESAI';
@@ -491,54 +478,54 @@ export const KepsekAuditView: React.FC = () => {
                       return (
                         <div 
                           key={rec.id}
-                          className="bg-stone-50/70 dark:bg-stone-800/40 border border-stone-200/80 dark:border-stone-700/70 rounded-xl p-3.5 text-xs space-y-2"
+                          className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-lg p-4 text-xs space-y-3"
                         >
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               <span className="font-bold text-stone-900 dark:text-stone-100">
                                 {sched?.subject || 'Mata Pelajaran'} ({sched?.className || 'Kelas'})
                               </span>
-                              <span className="text-stone-400 text-[11px] font-mono">
+                              <span className="text-stone-400 text-[10px] font-mono">
                                 • {rec.date} {rec.clockInTime ? `(Hadir ${rec.clockInTime})` : ''}
                               </span>
                             </div>
                             <div>
                               {hasJournal ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                                  Jurnal Terisi
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-[#1B4332]/10 text-[#1B4332] border border-[#1B4332]/25">
+                                  <CheckCircle2 className="w-3 h-3" strokeWidth={1.5} />
+                                  Terisi
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                                  <AlertCircle className="w-3 h-3 text-amber-600" />
-                                  Belum Diisi
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-[#D97706]/10 text-[#D97706] border border-[#D97706]/25">
+                                  <AlertCircle className="w-3 h-3" strokeWidth={1.5} />
+                                  Tertunda
                                 </span>
                               )}
                             </div>
                           </div>
 
                           {rec.journal ? (
-                            <div className="bg-white dark:bg-stone-900 p-2.5 rounded-lg border border-stone-200/60 dark:border-stone-700/60 space-y-1 text-stone-600 dark:text-stone-300">
-                              <p><strong className="text-stone-900 dark:text-stone-100">Materi/Topik:</strong> {rec.journal.topic}</p>
+                            <div className="bg-stone-50 dark:bg-stone-850 p-3 rounded border border-stone-200/50 dark:border-stone-850 space-y-1.5 text-stone-600 dark:text-stone-300">
+                              <p><strong className="text-stone-900 dark:text-stone-100 font-semibold">Materi/Topik:</strong> {rec.journal.topic}</p>
                               {rec.journal.learningObjectives && (
-                                <p><strong className="text-stone-900 dark:text-stone-100">Tujuan:</strong> {rec.journal.learningObjectives}</p>
+                                <p><strong className="text-stone-900 dark:text-stone-100 font-semibold">Tujuan:</strong> {rec.journal.learningObjectives}</p>
                               )}
                               {rec.journal.classNotes && (
-                                <p><strong className="text-stone-900 dark:text-stone-100">Catatan Kelas:</strong> {rec.journal.classNotes}</p>
+                                <p><strong className="text-stone-900 dark:text-stone-100 font-semibold">Catatan Kelas:</strong> {rec.journal.classNotes}</p>
                               )}
                               {rec.journal.studentAttendance && (
-                                <div className="pt-1 flex items-center gap-3 text-[11px] text-stone-500 dark:text-stone-400 font-mono">
+                                <div className="pt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-stone-500 dark:text-stone-400 font-mono border-t border-stone-200/40 dark:border-stone-700/40">
                                   <span>Total Santri: {rec.journal.studentAttendance.totalStudents}</span>
-                                  <span className="text-emerald-600">Hadir: {rec.journal.studentAttendance.presentCount}</span>
+                                  <span className="text-[#1B4332] font-semibold">Hadir: {rec.journal.studentAttendance.presentCount}</span>
                                   <span>Sakit: {rec.journal.studentAttendance.sickCount}</span>
                                   <span>Izin: {rec.journal.studentAttendance.permittedCount}</span>
-                                  <span className="text-rose-600">Alpa: {rec.journal.studentAttendance.absentCount}</span>
+                                  <span className="text-rose-600 font-semibold">Alpa: {rec.journal.studentAttendance.absentCount}</span>
                                 </div>
                               )}
                             </div>
                           ) : (
-                            <div className="bg-amber-50/50 dark:bg-amber-950/20 p-2 rounded-lg text-[11px] text-amber-800 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/40">
-                              Guru telah melakukan clock-in kehadiran tetapi belum melengkapi deskripsi topik materi & catatan presensi santri.
+                            <div className="bg-amber-50/40 dark:bg-amber-950/10 p-3 rounded text-[11px] text-[#D97706] border border-[#D97706]/15 leading-relaxed">
+                              Guru telah merekam kehadiran tatap muka tetapi belum melengkapi deskripsi topik materi serta presensi santri.
                             </div>
                           )}
                         </div>
@@ -550,10 +537,10 @@ export const KepsekAuditView: React.FC = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 border-t border-stone-100 dark:border-stone-800 flex items-center justify-end">
+            <div className="p-4 border-t border-stone-150 dark:border-stone-800 flex items-center justify-end">
               <button
                 onClick={() => setSelectedTeacherForDetail(null)}
-                className="px-4 py-1.5 text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors cursor-pointer"
+                className="px-4 py-1.5 text-xs font-semibold text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-850 rounded-lg transition-colors cursor-pointer"
               >
                 Tutup
               </button>

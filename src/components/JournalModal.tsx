@@ -4,7 +4,8 @@ import {
   Sparkles,
   AlertTriangle,
   CheckCircle2,
-  BookOpen
+  BookOpen,
+  UserCheck
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { AttendanceRecord, ClassSchedule, Teacher, StudentAttendance } from '../types';
@@ -14,7 +15,7 @@ import { formatIndonesianDate } from '../utils/formatters';
 interface JournalModalProps {
   attendance?: AttendanceRecord | null;
   schedule: ClassSchedule;
-  teacher?: Teacher;
+  teacher?: Teacher | null;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -26,7 +27,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const { attendances, currentUser, clockIn, submitJournal } = useHRIS();
+  const { attendances, currentUser, clockIn, submitJournal, teachers, badalAssignments } = useHRIS();
 
   const resolvedAttendance = attendance || attendances.find(
     (a) => a.scheduleId === schedule.id && a.date === new Date().toISOString().split('T')[0]
@@ -38,6 +39,12 @@ export const JournalModal: React.FC<JournalModalProps> = ({
   const isExpired = isPastShift;
   const isExpiredUnfilled = isExpired && !existingJournal;
   const isExpiredFilled = isExpired && existingJournal;
+
+  const activeBadal = badalAssignments.find(
+    (b) => b.scheduleId === schedule.id && (b.date === todayStr || !b.date) && (b.status === 'APPROVED' || b.status === 'COMPLETED')
+  );
+  const isBadalForMe = (activeBadal && activeBadal.badalTeacherId === (teacher?.id || currentUser?.id)) || (resolvedAttendance?.isBadal && resolvedAttendance.actualTeacherId === (teacher?.id || currentUser?.id));
+  const originalTeacher = activeBadal ? teachers.find((t) => t.id === activeBadal.originalTeacherId) : (schedule.teacherId !== (teacher?.id || currentUser?.id) ? teachers.find((t) => t.id === schedule.teacherId) : null);
 
   const [topic, setTopic] = useState(existingJournal?.topic || '');
   const [learningObjectives, setLearningObjectives] = useState(
@@ -114,6 +121,9 @@ export const JournalModal: React.FC<JournalModalProps> = ({
       }
 
       submitJournal(targetAttId, {
+        scheduleId: schedule.id,
+        date: resolvedAttendance?.date || todayStr,
+        teacherId: teacher?.id || currentUser?.id || schedule.teacherId,
         topic: topic.trim(),
         learningObjectives: learningObjectives.trim() || undefined,
         classNotes: classNotes.trim() || undefined,
@@ -152,6 +162,11 @@ export const JournalModal: React.FC<JournalModalProps> = ({
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-emerald-400" strokeWidth={1.5} />
               <h2 className="font-bold text-sm text-white">Jurnal Pembelajaran KBM</h2>
+              {isBadalForMe && (
+                <span className="text-[10px] font-bold bg-emerald-600/90 text-white px-2 py-0.5 rounded font-mono">
+                  GURU BADAL
+                </span>
+              )}
             </div>
             <p className="text-xs text-stone-400 mt-0.5">
               Kelas {schedule.className} • {schedule.subject} ({schedule.hours} JP)
@@ -164,6 +179,19 @@ export const JournalModal: React.FC<JournalModalProps> = ({
             <X className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Badal Banner */}
+        {isBadalForMe && originalTeacher && (
+          <div className="bg-emerald-50 dark:bg-emerald-950/30 border-b border-emerald-200 dark:border-emerald-900/40 p-3 flex items-start gap-2.5 text-xs text-emerald-900 dark:text-emerald-300">
+            <UserCheck className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" strokeWidth={1.5} />
+            <div>
+              <p className="font-bold">Pengisian Jurnal Guru Badal (Disetujui Kepsek)</p>
+              <p className="text-[11px] text-emerald-800 dark:text-emerald-400 mt-0.5">
+                Anda mengisi jurnal santri menggantikan <strong>Ustadz {originalTeacher.name}</strong>. Jurnal dan data presensi KBM akan tercatat resmi atas nama Anda.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Expired Unfilled Alert */}
         {isExpiredUnfilled && (

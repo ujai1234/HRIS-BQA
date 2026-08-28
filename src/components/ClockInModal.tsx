@@ -4,7 +4,7 @@ import {
   Clock, 
   CheckCircle2, 
   AlertTriangle,
-  Lock
+  UserCheck
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { ClassSchedule, Teacher } from '../types';
@@ -24,8 +24,15 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const { clockIn, currentUser } = useHRIS();
+  const { clockIn, currentUser, teachers, badalAssignments } = useHRIS();
   const effectiveTeacher = teacher || currentUser;
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const activeBadal = badalAssignments.find(
+    (b) => b.scheduleId === schedule.id && (b.date === todayStr || !b.date) && (b.status === 'APPROVED' || b.status === 'COMPLETED')
+  );
+  const isBadalForMe = activeBadal && activeBadal.badalTeacherId === effectiveTeacher?.id;
+  const originalTeacher = activeBadal ? teachers.find((t) => t.id === activeBadal.originalTeacherId) : (schedule.teacherId !== effectiveTeacher?.id ? teachers.find((t) => t.id === schedule.teacherId) : null);
 
   const getRealTimeString = () => {
     const now = new Date();
@@ -96,7 +103,14 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
         {/* Header */}
         <div className="bg-[#141A17] text-white px-5 py-3.5 flex items-center justify-between border-b border-stone-800">
           <div>
-            <h2 className="font-bold text-sm text-white">Presensi Masuk Sesi KBM</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="font-bold text-sm text-white">Presensi Masuk Sesi KBM</h2>
+              {isBadalForMe && (
+                <span className="text-[10px] font-bold bg-emerald-600/90 text-white px-2 py-0.5 rounded font-mono">
+                  BADAL
+                </span>
+              )}
+            </div>
             <p className="text-xs text-stone-400 mt-0.5">
               {schedule.className} • {schedule.subject} ({schedule.hours} JP)
             </p>
@@ -110,6 +124,21 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4">
+          {/* Badal Assignment Indicator Card */}
+          {isBadalForMe && originalTeacher && (
+            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-lg flex items-start gap-2.5 text-xs text-emerald-900 dark:text-emerald-200">
+              <UserCheck className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" strokeWidth={1.5} />
+              <div>
+                <p className="font-bold text-emerald-900 dark:text-emerald-200">
+                  Tugas Guru Badal (Disetujui Kepsek)
+                </p>
+                <p className="text-[11px] text-emerald-800 dark:text-emerald-300 mt-0.5">
+                  Anda melakukan presensi menggantikan <strong>Ustadz {originalTeacher.name}</strong>. Hak honor JP dan transport KBM sesi ini dialokasikan penuh ke kafa'ah Anda.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Live Clock Card */}
           <div className="bg-[#FBFBFA] dark:bg-[#141A17] rounded-xl p-4 text-center border border-stone-200 dark:border-stone-800">
             <span className="text-[10px] font-semibold uppercase text-stone-400 tracking-wider block">

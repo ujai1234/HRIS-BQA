@@ -94,7 +94,7 @@ export const LearningNeedManagement: React.FC = () => {
     return requests;
   }, [requests, currentRole, currentUser?.id, teacherMap, isKepsek, kepsekUnit]);
 
-  // KPI Metrics
+  // Metrics
   const metrics = useMemo(() => {
     return {
       total: baseRequests.length,
@@ -137,14 +137,14 @@ export const LearningNeedManagement: React.FC = () => {
       });
 
       // Header Document
-      doc.setFontSize(14);
+      doc.setFontSize(13);
       doc.setFont('helvetica', 'bold');
       doc.text("PESANTREN BAITUL QUR'AN AL-IKHWAN", 14, 15);
       
-      doc.setFontSize(10);
+      doc.setFontSize(9.5);
       doc.setFont('helvetica', 'normal');
-      doc.text("REKAPITULASI PENGAJUAN KEBUTUHAN SARANA PEMBELAJARAN", 14, 21);
-      doc.text(`Unit: ${isKepsek ? kepsekUnit : 'Semua Unit'} | Dicetak: ${todayStr}`, 14, 26);
+      doc.text("Rekapitulasi Pengajuan Kebutuhan Sarana Pembelajaran", 14, 21);
+      doc.text(`Unit: ${isKepsek ? kepsekUnit : 'Semua Unit'} | Tanggal: ${todayStr}`, 14, 26);
 
       const tableRows = filteredRequests.map((req, idx) => {
         const teacher = teacherMap.get(req.teacherId);
@@ -184,8 +184,8 @@ export const LearningNeedManagement: React.FC = () => {
       });
 
       const fileDate = new Date().toISOString().slice(0, 10);
-      doc.save(`Laporan_Kebutuhan_BQ_${fileDate}.pdf`);
-      toast.success('Laporan PDF pengajuan kebutuhan berhasil diunduh');
+      doc.save(`Rekap_Kebutuhan_${fileDate}.pdf`);
+      toast.success('Laporan PDF berhasil diunduh');
     } catch (err) {
       console.error('Error generating PDF:', err);
       toast.error('Gagal mengunduh laporan PDF');
@@ -210,14 +210,14 @@ export const LearningNeedManagement: React.FC = () => {
       category: 'Buku' 
     });
     setShowAddForm(false);
-    toast.success('Pengajuan kebutuhan sarana berhasil dikirim ke Kepala Unit');
+    toast.success('Pengajuan kebutuhan berhasil dikirim');
   };
 
   const handleOpenDecision = (req: LearningNeedRequest, action: LearningNeedStatus) => {
     let defaultNote = '';
-    if (action === 'APPROVED') defaultNote = 'Disetujui untuk pengadaan sarana KBM.';
-    else if (action === 'REJECTED') defaultNote = 'Belum dapat disetujui, stok masih mencukupi.';
-    else if (action === 'COMPLETED') defaultNote = 'Fasilitas telah diserahkan kepada guru.';
+    if (action === 'APPROVED') defaultNote = 'Disetujui untuk pengadaan sarana.';
+    else if (action === 'REJECTED') defaultNote = 'Belum disetujui.';
+    else if (action === 'COMPLETED') defaultNote = 'Telah diserahkan.';
 
     setDecisionModal({
       isOpen: true,
@@ -235,148 +235,145 @@ export const LearningNeedManagement: React.FC = () => {
       decisionModal.note.trim() || undefined
     );
     setDecisionModal({ isOpen: false, request: null, action: 'APPROVED', note: '' });
-    toast.success('Status permohonan berhasil diperbarui');
+    toast.success('Status berhasil diperbarui');
   };
 
   const getStatusBadge = (status: LearningNeedStatus) => {
     switch (status) {
       case 'PENDING':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200/60 dark:border-amber-900/40 text-[11px] font-semibold">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/40">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
             Menunggu
           </span>
         );
       case 'APPROVED':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-900/40 text-[11px] font-semibold">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
             Disetujui
           </span>
         );
       case 'REJECTED':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200/60 dark:border-rose-900/40 text-[11px] font-semibold">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200/60 dark:border-rose-800/40">
             <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
             Ditolak
           </span>
         );
       case 'COMPLETED':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/40 text-[11px] font-semibold">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/40">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
-            Terpenuhi
+            Selesai
           </span>
         );
     }
   };
 
   return (
-    <div className="space-y-5">
-      {/* 1. Header Toolbar */}
-      <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200/80 dark:border-stone-800 p-5 sm:p-6 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">
-              {isKepsek 
-                ? `Persetujuan Kebutuhan Sarana (${kepsekUnit})` 
-                : currentRole === 'GURU' 
-                  ? 'Pengajuan Kebutuhan Sarana Pembelajaran' 
-                  : 'Monitoring Kebutuhan Sarana KBM'}
-            </h1>
-            <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 max-w-2xl leading-relaxed">
-              {isKepsek 
-                ? 'Verifikasi, disposisi, dan persetujuan pengadaan buku, ATK, dan sarana kelas untuk asatidz.' 
-                : currentRole === 'GURU' 
-                  ? 'Ajukan permohonan sarana pendukung KBM untuk ditinjau oleh Kepala Unit.' 
-                  : 'Rekapitulasi seluruh pengajuan sarana pembelajaran di lingkungan Pesantren Baitul Qur\'an.'}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-            {currentRole === 'GURU' ? (
-              <button
-                onClick={() => setShowAddForm(true)}
-                className="inline-flex items-center gap-2 bg-[#1B4332] hover:bg-[#143326] text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs active:scale-[0.99]"
-              >
-                <Plus className="w-4 h-4" strokeWidth={2} />
-                <span>Ajukan Kebutuhan</span>
-              </button>
-            ) : (
-              <button
-                onClick={handleExportPDF}
-                className="inline-flex items-center gap-2 bg-stone-50 hover:bg-stone-100 dark:bg-stone-800 dark:hover:bg-stone-700/80 text-stone-700 dark:text-stone-200 text-xs font-semibold px-4 py-2.5 rounded-xl border border-stone-200/80 dark:border-stone-700 transition-all cursor-pointer"
-              >
-                <FileText className="w-3.5 h-3.5" strokeWidth={1.5} />
-                <span>Ekspor PDF</span>
-              </button>
-            )}
-          </div>
+    <div className="space-y-4">
+      {/* 1. Clean Minimalist Header */}
+      <div className="bg-white dark:bg-stone-900 rounded-lg border border-stone-200/80 dark:border-stone-800 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100">
+            {isKepsek 
+              ? `Persetujuan Kebutuhan (${kepsekUnit})` 
+              : currentRole === 'GURU' 
+                ? 'Pengajuan Kebutuhan' 
+                : 'Persetujuan Kebutuhan Sarana'}
+          </h1>
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+            {isKepsek 
+              ? `Verifikasi dan persetujuan pengadaan kebutuhan guru unit ${kepsekUnit}.`
+              : currentRole === 'GURU'
+                ? 'Daftar pengajuan kebutuhan sarana pembelajaran.'
+                : 'Rekapitulasi pengajuan sarana pembelajaran seluruh unit.'}
+          </p>
         </div>
 
-        {/* 2. Sleek Minimalist Metric Summary */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-5 border-t border-stone-100 dark:border-stone-800">
-          <div className="p-3.5 rounded-xl bg-stone-50/70 dark:bg-stone-800/30 border border-stone-100 dark:border-stone-800/60">
-            <span className="text-[10px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wider block">
-              Total Pengajuan
-            </span>
-            <div className="flex items-baseline gap-1.5 mt-1">
-              <span className="text-xl font-bold text-stone-900 dark:text-stone-100">{metrics.total}</span>
-              <span className="text-xs text-stone-500 dark:text-stone-400">Berkas</span>
-            </div>
-          </div>
-
-          <div className="p-3.5 rounded-xl bg-amber-50/40 dark:bg-amber-950/20 border border-amber-100/80 dark:border-amber-900/30">
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-              <span className="text-[10px] font-semibold text-amber-800/80 dark:text-amber-300/80 uppercase tracking-wider block">
-                Menunggu Review
-              </span>
-            </div>
-            <div className="flex items-baseline gap-1.5 mt-1">
-              <span className="text-xl font-bold text-amber-700 dark:text-amber-300">{metrics.pending}</span>
-              <span className="text-xs text-amber-600/80 dark:text-amber-400/80">Antrean</span>
-            </div>
-          </div>
-
-          <div className="p-3.5 rounded-xl bg-emerald-50/40 dark:bg-emerald-950/20 border border-emerald-100/80 dark:border-emerald-900/30">
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-              <span className="text-[10px] font-semibold text-emerald-800/80 dark:text-emerald-300/80 uppercase tracking-wider block">
-                Disetujui
-              </span>
-            </div>
-            <div className="flex items-baseline gap-1.5 mt-1">
-              <span className="text-xl font-bold text-emerald-700 dark:text-emerald-400">{metrics.approved}</span>
-              <span className="text-xs text-emerald-600/80 dark:text-emerald-400/80">Pengadaan</span>
-            </div>
-          </div>
-
-          <div className="p-3.5 rounded-xl bg-rose-50/40 dark:bg-rose-950/20 border border-rose-100/80 dark:border-rose-900/30">
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-              <span className="text-[10px] font-semibold text-rose-800/80 dark:text-rose-300/80 uppercase tracking-wider block">
-                Ditolak
-              </span>
-            </div>
-            <div className="flex items-baseline gap-1.5 mt-1">
-              <span className="text-xl font-bold text-rose-700 dark:text-rose-400">{metrics.rejected}</span>
-              <span className="text-xs text-rose-600/80 dark:text-rose-400/80">Ditolak</span>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          {currentRole === 'GURU' ? (
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="inline-flex items-center gap-1.5 bg-[#1B4332] hover:bg-[#143326] text-white text-xs font-medium px-3.5 py-1.5 rounded-md transition-colors cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Ajukan Kebutuhan</span>
+            </button>
+          ) : (
+            <button
+              onClick={handleExportPDF}
+              className="inline-flex items-center gap-1.5 bg-stone-50 hover:bg-stone-100 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-700 dark:text-stone-200 text-xs font-medium px-3 py-1.5 rounded-md border border-stone-200 dark:border-stone-700 transition-colors cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5 text-stone-400" />
+              <span>Ekspor PDF</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* 3. Filter & Search Controls */}
-      <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200/80 dark:border-stone-800 p-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-xs">
+      {/* 2. Proportional Compact Metric Strip */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 p-4 sm:p-5 shadow-xs">
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">
+            Total Pengajuan
+          </span>
+          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-stone-900 dark:text-stone-100 mt-1">
+            {metrics.total}
+          </p>
+          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
+            Seluruh usulan sarana
+          </span>
+        </div>
+
+        <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 p-4 sm:p-5 shadow-xs">
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">
+            Menunggu Persetujuan
+          </span>
+          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-amber-600 dark:text-amber-400 mt-1">
+            {metrics.pending}
+          </p>
+          <span className="text-[11px] text-amber-600 dark:text-amber-400 mt-1.5 block">
+            Perlu telaah Kepala Unit
+          </span>
+        </div>
+
+        <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 p-4 sm:p-5 shadow-xs">
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">
+            Disetujui
+          </span>
+          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-emerald-700 dark:text-emerald-400 mt-1">
+            {metrics.approved}
+          </p>
+          <span className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-1.5 block">
+            Siap direalisasikan
+          </span>
+        </div>
+
+        <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 p-4 sm:p-5 shadow-xs">
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">
+            Ditolak
+          </span>
+          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-stone-600 dark:text-stone-300 mt-1">
+            {metrics.rejected}
+          </p>
+          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
+            Belum dapat disetujui
+          </span>
+        </div>
+      </div>
+
+      {/* 3. Search & Filter Bar */}
+      <div className="bg-white dark:bg-stone-900 rounded-lg border border-stone-200/80 dark:border-stone-800 p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-2.5" strokeWidth={1.5} />
+          <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Cari kebutuhan, nama guru, atau kata kunci..."
-            className="w-full text-xs pl-9 pr-3.5 py-2 bg-stone-50/70 dark:bg-stone-800/60 border border-stone-200/80 dark:border-stone-700 rounded-xl text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-[#1B4332] dark:focus:border-emerald-500 transition-colors"
+            placeholder="Cari kebutuhan atau nama guru..."
+            className="w-full text-xs pl-8 pr-3 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-md text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-[#1B4332]"
           />
         </div>
 
@@ -385,12 +382,12 @@ export const LearningNeedManagement: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="text-xs px-3 py-2 bg-stone-50/70 dark:bg-stone-800/60 border border-stone-200/80 dark:border-stone-700 rounded-xl text-stone-700 dark:text-stone-200 focus:outline-none focus:border-[#1B4332] cursor-pointer"
+            className="text-xs px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-md text-stone-700 dark:text-stone-200 focus:outline-none focus:border-[#1B4332] cursor-pointer"
           >
             <option value="ALL">Semua Status</option>
-            <option value="PENDING">Menunggu Review</option>
+            <option value="PENDING">Menunggu</option>
             <option value="APPROVED">Disetujui</option>
-            <option value="COMPLETED">Terpenuhi</option>
+            <option value="COMPLETED">Selesai</option>
             <option value="REJECTED">Ditolak</option>
           </select>
 
@@ -398,7 +395,7 @@ export const LearningNeedManagement: React.FC = () => {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value as any)}
-            className="text-xs px-3 py-2 bg-stone-50/70 dark:bg-stone-800/60 border border-stone-200/80 dark:border-stone-700 rounded-xl text-stone-700 dark:text-stone-200 focus:outline-none focus:border-[#1B4332] cursor-pointer"
+            className="text-xs px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-md text-stone-700 dark:text-stone-200 focus:outline-none focus:border-[#1B4332] cursor-pointer"
           >
             <option value="ALL">Semua Kategori</option>
             <option value="Buku">Buku & Kitab</option>
@@ -409,163 +406,160 @@ export const LearningNeedManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* 4. Requests List / Table */}
-      <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200/80 dark:border-stone-800 overflow-hidden shadow-xs">
+      {/* 4. Table / List of Requests */}
+      <div className="bg-white dark:bg-stone-900 rounded-lg border border-stone-200/80 dark:border-stone-800 overflow-hidden">
         {filteredRequests.length === 0 ? (
-          <div className="p-12 text-center space-y-2">
-            <h3 className="text-sm font-bold text-stone-800 dark:text-stone-200">
-              Tidak Ada Data Pengajuan
-            </h3>
-            <p className="text-xs text-stone-400 max-w-sm mx-auto">
-              {currentRole === 'GURU'
-                ? 'Belum ada pengajuan sarana yang dibuat. Klik tombol di atas untuk mengajukan kebutuhan baru.'
-                : 'Tidak ada pengajuan yang sesuai dengan kriteria filter saat ini.'}
-            </p>
+          <div className="p-8 text-center text-xs text-stone-400">
+            Tidak ada data pengajuan yang sesuai.
           </div>
         ) : (
-          <div className="divide-y divide-stone-100 dark:divide-stone-800">
-            {/* Header Columns (Desktop) */}
-            <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-3 bg-stone-50/50 dark:bg-stone-800/30 text-[11px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wider">
-              <div className="col-span-2">Tanggal & Kategori</div>
-              <div className="col-span-4">Kebutuhan & Urgensi</div>
-              <div className="col-span-2">Pengaju</div>
-              <div className="col-span-2">Status & Disposisi</div>
-              <div className="col-span-2 text-right">Aksi</div>
-            </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-stone-200 dark:border-stone-800 bg-stone-50/70 dark:bg-stone-850/70 text-stone-500 dark:text-stone-400 font-medium">
+                  <th className="py-2.5 px-3.5">Tanggal</th>
+                  <th className="py-2.5 px-3.5">Kebutuhan</th>
+                  <th className="py-2.5 px-3.5">Kategori</th>
+                  <th className="py-2.5 px-3.5">Pengaju</th>
+                  <th className="py-2.5 px-3.5">Status</th>
+                  <th className="py-2.5 px-3.5 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-150 dark:divide-stone-800">
+                {filteredRequests.map((req) => {
+                  const teacher = teacherMap.get(req.teacherId);
+                  const isOwner = req.teacherId === currentUser?.id;
 
-            {/* Request Rows */}
-            {filteredRequests.map((req) => {
-              const teacher = teacherMap.get(req.teacherId);
-              const isOwner = req.teacherId === currentUser?.id;
-
-              return (
-                <div 
-                  key={req.id}
-                  className="p-4 sm:px-6 sm:py-4 hover:bg-stone-50/50 dark:hover:bg-stone-800/20 transition-colors"
-                >
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 items-start lg:items-center text-xs">
-                    {/* Col 1: Date & Category */}
-                    <div className="lg:col-span-2 space-y-1">
-                      <span className="font-mono text-stone-500 dark:text-stone-400 text-xs block">
+                  return (
+                    <tr 
+                      key={req.id}
+                      className="hover:bg-stone-50/60 dark:hover:bg-stone-800/40 transition-colors"
+                    >
+                      {/* Tanggal */}
+                      <td className="py-3 px-3.5 text-stone-500 dark:text-stone-400 font-mono whitespace-nowrap">
                         {formatIndonesianDate(req.createdAt)}
-                      </span>
-                      <span className="inline-block px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-[11px] font-medium">
-                        {req.category}
-                      </span>
-                    </div>
+                      </td>
 
-                    {/* Col 2: Title & Description */}
-                    <div className="lg:col-span-4 space-y-1">
-                      <h4 className="font-bold text-stone-900 dark:text-stone-100 text-sm">
-                        {req.title}
-                      </h4>
-                      <p className="text-stone-500 dark:text-stone-400 text-xs line-clamp-1">
-                        {req.description}
-                      </p>
-                    </div>
-
-                    {/* Col 3: Teacher */}
-                    <div className="lg:col-span-2 space-y-0.5">
-                      <p className="font-semibold text-stone-800 dark:text-stone-200">
-                        {teacher?.name || 'Asatidz'}
-                      </p>
-                      <p className="text-[11px] text-stone-400">
-                        Unit {teacher?.unit || 'SMP'}
-                      </p>
-                    </div>
-
-                    {/* Col 4: Status */}
-                    <div className="lg:col-span-2 space-y-1">
-                      <div>{getStatusBadge(req.status)}</div>
-                      {req.decisionNote && (
-                        <p className="text-[11px] text-stone-500 italic line-clamp-1">
-                          "{req.decisionNote}"
+                      {/* Kebutuhan (Judul & Ringkasan) */}
+                      <td className="py-3 px-3.5 max-w-xs">
+                        <p className="font-medium text-stone-900 dark:text-stone-100">
+                          {req.title}
                         </p>
-                      )}
-                    </div>
+                        <p className="text-[11px] text-stone-400 line-clamp-1 mt-0.5">
+                          {req.description}
+                        </p>
+                      </td>
 
-                    {/* Col 5: Actions */}
-                    <div className="lg:col-span-2 flex items-center justify-end gap-1.5 pt-2 lg:pt-0">
-                      <button
-                        onClick={() => setSelectedDetailRequest(req)}
-                        className="px-2.5 py-1.5 text-xs font-medium text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white bg-stone-100 dark:bg-stone-800 hover:bg-stone-200/80 rounded-lg transition-colors cursor-pointer"
-                      >
-                        Detail
-                      </button>
+                      {/* Kategori */}
+                      <td className="py-3 px-3.5 text-stone-600 dark:text-stone-300 whitespace-nowrap">
+                        {req.category}
+                      </td>
 
-                      {/* Kepsek Approval Actions */}
-                      {isKepsek && req.status === 'PENDING' && (
-                        <>
+                      {/* Pengaju */}
+                      <td className="py-3 px-3.5 whitespace-nowrap">
+                        <p className="text-stone-800 dark:text-stone-200 font-medium">
+                          {teacher?.name || 'Asatidz'}
+                        </p>
+                        <p className="text-[11px] text-stone-400">
+                          Unit {teacher?.unit || 'SMP'}
+                        </p>
+                      </td>
+
+                      {/* Status */}
+                      <td className="py-3 px-3.5 whitespace-nowrap">
+                        {getStatusBadge(req.status)}
+                        {req.decisionNote && (
+                          <p className="text-[10px] text-stone-400 mt-1 max-w-[180px] truncate" title={req.decisionNote}>
+                            {req.decisionNote}
+                          </p>
+                        )}
+                      </td>
+
+                      {/* Aksi */}
+                      <td className="py-3 px-3.5 text-right whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1.5 justify-end">
                           <button
-                            onClick={() => handleOpenDecision(req, 'APPROVED')}
-                            className="px-3 py-1.5 text-xs font-semibold text-white bg-[#1B4332] hover:bg-[#143326] rounded-lg transition-colors cursor-pointer"
+                            onClick={() => setSelectedDetailRequest(req)}
+                            className="px-2.5 py-1 text-xs font-medium text-stone-600 dark:text-stone-300 bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 rounded border border-stone-200 dark:border-stone-700 transition-colors cursor-pointer"
                           >
-                            Setujui
+                            Detail
                           </button>
-                          <button
-                            onClick={() => handleOpenDecision(req, 'REJECTED')}
-                            className="px-2.5 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-300 rounded-lg transition-colors cursor-pointer"
-                          >
-                            Tolak
-                          </button>
-                        </>
-                      )}
 
-                      {/* Delete Action (Owner or Admin) */}
-                      {(isOwner || currentRole === 'ADMIN') && req.status === 'PENDING' && (
-                        <button
-                          onClick={() => setDeleteModal({ isOpen: true, requestId: req.id })}
-                          className="p-1.5 text-stone-400 hover:text-rose-600 rounded-lg transition-colors cursor-pointer"
-                          title="Hapus Pengajuan"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                          {/* Approval Actions for Kepsek */}
+                          {isKepsek && req.status === 'PENDING' && (
+                            <>
+                              <button
+                                onClick={() => handleOpenDecision(req, 'APPROVED')}
+                                className="px-2.5 py-1 text-xs font-medium text-white bg-[#1B4332] hover:bg-[#143326] rounded transition-colors cursor-pointer"
+                              >
+                                Setujui
+                              </button>
+                              <button
+                                onClick={() => handleOpenDecision(req, 'REJECTED')}
+                                className="px-2.5 py-1 text-xs font-medium text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 rounded border border-rose-200/60 dark:border-rose-800/40 transition-colors cursor-pointer"
+                              >
+                                Tolak
+                              </button>
+                            </>
+                          )}
+
+                          {/* Delete Action (Owner or Admin) */}
+                          {(isOwner || currentRole === 'ADMIN') && req.status === 'PENDING' && (
+                            <button
+                              onClick={() => setDeleteModal({ isOpen: true, requestId: req.id })}
+                              className="p-1 text-stone-400 hover:text-rose-600 rounded transition-colors cursor-pointer"
+                              title="Hapus"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
 
       {/* MODAL: ADD NEW LEARNING NEED (GURU) */}
       {showAddForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-xl max-w-lg w-full overflow-hidden border border-stone-200/80 dark:border-stone-800">
-            <div className="px-6 py-4 flex items-center justify-between border-b border-stone-100 dark:border-stone-800">
-              <h3 className="font-bold text-base text-stone-900 dark:text-stone-100">
-                Pengajuan Kebutuhan Sarana
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-xs">
+          <div className="bg-white dark:bg-stone-900 rounded-lg shadow-lg max-w-md w-full overflow-hidden border border-stone-200 dark:border-stone-800">
+            <div className="px-4 py-3 flex items-center justify-between border-b border-stone-150 dark:border-stone-800">
+              <h3 className="font-semibold text-xs text-stone-900 dark:text-stone-100">
+                Pengajuan Kebutuhan Baru
               </h3>
               <button
                 onClick={() => setShowAddForm(false)}
-                className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-1 rounded-lg transition-colors cursor-pointer"
+                className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-1 rounded cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
-              <div className="space-y-1.5">
-                <label className="font-semibold text-stone-800 dark:text-stone-200 block">
-                  Kategori Kebutuhan
+            <form onSubmit={handleSubmit} className="p-4 space-y-3 text-xs">
+              <div className="space-y-1">
+                <label className="font-medium text-stone-600 dark:text-stone-300 block">
+                  Kategori
                 </label>
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
-                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-stone-200/80 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800/60 text-stone-900 dark:text-stone-100 focus:outline-none focus:border-[#1B4332]"
+                  className="w-full text-xs px-2.5 py-1.5 rounded border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:border-[#1B4332]"
                 >
-                  <option value="Buku">Buku / Kitab Pembelajaran</option>
-                  <option value="Alat Tulis">Alat Tulis Kantor & Kelas (ATK)</option>
-                  <option value="Sarana">Sarana & Fasilitas Kelas</option>
+                  <option value="Buku">Buku & Kitab</option>
+                  <option value="Alat Tulis">Alat Tulis (ATK)</option>
+                  <option value="Sarana">Sarana Kelas</option>
                   <option value="Lainnya">Lainnya</option>
                 </select>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="font-semibold text-stone-800 dark:text-stone-200 block">
-                  Nama / Judul Kebutuhan
+              <div className="space-y-1">
+                <label className="font-medium text-stone-600 dark:text-stone-300 block">
+                  Judul Kebutuhan
                 </label>
                 <input
                   type="text"
@@ -573,37 +567,37 @@ export const LearningNeedManagement: React.FC = () => {
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Contoh: Pengadaan Kitab Jurumiyyah (30 Eks)"
-                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-stone-200/80 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800/60 text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-[#1B4332]"
+                  className="w-full text-xs px-2.5 py-1.5 rounded border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-[#1B4332]"
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="font-semibold text-stone-800 dark:text-stone-200 block">
-                  Deskripsi & Urgensi Penggunaan
+              <div className="space-y-1">
+                <label className="font-medium text-stone-600 dark:text-stone-300 block">
+                  Deskripsi & Jumlah
                 </label>
                 <textarea
                   rows={3}
                   required
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Jelaskan spesifikasi jumlah, kelas yang membutuhkan, dan tujuan penggunaannya..."
-                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-stone-200/80 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800/60 text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-[#1B4332]"
+                  placeholder="Jelaskan kebutuhan, jumlah, dan kelas..."
+                  className="w-full text-xs px-2.5 py-1.5 rounded border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-[#1B4332]"
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2.5">
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-stone-150 dark:border-stone-800">
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-semibold text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 rounded text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 text-xs font-medium cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#1B4332] hover:bg-[#143326] text-white text-xs font-semibold px-5 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs"
+                  className="bg-[#1B4332] hover:bg-[#143326] text-white font-medium px-3.5 py-1.5 rounded text-xs transition-colors cursor-pointer"
                 >
-                  Kirim Permohonan
+                  Kirim
                 </button>
               </div>
             </form>
@@ -613,55 +607,54 @@ export const LearningNeedManagement: React.FC = () => {
 
       {/* MODAL: DETAIL PERMOHONAN */}
       {selectedDetailRequest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-stone-200/80 dark:border-stone-800">
-            <div className="px-6 py-4 flex items-center justify-between border-b border-stone-100 dark:border-stone-800">
-              <h3 className="font-bold text-base text-stone-900 dark:text-stone-100">
-                Rincian Kebutuhan
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-xs">
+          <div className="bg-white dark:bg-stone-900 rounded-lg shadow-lg max-w-sm w-full overflow-hidden border border-stone-200 dark:border-stone-800">
+            <div className="px-4 py-3 flex items-center justify-between border-b border-stone-150 dark:border-stone-800">
+              <h3 className="font-semibold text-xs text-stone-900 dark:text-stone-100">
+                Detail Kebutuhan
               </h3>
               <button
                 onClick={() => setSelectedDetailRequest(null)}
-                className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-1 rounded-lg transition-colors cursor-pointer"
+                className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-1 rounded cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-4 text-xs">
-              <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
-                <div>
-                  <span className="text-[11px] font-mono text-stone-400 block">
-                    {formatIndonesianDate(selectedDetailRequest.createdAt)}
-                  </span>
-                  <span className="text-[11px] font-semibold text-stone-600 dark:text-stone-300">
-                    Kategori: {selectedDetailRequest.category}
-                  </span>
-                </div>
+            <div className="p-4 space-y-3 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-stone-400 font-mono">
+                  {formatIndonesianDate(selectedDetailRequest.createdAt)}
+                </span>
                 <div>{getStatusBadge(selectedDetailRequest.status)}</div>
               </div>
 
               <div>
-                <h4 className="font-bold text-stone-900 dark:text-stone-100 text-sm">
+                <span className="text-[10px] text-stone-400 block">Kebutuhan</span>
+                <p className="font-medium text-stone-900 dark:text-stone-100 text-xs mt-0.5">
                   {selectedDetailRequest.title}
-                </h4>
+                </p>
               </div>
 
-              <div className="bg-stone-50/70 dark:bg-stone-800/40 p-3.5 rounded-xl border border-stone-100 dark:border-stone-800/60">
-                <span className="text-[10px] uppercase font-semibold text-stone-400 block mb-1">
-                  Deskripsi / Urgensi:
-                </span>
-                <p className="text-stone-700 dark:text-stone-300 leading-relaxed whitespace-pre-wrap">
+              <div>
+                <span className="text-[10px] text-stone-400 block">Kategori</span>
+                <p className="text-stone-700 dark:text-stone-300 text-xs mt-0.5">
+                  {selectedDetailRequest.category}
+                </p>
+              </div>
+
+              <div>
+                <span className="text-[10px] text-stone-400 block">Deskripsi / Keterangan</span>
+                <p className="text-stone-700 dark:text-stone-300 text-xs mt-0.5 leading-relaxed bg-stone-50 dark:bg-stone-800 p-2.5 rounded border border-stone-150 dark:border-stone-750">
                   {selectedDetailRequest.description}
                 </p>
               </div>
 
               {selectedDetailRequest.decisionNote && (
-                <div className="bg-emerald-50/40 dark:bg-emerald-950/20 p-3.5 rounded-xl border border-emerald-100/60 dark:border-emerald-900/30">
-                  <span className="text-[10px] uppercase font-semibold text-emerald-800 dark:text-emerald-300 block mb-0.5">
-                    Catatan Disposisi:
-                  </span>
-                  <p className="text-stone-800 dark:text-stone-200 font-medium">
-                    "{selectedDetailRequest.decisionNote}"
+                <div>
+                  <span className="text-[10px] text-stone-400 block">Catatan Disposisi</span>
+                  <p className="text-stone-800 dark:text-stone-200 text-xs mt-0.5 bg-stone-50 dark:bg-stone-800 p-2.5 rounded border border-stone-150 dark:border-stone-750">
+                    {selectedDetailRequest.decisionNote}
                   </p>
                 </div>
               )}
@@ -669,7 +662,7 @@ export const LearningNeedManagement: React.FC = () => {
               <div className="pt-2 flex justify-end">
                 <button
                   onClick={() => setSelectedDetailRequest(null)}
-                  className="px-4 py-2 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-xl text-xs font-semibold hover:bg-stone-200/80 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded text-xs font-medium hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors cursor-pointer"
                 >
                   Tutup
                 </button>
@@ -681,51 +674,53 @@ export const LearningNeedManagement: React.FC = () => {
 
       {/* MODAL: KEPSEK DECISION */}
       {decisionModal.isOpen && decisionModal.request && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-stone-200/80 dark:border-stone-800">
-            <div className="px-6 py-4 flex items-center justify-between border-b border-stone-100 dark:border-stone-800">
-              <h3 className="font-bold text-base text-stone-900 dark:text-stone-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-xs">
+          <div className="bg-white dark:bg-stone-900 rounded-lg shadow-lg max-w-sm w-full overflow-hidden border border-stone-200 dark:border-stone-800">
+            <div className="px-4 py-3 flex items-center justify-between border-b border-stone-150 dark:border-stone-800">
+              <h3 className="font-semibold text-xs text-stone-900 dark:text-stone-100">
                 {decisionModal.action === 'APPROVED' ? 'Setujui Pengajuan' : decisionModal.action === 'REJECTED' ? 'Tolak Pengajuan' : 'Tandai Selesai'}
               </h3>
               <button
                 onClick={() => setDecisionModal({ ...decisionModal, isOpen: false })}
-                className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-1 rounded-lg transition-colors cursor-pointer"
+                className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-1 rounded cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-4 text-xs">
-              <p className="text-stone-600 dark:text-stone-300 leading-relaxed">
-                Konfirmasi status permohonan untuk: <br />
-                <strong className="text-stone-900 dark:text-stone-100 text-sm">{decisionModal.request.title}</strong>
-              </p>
+            <div className="p-4 space-y-3 text-xs">
+              <div>
+                <span className="text-[10px] text-stone-400 block">Kebutuhan:</span>
+                <p className="font-medium text-stone-900 dark:text-stone-100 text-xs mt-0.5">
+                  {decisionModal.request.title}
+                </p>
+              </div>
 
-              <div className="space-y-1.5">
-                <label className="font-semibold text-stone-800 dark:text-stone-200 block">
+              <div className="space-y-1">
+                <label className="font-medium text-stone-600 dark:text-stone-300 block">
                   Catatan Disposisi (Opsional)
                 </label>
                 <textarea
                   rows={2}
                   value={decisionModal.note}
                   onChange={(e) => setDecisionModal({ ...decisionModal, note: e.target.value })}
-                  placeholder="Tambahkan catatan atau petunjuk pengadaan..."
-                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-stone-200/80 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800/60 text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-[#1B4332]"
+                  placeholder="Tambahkan catatan singkat..."
+                  className="w-full text-xs px-2.5 py-1.5 rounded border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-[#1B4332]"
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2.5">
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-stone-150 dark:border-stone-800">
                 <button
                   type="button"
                   onClick={() => setDecisionModal({ ...decisionModal, isOpen: false })}
-                  className="px-4 py-2 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                  className="px-3 py-1.5 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 rounded text-xs font-medium cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="button"
                   onClick={handleConfirmDecision}
-                  className={`px-5 py-2 text-white text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-xs ${
+                  className={`px-3.5 py-1.5 text-white font-medium rounded text-xs transition-colors cursor-pointer ${
                     decisionModal.action === 'APPROVED' || decisionModal.action === 'COMPLETED'
                       ? 'bg-[#1B4332] hover:bg-[#143326]'
                       : 'bg-rose-700 hover:bg-rose-800'
@@ -741,18 +736,18 @@ export const LearningNeedManagement: React.FC = () => {
 
       {/* MODAL: DELETE CONFIRMATION */}
       {deleteModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4 text-xs border border-stone-200/80 dark:border-stone-800">
-            <h3 className="font-bold text-base text-stone-900 dark:text-stone-100">
-              Hapus Pengajuan Kebutuhan?
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-xs">
+          <div className="bg-white dark:bg-stone-900 rounded-lg shadow-lg max-w-xs w-full p-4 space-y-3 text-xs border border-stone-200 dark:border-stone-800">
+            <h3 className="font-semibold text-xs text-stone-900 dark:text-stone-100">
+              Hapus Pengajuan?
             </h3>
-            <p className="text-stone-500 dark:text-stone-400 leading-relaxed">
-              Tindakan ini tidak dapat dibatalkan. Berkas permohonan akan dihapus secara permanen.
+            <p className="text-stone-500 dark:text-stone-400 text-xs">
+              Data pengajuan ini akan dihapus.
             </p>
-            <div className="pt-2 flex justify-end gap-2.5">
+            <div className="pt-2 flex justify-end gap-2 border-t border-stone-150 dark:border-stone-800">
               <button
                 onClick={() => setDeleteModal({ isOpen: false, requestId: null })}
-                className="px-4 py-2 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl text-xs font-semibold cursor-pointer"
+                className="px-3 py-1.5 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 rounded text-xs font-medium cursor-pointer"
               >
                 Batal
               </button>
@@ -764,7 +759,7 @@ export const LearningNeedManagement: React.FC = () => {
                     toast.success('Pengajuan berhasil dihapus');
                   }
                 }}
-                className="px-4 py-2 bg-rose-700 hover:bg-rose-800 text-white rounded-xl text-xs font-semibold cursor-pointer shadow-xs"
+                className="px-3.5 py-1.5 bg-rose-700 hover:bg-rose-800 text-white rounded text-xs font-medium cursor-pointer"
               >
                 Hapus
               </button>

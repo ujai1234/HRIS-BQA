@@ -5,10 +5,14 @@ import {
   Calendar,
   SlidersHorizontal,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Download
 } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
 import { formatRupiah, formatIndonesianDate, terbilang } from '../utils/formatters';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { toast } from 'sonner';
 
 export type AdminReportType = 
   | 'payroll' 
@@ -152,15 +156,268 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
   const totalNet = filteredPayrollItems.reduce((acc, i) => acc + i.netSalary, 0);
   const totalTeachingHours = filteredPayrollItems.reduce((acc, i) => acc + i.totalTaughtHours, 0);
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   const currentDate = new Date().toLocaleDateString('id-ID', {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
   });
+
+  const handleDownloadPDF = () => {
+    try {
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // 1. Official Letterhead
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(15, 23, 42);
+      doc.text("PONDOK PESANTREN BAITUL QUR'AN AL-IKHWAN", 105, 16, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(71, 85, 105);
+      doc.text("Lembaga Pendidikan Islam & Tahfiz Quran • SMP IT • MA • Pesantren", 105, 21, { align: 'center' });
+      doc.text("Jl. Sungai Kendal No.21, RT.8/RW.5, Marunda, Cilincing, Jakarta Utara 14150", 105, 26, { align: 'center' });
+      doc.text("Hotline: 0858-8302-2643 / 0812-8294-9922 • Email: sekretariat@bqa.sch.id", 105, 31, { align: 'center' });
+
+      // Separator double line
+      doc.setDrawColor(30, 41, 59);
+      doc.setLineWidth(0.8);
+      doc.line(14, 35, 196, 35);
+      doc.setLineWidth(0.2);
+      doc.line(14, 36.2, 196, 36.2);
+
+      // 2. Document Title
+      let title = '';
+      if (reportType === 'payroll') title = "REKAPITULASI LAPORAN KAFA'AH & PENGGAJIAN ASATIDZ";
+      else if (reportType === 'attendance_kbm') title = "LAPORAN REKAPITULASI PRESENSI & KEGIATAN BELAJAR MENGAJAR";
+      else if (reportType === 'journal_compliance') title = "LAPORAN KETAATAN PENGISIAN JURNAL PEMBELAJARAN (PBM)";
+      else if (reportType === 'badal_summary') title = "LAPORAN RESMI PENUGASAN GURU BADAL (PENGGANTI)";
+      else if (reportType === 'discipline_deduction') title = "REKAPITULASI PENEGAKAN SOP & POTONGAN DISIPLIN ASATIDZ";
+      else if (reportType === 'executive_summary') title = "LAPORAN EKSEKUTIF MANAJEMEN & SUMBER DAYA ASATIDZ";
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10.5);
+      doc.setTextColor(15, 23, 42);
+      doc.text(title, 105, 43, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Nomor: ${docNumber}  |  Rentang: ${dateRangeLabel}  |  Unit: ${unitFilter === 'ALL' ? 'Semua Unit' : unitFilter}`, 105, 48, { align: 'center' });
+
+      // Introductory Statement
+      doc.setFont('times', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(51, 65, 85);
+      doc.text(`Berdasarkan rekapitulasi data sistem HRIS Presensi dan Tata Usaha Pesantren Baitul Qur'an Al-Ikhwan untuk ${dateRangeLabel}, berikut disampaikan laporan resmi kepegawaian tenaga pendidik (asatidz) untuk menjadi bahan pertanggungjawaban administratif:`, 14, 55, { maxWidth: 182 });
+
+      // 4. Draw Table based on Report Type
+      if (reportType === 'payroll') {
+        const tableRows = filteredPayrollItems.map((item, idx) => [
+          String(idx + 1),
+          item.teacher.name,
+          item.teacher.unit,
+          formatRupiah(item.baseSalary),
+          String(item.totalTaughtHours),
+          formatRupiah(item.teachingHonorarium),
+          formatRupiah(item.totalTransport),
+          showDeductions ? `-${formatRupiah(item.totalDeductions)}` : '-',
+          formatRupiah(item.netSalary)
+        ]);
+
+        autoTable(doc, {
+          startY: 65,
+          head: [['No', 'Nama Asatidz', 'Unit', 'Gaji Pokok', 'JP', 'Honor JP', 'Transport', 'Potongan', 'Gaji Bersih']],
+          body: tableRows,
+          theme: 'striped',
+          headStyles: { fillColor: [27, 67, 50], fontSize: 8 },
+          bodyStyles: { fontSize: 8 },
+          foot: [['', 'TOTAL KESELURUHAN', '', formatRupiah(totalBaseSalary), String(totalTeachingHours), formatRupiah(totalHonor), formatRupiah(totalTransport), `-${formatRupiah(totalDeductions)}`, formatRupiah(totalNet)]],
+          footStyles: { fillColor: [241, 245, 249], textColor: [15, 23, 42], fontSize: 8, fontStyle: 'bold' }
+        });
+      } else if (reportType === 'attendance_kbm') {
+        const tableRows = filteredSchedules.map((sched, idx) => {
+          const teacher = teachers.find(t => t.id === sched.teacherId);
+          return [
+            String(idx + 1),
+            `${sched.subject} (Kelas ${sched.classRoom})`,
+            `${sched.dayOfWeek}, ${sched.startTime}-${sched.endTime}`,
+            teacher?.name || '-',
+            sched.unit,
+            `${sched.hours} JP`,
+            'TERLAKSANA'
+          ];
+        });
+
+        autoTable(doc, {
+          startY: 65,
+          head: [['No', 'Mata Pelajaran & Kelas', 'Hari & Waktu', 'Guru Pengampu', 'Unit', 'Beban', 'Status SOP']],
+          body: tableRows,
+          theme: 'striped',
+          headStyles: { fillColor: [27, 67, 50], fontSize: 8 },
+          bodyStyles: { fontSize: 8 }
+        });
+      } else if (reportType === 'journal_compliance') {
+        const tableRows = filteredAttendances.map((att, idx) => {
+          const sched = schedules.find(s => s.id === att.scheduleId);
+          const teacher = teachers.find(t => t.id === (att.actualTeacherId || att.teacherId));
+          return [
+            String(idx + 1),
+            `${teacher?.name || '-'} (${sched?.subject || 'KBM'})`,
+            `${att.date} ${att.clockInTime}`,
+            att.teachingMaterial || '[Belum diisi]',
+            att.status === 'SELESAI' ? 'LENGKAP' : 'PENDING',
+            `-${formatRupiah(att.penaltyAmount)}`
+          ];
+        });
+
+        autoTable(doc, {
+          startY: 65,
+          head: [['No', 'Nama Asatidz & Mapel', 'Tanggal / Waktu', 'Materi / Bahasan', 'Status Jurnal', 'Potongan']],
+          body: tableRows,
+          theme: 'striped',
+          headStyles: { fillColor: [27, 67, 50], fontSize: 8 },
+          bodyStyles: { fontSize: 8 }
+        });
+      } else if (reportType === 'badal_summary') {
+        const tableRows = filteredBadalAssignments.map((b, idx) => {
+          const sched = schedules.find(s => s.id === b.scheduleId);
+          const origTeacher = teachers.find(t => t.id === b.originalTeacherId);
+          const badalTeacher = teachers.find(t => t.id === b.badalTeacherId);
+          return [
+            String(idx + 1),
+            b.date,
+            sched?.subject || '-',
+            origTeacher?.name || '-',
+            badalTeacher?.name || '-',
+            b.reason,
+            formatRupiah(80000)
+          ];
+        });
+
+        autoTable(doc, {
+          startY: 65,
+          head: [['No', 'Tanggal', 'Mapel & Kelas', 'Guru Utama', 'Guru Badal', 'Alasan', 'Kafa’ah Hak']],
+          body: tableRows,
+          theme: 'striped',
+          headStyles: { fillColor: [27, 67, 50], fontSize: 8 },
+          bodyStyles: { fontSize: 8 }
+        });
+      } else if (reportType === 'discipline_deduction') {
+        const tableRows = filteredPayrollItems.filter(i => i.totalDeductions > 0).map((item, idx) => [
+          String(idx + 1),
+          item.teacher.name,
+          item.teacher.unit,
+          formatRupiah(item.totalLateMinutes * 500),
+          formatRupiah(Math.max(0, item.totalDeductions - (item.totalLateMinutes * 500))),
+          `-${formatRupiah(item.totalDeductions)}`
+        ]);
+
+        autoTable(doc, {
+          startY: 65,
+          head: [['No', 'Nama Asatidz & NIP', 'Unit', 'Potongan Terlambat', 'Penalti Jurnal Kos', 'Total Potongan']],
+          body: tableRows,
+          theme: 'striped',
+          headStyles: { fillColor: [27, 67, 50], fontSize: 8 },
+          bodyStyles: { fontSize: 8 }
+        });
+      } else {
+        const tableRows = [
+          ['Total Tenaga Pendidik', `${teachers.length} Asatidz Aktif`],
+          ['Total Beban Mengajar', `${schedules.reduce((a, s) => a + s.hours, 0)} JP / Pekan`],
+          ['Rasio Kepatuhan Jurnal', `${complianceRate}% Tertib`],
+          ['Alokasi Anggaran Kafa\'ah', formatRupiah(payrollSummary.totalNet)],
+          ['Efisiensi Potongan Disiplin', formatRupiah(payrollSummary.totalDeductions)]
+        ];
+
+        autoTable(doc, {
+          startY: 65,
+          head: [['Indikator Kunci', 'Capaian & Evaluasi']],
+          body: tableRows,
+          theme: 'striped',
+          headStyles: { fillColor: [27, 67, 50], fontSize: 8 },
+          bodyStyles: { fontSize: 8 }
+        });
+      }
+
+      // Closing Statement
+      let currentY = (doc as any).lastAutoTable.finalY + 10;
+      if (currentY > 240) {
+        doc.addPage();
+        currentY = 20;
+      }
+
+      doc.setFont('times', 'normal');
+      doc.setFontSize(10);
+      doc.text("Demikian laporan resmi ini dibuat dengan sebenarnya sesuai dengan data operasional dan catatan elektronik sistem presensi Pesantren Baitul Qur'an Al-Ikhwan untuk dipergunakan sebagaimana mestinya.", 14, currentY, { maxWidth: 182 });
+
+      // Signatures
+      currentY += 15;
+      if (currentY > 235) {
+        doc.addPage();
+        currentY = 20;
+      }
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.text(`Jakarta, ${currentDate}`, 196, currentY, { align: 'right' });
+
+      currentY += 6;
+      if (signatoryRoleCount === '3_SIG') {
+        doc.text("Mengetahui / Mengesahkan,", 20, currentY);
+        doc.text("Pemeriksa Data,", 105, currentY, { align: 'center' });
+        doc.text("Disusun Oleh,", 190, currentY, { align: 'right' });
+
+        doc.setFont('helvetica', 'bold');
+        doc.text("Pimpinan Pesantren", 20, currentY + 4);
+        doc.text("Kepala Tata Usaha & HR", 105, currentY + 4, { align: 'center' });
+        doc.text("Bendahara & Penggajian", 190, currentY + 4, { align: 'right' });
+
+        currentY += 22;
+        doc.text("Ust. Cahyono, M.Pd.", 20, currentY);
+        doc.text("Ust. Akmal Yaqien, S.E.", 105, currentY, { align: 'center' });
+        doc.text("Ust. M. Zaki, S.Ak.", 190, currentY, { align: 'right' });
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.text("NIP. 197805122003121001", 20, currentY + 4);
+        doc.text("NIP. 198904152012011002", 105, currentY + 4, { align: 'center' });
+        doc.text("NIP. 199307202018041003", 190, currentY + 4, { align: 'right' });
+      } else {
+        doc.text("Mengetahui / Mengesahkan,", 35, currentY);
+        doc.text("Pemeriksa Data,", 175, currentY, { align: 'right' });
+
+        doc.setFont('helvetica', 'bold');
+        doc.text("Pimpinan Pesantren", 35, currentY + 4);
+        doc.text("Kepala Tata Usaha & HR", 175, currentY + 4, { align: 'right' });
+
+        currentY += 22;
+        doc.text("Ust. Cahyono, M.Pd.", 35, currentY);
+        doc.text("Ust. Akmal Yaqien, S.E.", 175, currentY, { align: 'right' });
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.text("NIP. 197805122003121001", 35, currentY + 4);
+        doc.text("NIP. 198904152012011002", 175, currentY + 4, { align: 'right' });
+      }
+
+      // Save PDF Document
+      const filename = `Laporan_Resmi_${reportType}_${selectedPeriod.replace(/\s+/g, '_')}.pdf`;
+      doc.save(filename);
+      toast.success(`Dokumen resmi berhasil diunduh: ${filename}`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Gagal membuat dokumen PDF");
+    }
+  };
+
+  const handlePrintBackup = () => {
+    window.print();
+  };
 
   return (
     <div 
@@ -178,7 +435,7 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <span className="w-6 h-6 rounded bg-emerald-600 flex items-center justify-center font-bold text-[11px] text-white">
-                BQ
+                BQA
               </span>
               <div>
                 <h2 className="font-semibold text-xs text-stone-100 leading-tight">
@@ -235,11 +492,11 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
               {/* Print Button */}
               <button
                 type="button"
-                onClick={handlePrint}
+                onClick={handleDownloadPDF}
                 className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-colors shadow-xs cursor-pointer"
               >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Cetak / PDF</span>
+                <Download className="w-3.5 h-3.5" />
+                <span>Unduh PDF Resmi</span>
               </button>
 
               <button

@@ -217,17 +217,9 @@ export const KafaahManagementView: React.FC = () => {
       <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 p-5 shadow-2xs">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-emerald-50 dark:bg-emerald-950/30 rounded-lg text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
-                <Coins className="w-5 h-5" />
-              </div>
-              <h2 className="text-base font-bold text-stone-900 dark:text-stone-100 tracking-tight">
-                Manajemen Tarif Kafa'ah & Honor Asatidz
-              </h2>
-            </div>
-            <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 max-w-2xl">
-              Kelola struktur nominal kafa'ah per jam pelajaran (JP), gaji pokok kehadiran tetap, dan uang transport harian secara terperinci dengan validasi Rupiah dan kalkulasi estimasi anggaran bulanan otomatis.
-            </p>
+            <h2 className="text-base font-bold text-stone-900 dark:text-stone-100 tracking-tight">
+              Manajemen Tarif Kafa'ah & Honor Asatidz
+            </h2>
           </div>
 
           {/* Action buttons */}

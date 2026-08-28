@@ -107,9 +107,26 @@ async function startServer() {
 
   app.delete('/api/teachers/:id', async (req, res) => {
     try {
-      await db.delete(schema.teachers).where(eq(schema.teachers.id, req.params.id));
+      const id = req.params.id;
+      if (id === 'all') {
+        await db.delete(schema.learningNeedRequests);
+        await db.delete(schema.journals);
+        await db.delete(schema.attendances);
+        await db.delete(schema.badalAssignments);
+        await db.delete(schema.schedules);
+        await db.delete(schema.teachers);
+        return res.json({ success: true, message: 'All teachers and related data deleted' });
+      }
+      // Delete dependent records first to maintain relational integrity
+      await db.delete(schema.learningNeedRequests).where(eq(schema.learningNeedRequests.teacherId, id));
+      await db.delete(schema.journals).where(eq(schema.journals.teacherId, id));
+      await db.delete(schema.attendances).where(or(eq(schema.attendances.teacherId, id), eq(schema.attendances.actualTeacherId, id)));
+      await db.delete(schema.badalAssignments).where(or(eq(schema.badalAssignments.originalTeacherId, id), eq(schema.badalAssignments.badalTeacherId, id)));
+      await db.delete(schema.schedules).where(eq(schema.schedules.teacherId, id));
+      await db.delete(schema.teachers).where(eq(schema.teachers.id, id));
       res.json({ success: true });
     } catch (error) {
+      console.error('Delete teacher error:', error);
       res.status(500).json({ error: 'Failed to delete teacher' });
     }
   });
@@ -181,9 +198,22 @@ async function startServer() {
 
   app.delete('/api/schedules/:id', async (req, res) => {
     try {
-      await db.delete(schema.schedules).where(eq(schema.schedules.id, req.params.id));
+      const id = req.params.id;
+      if (id === 'all') {
+        await db.delete(schema.journals);
+        await db.delete(schema.attendances);
+        await db.delete(schema.badalAssignments);
+        await db.delete(schema.schedules);
+        return res.json({ success: true, message: 'All schedules and related data deleted' });
+      }
+      // Delete dependent records first to maintain relational integrity
+      await db.delete(schema.journals).where(eq(schema.journals.scheduleId, id));
+      await db.delete(schema.attendances).where(eq(schema.attendances.scheduleId, id));
+      await db.delete(schema.badalAssignments).where(eq(schema.badalAssignments.scheduleId, id));
+      await db.delete(schema.schedules).where(eq(schema.schedules.id, id));
       res.json({ success: true });
     } catch (error) {
+      console.error('Delete schedule error:', error);
       res.status(500).json({ error: 'Failed to delete schedule' });
     }
   });
@@ -339,11 +369,15 @@ async function startServer() {
       const permCount = studentAttendance?.permittedCount ?? permittedCount ?? 0;
       const absCount = studentAttendance?.absentCount ?? absentCount ?? 0;
       const parsedFilledAt = filledAt ? new Date(filledAt) : new Date();
+      const todayStr = new Date().toISOString().split('T')[0];
 
       // 1. Ensure attendance record exists in DB and is linked
-      let targetAttendance = await db.query.attendances.findFirst({
-        where: eq(schema.attendances.id, attendanceId)
-      });
+      let targetAttendance = null;
+      if (attendanceId) {
+        targetAttendance = await db.query.attendances.findFirst({
+          where: eq(schema.attendances.id, attendanceId)
+        });
+      }
 
       if (!targetAttendance && scheduleId && date) {
         targetAttendance = await db.query.attendances.findFirst({
@@ -354,19 +388,27 @@ async function startServer() {
         });
       }
 
+      const effectiveDate = date || targetAttendance?.date || todayStr;
+      const effectiveScheduleId = scheduleId || targetAttendance?.scheduleId;
+      let effectiveTeacherId = teacherId || targetAttendance?.actualTeacherId || targetAttendance?.teacherId;
+
       // If no attendance record exists in DB yet, create one
       if (!targetAttendance) {
-        const sched = await db.query.schedules.findFirst({
-          where: eq(schema.schedules.id, scheduleId)
-        });
+        if (!effectiveTeacherId && effectiveScheduleId) {
+          const sched = await db.query.schedules.findFirst({
+            where: eq(schema.schedules.id, effectiveScheduleId)
+          });
+          effectiveTeacherId = sched?.teacherId || 'T-08';
+        }
+
         const newAttId = attendanceId || `ATT-${Date.now()}`;
         const createdAtt = await db.insert(schema.attendances).values({
           id: newAttId,
-          scheduleId: scheduleId,
-          teacherId: sched?.teacherId || teacherId,
-          actualTeacherId: teacherId || sched?.teacherId,
+          scheduleId: effectiveScheduleId || 'SCH-01',
+          teacherId: effectiveTeacherId || 'T-08',
+          actualTeacherId: effectiveTeacherId || 'T-08',
           isBadal: false,
-          date: date || new Date().toISOString().split('T')[0],
+          date: effectiveDate,
           clockInTime: `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`,
           lateMinutes: 0,
           lateCategory: 'TEPAT_WAKTU',
@@ -382,23 +424,29 @@ async function startServer() {
       }
 
       const effectiveAttendanceId = targetAttendance.id;
+      const finalScheduleId = effectiveScheduleId || targetAttendance.scheduleId;
 
       // 2. Check if journal already exists for this attendance or (scheduleId, date)
-      const existing = await db.query.journals.findFirst({
-        where: or(
-          eq(schema.journals.attendanceId, effectiveAttendanceId),
-          and(
-            eq(schema.journals.scheduleId, scheduleId),
-            eq(schema.journals.date, date)
+      let existing = null;
+      if (effectiveAttendanceId) {
+        existing = await db.query.journals.findFirst({
+          where: eq(schema.journals.attendanceId, effectiveAttendanceId)
+        });
+      }
+      if (!existing && finalScheduleId && effectiveDate) {
+        existing = await db.query.journals.findFirst({
+          where: and(
+            eq(schema.journals.scheduleId, finalScheduleId),
+            eq(schema.journals.date, effectiveDate)
           )
-        )
-      });
+        });
+      }
 
       const journalDbValues = {
         attendanceId: effectiveAttendanceId,
-        scheduleId: scheduleId || targetAttendance.scheduleId,
-        date: date || targetAttendance.date,
-        teacherId: teacherId || targetAttendance.actualTeacherId || targetAttendance.teacherId,
+        scheduleId: finalScheduleId || 'SCH-01',
+        date: effectiveDate,
+        teacherId: effectiveTeacherId || targetAttendance.actualTeacherId || targetAttendance.teacherId || 'T-08',
         topic: topic || 'Materi KBM',
         learningObjectives: learningObjectives || null,
         classNotes: classNotes || null,

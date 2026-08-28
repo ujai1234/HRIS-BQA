@@ -186,17 +186,17 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <>
       {/* Mobile Sidebar Backdrop */}
-      {sidebarOpen && (
-        <div 
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-40 lg:hidden print:hidden"
-        />
-      )}
+      <div 
+        onClick={() => setSidebarOpen(false)}
+        className={`fixed inset-0 bg-stone-950/60 backdrop-blur-[2px] z-40 lg:hidden print:hidden transition-opacity duration-300 ease-in-out ${
+          sidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      />
 
       {/* Desktop & Mobile Slideout Sidebar */}
       <aside 
-        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-[#141A17] border-r border-stone-800/80 flex flex-col justify-between transition-transform duration-200 ease-in-out lg:transtone-x-0 print:hidden ${
-          sidebarOpen ? 'transtone-x-0' : '-transtone-x-full'
+        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-[#141A17] border-r border-stone-800/80 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex flex-col flex-1 overflow-y-auto">
@@ -272,39 +272,48 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </aside>
 
-      {/* Top Header Bar for Desktop & Mobile */}
-      <header className="fixed top-0 right-0 left-0 lg:left-64 z-30 h-16 bg-[#FBFBFA]/90 dark:bg-[#141A17]/90 backdrop-blur-md border-b border-stone-200 dark:border-stone-800/80 flex items-center justify-between px-4 sm:px-6 print:hidden transition-colors duration-200">
-        {/* Left: Mobile Toggle & Breadcrumbs */}
+      {/* Top Header Bar for Desktop & Mobile with Modern Islamic Minimalist Stylist Accents */}
+      <header className="fixed top-0 right-0 left-0 lg:left-64 z-30 h-16 bg-[#FBFBFA]/95 dark:bg-[#111613]/95 backdrop-blur-md border-b border-stone-200/80 dark:border-stone-850 flex items-center justify-between px-4 sm:px-6 print:hidden transition-colors duration-200">
+        
+        {/* Dual-tone Islamic Premium Border Line */}
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#1B4332] via-[#B08968] to-[#1B4332]" />
+
+        {/* Left: Mobile Toggle & Elegant Breadcrumbs */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-1.5 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors"
+            className="lg:hidden p-2 text-stone-600 dark:text-stone-400 hover:text-[#1B4332] dark:hover:text-emerald-400 hover:bg-stone-100 dark:hover:bg-stone-900 rounded-xl transition-all"
           >
             <Menu className="w-4 h-4" />
           </button>
 
-          <div>
-            <div className="flex items-center gap-1.5 text-[11px] font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+          <div className="flex items-center gap-2">
+            <span className="p-1.5 bg-[#1B4332]/5 dark:bg-emerald-950/20 text-[#1B4332] dark:text-emerald-400 rounded-lg hidden sm:inline-block border border-[#1B4332]/10 dark:border-emerald-900/20">
+              <Sparkles className="w-3.5 h-3.5 text-[#B08968]" />
+            </span>
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-stone-500 dark:text-stone-450 uppercase tracking-widest">
               <span>HRIS</span>
-              <ChevronRight className="w-3 h-3 text-stone-400" />
-              <span className="text-stone-900 dark:text-stone-100 font-bold">{currentPath.split('/').pop()?.replace('_', ' ') || 'Guru'}</span>
+              <ChevronRight className="w-3 h-3 text-[#B08968]/60" />
+              <span className="text-stone-900 dark:text-stone-100 font-extrabold font-serif">
+                {currentPath.split('/').pop()?.replace('_', ' ') || 'Guru'}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Right: RBAC Persona Simulator & Period Controls */}
+        {/* Right: RBAC Persona Simulator & Period Controls with Clean Premium SaaS Style */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Manual Refresh Data Button */}
           <button
             id="btn-refresh-data"
             onClick={handleRefresh}
             disabled={isRefreshing || isLoading}
-            className="flex items-center gap-1.5 bg-stone-50 dark:bg-stone-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-stone-200 dark:border-stone-700 hover:border-emerald-200 dark:hover:border-emerald-800 text-stone-600 dark:text-stone-300 hover:text-emerald-700 dark:hover:text-emerald-400 py-1.5 px-2.5 sm:px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 shrink-0"
+            className="flex items-center gap-1.5 bg-white dark:bg-stone-900 hover:bg-emerald-50/50 dark:hover:bg-[#16221B]/40 border border-stone-200 dark:border-stone-800 hover:border-emerald-200 dark:hover:border-emerald-900 text-stone-700 dark:text-stone-300 hover:text-[#1B4332] dark:hover:text-emerald-400 py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 shrink-0 shadow-3xs"
             title="Refresh Data terbaru dari server tanpa memuat ulang halaman"
             aria-label="Refresh Data"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 ${isRefreshing || isLoading ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline">Refresh Data</span>
+            <RefreshCw className={`w-3.5 h-3.5 text-[#1B4332] dark:text-emerald-400 shrink-0 ${isRefreshing || isLoading ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Segarkan Data</span>
           </button>
 
           {/* Reset Database Button (Visible for Admins) */}
@@ -315,18 +324,21 @@ export const Header: React.FC<HeaderProps> = ({
                   resetToDefault();
                 }
               }}
-              className="flex items-center gap-2 bg-stone-50 hover:bg-stone-100 border border-stone-200 text-stone-400 hover:text-rose-600 py-1.5 px-3 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
+              className="flex items-center gap-1.5 bg-white hover:bg-rose-50/50 dark:bg-stone-900 dark:hover:bg-rose-950/10 border border-stone-200 dark:border-stone-800 text-stone-500 hover:text-rose-600 dark:hover:text-rose-450 py-2 px-3 rounded-xl text-[10px] font-bold tracking-wider transition-all cursor-pointer shadow-3xs"
               title="Reset Sinkronisasi Data"
             >
-              <RotateCcw className="w-3 h-3" />
+              <RotateCcw className="w-3 h-3 text-rose-500" />
               <span className="hidden sm:inline uppercase">Reset</span>
             </button>
           )}
 
-          {/* Logged in User Pill */}
-          <div className="hidden sm:flex items-center gap-2 bg-stone-50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-700 text-xs font-medium text-stone-700 dark:text-stone-300 py-1.5 px-3 rounded-lg">
-            <div className={`w-1.5 h-1.5 rounded-full ${currentRole === 'GURU' ? 'bg-emerald-500' : currentRole === 'ADMIN' ? 'bg-blue-500' : 'bg-amber-500'}`} />
-            <span className="max-w-[150px] truncate">{currentUser.name}</span>
+          {/* Logged in User Pill with Role Indicator Dot */}
+          <div className="hidden sm:flex items-center gap-2 bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 text-xs font-bold text-stone-850 dark:text-stone-200 py-1.5 px-3.5 rounded-xl shadow-3xs">
+            <span className="relative flex h-2 w-2">
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${currentRole === 'GURU' ? 'bg-emerald-400' : currentRole === 'ADMIN' ? 'bg-indigo-400' : 'bg-amber-400'}`}></span>
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${currentRole === 'GURU' ? 'bg-emerald-500' : currentRole === 'ADMIN' ? 'bg-indigo-500' : 'bg-amber-500'}`}></span>
+            </span>
+            <span className="max-w-[130px] truncate">{currentUser.name}</span>
           </div>
 
           {/* Period Selector */}
@@ -334,13 +346,13 @@ export const Header: React.FC<HeaderProps> = ({
             <select
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="bg-stone-50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-700 text-xs font-medium text-stone-700 dark:text-stone-300 py-1.5 pl-2.5 pr-7 rounded-lg appearance-none cursor-pointer focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500"
+              className="bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 text-xs font-bold text-stone-750 dark:text-stone-300 py-2 pl-3 pr-8 rounded-xl appearance-none cursor-pointer focus:outline-none focus:border-[#1B4332] dark:focus:border-emerald-500 shadow-3xs"
             >
               <option value="Agustus 2026">Agustus 2026</option>
               <option value="Juli 2026">Juli 2026</option>
               <option value="Juni 2026">Juni 2026</option>
             </select>
-            <ChevronDown className="w-3 h-3 text-stone-400 absolute right-2 top-3 pointer-events-none" />
+            <ChevronDown className="w-3.5 h-3.5 text-[#B08968] absolute right-2.5 top-3.5 pointer-events-none" />
           </div>
 
           {/* Notification Bell (Guru Only) */}
@@ -390,43 +402,43 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
 
                   {/* Filter Pills */}
-                  <div className="flex items-center gap-1 px-3 py-2 bg-stone-50/70 dark:bg-stone-800/40 border-b border-stone-100 dark:border-stone-800/80 overflow-x-auto text-[10px]">
+                  <div className="flex items-center gap-1 px-3 py-1.5 bg-stone-50/50 dark:bg-stone-850/20 border-b border-stone-100 dark:border-stone-850/60 overflow-x-auto text-[10px]">
                     <button
                       onClick={() => setFilterType('ALL')}
-                      className={`px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer shrink-0 ${
+                      className={`px-2 py-0.5 rounded transition-all cursor-pointer shrink-0 font-bold ${
                         filterType === 'ALL'
-                          ? 'bg-stone-900 text-white dark:bg-white dark:text-stone-900'
-                          : 'text-stone-500 hover:text-stone-900 dark:hover:text-stone-200'
+                          ? 'text-[#1B4332] dark:text-emerald-400 bg-stone-100/80 dark:bg-stone-800/60'
+                          : 'text-stone-550 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                       }`}
                     >
                       Semua ({notifications.length})
                     </button>
                     <button
                       onClick={() => setFilterType('BADAL')}
-                      className={`px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer shrink-0 ${
+                      className={`px-2 py-0.5 rounded transition-all cursor-pointer shrink-0 font-bold ${
                         filterType === 'BADAL'
-                          ? 'bg-amber-600 text-white'
-                          : 'text-stone-500 hover:text-amber-600'
+                          ? 'text-[#B08968] bg-[#B08968]/5 border border-[#B08968]/20'
+                          : 'text-stone-550 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                       }`}
                     >
                       Badal ({notifications.filter(n => n.type === 'BADAL').length})
                     </button>
                     <button
                       onClick={() => setFilterType('KBM')}
-                      className={`px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer shrink-0 ${
+                      className={`px-2 py-0.5 rounded transition-all cursor-pointer shrink-0 font-bold ${
                         filterType === 'KBM'
-                          ? 'bg-emerald-600 text-white'
-                          : 'text-stone-500 hover:text-emerald-600'
+                          ? 'text-[#1B4332] dark:text-emerald-400 bg-[#1B4332]/5 border border-[#1B4332]/20'
+                          : 'text-stone-550 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                       }`}
                     >
-                      Absen & Jurnal ({notifications.filter(n => n.type === 'ATTENDANCE_OPEN' || n.type === 'JOURNAL_PENDING').length})
+                      KBM ({notifications.filter(n => n.type === 'ATTENDANCE_OPEN' || n.type === 'JOURNAL_PENDING').length})
                     </button>
                     <button
                       onClick={() => setFilterType('REQUEST')}
-                      className={`px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer shrink-0 ${
+                      className={`px-2 py-0.5 rounded transition-all cursor-pointer shrink-0 font-bold ${
                         filterType === 'REQUEST'
-                          ? 'bg-purple-600 text-white'
-                          : 'text-stone-500 hover:text-purple-600'
+                          ? 'text-purple-600 dark:text-purple-400 bg-purple-500/5 border border-purple-500/20'
+                          : 'text-stone-550 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                       }`}
                     >
                       Ajuan ({notifications.filter(n => n.type === 'REQUEST_UPDATE').length})
@@ -434,7 +446,7 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
 
                   {/* List Content */}
-                  <div className="max-h-80 overflow-y-auto divide-y divide-stone-100 dark:divide-stone-800/60 p-1.5 space-y-1">
+                  <div className="max-h-80 overflow-y-auto divide-y divide-stone-100/60 dark:divide-stone-800/40 p-2 space-y-1">
                     {filteredNotifications.length === 0 ? (
                       <div className="p-8 text-center text-xs text-stone-400 dark:text-stone-500">
                         Tidak ada notifikasi pada kategori ini.
@@ -443,10 +455,14 @@ export const Header: React.FC<HeaderProps> = ({
                       filteredNotifications.map((notif) => (
                         <div 
                           key={notif.id}
-                          className={`p-3 rounded-xl transition-all cursor-pointer border ${
+                          className={`p-2.5 rounded-xl transition-all cursor-pointer border-l-2 flex flex-col gap-1 ${
+                            notif.type === 'BADAL' ? 'border-l-[#B08968]' :
+                            notif.type === 'ATTENDANCE_OPEN' ? 'border-l-[#1B4332]' :
+                            notif.type === 'JOURNAL_PENDING' ? 'border-l-sky-500' : 'border-l-stone-300 dark:border-l-stone-750'
+                          } ${
                             notif.isRead 
-                              ? 'bg-transparent hover:bg-stone-50 dark:hover:bg-stone-800/40 border-transparent' 
-                              : 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-100/60 dark:border-emerald-900/40 hover:bg-emerald-50/70'
+                              ? 'bg-transparent hover:bg-stone-50/60 dark:hover:bg-stone-850/20 border-transparent' 
+                              : 'bg-stone-50/50 dark:bg-stone-850/40 hover:bg-stone-100/40'
                           }`}
                           onClick={() => {
                             markAsRead(notif.id);
@@ -454,32 +470,26 @@ export const Header: React.FC<HeaderProps> = ({
                             setShowNotifPopover(false);
                           }}
                         >
-                          <div className="flex items-start justify-between gap-2 mb-1">
+                          <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-1.5 min-w-0">
                               {!notif.isRead && (
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#1B4332] dark:bg-emerald-400 shrink-0 animate-pulse" />
                               )}
-                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider shrink-0 ${getTagStyle(notif.type)}`}>
-                                {getTagLabel(notif.type)}
-                              </span>
-                              <p className="text-xs font-semibold text-stone-800 dark:text-stone-200 truncate">
+                              <p className="text-xs font-bold text-stone-850 dark:text-stone-200 truncate">
                                 {notif.title}
                               </p>
                             </div>
-                            <span className="text-[9px] text-stone-400 shrink-0 whitespace-nowrap">
+                            <span className="text-[9px] text-stone-400 shrink-0 whitespace-nowrap font-mono font-medium">
                               {notif.timeLabel}
                             </span>
                           </div>
 
-                          <p className="text-[11px] text-stone-600 dark:text-stone-400 line-clamp-2 leading-relaxed mb-2">
+                          <p className="text-[11px] text-stone-550 dark:text-stone-400 line-clamp-1 leading-normal">
                             {notif.subtitle}
                           </p>
 
-                          <div className="flex items-center justify-between pt-1">
-                            <span className="text-[9px] text-stone-400">
-                              {notif.type === 'BADAL' ? 'Penugasan Pengganti' : notif.type === 'REQUEST_UPDATE' ? 'Disposisi' : 'KBM Harian'}
-                            </span>
-                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 inline-flex items-center gap-0.5 group-hover:underline">
+                          <div className="flex items-center justify-end mt-0.5">
+                            <span className="text-[10px] font-bold text-[#1B4332] dark:text-emerald-400 inline-flex items-center gap-0.5 hover:underline">
                               <span>{notif.actionLabel}</span>
                               <ChevronRight className="w-2.5 h-2.5" />
                             </span>

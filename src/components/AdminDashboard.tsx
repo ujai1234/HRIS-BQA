@@ -263,15 +263,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* 1. Clean Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-stone-900 px-5 py-4 rounded-xl border border-stone-200/80 dark:border-stone-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
         <div>
-          <h1 className="text-base font-semibold text-stone-900 dark:text-stone-100 tracking-tight">
+          <h1 className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100 tracking-tight">
             Dashboard Administrasi
           </h1>
           <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-            Periode {selectedPeriod} • Pesantren Baitul Qur'an
+            Periode {selectedPeriod} • Pesantren Baitul Qur'an Al-Ikhwan
           </p>
         </div>
 
@@ -281,7 +281,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
             setOfficialReportType('executive_summary');
             setShowOfficialReportModal(true);
           }}
-          className="inline-flex items-center gap-1.5 bg-stone-900 dark:bg-stone-800 hover:bg-stone-800 dark:hover:bg-stone-700 text-white text-xs font-medium px-3.5 py-2 rounded-lg transition-colors cursor-pointer self-start sm:self-auto"
+          className="inline-flex items-center gap-1.5 bg-stone-900 dark:bg-stone-800 hover:bg-stone-800 dark:hover:bg-stone-700 text-white text-xs font-medium px-3.5 py-2 rounded-lg transition-colors cursor-pointer self-start sm:self-auto shadow-2xs"
         >
           <Printer className="w-3.5 h-3.5 text-emerald-400" />
           <span>Cetak Laporan PDF</span>
@@ -289,43 +289,43 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
       </div>
 
       {/* 2. Key Metrics (4 Clean Cards) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800">
-          <span className="text-xs text-stone-500 dark:text-stone-400 block">Total Guru</span>
-          <p className="text-2xl font-semibold text-stone-900 dark:text-stone-100 mt-1 font-mono">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Total Guru</span>
+          <p className="text-2xl sm:text-3xl font-semibold text-stone-900 dark:text-stone-100 mt-1 font-mono tracking-tight">
             {totalTeachers}
           </p>
-          <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium block mt-1">
+          <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium block mt-1.5">
             Semua Aktif
           </span>
         </div>
 
-        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800">
-          <span className="text-xs text-stone-500 dark:text-stone-400 block">Beban KBM</span>
-          <p className="text-2xl font-semibold text-stone-900 dark:text-stone-100 mt-1 font-mono">
+        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Beban KBM</span>
+          <p className="text-2xl sm:text-3xl font-semibold text-stone-900 dark:text-stone-100 mt-1 font-mono tracking-tight">
             {totalWeeklyJP} <span className="text-xs font-normal text-stone-500 dark:text-stone-400 font-sans">JP/mgg</span>
           </p>
-          <span className="text-[11px] text-stone-500 dark:text-stone-500 block mt-1 font-mono">
-            {totalSchedules} Sesi
+          <span className="text-[11px] text-stone-400 dark:text-stone-500 block mt-1.5 font-mono">
+            {totalSchedules} Sesi Terjadwal
           </span>
         </div>
 
-        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800">
-          <span className="text-xs text-stone-500 dark:text-stone-400 block">Kepatuhan Jurnal</span>
-          <p className="text-2xl font-semibold text-emerald-700 dark:text-emerald-400 mt-1 font-mono">
+        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Kepatuhan Jurnal</span>
+          <p className="text-2xl sm:text-3xl font-semibold text-emerald-700 dark:text-emerald-400 mt-1 font-mono tracking-tight">
             {complianceRate}%
           </p>
-          <span className="text-[11px] text-stone-500 dark:text-stone-400 block mt-1 font-mono">
+          <span className="text-[11px] text-stone-400 dark:text-stone-500 block mt-1.5 font-mono">
             {completedJournals} Selesai • {pendingJournals} Pending
           </span>
         </div>
 
-        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800">
-          <span className="text-xs text-stone-500 dark:text-stone-400 block">Estimasi Kafa'ah</span>
-          <p className="text-xl font-semibold text-stone-900 dark:text-stone-100 mt-1 font-mono truncate">
+        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Estimasi Kafa'ah</span>
+          <p className="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-stone-100 mt-1 font-mono tracking-tight truncate">
             {formatRupiah(payrollSummary.totalNet)}
           </p>
-          <span className="text-[11px] text-stone-500 dark:text-stone-500 block mt-1 font-mono">
+          <span className="text-[11px] text-stone-400 dark:text-stone-500 block mt-1.5 font-mono truncate">
             Potongan: -{formatRupiah(payrollSummary.totalDeductions)}
           </span>
         </div>
@@ -334,10 +334,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
       {/* 2.2 Pending Learning Needs Summary Card (Minimalist & Modern) */}
       <div 
         onClick={() => setCurrentPath('/dashboard/admin/kebutuhan')}
-        className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-stone-300 dark:hover:border-stone-700 transition-all cursor-pointer group shadow-xs"
+        className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-stone-300 dark:hover:border-stone-700 transition-all cursor-pointer group shadow-xs"
       >
         <div className="flex items-center gap-3">
-          <div className={`w-2.5 h-2.5 rounded-full ${pendingLearningNeeds > 0 ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+          <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${pendingLearningNeeds > 0 ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-stone-800 dark:text-stone-200">
@@ -356,14 +356,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = () => {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1 text-xs font-semibold text-stone-600 dark:text-stone-300 group-hover:text-stone-900 dark:group-hover:text-white transition-colors self-end sm:self-auto">
+        <div className="flex items-center gap-1 text-xs font-medium text-stone-600 dark:text-stone-300 group-hover:text-stone-900 dark:group-hover:text-white transition-colors self-end sm:self-auto">
           <span>Kelola Modul Kebutuhan</span>
-          <ArrowRight className="w-3.5 h-3.5 group-hover:transtone-x-0.5 transition-transform" />
+          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
         </div>
       </div>
 
       {/* 3. Trend Kehadiran Mingguan (Minimalist Stacked Bar) */}
-      <div className="bg-white dark:bg-stone-900 p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 space-y-4">
+      <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800 gap-3">
           <div>
             <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">

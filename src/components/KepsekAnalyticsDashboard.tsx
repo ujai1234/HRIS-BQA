@@ -348,25 +348,25 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
     <div className="space-y-6">
       
       {/* 1. Header & Controls Bar */}
-      <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200/90 dark:border-stone-800 p-5 shadow-xs">
+      <div className="bg-white dark:bg-stone-900/90 rounded-xl border border-stone-200/80 dark:border-stone-800 p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-0.5">
+          <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400 font-semibold uppercase tracking-wider">
                 Pesantren Baitul Qur'an Al-Ikhwan
               </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                {effectiveUnit === 'MA' ? 'Unit MA Al-Ikhwan' : effectiveUnit === 'SMP' ? 'Unit SMP IT' : effectiveUnit === 'PESANTREN' ? 'Unit Pondok Pesantren' : 'Semua Unit'}
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-stone-100 dark:bg-stone-800 text-[#1B4332] dark:text-emerald-400 border border-stone-200 dark:border-stone-700">
+                {effectiveUnit === 'MA' ? 'MA Al-Ikhwan' : effectiveUnit === 'SMP' ? 'SMP IT' : effectiveUnit === 'PESANTREN' ? 'Pesantren' : 'Semua Unit'}
               </span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight font-sans">
               {effectiveUnit === 'MA' 
-                ? 'Dashboard Kinerja & Kedisiplinan Guru MA' 
+                ? 'Kinerja & Kedisiplinan Guru MA' 
                 : effectiveUnit === 'SMP' 
-                ? 'Dashboard Kinerja & Kedisiplinan Guru SMP' 
+                ? 'Kinerja & Kedisiplinan Guru SMP IT' 
                 : effectiveUnit === 'PESANTREN' 
-                ? 'Dashboard Kinerja & Kedisiplinan Asatidz Ponpes' 
-                : 'Dashboard Kinerja & Kedisiplinan Asatidz'}
+                ? 'Kinerja & Kedisiplinan Asatidz Ponpes' 
+                : 'Kinerja & Kedisiplinan Asatidz'}
             </h1>
           </div>
 
@@ -374,12 +374,12 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
           <div className="flex flex-wrap items-center gap-2.5 pt-2 lg:pt-0">
             {/* Unit Filter - Only show if ADMIN (Global access) */}
             {currentRole === 'ADMIN' && (
-              <div className="flex items-center bg-stone-50 dark:bg-stone-800/50 p-1 rounded-xl border border-stone-200/60 dark:border-stone-700/50 text-[11px]">
+              <div className="flex items-center bg-stone-50 dark:bg-stone-800/50 p-1 rounded-lg border border-stone-200/60 dark:border-stone-700/50 text-[11px]">
                 <button
                   onClick={() => setSelectedUnit('ALL')}
-                  className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-md font-semibold transition-all cursor-pointer ${
                     selectedUnit === 'ALL'
-                      ? 'bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 shadow-sm'
+                      ? 'bg-white dark:bg-stone-900 text-[#1B4332] dark:text-emerald-400 shadow-xs'
                       : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
                   }`}
                 >
@@ -387,9 +387,9 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
                 </button>
                 <button
                   onClick={() => setSelectedUnit('SMP')}
-                  className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-md font-semibold transition-all cursor-pointer ${
                     selectedUnit === 'SMP'
-                      ? 'bg-white dark:bg-stone-900 text-emerald-600 dark:text-emerald-400 shadow-sm'
+                      ? 'bg-white dark:bg-stone-900 text-[#1B4332] dark:text-emerald-400 shadow-xs'
                       : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
                   }`}
                 >
@@ -397,9 +397,9 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
                 </button>
                 <button
                   onClick={() => setSelectedUnit('MA')}
-                  className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-md font-semibold transition-all cursor-pointer ${
                     selectedUnit === 'MA'
-                      ? 'bg-white dark:bg-stone-900 text-emerald-600 dark:text-emerald-400 shadow-sm'
+                      ? 'bg-white dark:bg-stone-900 text-[#1B4332] dark:text-emerald-400 shadow-xs'
                       : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
                   }`}
                 >
@@ -407,9 +407,9 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
                 </button>
                 <button
                   onClick={() => setSelectedUnit('PESANTREN')}
-                  className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-md font-semibold transition-all cursor-pointer ${
                     selectedUnit === 'PESANTREN'
-                      ? 'bg-white dark:bg-stone-900 text-emerald-600 dark:text-emerald-400 shadow-sm'
+                      ? 'bg-white dark:bg-stone-900 text-[#1B4332] dark:text-emerald-400 shadow-xs'
                       : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
                   }`}
                 >
@@ -424,143 +424,109 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
       {/* 2. Executive KPI Cards (Academic & Discipline Metrics Only) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Tingkat Kehadiran Staf */}
-        <div className="bg-white dark:bg-stone-900 p-5 rounded-2xl border border-stone-200/70 dark:border-stone-800/80 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">
-              Kehadiran Staf
-            </span>
-            <div className="p-1.5 bg-stone-50 dark:bg-stone-800 text-emerald-600 dark:text-emerald-400 rounded-lg">
-              <CheckCheck className="w-3.5 h-3.5" />
-            </div>
-          </div>
-          <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-stone-900 dark:text-stone-100">
-              96.8%
-            </span>
-          </div>
-          <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-1">
-            Total {totalStaffCount} asatidz aktif
+        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">
+            Kehadiran Staf
+          </span>
+          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-stone-900 dark:text-stone-100 mt-1">
+            96.8%
           </p>
+          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
+            Total {totalStaffCount} asatidz aktif
+          </span>
         </div>
 
         {/* Card 2: Ketaatan Pengisian Jurnal */}
-        <div className="bg-white dark:bg-stone-900 p-5 rounded-2xl border border-stone-200/70 dark:border-stone-800/80 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">
-              Ketaatan Jurnal
-            </span>
-            <div className="p-1.5 bg-stone-50 dark:bg-stone-800 text-blue-600 dark:text-blue-400 rounded-lg">
-              <ClipboardCheck className="w-3.5 h-3.5" />
-            </div>
-          </div>
-          <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-stone-900 dark:text-stone-100">
-              {journalComplianceRate}%
-            </span>
-          </div>
-          <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-1">
-            {completedJournals} Sesi Jurnal Lengkap
+        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">
+            Ketaatan Jurnal
+          </span>
+          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-emerald-700 dark:text-emerald-400 mt-1">
+            {journalComplianceRate}%
           </p>
+          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
+            {completedJournals} Sesi Jurnal Lengkap
+          </span>
         </div>
 
         {/* Card 3: Ketepatan Waktu Presensi */}
-        <div className="bg-white dark:bg-stone-900 p-5 rounded-2xl border border-stone-200/70 dark:border-stone-800/80 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">
-              Disiplin Waktu
-            </span>
-            <div className="p-1.5 bg-stone-50 dark:bg-stone-800 text-amber-600 dark:text-amber-400 rounded-lg">
-              <Clock className="w-3.5 h-3.5" />
-            </div>
-          </div>
-          <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-stone-900 dark:text-stone-100">
-              {punctualityRate}%
-            </span>
-          </div>
-          <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-1">
-            Persentase Tepat Waktu
+        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">
+            Disiplin Waktu
+          </span>
+          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-stone-900 dark:text-stone-100 mt-1">
+            {punctualityRate}%
           </p>
+          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
+            Persentase Tepat Waktu
+          </span>
         </div>
 
         {/* Card 4: Total Beban Mengajar & Guru Badal */}
-        <div className="bg-white dark:bg-stone-900 p-5 rounded-2xl border border-stone-200/70 dark:border-stone-800/80 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">
-              Beban KBM
-            </span>
-            <div className="p-1.5 bg-stone-50 dark:bg-stone-800 text-purple-600 dark:text-purple-400 rounded-lg">
-              <UserCheck className="w-3.5 h-3.5" />
-            </div>
-          </div>
-          <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-stone-900 dark:text-stone-100">
-              {totalWeeklyHours} <span className="text-sm font-semibold text-stone-400">JP</span>
-            </span>
-          </div>
-          <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-1">
-            Rasio Badal {badalRate}%
+        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">
+            Beban KBM
+          </span>
+          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-stone-900 dark:text-stone-100 mt-1">
+            {totalWeeklyHours} <span className="text-xs font-normal text-stone-500 dark:text-stone-400 font-sans">JP/mgg</span>
           </p>
+          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
+            Rasio Badal {badalRate}%
+          </span>
         </div>
       </div>
 
-      {/* 3. Primary Chart Section: Tren Bulanan Kehadiran & Kepatuhan Jurnal (Enlarged Full-Width) */}
-      <div className="bg-white dark:bg-stone-900 p-5 sm:p-6 rounded-2xl border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-4">
+      {/* 3. Primary Chart Section: Tren Bulanan Kehadiran & Kepatuhan Jurnal */}
+      <div className="bg-white dark:bg-stone-900 p-5 sm:p-6 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 gap-3 border-b border-stone-100 dark:border-stone-800">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest block">
-                Analisis Tren Semester
-              </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/50">
-                Semester Ganjil 2026/2027
-              </span>
-            </div>
-            <h2 className="text-base sm:text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2 mt-0.5">
-              <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-              Grafik Analisa Tren Kehadiran & Kepatuhan Jurnal Staf
+            <span className="text-[10px] font-semibold text-[#52796F] dark:text-[#81A499] uppercase tracking-wider block">
+              Analisis Tren Semester
+            </span>
+            <h2 className="text-base font-bold text-stone-900 dark:text-stone-100 mt-0.5">
+              Grafik Kehadiran & Kepatuhan Jurnal Staf
             </h2>
           </div>
 
-          {/* Dynamic Legend Badges */}
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 font-semibold border border-emerald-200/60 dark:border-emerald-900/40">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#10b981]" />
-              <span>Tingkat Kehadiran</span>
+          {/* Minimalist Sleek Legend */}
+          <div className="flex flex-wrap items-center gap-4 text-xs font-medium">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#1B4332] dark:bg-emerald-600" />
+              <span className="text-stone-700 dark:text-stone-300">Tingkat Kehadiran</span>
             </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 font-semibold border border-blue-200/60 dark:border-blue-900/40">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#3b82f6]" />
-              <span>Ketaatan Jurnal KBM</span>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#52796F]" />
+              <span className="text-stone-700 dark:text-stone-300">Ketaatan Jurnal</span>
             </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 font-semibold border border-amber-200/60 dark:border-amber-900/40">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b]" />
-              <span>Ketepatan Waktu</span>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#D97706]" />
+              <span className="text-stone-700 dark:text-stone-300">Ketepatan Waktu</span>
             </div>
           </div>
         </div>
 
-        {/* Enlarged Chart Canvas (Full Width & Spacious Height) */}
-        <div className="h-88 sm:h-96 w-full pt-2">
+        {/* Clean Chart Canvas */}
+        <div className="h-80 w-full pt-1">
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={monthlyTrendsData} margin={{ top: 15, right: 15, left: -20, bottom: 0 }}>
+            <ComposedChart data={monthlyTrendsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorKehadiran" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0.0}/>
+                  <stop offset="5%" stopColor="#1B4332" stopOpacity={0.12}/>
+                  <stop offset="95%" stopColor="#1B4332" stopOpacity={0.0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" className="dark:opacity-5" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" className="dark:opacity-10" />
               <XAxis 
                 dataKey="month" 
                 axisLine={false} 
                 tickLine={false} 
-                tick={{ fontSize: 12, fontWeight: 600, fill: '#64748b' }} 
+                tick={{ fontSize: 11, fontWeight: 600, fill: '#475569' }} 
               />
               <YAxis 
                 domain={[80, 100]} 
                 axisLine={false} 
                 tickLine={false} 
-                tick={{ fontSize: 11, fontWeight: 500, fill: '#94a3b8' }} 
+                tick={{ fontSize: 11, fontWeight: 600, fill: '#475569' }} 
                 tickFormatter={(val) => `${val}%`}
               />
               <Tooltip content={<PercentageTooltip />} />
@@ -570,8 +536,8 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
                 type="monotone" 
                 dataKey="tingkatKehadiran" 
                 name="Kehadiran" 
-                stroke="#10b981" 
-                strokeWidth={2.5} 
+                stroke="#1B4332" 
+                strokeWidth={2} 
                 fillOpacity={1} 
                 fill="url(#colorKehadiran)" 
               />
@@ -581,10 +547,9 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
                 type="monotone" 
                 dataKey="kepatuhanJurnal" 
                 name="Jurnal KBM" 
-                stroke="#3b82f6" 
-                strokeWidth={2.5} 
-                dot={{ r: 4, fill: '#3b82f6', strokeWidth: 2, stroke: '#ffffff' }}
-                activeDot={{ r: 6 }} 
+                stroke="#52796F" 
+                strokeWidth={2} 
+                dot={{ r: 3, fill: '#52796F' }}
               />
 
               {/* Line 3: Ketepatan Waktu */}
@@ -592,43 +557,43 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
                 type="monotone" 
                 dataKey="ketepatanWaktu" 
                 name="Tepat Waktu" 
-                stroke="#f59e0b" 
+                stroke="#D97706" 
                 strokeWidth={2} 
                 strokeDasharray="4 4"
-                dot={{ r: 3, fill: '#f59e0b' }}
+                dot={{ r: 2.5, fill: '#D97706' }}
               />
             </ComposedChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Aggregate Summary Analytics Footer */}
+        {/* Minimalist Summary Cards */}
         <div className="pt-3 border-t border-stone-100 dark:border-stone-800 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-          <div className="p-3 bg-stone-50 dark:bg-stone-800/40 rounded-xl border border-stone-100 dark:border-stone-800/60">
+          <div className="p-3 bg-stone-50/70 dark:bg-stone-850/40 rounded-lg border border-stone-100 dark:border-stone-800/60">
             <span className="text-[10px] text-stone-400 block font-medium">Rata-rata Kehadiran</span>
             <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold text-emerald-700 dark:text-emerald-400">96.8%</span>
-              <span className="text-[10px] text-emerald-600 font-medium">+2.1% YoY</span>
+              <span className="text-base font-bold font-serif text-stone-900 dark:text-stone-100">96.8%</span>
+              <span className="text-[10px] text-emerald-700 font-bold">+2.1%</span>
             </div>
           </div>
-          <div className="p-3 bg-stone-50 dark:bg-stone-800/40 rounded-xl border border-stone-100 dark:border-stone-800/60">
+          <div className="p-3 bg-stone-50/70 dark:bg-stone-850/40 rounded-lg border border-stone-100 dark:border-stone-800/60">
             <span className="text-[10px] text-stone-400 block font-medium">Rata-rata Jurnal KBM</span>
             <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold text-blue-700 dark:text-blue-400">95.3%</span>
-              <span className="text-[10px] text-blue-600 font-medium">Tertib Administrasi</span>
+              <span className="text-base font-bold font-serif text-stone-900 dark:text-stone-100">95.3%</span>
+              <span className="text-[10px] text-[#52796F] font-bold">Tertib</span>
             </div>
           </div>
-          <div className="p-3 bg-stone-50 dark:bg-stone-800/40 rounded-xl border border-stone-100 dark:border-stone-800/60">
+          <div className="p-3 bg-stone-50/70 dark:bg-stone-850/40 rounded-lg border border-stone-100 dark:border-stone-800/60">
             <span className="text-[10px] text-stone-400 block font-medium">Rata-rata Tepat Waktu</span>
             <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold text-amber-700 dark:text-amber-400">93.8%</span>
-              <span className="text-[10px] text-amber-600 font-medium">Disiplin Tinggi</span>
+              <span className="text-base font-bold font-serif text-stone-900 dark:text-stone-100">93.8%</span>
+              <span className="text-[10px] text-amber-700 font-bold">Baik</span>
             </div>
           </div>
-          <div className="p-3 bg-stone-50 dark:bg-stone-800/40 rounded-xl border border-stone-100 dark:border-stone-800/60">
-            <span className="text-[10px] text-stone-400 block font-medium">Total Sesi KBM Terekam</span>
+          <div className="p-3 bg-stone-50/70 dark:bg-stone-850/40 rounded-lg border border-stone-100 dark:border-stone-800/60">
+            <span className="text-[10px] text-stone-400 block font-medium">Total Sesi KBM</span>
             <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold text-stone-900 dark:text-stone-100">{totalRecordedSessions} Sesi</span>
-              <span className="text-[10px] text-stone-400 font-medium">KBM Aktif</span>
+              <span className="text-base font-bold font-serif text-stone-900 dark:text-stone-100">{totalRecordedSessions} Sesi</span>
+              <span className="text-[10px] text-stone-400 font-medium">Aktif</span>
             </div>
           </div>
         </div>
@@ -638,108 +603,110 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Chart 3: Pola Disiplin & Beban KBM Berdasarkan Hari (Senin - Ahad) - 5 Cols on desktop */}
-        <div className="lg:col-span-5 bg-white dark:bg-stone-900 p-5 rounded-2xl border border-stone-200/80 dark:border-stone-800 shadow-xs flex flex-col justify-between space-y-4">
+        <div className="lg:col-span-5 bg-white dark:bg-stone-900 p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between pb-2 border-b border-stone-100 dark:border-stone-800">
             <div>
-              <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest block">
+              <span className="text-[10px] font-semibold text-[#52796F] uppercase tracking-wider block">
                 Evaluasi Harian
               </span>
-              <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
                 Pola Kedisiplinan Mingguan
               </h3>
             </div>
-            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
-              Senin - Ahad
-            </span>
+            <div className="flex items-center gap-3 text-[11px] font-medium">
+              <div className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-[#1B4332]" />
+                <span className="text-stone-700 dark:text-stone-300">Tepat</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-[#D97706]" />
+                <span className="text-stone-700 dark:text-stone-300">Terlambat</span>
+              </div>
+            </div>
           </div>
 
-          <div className="h-72 w-full pt-1">
+          <div className="h-64 w-full pt-1">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklyDayData} margin={{ top: 15, right: 10, left: -25, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" className="dark:opacity-5" />
+              <BarChart data={weeklyDayData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" className="dark:opacity-10" />
                 <XAxis 
                   dataKey="hari" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 500, fill: '#94a3b8' }} 
+                  tick={{ fontSize: 11, fontWeight: 600, fill: '#475569' }} 
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 500, fill: '#cbd5e1' }} 
+                  tick={{ fontSize: 11, fontWeight: 600, fill: '#475569' }} 
                 />
                 <Tooltip content={<PercentageTooltip />} cursor={{ fill: 'transparent' }} />
                 <Bar 
                   dataKey="tepatWaktu" 
                   name="Tepat Waktu" 
-                  fill="#10b981" 
+                  fill="#1B4332" 
                   stackId="a" 
-                  barSize={18} 
+                  barSize={14} 
+                  radius={[0, 0, 2, 2]}
                 />
                 <Bar 
                   dataKey="terlambat" 
                   name="Terlambat" 
-                  fill="#f43f5e" 
+                  fill="#D97706" 
                   stackId="a" 
                   radius={[3, 3, 0, 0]} 
-                  barSize={18} 
+                  barSize={14} 
                 />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="pt-2 text-[11px] text-stone-500 dark:text-stone-400 bg-stone-50 dark:bg-stone-800/40 p-2.5 rounded-xl flex items-center justify-between border border-stone-100 dark:border-stone-800/60">
-            <span>Tingkat ketepatan waktu tertinggi: <strong>Jumat & Sabtu (98%)</strong></span>
-            <span className="text-emerald-700 dark:text-emerald-400 font-semibold">Terkendali</span>
+          <div className="pt-2 text-[11px] text-stone-500 dark:text-stone-400 flex items-center justify-between border-t border-stone-100 dark:border-stone-800/80">
+            <span>Tingkat ketepatan tertinggi: <strong className="text-stone-800 dark:text-stone-200">Jumat & Sabtu (98%)</strong></span>
+            <span className="text-emerald-700 dark:text-emerald-400 font-bold">Terkendali</span>
           </div>
         </div>
 
-        {/* Chart 4: Enhanced Radar & Scorecard Matriks Mutu Pengajaran - 7 Cols on desktop */}
-        <div className="lg:col-span-7 bg-white dark:bg-stone-900 p-5 rounded-2xl border border-stone-200/80 dark:border-stone-800 shadow-xs flex flex-col justify-between space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-stone-100 dark:border-stone-800 gap-2">
+        {/* Chart 4: Matriks Mutu Pengajaran (Minimalist & Simple) */}
+        <div className="lg:col-span-7 bg-white dark:bg-stone-900 p-5 sm:p-6 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs flex flex-col justify-between space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800 gap-2">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest block">
-                  Standar Mutu KBM
-                </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200/50">
-                  Indeks Mutu: 95.2% (Unggul / A)
-                </span>
-              </div>
-              <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2 mt-0.5">
-                <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                Matriks Mutu Pengajaran & Kepatuhan Standar
+              <span className="text-[10px] font-semibold text-[#52796F] uppercase tracking-wider block">
+                Evaluasi Mutu
+              </span>
+              <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                Matriks Kepatuhan & Standardisasi KBM
               </h3>
             </div>
 
-            {/* Legend */}
-            <div className="flex items-center gap-3 text-[11px]">
-              <div className="flex items-center gap-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-                <span className="font-semibold text-stone-700 dark:text-stone-300">Capaian Riil</span>
+            {/* Simple Legend */}
+            <div className="flex items-center gap-4 text-xs font-medium">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#1B4332]" />
+                <span className="text-stone-700 dark:text-stone-300">Capaian Riil</span>
               </div>
-              <div className="flex items-center gap-1">
-                <span className="w-2.5 h-0.5 bg-stone-400 border-b border-dashed border-stone-500" />
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-0.5 bg-stone-350 dark:bg-stone-600" />
                 <span className="text-stone-500 dark:text-stone-400">Target Minimal</span>
               </div>
             </div>
           </div>
 
-          {/* Dual Visual: Radar on Left, Scorecard List on Right */}
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-            {/* Radar Chart Visual */}
-            <div className="sm:col-span-6 h-64 w-full">
+          {/* Dual Visual: Minimalist Radar + Sleek Scorecard List */}
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
+            {/* Clean Radar Chart */}
+            <div className="sm:col-span-6 h-60 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={radarDimensionsData} margin={{ top: 10, right: 25, bottom: 10, left: 25 }}>
-                  <PolarGrid stroke="#e2e8f0" className="dark:opacity-10" />
+                <RadarChart data={radarDimensionsData} margin={{ top: 10, right: 20, bottom: 10, left: 20 }}>
+                  <PolarGrid stroke="#cbd5e1" className="dark:opacity-10" />
                   <PolarAngleAxis 
                     dataKey="subject" 
-                    tick={{ fontSize: 10, fontWeight: 600, fill: '#64748b' }} 
+                    tick={{ fontSize: 10, fontWeight: 600, fill: '#334155' }} 
                   />
                   <PolarRadiusAxis 
                     angle={30} 
                     domain={[0, 100]} 
-                    tick={{ fontSize: 8, fill: '#94a3b8' }} 
+                    tick={{ fontSize: 8, fill: '#64748b' }} 
                   />
                   {/* Standar Minimum Boundary */}
                   <Radar 
@@ -747,56 +714,45 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
                     dataKey="standar" 
                     stroke="#94a3b8" 
                     strokeDasharray="3 3" 
-                    fill="#94a3b8" 
-                    fillOpacity={0.08} 
+                    fill="#e2e8f0" 
+                    fillOpacity={0.1} 
                   />
                   {/* Realisasi Capaian */}
                   <Radar 
                     name="Capaian Riil" 
                     dataKey="realisasi" 
-                    stroke="#6366f1" 
+                    stroke="#1B4332" 
                     strokeWidth={2}
-                    fill="#6366f1" 
-                    fillOpacity={0.25} 
-                    dot={{ r: 3, fill: '#6366f1' }}
+                    fill="#1B4332" 
+                    fillOpacity={0.15} 
+                    dot={{ r: 2.5, fill: '#1B4332' }}
                   />
                   <Tooltip content={<PercentageTooltip />} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
 
-            {/* Intuitive 6-Pillar Scorecard for Principal */}
-            <div className="sm:col-span-6 space-y-2 text-xs">
+            {/* Clean, Minimalist Scorecard Rows */}
+            <div className="sm:col-span-6 space-y-2.5 text-xs">
               {radarDimensionsData.map((item, idx) => (
-                <div 
-                  key={idx} 
-                  className="p-2 rounded-xl bg-stone-50 dark:bg-stone-800/40 border border-stone-100 dark:border-stone-800/60 flex flex-col gap-1"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-stone-800 dark:text-stone-200 text-[11px] truncate max-w-[140px]">
+                <div key={idx} className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-stone-700 dark:text-stone-300 text-[11px]">
                       {item.fullSubject}
                     </span>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2">
                       <span className="font-mono font-bold text-stone-900 dark:text-stone-100 text-[11px]">
                         {item.realisasi}%
                       </span>
-                      <span className="text-[9px] text-stone-400">
-                        (min {item.standar}%)
-                      </span>
-                      <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${
-                        item.isPassed 
-                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' 
-                          : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
-                      }`}>
-                        {item.status}
+                      <span className="text-[10px] text-stone-500 font-medium">
+                        / {item.standar}%
                       </span>
                     </div>
                   </div>
-                  {/* Micro Progress Bar */}
-                  <div className="w-full h-1.5 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
+                  <div className="w-full h-1 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
                     <div 
-                      className={`h-full rounded-full ${
-                        item.isPassed ? 'bg-indigo-600 dark:bg-indigo-500' : 'bg-amber-500'
+                      className={`h-full rounded-full transition-all duration-300 ${
+                        item.realisasi >= item.standar ? 'bg-[#1B4332] dark:bg-emerald-500' : 'bg-[#D97706]'
                       }`}
                       style={{ width: `${item.realisasi}%` }}
                     />
@@ -806,34 +762,32 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
             </div>
           </div>
 
-          <div className="pt-2 text-[11px] text-stone-600 dark:text-stone-400 bg-indigo-50/50 dark:bg-indigo-950/20 p-2.5 rounded-xl flex items-center justify-between border border-indigo-100 dark:border-indigo-900/30">
-            <span className="text-indigo-950 dark:text-indigo-300">
-              💡 <strong>Rekomendasi Kepsek:</strong> 5 dari 6 indikator melampaui target standar. Tingkatkan monitoring presensi tepat waktu di awal pekan.
-            </span>
+          <div className="pt-2 text-[11px] text-stone-500 dark:text-stone-400 flex items-center justify-between border-t border-stone-100 dark:border-stone-800/80">
+            <span>Rata-rata Kepatuhan Mutu: <strong className="text-stone-800 dark:text-stone-200">95.2%</strong></span>
+            <span className="text-emerald-700 dark:text-emerald-400 font-bold">Melampaui Target</span>
           </div>
         </div>
       </div>
 
       {/* 5. Staff Performance Leaderboard & Teaching Analytics (Horizontal Bar & Table) */}
-      <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200/90 dark:border-stone-800 p-5 sm:p-6 shadow-xs space-y-5">
+      <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 p-6 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-stone-100 dark:border-stone-800 gap-2">
           <div>
-            <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest block">
+            <span className="text-[10px] font-semibold text-[#52796F] uppercase tracking-wider block">
               Evaluasi Tenaga Pendidik
             </span>
-            <h3 className="text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-              <Award className="w-4 h-4 text-amber-500" />
+            <h3 className="text-base font-bold text-stone-900 dark:text-stone-100">
               Peringkat & Kinerja Pengajaran Asatidz (Top 5)
             </h3>
           </div>
-          <span className="text-xs text-stone-500 dark:text-stone-400">
+          <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">
             Menampilkan 5 asatidz terbaik unit {effectiveUnit}
           </span>
         </div>
 
         {/* Top Performers Visual Comparison (Recharts Horizontal Bar) */}
-        <div className="space-y-2">
-          <h4 className="text-xs font-bold text-stone-600 dark:text-stone-400 uppercase tracking-wider">
+        <div className="space-y-3">
+          <h4 className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
             Top 5 Asatidz dengan Indeks Kinerja Pengajaran Tertinggi
           </h4>
           <div className="h-56 w-full pt-1">
@@ -853,14 +807,14 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
                   type="category" 
                   tickLine={false} 
                   axisLine={false} 
-                  tick={{ fontSize: 11, fontWeight: 500, fill: '#64748b' }} 
+                  tick={{ fontSize: 11, fontWeight: 600, fill: '#475569' }} 
                 />
                 <Tooltip content={<PercentageTooltip />} cursor={{ fill: 'transparent' }} />
                 <Bar 
                   dataKey="skorKinerja" 
                   name="Skor" 
-                  fill="#10b981" 
-                  radius={[0, 4, 4, 0]} 
+                  fill="#1B4332" 
+                  radius={[0, 2, 2, 0]} 
                   barSize={12} 
                 />
               </BarChart>
@@ -870,26 +824,26 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
 
         {/* Full Asatidz Teaching Analytics Table (No Salary Columns) */}
         <div className="overflow-x-auto pt-2">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-stone-200 dark:border-stone-800 text-stone-400 dark:text-stone-500 font-bold uppercase tracking-wider text-[10px]">
-                <th className="py-2.5 px-3">Nama Asatidz</th>
-                <th className="py-2.5 px-3">Unit / Jabatan</th>
-                <th className="py-2.5 px-3 text-center">Beban KBM</th>
-                <th className="py-2.5 px-3 text-center">Ketepatan Waktu</th>
-                <th className="py-2.5 px-3 text-center">Ketaatan Jurnal</th>
-                <th className="py-2.5 px-3 text-center">Indeks Kinerja</th>
-                <th className="py-2.5 px-3 text-center">Status Evaluasi</th>
+              <tr className="border-b border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider text-[10px]">
+                <th className="py-3 px-4">Nama Asatidz</th>
+                <th className="py-3 px-4">Unit / Jabatan</th>
+                <th className="py-3 px-4 text-center">Beban KBM</th>
+                <th className="py-3 px-4 text-center">Ketepatan Waktu</th>
+                <th className="py-3 px-4 text-center">Ketaatan Jurnal</th>
+                <th className="py-3 px-4 text-center">Indeks Kinerja</th>
+                <th className="py-3 px-4 text-center">Status Evaluasi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100 dark:divide-stone-800/80 text-stone-700 dark:text-stone-300">
               {teacherPerformanceList.slice(0, 5).map((t, idx) => (
-                <tr key={t.id} className="hover:bg-stone-50/70 dark:hover:bg-stone-800/40 transition-colors">
-                  <td className="py-2.5 px-3">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                <tr key={t.id} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/20 transition-colors">
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-3">
+                      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold font-mono ${
                         idx < 3 
-                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300' 
+                          ? 'bg-[#1B4332]/10 text-[#1B4332] dark:bg-emerald-950/40 dark:text-emerald-300' 
                           : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400'
                       }`}>
                         {idx + 1}
@@ -902,46 +856,46 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
                       </div>
                     </div>
                   </td>
-                  <td className="py-2.5 px-3">
-                    <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300">
+                  <td className="py-3 px-4">
+                    <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-stone-50 dark:bg-stone-800/60 text-stone-600 dark:text-stone-300 border border-stone-200/40 dark:border-stone-700/40">
                       {t.unit} • {t.position}
                     </span>
                   </td>
-                  <td className="py-2.5 px-3 text-center font-mono font-medium">
+                  <td className="py-3 px-4 text-center font-mono font-medium text-stone-600 dark:text-stone-400">
                     {t.taughtHours} JP <span className="text-[10px] text-stone-400">({t.schedulesCount} Kelas)</span>
                   </td>
-                  <td className="py-2.5 px-3 text-center">
-                    <span className={`font-mono font-semibold ${
-                      t.punctuality >= 95 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
+                  <td className="py-3 px-4 text-center">
+                    <span className={`font-mono font-bold ${
+                      t.punctuality >= 95 ? 'text-[#1B4332] dark:text-emerald-400' : 'text-[#D97706]'
                     }`}>
                       {t.punctuality}%
                     </span>
                   </td>
-                  <td className="py-2.5 px-3 text-center">
-                    <span className={`font-mono font-semibold ${
-                      t.journalRate === 100 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'
+                  <td className="py-3 px-4 text-center">
+                    <span className={`font-mono font-bold ${
+                      t.journalRate === 100 ? 'text-[#1B4332] dark:text-emerald-400' : 'text-[#D97706]'
                     }`}>
                       {t.journalRate}%
                     </span>
                   </td>
-                  <td className="py-2.5 px-3 text-center font-mono font-bold text-stone-900 dark:text-stone-100">
+                  <td className="py-3 px-4 text-center font-mono font-bold text-stone-900 dark:text-stone-100">
                     {t.performanceScore} <span className="text-[10px] text-stone-400 font-normal">pts</span>
                   </td>
-                  <td className="py-2.5 px-3 text-center">
+                  <td className="py-3 px-4 text-center">
                     {t.statusTier === 'TELADAN' && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-[#1B4332]/10 text-[#1B4332] dark:bg-emerald-950/30 dark:text-emerald-300 border border-[#1B4332]/20 dark:border-emerald-900/30">
+                        <CheckCircle2 className="w-3 h-3" strokeWidth={1.5} />
                         Teladan
                       </span>
                     )}
                     {t.statusTier === 'OPTIMAL' && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-semibold bg-stone-55 dark:bg-stone-800/60 text-stone-600 dark:text-stone-300 border border-stone-200/60 dark:border-stone-700/60">
                         Optimal
                       </span>
                     )}
                     {t.statusTier === 'SUPERVISI' && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40">
-                        <AlertCircle className="w-3 h-3 text-amber-600" />
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-[#D97706]/10 text-[#D97706] dark:bg-amber-950/30 dark:text-amber-300 border border-[#D97706]/20 dark:border-amber-900/30">
+                        <AlertCircle className="w-3 h-3" strokeWidth={1.5} />
                         Supervisi
                       </span>
                     )}

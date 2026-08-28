@@ -6,6 +6,7 @@ import {
   AttendanceRecord, 
   BadalAssignment, 
   TeachingJournal,
+  StudentAttendance,
   TeacherPayrollItem,
   MonthlyPayrollSummary,
   UserRole,
@@ -55,8 +56,8 @@ interface HRISContextType {
   clockIn: (scheduleId: string, timeString?: string, notes?: string) => AttendanceRecord;
   submitJournal: (
     attendanceId: string, 
-    journalInput: Omit<TeachingJournal, 'id' | 'attendanceId' | 'filledAt'>
-  ) => void;
+    journalInput: Partial<TeachingJournal> & { topic: string; studentAttendance: StudentAttendance }
+  ) => Promise<void>;
   markAttendanceDirect: (scheduleId: string, teacherId: string, status: AttendanceRecord['status'], notes?: string) => void;
   
   // Guru Badal
@@ -362,7 +363,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Check if there is an approved badal assignment for this schedule today
     const activeBadal = badalAssignments.find(
-      (b) => b.scheduleId === scheduleId && b.date === todayStr && b.status !== 'PENDING'
+      (b) => b.scheduleId === scheduleId && (b.date === todayStr || !b.date) && (b.status === 'APPROVED' || b.status === 'COMPLETED')
     );
 
     const actualTeacherId = activeBadal ? activeBadal.badalTeacherId : currentUser.id;
@@ -430,13 +431,22 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Submit Jurnal Mengajar
   const submitJournal = async (
     attendanceId: string,
-    journalInput: Omit<TeachingJournal, 'id' | 'attendanceId' | 'filledAt'>
+    journalInput: Partial<TeachingJournal> & { topic: string; studentAttendance: StudentAttendance }
   ) => {
-    const journalId = `JRN-${Date.now()}`;
+    const todayStr = new Date().toISOString().split('T')[0];
+    const targetAtt = attendances.find(a => a.id === attendanceId);
+    const scheduleId = journalInput.scheduleId || targetAtt?.scheduleId || 'SCH-01';
+    const date = journalInput.date || targetAtt?.date || todayStr;
+    const teacherId = journalInput.teacherId || targetAtt?.actualTeacherId || targetAtt?.teacherId || currentUser?.id || 'T-08';
+
+    const journalId = journalInput.id || `JRN-${Date.now()}`;
     const newJournal: TeachingJournal = {
       ...journalInput,
       id: journalId,
       attendanceId,
+      scheduleId,
+      date,
+      teacherId,
       filledAt: new Date().toISOString(),
     };
 
@@ -444,7 +454,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAttendances((prev) => {
       let matched = false;
       const updated = prev.map((att) => {
-        if (att.id === attendanceId || (att.scheduleId === journalInput.scheduleId && att.date === journalInput.date)) {
+        if (att.id === attendanceId || (att.scheduleId === scheduleId && att.date === date)) {
           matched = true;
           return {
             ...att,
@@ -458,11 +468,11 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!matched) {
         const fallbackAtt: AttendanceRecord = {
           id: attendanceId,
-          scheduleId: journalInput.scheduleId,
-          teacherId: journalInput.teacherId,
-          actualTeacherId: journalInput.teacherId,
+          scheduleId,
+          teacherId,
+          actualTeacherId: teacherId,
           isBadal: false,
-          date: journalInput.date,
+          date,
           clockInTime: `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`,
           lateMinutes: 0,
           lateCategory: 'TEPAT_WAKTU',

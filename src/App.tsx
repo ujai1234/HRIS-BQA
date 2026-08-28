@@ -117,7 +117,7 @@ const MainContent: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded bg-[#1B4332] text-white flex items-center justify-center font-bold text-[10px]">
-                BQ
+                BQA
               </div>
               <span className="font-semibold text-stone-800 dark:text-stone-200">
                 Pesantren Baitul Qur'an Al-Ikhwan
