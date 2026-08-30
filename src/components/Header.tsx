@@ -57,6 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
   } = useHRIS();
 
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [logoState, setLogoState] = useState<'jpeg' | 'jpg' | 'png' | 'fallback'>('jpeg');
 
   const handleRefresh = async () => {
     if (isRefreshing || isLoading) return;
@@ -141,9 +142,11 @@ export const Header: React.FC<HeaderProps> = ({
         {
           title: 'MENU UTAMA GURU',
           items: [
-            { path: '/dashboard/guru', label: 'Presensi & Jurnal', icon: Clock, desc: 'Catat kehadiran & PBM harian' },
-            { path: '/dashboard/guru/slip', label: 'Slip Gaji', icon: CreditCard, desc: 'Rincian penghasilan bulanan' },
-            { path: '/dashboard/guru/jadwal', label: 'Jadwal Mengajar', icon: CalendarDays, desc: 'Jadwal tatap muka mingguan' },
+            { path: '/dashboard/guru', label: 'Teacher Dashboard', icon: LayoutDashboard, desc: 'Overview & Metrik Cepat' },
+            { path: '/dashboard/guru/materi', label: 'Course Builder', icon: BookOpen, desc: 'Manajemen Kelas & Materi' },
+            { path: '/dashboard/guru/penilaian', label: 'Grading Suite', icon: FileText, desc: 'Penilaian & Tugas' },
+            { path: '/dashboard/guru/analitik', label: 'Analitik Siswa', icon: Users, desc: 'Presensi & Performa' },
+            { path: '/dashboard/guru/slip', label: 'Slip Gaji', icon: CreditCard, desc: 'Rincian penghasilan' },
             { path: '/dashboard/guru/kebutuhan', label: 'Pengajuan Kebutuhan', icon: ClipboardList, desc: 'Fasilitas pembelajaran' },
           ]
         }
@@ -203,12 +206,32 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Logo and Brand Header */}
           <div className="p-4 sm:p-5 border-b border-white/5 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-[#1B4332] rounded-lg flex items-center justify-center border border-white/10 shrink-0">
-                <span className="text-white text-sm font-bold tracking-tight">BQA</span>
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 overflow-hidden ${
+                logoState !== 'fallback' ? 'bg-white border border-stone-200/30' : 'bg-[#1B4332] border border-white/10'
+              }`}>
+                {logoState !== 'fallback' ? (
+                  <img 
+                    src={logoState === 'jpeg' ? '/logo.jpeg' : (logoState === 'jpg' ? '/logo.jpg' : '/logo.png')} 
+                    alt="BQA Logo" 
+                    className="w-full h-full object-contain scale-[1.42]" 
+                    onError={() => {
+                      if (logoState === 'jpeg') {
+                        setLogoState('jpg');
+                      } else if (logoState === 'jpg') {
+                        setLogoState('png');
+                      } else {
+                        setLogoState('fallback');
+                      }
+                    }}
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <span className="text-white text-sm font-bold tracking-tight">BQA</span>
+                )}
               </div>
               <div className="leading-tight">
-                <h1 className="font-bold text-sm text-stone-100 tracking-tight leading-snug">Baitul Qur'an</h1>
-                <p className="text-[10px] text-[#B08968] uppercase tracking-wider font-bold">Al-Ikhwan HRIS</p>
+                <h1 className="font-bold text-lg text-white tracking-tight leading-tight">Baitul Qur'an</h1>
+                <p className="text-[11px] text-[#B08968] uppercase tracking-[0.15em] font-black">Al-Ikhwan • HRIS</p>
               </div>
             </div>
             <button 
@@ -288,9 +311,6 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           <div className="flex items-center gap-2">
-            <span className="p-1.5 bg-[#1B4332]/5 dark:bg-emerald-950/20 text-[#1B4332] dark:text-emerald-400 rounded-lg hidden sm:inline-block border border-[#1B4332]/10 dark:border-emerald-900/20">
-              <Sparkles className="w-3.5 h-3.5 text-[#B08968]" />
-            </span>
             <div className="flex items-center gap-1.5 text-[10px] font-bold text-stone-500 dark:text-stone-450 uppercase tracking-widest">
               <span>HRIS</span>
               <ChevronRight className="w-3 h-3 text-[#B08968]/60" />

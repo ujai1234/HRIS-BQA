@@ -44,13 +44,19 @@ const MainContent: React.FC = () => {
       if (currentPath === '/dashboard/guru/slip') {
         return <GuruView initialTab="slip_gaji" key="guru-slip" />;
       }
-      if (currentPath === '/dashboard/guru/jadwal') {
-        return <GuruView initialTab="jadwal" key="guru-jadwal" />;
+      if (currentPath === '/dashboard/guru/materi') {
+        return <GuruView initialTab="kelas_materi" key="guru-materi" />;
+      }
+      if (currentPath === '/dashboard/guru/penilaian') {
+        return <GuruView initialTab="penilaian_tugas" key="guru-penilaian" />;
+      }
+      if (currentPath === '/dashboard/guru/analitik') {
+        return <GuruView initialTab="presensi_analitik" key="guru-analitik" />;
       }
       if (currentPath === '/dashboard/guru/kebutuhan') {
         return <LearningNeedManagement key="guru-kebutuhan" />;
       }
-      return <GuruView initialTab="clockin_journal" key="guru-clockin" />;
+      return <GuruView initialTab="overview" key="guru-overview" />;
     }
 
     if (currentRole === 'ADMIN' || currentPath.startsWith('/dashboard/admin')) {
@@ -116,13 +122,7 @@ const MainContent: React.FC = () => {
         <footer className="bg-white dark:bg-[#141A17] border-t border-stone-200 dark:border-stone-800/80 py-3.5 text-xs text-stone-500 dark:text-stone-400 mt-auto print:hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded bg-[#1B4332] text-white flex items-center justify-center font-bold text-[10px]">
-                BQA
-              </div>
-              <span className="font-semibold text-stone-800 dark:text-stone-200">
-                Pesantren Baitul Qur'an Al-Ikhwan
-              </span>
-              <span className="text-stone-400 dark:text-stone-500 hidden md:inline">• HRIS & Kafa'ah Asatidz</span>
+              <span className="text-stone-400 dark:text-stone-500 hidden md:inline">HRIS & Kafa'ah Asatidz</span>
             </div>
 
             <div className="flex items-center gap-2 text-stone-400 text-[11px]">

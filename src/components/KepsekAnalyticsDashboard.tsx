@@ -1,56 +1,31 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
-  Building2, 
-  Users, 
-  Calendar, 
-  Clock, 
+  Search, 
+  RefreshCw, 
   CheckCircle2, 
-  TrendingUp, 
-  ArrowRight, 
-  BookOpen,
-  PieChart as PieChartIcon,
-  BarChart3,
-  Activity,
+  X,
+  Trophy,
+  Medal,
   Award,
-  AlertCircle,
-  GraduationCap,
-  CalendarDays,
-  ShieldCheck,
-  UserCheck,
-  ClipboardCheck,
-  Layers,
+  Star,
+  TrendingUp,
   Sparkles,
-  Filter,
-  CheckCheck,
-  ArrowUpRight,
-  TrendingDown,
-  Printer
+  UserCheck
 } from 'lucide-react';
 import {
   ResponsiveContainer,
   ComposedChart,
-  AreaChart,
   Area,
+  Line,
   BarChart,
   Bar,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
-  Legend,
-  PieChart,
-  Pie,
-  Cell,
-  RadarChart,
-  Radar,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis
+  Tooltip
 } from 'recharts';
 import { useHRIS } from '../context/HRISContext';
-import { UnitType, getRoleUnit, isKepsekRole } from '../types';
+import { UnitType, getRoleUnit, AttendanceRecord, ClassSchedule } from '../types';
 
 interface KepsekAnalyticsDashboardProps {
   onNavigateToAudit?: () => void;
@@ -67,19 +42,24 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
     attendances, 
     badalAssignments, 
     currentUser,
-    currentRole,
-    setCurrentPath
+    currentRole
   } = useHRIS();
 
   const userUnit = getRoleUnit(currentRole, currentUser?.unit);
-  const isGlobalAdmin = currentRole === 'ADMIN';
 
-  // Filters State - strictly lock to user's unit if not global admin
+  // Active Main Tab within Monitoring
+  const [activeView, setActiveView] = useState<'REALTIME' | 'BADAL' | 'REKAP'>('REALTIME');
+
+  // Filters State
   const [selectedUnit, setSelectedUnit] = useState<'ALL' | UnitType>(
     userUnit === 'ALL' ? 'ALL' : (userUnit as UnitType)
   );
-  const [metricView, setMetricView] = useState<'ALL' | 'ATTENDANCE' | 'PERFORMANCE'>('ALL');
-  const [selectedSemester, setSelectedSemester] = useState<string>('Ganjil 2026/2027');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'HADIR' | 'TERLAMBAT' | 'PENDING_JURNAL' | 'BADAL'>('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState('10:12');
+  const [selectedSessionDetail, setSelectedSessionDetail] = useState<any | null>(null);
+  const [selectedTopTeacherDetail, setSelectedTopTeacherDetail] = useState<any | null>(null);
 
   // Keep selectedUnit strictly synchronized if user role is specific Kepsek
   useEffect(() => {
@@ -90,7 +70,7 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
 
   const effectiveUnit: 'ALL' | UnitType = userUnit !== 'ALL' ? (userUnit as UnitType) : selectedUnit;
 
-  // Filtered teachers and schedules strictly for the effective unit
+  // Filtered teachers and schedules
   const filteredTeachers = useMemo(() => {
     if (effectiveUnit === 'ALL') return teachers;
     return teachers.filter(t => t.unit === effectiveUnit);
@@ -107,806 +87,1066 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
     return attendances.filter(a => teacherIds.has(a.teacherId) || teacherIds.has(a.actualTeacherId));
   }, [attendances, filteredTeachers]);
 
-  // Key Aggregated Metrics
-  const totalStaffCount = filteredTeachers.length;
-  const totalClassSchedules = filteredSchedules.length;
-  const totalWeeklyHours = filteredSchedules.reduce((acc, s) => acc + s.hours, 0);
+  // Today's Live Sessions Data
+  const liveSessions = useMemo(() => {
+    return filteredSchedules.map((schedule, idx) => {
+      const teacher = teachers.find(t => t.id === schedule.teacherId);
+      const att = attendances.find(a => a.scheduleId === schedule.id);
+      const badal = badalAssignments.find(b => b.scheduleId === schedule.id);
+      const badalTeacher = badal ? teachers.find(t => t.id === badal.badalTeacherId) : null;
 
-  const completedJournals = filteredAttendances.filter(a => a.status === 'SELESAI').length;
-  const pendingJournals = filteredAttendances.filter(a => a.status === 'HADIR_JURNAL_KOSONG').length;
-  const totalRecordedSessions = Math.max(1, completedJournals + pendingJournals);
-  const journalComplianceRate = Math.round((completedJournals / totalRecordedSessions) * 100);
+      // Determine Realtime State
+      let checkInTime = att?.clockInTime;
+      let attendanceStatus: 'HADIR_TEPAT' | 'HADIR_TERLAMBAT' | 'BELUM_HADIR' = 'BELUM_HADIR';
+      let lateMinutes = att?.lateMinutes || 0;
 
-  const onTimeCount = filteredAttendances.filter(a => a.lateCategory === 'TEPAT_WAKTU').length;
-  const punctualityRate = totalRecordedSessions > 0 ? Math.round((onTimeCount / totalRecordedSessions) * 100) : 94;
+      if (att) {
+        if (att.lateCategory === 'TEPAT_WAKTU' || (att.lateMinutes || 0) === 0) {
+          attendanceStatus = 'HADIR_TEPAT';
+        } else {
+          attendanceStatus = 'HADIR_TERLAMBAT';
+        }
+      } else if (idx % 4 !== 3) {
+        const mockTime = `07:${(idx * 7) % 55 < 10 ? '0' + (idx * 7) % 55 : (idx * 7) % 55}`;
+        checkInTime = mockTime;
+        if (idx % 5 === 2) {
+          attendanceStatus = 'HADIR_TERLAMBAT';
+          lateMinutes = 12;
+        } else {
+          attendanceStatus = 'HADIR_TEPAT';
+          lateMinutes = 0;
+        }
+      }
 
-  const totalBadalSessions = filteredAttendances.filter(a => a.isBadal).length || badalAssignments.length;
-  const badalRate = totalRecordedSessions > 0 ? ((totalBadalSessions / totalRecordedSessions) * 100).toFixed(1) : '3.2';
-
-  // 1. Monthly Trends Data (6-Month Academic Trajectory)
-  const monthlyTrendsData = useMemo(() => {
-    const months = [
-      { month: 'Juli', basePresent: 95, basePunctual: 91, baseJournal: 92, totalSessions: 142, late: 12, badal: 4 },
-      { month: 'Agustus', basePresent: 96, basePunctual: 93, baseJournal: 94, totalSessions: 168, late: 11, badal: 5 },
-      { month: 'September', basePresent: 97, basePunctual: 94, baseJournal: 96, totalSessions: 176, late: 10, badal: 3 },
-      { month: 'Oktober', basePresent: 96, basePunctual: 92, baseJournal: 95, totalSessions: 180, late: 14, badal: 6 },
-      { month: 'November', basePresent: 98, basePunctual: 96, baseJournal: 97, totalSessions: 172, late: 7, badal: 2 },
-      { month: 'Desember', basePresent: 99, basePunctual: 97, baseJournal: 98, totalSessions: 154, late: 5, badal: 1 }
-    ];
-
-    // Factor in real-time filter adjustments
-    return months.map(m => {
-      const modifier = selectedUnit === 'SMP' ? 1.01 : selectedUnit === 'MA' ? 0.99 : 1.0;
-      return {
-        month: m.month,
-        tingkatKehadiran: Math.min(100, Math.round(m.basePresent * modifier)),
-        ketepatanWaktu: Math.min(100, Math.round(m.basePunctual * modifier)),
-        kepatuhanJurnal: Math.min(100, Math.round(m.baseJournal * modifier)),
-        totalSesi: Math.round(m.totalSessions * (filteredTeachers.length / Math.max(1, teachers.length))),
-        sesiTerlambat: Math.max(1, Math.round(m.late * (filteredTeachers.length / Math.max(1, teachers.length)))),
-        sesiBadal: Math.max(0, Math.round(m.badal * (filteredTeachers.length / Math.max(1, teachers.length))))
-      };
-    });
-  }, [selectedUnit, filteredTeachers.length, teachers.length]);
-
-  // 2. Unit-Level Teaching Performance & Compliance
-  const unitPerformanceData = useMemo(() => {
-    const units: UnitType[] = effectiveUnit === 'ALL' 
-      ? ['SMP', 'MA', 'PESANTREN'] 
-      : [effectiveUnit];
-
-    return units.map(u => {
-      const uTeachers = teachers.filter(t => t.unit === u);
-      const uSchedules = schedules.filter(s => s.unit === u);
-      const uHours = uSchedules.reduce((acc, s) => acc + s.hours, 0);
-      const uTeacherIds = new Set(uTeachers.map(t => t.id));
-      const uAttendances = attendances.filter(a => uTeacherIds.has(a.teacherId));
-      
-      const completed = uAttendances.filter(a => a.status === 'SELESAI').length;
-      const total = Math.max(1, uAttendances.length || uSchedules.length);
-      const compliance = Math.round(((completed || (total * 0.93)) / total) * 100);
-      
-      const onTime = uAttendances.filter(a => a.lateCategory === 'TEPAT_WAKTU').length;
-      const punctuality = Math.round(((onTime || (total * 0.91)) / total) * 100);
-
-      const unitLabel = u === 'SMP' ? 'SMP IT' : u === 'MA' ? 'MA Al-Ikhwan' : 'Ponpes Tahfidz';
+      const isJournalComplete = att?.status === 'SELESAI' || (idx % 3 !== 0 && attendanceStatus !== 'BELUM_HADIR');
+      const journalTopic = att?.journal?.topic || (isJournalComplete ? `Halaqoh: Bab ${schedule.subject} - Sesi ${idx + 1}` : null);
+      const isBadal = !!badal || idx === 1;
+      const actualTeacherName = isBadal ? (badalTeacher?.name || 'Ust Syuhada') : (teacher?.name || 'Asatidz');
 
       return {
-        unit: unitLabel,
-        rawUnit: u,
-        guruCount: uTeachers.length,
-        totalJadwal: uSchedules.length,
-        totalJP: uHours,
-        kepatuhanJurnal: Math.min(100, compliance),
-        ketepatanWaktu: Math.min(100, punctuality),
-        rataSantriHadir: u === 'SMP' ? 96 : u === 'MA' ? 95 : 98
+        id: schedule.id,
+        scheduleId: schedule.id,
+        originalTeacherId: schedule.teacherId,
+        originalTeacherName: teacher?.name || 'Ust Asatidz',
+        actualTeacherName,
+        isBadal,
+        badalReason: isBadal ? (badal?.reason || 'Izin Keperluan Mendesak') : null,
+        badalStatus: isBadal ? (badal?.status || 'APPROVED') : null,
+        className: schedule.className,
+        subject: schedule.subject,
+        timeSlot: `${schedule.startTime} - ${schedule.endTime}`,
+        hours: schedule.hours,
+        unit: schedule.unit,
+        attendanceStatus,
+        checkInTime,
+        lateMinutes,
+        isJournalComplete,
+        journalTopic,
+        studentPresentCount: 18 - (idx % 3),
+        totalStudents: 18
       };
     });
-  }, [teachers, schedules, attendances, effectiveUnit]);
+  }, [filteredSchedules, teachers, attendances, badalAssignments]);
 
-  // 3. Weekly Day-of-Week Attendance & Discipline Distribution
-  const weeklyDayData = useMemo(() => {
-    const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Ahad'];
-    return days.map(day => {
-      const daySchedules = filteredSchedules.filter(s => s.dayOfWeek === day);
-      const dayJP = daySchedules.reduce((acc, s) => acc + s.hours, 0);
-      
-      // Calculate realistic day distribution
-      const isPeakDay = day === 'Senin' || day === 'Kamis';
-      const onTime = Math.max(1, Math.round(daySchedules.length * (isPeakDay ? 0.88 : 0.95)));
-      const late = Math.max(0, daySchedules.length - onTime);
-      const badal = isPeakDay ? 1 : 0;
+  // Filtered Live Sessions by Search & Status
+  const filteredLiveSessions = useMemo(() => {
+    return liveSessions.filter(session => {
+      const matchSearch = 
+        session.originalTeacherName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        session.actualTeacherName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        session.className.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        session.subject.toLowerCase().includes(searchQuery.toLowerCase());
 
-      return {
-        hari: day,
-        jadwalCount: daySchedules.length,
-        totalJP: dayJP,
-        tepatWaktu: onTime,
-        terlambat: late,
-        guruBadal: badal,
-        disiplinRate: daySchedules.length > 0 ? Math.round((onTime / daySchedules.length) * 100) : 100
-      };
+      if (!matchSearch) return false;
+
+      if (statusFilter === 'HADIR') return session.attendanceStatus === 'HADIR_TEPAT';
+      if (statusFilter === 'TERLAMBAT') return session.attendanceStatus === 'HADIR_TERLAMBAT';
+      if (statusFilter === 'PENDING_JURNAL') return !session.isJournalComplete && session.attendanceStatus !== 'BELUM_HADIR';
+      if (statusFilter === 'BADAL') return session.isBadal;
+
+      return true;
     });
-  }, [filteredSchedules]);
+  }, [liveSessions, searchQuery, statusFilter]);
 
-  // 4. Institutional Competency & Quality Radar Matrix (Enhanced for Principals)
-  const radarDimensionsData = useMemo(() => {
+  // Today's Live Metrics
+  const totalSessionsToday = liveSessions.length;
+  const presentCount = liveSessions.filter(s => s.attendanceStatus !== 'BELUM_HADIR').length;
+  const lateCount = liveSessions.filter(s => s.attendanceStatus === 'HADIR_TERLAMBAT').length;
+  const completedJournalCount = liveSessions.filter(s => s.isJournalComplete).length;
+  const pendingJournalCount = presentCount - completedJournalCount;
+  const activeBadalCount = liveSessions.filter(s => s.isBadal).length;
+  const onTimePercentage = presentCount > 0 ? Math.round(((presentCount - lateCount) / presentCount) * 100) : 100;
+
+  // 7-Day Teacher Attendance Trend Data
+  const last7DaysData = useMemo(() => {
+    const totalGuru = filteredTeachers.length || 19;
     return [
+      { date: 'Sen (24/8)', hadir: Math.min(totalGuru, 18), tepat: 17, terlambat: 1, izin: 1, persentase: 95 },
+      { date: 'Sel (25/8)', hadir: Math.min(totalGuru, 19), tepat: 18, terlambat: 1, izin: 0, persentase: 100 },
+      { date: 'Rab (26/8)', hadir: Math.min(totalGuru, 19), tepat: 19, terlambat: 0, izin: 0, persentase: 100 },
+      { date: 'Kam (27/8)', hadir: Math.min(totalGuru, 18), tepat: 16, terlambat: 2, izin: 1, persentase: 95 },
+      { date: 'Jum (28/8)', hadir: Math.min(totalGuru, 19), tepat: 19, terlambat: 0, izin: 0, persentase: 100 },
+      { date: 'Sab (29/8)', hadir: Math.min(totalGuru, 18), tepat: 17, terlambat: 1, izin: 1, persentase: 95 },
       { 
-        subject: 'Ketepatan Waktu', 
-        fullSubject: 'Ketepatan Waktu KBM', 
-        realisasi: punctualityRate, 
-        standar: 95, 
-        fullMark: 100,
-        status: punctualityRate >= 95 ? 'Tercapai' : 'Perlu Supervisi',
-        isPassed: punctualityRate >= 95
-      },
-      { 
-        subject: 'Ketaatan Jurnal', 
-        fullSubject: 'Ketaatan Jurnal KBM', 
-        realisasi: journalComplianceRate, 
-        standar: 95, 
-        fullMark: 100,
-        status: journalComplianceRate >= 95 ? 'Tercapai' : 'Perlu Supervisi',
-        isPassed: journalComplianceRate >= 95
-      },
-      { 
-        subject: 'Kemandirian', 
-        fullSubject: 'Kemandirian (Bebas Badal)', 
-        realisasi: Math.min(100, Math.round(100 - parseFloat(badalRate) * 2)), 
-        standar: 90, 
-        fullMark: 100,
-        status: 'Sangat Baik',
-        isPassed: true
-      },
-      { 
-        subject: 'Presensi Santri', 
-        fullSubject: 'Presensi Rinci Santri', 
-        realisasi: 96, 
-        standar: 90, 
-        fullMark: 100,
-        status: 'Sangat Baik',
-        isPassed: true
-      },
-      { 
-        subject: 'Pemenuhan JP', 
-        fullSubject: 'Pemenuhan Jam Pelajaran', 
-        realisasi: 98, 
-        standar: 95, 
-        fullMark: 100,
-        status: 'Sangat Baik',
-        isPassed: true
-      },
-      { 
-        subject: 'Materi & Tugas', 
-        fullSubject: 'Kelengkapan Materi & Tugas', 
-        realisasi: 93, 
-        standar: 90, 
-        fullMark: 100,
-        status: 'Tercapai',
-        isPassed: true
+        date: 'Hari Ini', 
+        hadir: Math.max(1, presentCount), 
+        tepat: Math.max(1, presentCount - lateCount), 
+        terlambat: lateCount, 
+        izin: Math.max(0, totalSessionsToday - presentCount),
+        persentase: totalSessionsToday > 0 ? Math.round((presentCount / totalSessionsToday) * 100) : 95 
       }
     ];
-  }, [punctualityRate, journalComplianceRate, badalRate]);
+  }, [filteredTeachers, presentCount, lateCount, totalSessionsToday]);
 
-  // 5. Staff Teaching Performance Rankings
-  const teacherPerformanceList = useMemo(() => {
-    return filteredTeachers.map(teacher => {
-      const tSchedules = schedules.filter(s => s.teacherId === teacher.id);
-      const taughtHours = tSchedules.reduce((acc, s) => acc + s.hours, 0);
-      const tAttendances = attendances.filter(a => a.teacherId === teacher.id);
-      
-      const completed = tAttendances.filter(a => a.status === 'SELESAI').length;
-      const totalAtt = Math.max(1, tAttendances.length);
-      const journalRate = tAttendances.length > 0 ? Math.round((completed / totalAtt) * 100) : 100;
-      
-      const onTime = tAttendances.filter(a => a.lateCategory === 'TEPAT_WAKTU').length;
-      const punctuality = tAttendances.length > 0 ? Math.round((onTime / totalAtt) * 100) : 96;
+  // Monthly Trajectory Trends Data
+  const monthlyTrendsData = useMemo(() => {
+    return [
+      { month: 'Juli', kehadiran: 95, jurnal: 92, tepat: 91 },
+      { month: 'Agustus', kehadiran: 96, jurnal: 94, tepat: 93 },
+      { month: 'September', kehadiran: 97, jurnal: 96, tepat: 94 },
+      { month: 'Oktober', kehadiran: 96, jurnal: 95, tepat: 92 },
+      { month: 'November', kehadiran: 98, jurnal: 97, tepat: 96 },
+      { month: 'Desember', kehadiran: 99, jurnal: 98, tepat: 97 }
+    ];
+  }, []);
 
-      // Composite Teaching Performance Index (0 - 100)
-      const performanceScore = Math.round((punctuality * 0.45) + (journalRate * 0.40) + (Math.min(taughtHours, 24) / 24 * 15));
+  // Top 5 Ustadz Terbaik (Kinerja & Kedisiplinan)
+  const top5Teachers = useMemo(() => {
+    const defaultTopList = [
+      {
+        id: 'top-1',
+        name: 'Ust. Ahmad Dahlan, M.Pd.',
+        nip: '198503122010011002',
+        position: 'Guru Mukim / Pengajar MA',
+        unit: 'MA' as UnitType,
+        avatarColor: 'bg-[#1B4332]',
+        overallScore: 99.4,
+        onTimeRate: 100,
+        journalRate: 98.8,
+        totalJP: 28,
+        studentRating: 4.9,
+        badgeLabel: 'Teladan Utama',
+        awards: ['Hadir 100% Tepat Waktu', 'Jurnal KBM Selalu Lengkap', 'Evaluasi Santri 4.9/5']
+      },
+      {
+        id: 'top-2',
+        name: 'Ust. Muhammad Ridwan, S.Ag.',
+        nip: '198807212014021005',
+        position: 'Guru Tahfidz Al-Qur\'an',
+        unit: 'PESANTREN' as UnitType,
+        avatarColor: 'bg-emerald-700',
+        overallScore: 98.7,
+        onTimeRate: 98.5,
+        journalRate: 100,
+        totalJP: 26,
+        studentRating: 4.9,
+        badgeLabel: 'Disiplin Tinggi',
+        awards: ['Tahfidz Best Mentor', 'Jurnal 100% On-Time', 'Kedisiplinan Subuh']
+      },
+      {
+        id: 'top-3',
+        name: 'Ust. H. Mahmud Zaky, Lc.',
+        nip: '198211052008031001',
+        position: 'Pengampu Kitab Kuning / MA',
+        unit: 'MA' as UnitType,
+        avatarColor: 'bg-[#4F46E5]',
+        overallScore: 98.1,
+        onTimeRate: 97.2,
+        journalRate: 99.0,
+        totalJP: 24,
+        studentRating: 4.8,
+        badgeLabel: 'Jurnal Presisi',
+        awards: ['Rekomendasi Mudir', 'Aktif Menyusun Modul', 'Zero Absence']
+      },
+      {
+        id: 'top-4',
+        name: 'Ust. Abdullah Faqih, S.H.I.',
+        nip: '199004152016011003',
+        position: 'Guru Fiqih & Bahasa Arab',
+        unit: 'SMP' as UnitType,
+        avatarColor: 'bg-slate-700',
+        overallScore: 97.5,
+        onTimeRate: 96.8,
+        journalRate: 98.2,
+        totalJP: 22,
+        studentRating: 4.8,
+        badgeLabel: 'Inovatif',
+        awards: ['Media Pembelajaran Kreatif', 'Presensi Santri Rapi']
+      },
+      {
+        id: 'top-5',
+        name: 'Ust. Hasan Basri, S.Pd.I.',
+        nip: '199208032018021008',
+        position: 'Guru IPA / SMP IT',
+        unit: 'SMP' as UnitType,
+        avatarColor: 'bg-stone-700',
+        overallScore: 96.9,
+        onTimeRate: 96.0,
+        journalRate: 97.8,
+        totalJP: 20,
+        studentRating: 4.7,
+        badgeLabel: 'Konsisten',
+        awards: ['Ekskul Sains Mentor', 'Zero Late Check-in']
+      }
+    ];
 
-      let statusTier: 'TELADAN' | 'OPTIMAL' | 'SUPERVISI' = 'OPTIMAL';
-      if (performanceScore >= 95 && journalRate >= 95) {
-        statusTier = 'TELADAN';
-      } else if (performanceScore < 85 || journalRate < 80) {
-        statusTier = 'SUPERVISI';
+    if (filteredTeachers.length > 0) {
+      const mapped = filteredTeachers.map((teacher, index) => {
+        const teacherSchedules = filteredSchedules.filter(s => s.teacherId === teacher.id);
+        const hours = teacherSchedules.reduce((acc, s) => acc + (s.hours || 2), 0) * 4 || (18 + (index * 3) % 12);
+        
+        const onTime = Math.min(100, Math.max(90, 100 - (index % 4) * 1.5));
+        const journal = Math.min(100, Math.max(92, 100 - (index % 3) * 1.2));
+        const rating = (4.7 + ((index * 3) % 3) * 0.1).toFixed(1);
+        const score = Math.min(99.8, (onTime * 0.45 + journal * 0.45 + (parseFloat(rating) / 5 * 100) * 0.1)).toFixed(1);
+
+        const badges = ['Teladan Utama', 'Disiplin Tinggi', 'Jurnal Presisi', 'Inovatif', 'Konsisten'];
+
+        return {
+          id: teacher.id,
+          name: teacher.name,
+          nip: teacher.nip || `NIP.${19850000 + index}`,
+          position: teacher.position || 'Pengajar',
+          unit: teacher.unit,
+          avatarColor: teacher.avatarColor || (index % 2 === 0 ? 'bg-[#1B4332]' : 'bg-[#4F46E5]'),
+          overallScore: parseFloat(score),
+          onTimeRate: Math.round(onTime),
+          journalRate: Math.round(journal),
+          totalJP: hours,
+          studentRating: parseFloat(rating),
+          badgeLabel: badges[index % badges.length],
+          awards: ['Kehadiran Konsisten', 'Pengisian Jurnal Tepat Waktu', 'Evaluasi Santri Baik']
+        };
+      });
+
+      const sorted = mapped.sort((a, b) => b.overallScore - a.overallScore).slice(0, 5);
+
+      if (sorted.length < 5) {
+        defaultTopList.forEach(def => {
+          if (sorted.length < 5 && !sorted.some(s => s.name === def.name)) {
+            sorted.push(def);
+          }
+        });
       }
 
-      return {
-        id: teacher.id,
-        name: teacher.name,
-        position: teacher.position,
-        unit: teacher.unit,
-        nip: teacher.nip,
-        taughtHours,
-        schedulesCount: tSchedules.length,
-        journalRate,
-        punctuality,
-        performanceScore,
-        statusTier
-      };
-    }).sort((a, b) => b.performanceScore - a.performanceScore);
-  }, [filteredTeachers, schedules, attendances]);
-
-  // Top 5 Teachers for horizontal bar chart
-  const topTeachersChartData = useMemo(() => {
-    return teacherPerformanceList.slice(0, 5).map(t => ({
-      name: t.name.split(' ')[0] + ' ' + (t.name.split(' ')[1] || ''),
-      fullName: t.name,
-      skorKinerja: t.performanceScore,
-      bebanJP: t.taughtHours,
-      ketepatan: t.punctuality,
-      unit: t.unit
-    }));
-  }, [teacherPerformanceList]);
-
-  // Custom Chart Tooltips
-  const PercentageTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-stone-900/95 text-white p-3 rounded-xl shadow-xl text-xs border border-stone-800 backdrop-blur-xs space-y-1 min-w-[170px]">
-          <p className="font-bold text-stone-200 border-b border-stone-700/80 pb-1">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <div key={`item-${index}`} className="flex items-center justify-between gap-3 text-[11px]">
-              <span className="flex items-center gap-1.5" style={{ color: entry.color }}>
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                {entry.name}:
-              </span>
-              <span className="font-mono font-bold text-stone-100">
-                {entry.value}{entry.unit || (entry.name.includes('%') || entry.name.includes('Tingkat') || entry.name.includes('Kepatuhan') || entry.name.includes('Ketepatan') ? '%' : '')}
-              </span>
-            </div>
-          ))}
-        </div>
-      );
+      return sorted.slice(0, 5);
     }
-    return null;
+
+    return defaultTopList;
+  }, [filteredTeachers, filteredSchedules]);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      const now = new Date();
+      setLastUpdated(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
+      setIsRefreshing(false);
+    }, 400);
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       
-      {/* 1. Header & Controls Bar */}
-      <div className="bg-white dark:bg-stone-900/90 rounded-xl border border-stone-200/80 dark:border-stone-800 p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-1">
+      {/* 1. Header Minimalis & Modern */}
+      <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 p-4 sm:p-5 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] text-stone-500 dark:text-stone-400 font-semibold uppercase tracking-wider">
-                Pesantren Baitul Qur'an Al-Ikhwan
-              </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold bg-stone-100 dark:bg-stone-800 text-[#1B4332] dark:text-emerald-400 border border-stone-200 dark:border-stone-700">
-                {effectiveUnit === 'MA' ? 'MA Al-Ikhwan' : effectiveUnit === 'SMP' ? 'SMP IT' : effectiveUnit === 'PESANTREN' ? 'Pesantren' : 'Semua Unit'}
-              </span>
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/60 font-mono">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                LIVE REALTIME
+              </div>
+              <div className="text-[11px] text-stone-400 font-mono">
+                Pembaruan: {lastUpdated}
+              </div>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight font-sans">
-              {effectiveUnit === 'MA' 
-                ? 'Kinerja & Kedisiplinan Guru MA' 
-                : effectiveUnit === 'SMP' 
-                ? 'Kinerja & Kedisiplinan Guru SMP IT' 
-                : effectiveUnit === 'PESANTREN' 
-                ? 'Kinerja & Kedisiplinan Asatidz Ponpes' 
-                : 'Kinerja & Kedisiplinan Asatidz'}
+            <h1 className="text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100 tracking-tight mt-1">
+              Monitoring KBM & Tenaga Pendidik
             </h1>
           </div>
 
-          {/* Filters & Actions */}
-          <div className="flex flex-wrap items-center gap-2.5 pt-2 lg:pt-0">
-            {/* Unit Filter - Only show if ADMIN (Global access) */}
+          {/* Controls: Unit Filter & Refresh */}
+          <div className="flex flex-wrap items-center gap-2">
             {currentRole === 'ADMIN' && (
-              <div className="flex items-center bg-stone-50 dark:bg-stone-800/50 p-1 rounded-lg border border-stone-200/60 dark:border-stone-700/50 text-[11px]">
-                <button
-                  onClick={() => setSelectedUnit('ALL')}
-                  className={`px-3 py-1 rounded-md font-semibold transition-all cursor-pointer ${
-                    selectedUnit === 'ALL'
-                      ? 'bg-white dark:bg-stone-900 text-[#1B4332] dark:text-emerald-400 shadow-xs'
-                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
-                  }`}
-                >
-                  Semua
-                </button>
-                <button
-                  onClick={() => setSelectedUnit('SMP')}
-                  className={`px-3 py-1 rounded-md font-semibold transition-all cursor-pointer ${
-                    selectedUnit === 'SMP'
-                      ? 'bg-white dark:bg-stone-900 text-[#1B4332] dark:text-emerald-400 shadow-xs'
-                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
-                  }`}
-                >
-                  SMP
-                </button>
-                <button
-                  onClick={() => setSelectedUnit('MA')}
-                  className={`px-3 py-1 rounded-md font-semibold transition-all cursor-pointer ${
-                    selectedUnit === 'MA'
-                      ? 'bg-white dark:bg-stone-900 text-[#1B4332] dark:text-emerald-400 shadow-xs'
-                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
-                  }`}
-                >
-                  MA
-                </button>
-                <button
-                  onClick={() => setSelectedUnit('PESANTREN')}
-                  className={`px-3 py-1 rounded-md font-semibold transition-all cursor-pointer ${
-                    selectedUnit === 'PESANTREN'
-                      ? 'bg-white dark:bg-stone-900 text-[#1B4332] dark:text-emerald-400 shadow-xs'
-                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
-                  }`}
-                >
-                  Ponpes
-                </button>
+              <div className="flex bg-stone-100 dark:bg-stone-800 p-0.5 rounded-lg border border-stone-200/60 dark:border-stone-700 text-xs">
+                {(['ALL', 'SMP', 'MA', 'PESANTREN'] as const).map(u => (
+                  <button
+                    key={u}
+                    onClick={() => setSelectedUnit(u)}
+                    className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
+                      selectedUnit === u
+                        ? 'bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 shadow-3xs'
+                        : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
+                    }`}
+                  >
+                    {u === 'ALL' ? 'Semua' : u}
+                  </button>
+                ))}
               </div>
             )}
+
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="p-2 rounded-lg border border-stone-200/80 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
+              title="Refresh Data"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-emerald-600' : ''}`} />
+            </button>
+          </div>
+        </div>
+
+        {/* Sub-Tab Navigation */}
+        <div className="flex items-center gap-1.5 mt-4 pt-3.5 border-t border-stone-100 dark:border-stone-800 text-xs font-medium">
+          <button
+            onClick={() => setActiveView('REALTIME')}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+              activeView === 'REALTIME'
+                ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 font-semibold'
+                : 'text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800'
+            }`}
+          >
+            Live Sesi Hari Ini ({totalSessionsToday})
+          </button>
+          <button
+            onClick={() => setActiveView('BADAL')}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeView === 'BADAL'
+                ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 font-semibold'
+                : 'text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800'
+            }`}
+          >
+            Guru Pengganti
+            {activeBadalCount > 0 && (
+              <div className="w-4 h-4 rounded-full bg-amber-500 text-white text-[10px] font-mono font-bold flex items-center justify-center">
+                {activeBadalCount}
+              </div>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveView('REKAP')}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+              activeView === 'REKAP'
+                ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 font-semibold'
+                : 'text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800'
+            }`}
+          >
+            Rekap & Analitik Kinerja
+          </button>
+        </div>
+      </div>
+
+      {/* 2. Key Metrics Bar (Clean, Minimal, High Contrast) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {/* Metric 1: Kehadiran Hari Ini */}
+        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
+          <div className="text-xs font-medium text-stone-500 dark:text-stone-400">
+            Kehadiran Asatidz
+          </div>
+          <div className="text-2xl sm:text-3xl font-mono font-bold text-stone-900 dark:text-stone-100 mt-1">
+            {presentCount}
+          </div>
+          <div className="text-[11px] text-stone-400 mt-1">
+            {lateCount > 0 ? `${lateCount} hadir terlambat` : 'Semua hadir tepat waktu'}
+          </div>
+        </div>
+
+        {/* Metric 2: Ketaatan Jurnal Hari Ini */}
+        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
+          <div className="text-xs font-medium text-stone-500 dark:text-stone-400">
+            Jurnal KBM Terisi
+          </div>
+          <div className="text-2xl sm:text-3xl font-mono font-bold text-stone-900 dark:text-stone-100 mt-1">
+            {completedJournalCount}
+          </div>
+          <div className="text-[11px] text-stone-400 mt-1">
+            {pendingJournalCount > 0 ? `${pendingJournalCount} jurnal belum diserahkan` : 'Semua jurnal lengkap'}
+          </div>
+        </div>
+
+        {/* Metric 3: Guru Pengganti (Badal) */}
+        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
+          <div className="text-xs font-medium text-stone-500 dark:text-stone-400">
+            Guru Pengganti (Badal)
+          </div>
+          <div className="text-2xl sm:text-3xl font-mono font-bold text-amber-600 dark:text-amber-400 mt-1">
+            {activeBadalCount}
+          </div>
+          <div className="text-[11px] text-stone-400 mt-1">
+            {activeBadalCount > 0 ? 'Semua terisi guru pengganti' : 'Tidak ada kebutuhan badal'}
+          </div>
+        </div>
+
+        {/* Metric 4: Ketepatan Waktu Check-In */}
+        <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
+          <div className="text-xs font-medium text-stone-500 dark:text-stone-400">
+            Ketepatan Waktu KBM
+          </div>
+          <div className="text-2xl sm:text-3xl font-mono font-bold text-stone-900 dark:text-stone-100 mt-1">
+            {onTimePercentage}%
+          </div>
+          <div className="text-[11px] text-stone-400 mt-1">
+            Target kedisiplinan 95%
           </div>
         </div>
       </div>
 
-      {/* 2. Executive KPI Cards (Academic & Discipline Metrics Only) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Tingkat Kehadiran Staf */}
-        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
-          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">
-            Kehadiran Staf
-          </span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-stone-900 dark:text-stone-100 mt-1">
-            96.8%
-          </p>
-          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
-            Total {totalStaffCount} asatidz aktif
-          </span>
-        </div>
-
-        {/* Card 2: Ketaatan Pengisian Jurnal */}
-        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
-          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">
-            Ketaatan Jurnal
-          </span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-emerald-700 dark:text-emerald-400 mt-1">
-            {journalComplianceRate}%
-          </p>
-          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
-            {completedJournals} Sesi Jurnal Lengkap
-          </span>
-        </div>
-
-        {/* Card 3: Ketepatan Waktu Presensi */}
-        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
-          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">
-            Disiplin Waktu
-          </span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-stone-900 dark:text-stone-100 mt-1">
-            {punctualityRate}%
-          </p>
-          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
-            Persentase Tepat Waktu
-          </span>
-        </div>
-
-        {/* Card 4: Total Beban Mengajar & Guru Badal */}
-        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
-          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">
-            Beban KBM
-          </span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-stone-900 dark:text-stone-100 mt-1">
-            {totalWeeklyHours} <span className="text-xs font-normal text-stone-500 dark:text-stone-400 font-sans">JP/mgg</span>
-          </p>
-          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
-            Rasio Badal {badalRate}%
-          </span>
-        </div>
-      </div>
-
-      {/* 3. Primary Chart Section: Tren Bulanan Kehadiran & Kepatuhan Jurnal */}
-      <div className="bg-white dark:bg-stone-900 p-5 sm:p-6 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 gap-3 border-b border-stone-100 dark:border-stone-800">
-          <div>
-            <span className="text-[10px] font-semibold text-[#52796F] dark:text-[#81A499] uppercase tracking-wider block">
-              Analisis Tren Semester
-            </span>
-            <h2 className="text-base font-bold text-stone-900 dark:text-stone-100 mt-0.5">
-              Grafik Kehadiran & Kepatuhan Jurnal Staf
-            </h2>
-          </div>
-
-          {/* Minimalist Sleek Legend */}
-          <div className="flex flex-wrap items-center gap-4 text-xs font-medium">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#1B4332] dark:bg-emerald-600" />
-              <span className="text-stone-700 dark:text-stone-300">Tingkat Kehadiran</span>
+      {/* 3. VIEW 1: LIVE REALTIME MONITORING TABLE */}
+      {activeView === 'REALTIME' && (
+        <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs overflow-hidden">
+          {/* Table Filters & Search */}
+          <div className="p-3.5 border-b border-stone-100 dark:border-stone-800 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            {/* Filter chips */}
+            <div className="flex flex-wrap items-center gap-1.5 text-xs">
+              <button
+                onClick={() => setStatusFilter('ALL')}
+                className={`px-2.5 py-1 rounded-lg border font-medium transition-all cursor-pointer ${
+                  statusFilter === 'ALL'
+                    ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 border-stone-900 dark:border-stone-100'
+                    : 'bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-800 hover:bg-stone-50'
+                }`}
+              >
+                Semua ({liveSessions.length})
+              </button>
+              <button
+                onClick={() => setStatusFilter('HADIR')}
+                className={`px-2.5 py-1 rounded-lg border font-medium transition-all cursor-pointer ${
+                  statusFilter === 'HADIR'
+                    ? 'bg-emerald-600 text-white border-emerald-600'
+                    : 'bg-white dark:bg-stone-900 text-emerald-700 dark:text-emerald-400 border-stone-200 dark:border-stone-800 hover:bg-stone-50'
+                }`}
+              >
+                Tepat Waktu ({liveSessions.filter(s => s.attendanceStatus === 'HADIR_TEPAT').length})
+              </button>
+              <button
+                onClick={() => setStatusFilter('TERLAMBAT')}
+                className={`px-2.5 py-1 rounded-lg border font-medium transition-all cursor-pointer ${
+                  statusFilter === 'TERLAMBAT'
+                    ? 'bg-amber-600 text-white border-amber-600'
+                    : 'bg-white dark:bg-stone-900 text-amber-700 dark:text-amber-400 border-stone-200 dark:border-stone-800 hover:bg-stone-50'
+                }`}
+              >
+                Terlambat ({lateCount})
+              </button>
+              <button
+                onClick={() => setStatusFilter('PENDING_JURNAL')}
+                className={`px-2.5 py-1 rounded-lg border font-medium transition-all cursor-pointer ${
+                  statusFilter === 'PENDING_JURNAL'
+                    ? 'bg-rose-600 text-white border-rose-600'
+                    : 'bg-white dark:bg-stone-900 text-rose-700 dark:text-rose-400 border-stone-200 dark:border-stone-800 hover:bg-stone-50'
+                }`}
+              >
+                Pending Jurnal ({pendingJournalCount})
+              </button>
+              <button
+                onClick={() => setStatusFilter('BADAL')}
+                className={`px-2.5 py-1 rounded-lg border font-medium transition-all cursor-pointer ${
+                  statusFilter === 'BADAL'
+                    ? 'bg-indigo-600 text-white border-indigo-600'
+                    : 'bg-white dark:bg-stone-900 text-[#4F46E5] dark:text-indigo-400 border-stone-200 dark:border-stone-800 hover:bg-stone-50'
+                }`}
+              >
+                Guru Badal ({activeBadalCount})
+              </button>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#52796F]" />
-              <span className="text-stone-700 dark:text-stone-300">Ketaatan Jurnal</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#D97706]" />
-              <span className="text-stone-700 dark:text-stone-300">Ketepatan Waktu</span>
-            </div>
-          </div>
-        </div>
 
-        {/* Clean Chart Canvas */}
-        <div className="h-80 w-full pt-1">
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={monthlyTrendsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorKehadiran" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#1B4332" stopOpacity={0.12}/>
-                  <stop offset="95%" stopColor="#1B4332" stopOpacity={0.0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" className="dark:opacity-10" />
-              <XAxis 
-                dataKey="month" 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fontSize: 11, fontWeight: 600, fill: '#475569' }} 
+            {/* Search Input */}
+            <div className="relative w-full md:w-60">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+              <input
+                type="text"
+                placeholder="Cari guru, kelas, mapel..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-xs focus:ring-1 focus:ring-[#1B4332] text-stone-900 dark:text-stone-100 outline-none"
               />
-              <YAxis 
-                domain={[80, 100]} 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fontSize: 11, fontWeight: 600, fill: '#475569' }} 
-                tickFormatter={(val) => `${val}%`}
-              />
-              <Tooltip content={<PercentageTooltip />} />
-              
-              {/* Area 1: Kehadiran */}
-              <Area 
-                type="monotone" 
-                dataKey="tingkatKehadiran" 
-                name="Kehadiran" 
-                stroke="#1B4332" 
-                strokeWidth={2} 
-                fillOpacity={1} 
-                fill="url(#colorKehadiran)" 
-              />
+            </div>
+          </div>
 
-              {/* Line 2: Ketaatan Jurnal */}
-              <Line 
-                type="monotone" 
-                dataKey="kepatuhanJurnal" 
-                name="Jurnal KBM" 
-                stroke="#52796F" 
-                strokeWidth={2} 
-                dot={{ r: 3, fill: '#52796F' }}
-              />
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-400 font-semibold uppercase tracking-wider text-[10px] bg-stone-50/50 dark:bg-stone-850/40">
+                  <th className="py-3 px-4">Asatidz Pengajar</th>
+                  <th className="py-3 px-4">Kelas & Mapel</th>
+                  <th className="py-3 px-4">Waktu</th>
+                  <th className="py-3 px-4">Status Absensi</th>
+                  <th className="py-3 px-4">Status Jurnal</th>
+                  <th className="py-3 px-4">Guru Pengganti</th>
+                  <th className="py-3 px-4 text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-100 dark:divide-stone-800 text-stone-700 dark:text-stone-300">
+                {filteredLiveSessions.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-xs text-stone-400">
+                      Tidak ada data monitoring yang sesuai dengan filter.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredLiveSessions.map((session) => (
+                    <tr key={session.id} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/30 transition-colors">
+                      <td className="py-3 px-4">
+                        <div>
+                          <div className="font-semibold text-stone-900 dark:text-stone-100">
+                            {session.actualTeacherName}
+                          </div>
+                          {session.isBadal && (
+                            <div className="text-[10px] text-stone-400">
+                              Jadwal Asli: {session.originalTeacherName}
+                            </div>
+                          )}
+                        </div>
+                      </td>
 
-              {/* Line 3: Ketepatan Waktu */}
-              <Line 
-                type="monotone" 
-                dataKey="ketepatanWaktu" 
-                name="Tepat Waktu" 
-                stroke="#D97706" 
-                strokeWidth={2} 
-                strokeDasharray="4 4"
-                dot={{ r: 2.5, fill: '#D97706' }}
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
+                      <td className="py-3 px-4">
+                        <div>
+                          <div className="font-medium text-stone-800 dark:text-stone-200">
+                            {session.className}
+                          </div>
+                          <div className="text-[10px] text-stone-400">
+                            {session.subject} ({session.hours} JP)
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="py-3 px-4 font-mono text-[11px] text-stone-600 dark:text-stone-400">
+                        {session.timeSlot}
+                      </td>
+
+                      <td className="py-3 px-4">
+                        {session.attendanceStatus === 'HADIR_TEPAT' && (
+                          <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/40 font-mono">
+                            Hadir ({session.checkInTime})
+                          </div>
+                        )}
+                        {session.attendanceStatus === 'HADIR_TERLAMBAT' && (
+                          <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-900/40 font-mono">
+                            Terlambat +{session.lateMinutes}m ({session.checkInTime})
+                          </div>
+                        )}
+                        {session.attendanceStatus === 'BELUM_HADIR' && (
+                          <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-stone-100 dark:bg-stone-800 text-stone-500 border border-stone-200 dark:border-stone-700">
+                            Menunggu Sesi
+                          </div>
+                        )}
+                      </td>
+
+                      <td className="py-3 px-4">
+                        {session.isJournalComplete ? (
+                          <div>
+                            <div className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+                              <CheckCircle2 className="w-3 h-3 shrink-0" />
+                              Lengkap
+                            </div>
+                            <div className="text-[10px] text-stone-400 truncate max-w-[180px]">
+                              {session.journalTopic}
+                            </div>
+                          </div>
+                        ) : session.attendanceStatus !== 'BELUM_HADIR' ? (
+                          <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200/60 dark:border-rose-900/40">
+                            Pending Jurnal
+                          </div>
+                        ) : (
+                          <div className="text-[10px] text-stone-400">-</div>
+                        )}
+                      </td>
+
+                      <td className="py-3 px-4">
+                        {session.isBadal ? (
+                          <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-indigo-50 dark:bg-indigo-950/40 text-[#4F46E5] dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-900/40">
+                            Pengganti Aktif
+                          </div>
+                        ) : (
+                          <div className="text-stone-400 text-[11px]">-</div>
+                        )}
+                      </td>
+
+                      <td className="py-3 px-4 text-center">
+                        <button
+                          onClick={() => setSelectedSessionDetail(session)}
+                          className="px-2.5 py-1 rounded text-[10px] font-medium border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 transition-colors cursor-pointer"
+                        >
+                          Detail
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
+      )}
 
-        {/* Minimalist Summary Cards */}
-        <div className="pt-3 border-t border-stone-100 dark:border-stone-800 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-          <div className="p-3 bg-stone-50/70 dark:bg-stone-850/40 rounded-lg border border-stone-100 dark:border-stone-800/60">
-            <span className="text-[10px] text-stone-400 block font-medium">Rata-rata Kehadiran</span>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold font-serif text-stone-900 dark:text-stone-100">96.8%</span>
-              <span className="text-[10px] text-emerald-700 font-bold">+2.1%</span>
-            </div>
-          </div>
-          <div className="p-3 bg-stone-50/70 dark:bg-stone-850/40 rounded-lg border border-stone-100 dark:border-stone-800/60">
-            <span className="text-[10px] text-stone-400 block font-medium">Rata-rata Jurnal KBM</span>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold font-serif text-stone-900 dark:text-stone-100">95.3%</span>
-              <span className="text-[10px] text-[#52796F] font-bold">Tertib</span>
-            </div>
-          </div>
-          <div className="p-3 bg-stone-50/70 dark:bg-stone-850/40 rounded-lg border border-stone-100 dark:border-stone-800/60">
-            <span className="text-[10px] text-stone-400 block font-medium">Rata-rata Tepat Waktu</span>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold font-serif text-stone-900 dark:text-stone-100">93.8%</span>
-              <span className="text-[10px] text-amber-700 font-bold">Baik</span>
-            </div>
-          </div>
-          <div className="p-3 bg-stone-50/70 dark:bg-stone-850/40 rounded-lg border border-stone-100 dark:border-stone-800/60">
-            <span className="text-[10px] text-stone-400 block font-medium">Total Sesi KBM</span>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-base font-bold font-serif text-stone-900 dark:text-stone-100">{totalRecordedSessions} Sesi</span>
-              <span className="text-[10px] text-stone-400 font-medium">Aktif</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 4. Secondary Row: Weekly Pattern Bar Chart & Enhanced Multi-Dimensional Quality Matrix */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* Chart 3: Pola Disiplin & Beban KBM Berdasarkan Hari (Senin - Ahad) - 5 Cols on desktop */}
-        <div className="lg:col-span-5 bg-white dark:bg-stone-900 p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs flex flex-col justify-between space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-stone-100 dark:border-stone-800">
-            <div>
-              <span className="text-[10px] font-semibold text-[#52796F] uppercase tracking-wider block">
-                Evaluasi Harian
-              </span>
-              <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
-                Pola Kedisiplinan Mingguan
-              </h3>
-            </div>
-            <div className="flex items-center gap-3 text-[11px] font-medium">
-              <div className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-[#1B4332]" />
-                <span className="text-stone-700 dark:text-stone-300">Tepat</span>
+      {/* 4. VIEW 2: MONITORING GURU PENGGANTI (BADAL) */}
+      {activeView === 'BADAL' && (
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 p-5 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                  Monitoring Penugasan Guru Badal Hari Ini
+                </h2>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  Pemantauan asatidz pengganti untuk memastikan KBM tetap berjalan 100%.
+                </p>
               </div>
-              <div className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-[#D97706]" />
-                <span className="text-stone-700 dark:text-stone-300">Terlambat</span>
-              </div>
+              {onNavigateToBadal && (
+                <button
+                  onClick={onNavigateToBadal}
+                  className="px-3.5 py-1.5 bg-[#1B4332] hover:bg-[#143326] text-white text-xs font-semibold rounded-lg transition-all cursor-pointer shadow-3xs"
+                >
+                  Kelola Penugasan Badal
+                </button>
+              )}
             </div>
-          </div>
 
-          <div className="h-64 w-full pt-1">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklyDayData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" className="dark:opacity-10" />
-                <XAxis 
-                  dataKey="hari" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 11, fontWeight: 600, fill: '#475569' }} 
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 11, fontWeight: 600, fill: '#475569' }} 
-                />
-                <Tooltip content={<PercentageTooltip />} cursor={{ fill: 'transparent' }} />
-                <Bar 
-                  dataKey="tepatWaktu" 
-                  name="Tepat Waktu" 
-                  fill="#1B4332" 
-                  stackId="a" 
-                  barSize={14} 
-                  radius={[0, 0, 2, 2]}
-                />
-                <Bar 
-                  dataKey="terlambat" 
-                  name="Terlambat" 
-                  fill="#D97706" 
-                  stackId="a" 
-                  radius={[3, 3, 0, 0]} 
-                  barSize={14} 
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div className="pt-2 text-[11px] text-stone-500 dark:text-stone-400 flex items-center justify-between border-t border-stone-100 dark:border-stone-800/80">
-            <span>Tingkat ketepatan tertinggi: <strong className="text-stone-800 dark:text-stone-200">Jumat & Sabtu (98%)</strong></span>
-            <span className="text-emerald-700 dark:text-emerald-400 font-bold">Terkendali</span>
+            {/* Badal Schedule Table */}
+            <div className="overflow-x-auto mt-4 pt-2">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-stone-200 dark:border-stone-800 text-stone-500 font-semibold uppercase tracking-wider text-[10px] bg-stone-50/50 dark:bg-stone-850/40">
+                    <th className="py-3 px-4">Guru Utama (Berhalangan)</th>
+                    <th className="py-3 px-4">Guru Pengganti (Badal)</th>
+                    <th className="py-3 px-4">Kelas & Mapel</th>
+                    <th className="py-3 px-4">Waktu</th>
+                    <th className="py-3 px-4">Alasan Badal</th>
+                    <th className="py-3 px-4">Status Penugasan</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-stone-100 dark:divide-stone-800 text-stone-700 dark:text-stone-300">
+                  {liveSessions.filter(s => s.isBadal).length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-10 text-center text-xs text-stone-400">
+                        Tidak ada guru pengganti yang bertugas hari ini.
+                      </td>
+                    </tr>
+                  ) : (
+                    liveSessions.filter(s => s.isBadal).map((session) => (
+                      <tr key={session.id} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/30 transition-colors">
+                        <td className="py-3 px-4 font-semibold text-stone-900 dark:text-stone-100">
+                          {session.originalTeacherName}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="font-semibold text-emerald-700 dark:text-emerald-400">
+                            {session.actualTeacherName}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          {session.className} • {session.subject} ({session.hours} JP)
+                        </td>
+                        <td className="py-3 px-4 font-mono text-[11px] text-stone-500">
+                          {session.timeSlot}
+                        </td>
+                        <td className="py-3 px-4 text-stone-500">
+                          {session.badalReason}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/40">
+                            Disetujui & Bertugas
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+      )}
 
-        {/* Chart 4: Matriks Mutu Pengajaran (Minimalist & Simple) */}
-        <div className="lg:col-span-7 bg-white dark:bg-stone-900 p-5 sm:p-6 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs flex flex-col justify-between space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800 gap-2">
-            <div>
-              <span className="text-[10px] font-semibold text-[#52796F] uppercase tracking-wider block">
-                Evaluasi Mutu
-              </span>
-              <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
-                Matriks Kepatuhan & Standardisasi KBM
-              </h3>
+      {/* 5. VIEW 3: REKAP & ANALITIK KINERJA */}
+      {activeView === 'REKAP' && (
+        <div className="space-y-6">
+          {/* 7-Day Teacher Attendance Trend Chart */}
+          <div className="bg-white dark:bg-stone-900 p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800 gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                    Tren Kehadiran Guru (7 Hari Terakhir)
+                  </h3>
+                  <div className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">
+                    7 Hari
+                  </div>
+                </div>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  Visualisasi kedisiplinan dan jumlah kehadiran harian tenaga pendidik.
+                </p>
+              </div>
+
+              {/* Minimalist Legend */}
+              <div className="flex items-center gap-4 text-xs font-medium">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-sm bg-[#1B4332]" />
+                  <div className="text-stone-600 dark:text-stone-300">Tepat Waktu</div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-sm bg-[#D97706]" />
+                  <div className="text-stone-600 dark:text-stone-300">Terlambat</div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-sm bg-stone-300 dark:bg-stone-700" />
+                  <div className="text-stone-600 dark:text-stone-300">Izin / Sakit</div>
+                </div>
+              </div>
             </div>
 
-            {/* Simple Legend */}
-            <div className="flex items-center gap-4 text-xs font-medium">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#1B4332]" />
-                <span className="text-stone-700 dark:text-stone-300">Capaian Riil</span>
+            {/* Quick 7-Day Stats Summary */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="p-3 bg-stone-50/70 dark:bg-stone-850/50 rounded-lg border border-stone-100 dark:border-stone-800 text-center">
+                <div className="text-[10px] font-medium text-stone-500 uppercase">Rata-Rata Kehadiran</div>
+                <div className="text-lg font-mono font-bold text-emerald-700 dark:text-emerald-400 mt-0.5">97.1%</div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-0.5 bg-stone-350 dark:bg-stone-600" />
-                <span className="text-stone-500 dark:text-stone-400">Target Minimal</span>
+              <div className="p-3 bg-stone-50/70 dark:bg-stone-850/50 rounded-lg border border-stone-100 dark:border-stone-800 text-center">
+                <div className="text-[10px] font-medium text-stone-500 uppercase">Total Kehadiran Tepat</div>
+                <div className="text-lg font-mono font-bold text-stone-900 dark:text-stone-100 mt-0.5">124 Sesi</div>
+              </div>
+              <div className="p-3 bg-stone-50/70 dark:bg-stone-850/50 rounded-lg border border-stone-100 dark:border-stone-800 text-center">
+                <div className="text-[10px] font-medium text-stone-500 uppercase">Total Badal / Izin</div>
+                <div className="text-lg font-mono font-bold text-amber-600 dark:text-amber-400 mt-0.5">5 Sesi</div>
               </div>
             </div>
-          </div>
 
-          {/* Dual Visual: Minimalist Radar + Sleek Scorecard List */}
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
-            {/* Clean Radar Chart */}
-            <div className="sm:col-span-6 h-60 w-full">
+            {/* Recharts Bar Chart */}
+            <div className="h-60 w-full pt-1">
               <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={radarDimensionsData} margin={{ top: 10, right: 20, bottom: 10, left: 20 }}>
-                  <PolarGrid stroke="#cbd5e1" className="dark:opacity-10" />
-                  <PolarAngleAxis 
-                    dataKey="subject" 
-                    tick={{ fontSize: 10, fontWeight: 600, fill: '#334155' }} 
+                <BarChart data={last7DaysData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" className="dark:opacity-10" />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
+                  <Tooltip
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="bg-stone-900 text-white p-3 rounded-lg text-xs space-y-1 shadow-lg border border-stone-800">
+                            <p className="font-bold border-b border-stone-800 pb-1">{label}</p>
+                            {payload.map((p: any, i: number) => (
+                              <div key={i} className="flex justify-between gap-4 text-[11px]">
+                                <span style={{ color: p.color }}>{p.name}:</span>
+                                <span className="font-mono font-bold">{p.value} Guru</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
                   />
-                  <PolarRadiusAxis 
-                    angle={30} 
-                    domain={[0, 100]} 
-                    tick={{ fontSize: 8, fill: '#64748b' }} 
-                  />
-                  {/* Standar Minimum Boundary */}
-                  <Radar 
-                    name="Target Minimal" 
-                    dataKey="standar" 
-                    stroke="#94a3b8" 
-                    strokeDasharray="3 3" 
-                    fill="#e2e8f0" 
-                    fillOpacity={0.1} 
-                  />
-                  {/* Realisasi Capaian */}
-                  <Radar 
-                    name="Capaian Riil" 
-                    dataKey="realisasi" 
-                    stroke="#1B4332" 
-                    strokeWidth={2}
-                    fill="#1B4332" 
-                    fillOpacity={0.15} 
-                    dot={{ r: 2.5, fill: '#1B4332' }}
-                  />
-                  <Tooltip content={<PercentageTooltip />} />
-                </RadarChart>
+                  <Bar dataKey="tepat" name="Tepat Waktu" stackId="a" fill="#1B4332" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="terlambat" name="Terlambat" stackId="a" fill="#D97706" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="izin" name="Izin / Sakit" stackId="a" fill="#94a3b8" radius={[4, 4, 0, 0]} />
+                </BarChart>
               </ResponsiveContainer>
             </div>
+          </div>
 
-            {/* Clean, Minimalist Scorecard Rows */}
-            <div className="sm:col-span-6 space-y-2.5 text-xs">
-              {radarDimensionsData.map((item, idx) => (
-                <div key={idx} className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-stone-700 dark:text-stone-300 text-[11px]">
-                      {item.fullSubject}
+          {/* Monthly Trajectory Chart */}
+          <div className="bg-white dark:bg-stone-900 p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800 gap-2">
+              <div>
+                <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                  Tren Kehadiran & Ketaatan Jurnal Semester
+                </h3>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  Grafik agregat kedisiplinan dan kelengkapan jurnal per bulan.
+                </p>
+              </div>
+
+              {/* Minimalist Legend */}
+              <div className="flex items-center gap-4 text-xs font-medium">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-[#1B4332]" />
+                  <div className="text-stone-600 dark:text-stone-300">Kehadiran</div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-[#4F46E5]" />
+                  <div className="text-stone-600 dark:text-stone-300">Jurnal KBM</div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-[#D97706]" />
+                  <div className="text-stone-600 dark:text-stone-300">Tepat Waktu</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="h-60 w-full pt-1">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={monthlyTrendsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" className="dark:opacity-10" />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
+                  <YAxis domain={[80, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={(v) => `${v}%`} />
+                  <Tooltip 
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="bg-stone-900 text-white p-2.5 rounded-lg text-xs space-y-1 shadow-lg">
+                            <p className="font-bold border-b border-stone-800 pb-1">{label}</p>
+                            {payload.map((p: any, i: number) => (
+                              <div key={i} className="flex justify-between gap-4 text-[11px]">
+                                <span style={{ color: p.color }}>{p.name}:</span>
+                                <span className="font-mono font-bold">{p.value}%</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+                      return null;
+                    }} 
+                  />
+                  <Area type="monotone" dataKey="kehadiran" name="Kehadiran" stroke="#1B4332" strokeWidth={2} fill="#1B4332" fillOpacity={0.08} />
+                  <Line type="monotone" dataKey="jurnal" name="Jurnal KBM" stroke="#4F46E5" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="tepat" name="Tepat Waktu" stroke="#D97706" strokeWidth={2} strokeDasharray="3 3" dot={{ r: 2.5 }} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* TOP 5 USTADZ TERBAIK (DI PALING BAWAH - SIMPEL, MINIMALIS, MODERN) */}
+          <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 p-5 shadow-xs space-y-3">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
+              <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                Top 5 Ustadz Terbaik
+              </h3>
+              <span className="text-xs text-stone-400 font-mono">Bulan Ini</span>
+            </div>
+
+            <div className="divide-y divide-stone-100 dark:divide-stone-800/60">
+              {top5Teachers.map((teacher, idx) => (
+                <div
+                  key={teacher.id}
+                  onClick={() => setSelectedTopTeacherDetail(teacher)}
+                  className="py-2.5 px-2 hover:bg-stone-50/80 dark:hover:bg-stone-800/40 rounded-lg transition-colors flex items-center justify-between gap-4 cursor-pointer text-xs"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className={`w-6 h-6 rounded-md flex-shrink-0 flex items-center justify-center font-mono font-bold text-xs ${
+                      idx === 0 
+                        ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900' 
+                        : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400'
+                    }`}>
+                      {idx + 1}
                     </span>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-stone-900 dark:text-stone-100 text-[11px]">
-                        {item.realisasi}%
+                    <div className="truncate">
+                      <span className="font-semibold text-stone-900 dark:text-stone-100 block truncate">
+                        {teacher.name}
                       </span>
-                      <span className="text-[10px] text-stone-500 font-medium">
-                        / {item.standar}%
+                      <span className="text-[11px] text-stone-400 block truncate">
+                        {teacher.position} • {teacher.unit}
                       </span>
                     </div>
                   </div>
-                  <div className="w-full h-1 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full rounded-full transition-all duration-300 ${
-                        item.realisasi >= item.standar ? 'bg-[#1B4332] dark:bg-emerald-500' : 'bg-[#D97706]'
-                      }`}
-                      style={{ width: `${item.realisasi}%` }}
-                    />
+
+                  <div className="flex items-center gap-4 sm:gap-6 font-mono text-stone-600 dark:text-stone-300 flex-shrink-0">
+                    <div className="text-right hidden sm:block">
+                      <span className="text-[10px] text-stone-400 block font-sans">Kehadiran</span>
+                      <span className="font-semibold text-stone-800 dark:text-stone-200">{teacher.onTimeRate}%</span>
+                    </div>
+                    <div className="text-right hidden sm:block">
+                      <span className="text-[10px] text-stone-400 block font-sans">Jurnal</span>
+                      <span className="font-semibold text-stone-800 dark:text-stone-200">{teacher.journalRate}%</span>
+                    </div>
+                    <div className="text-right sm:pl-3 sm:border-l sm:border-stone-200 sm:dark:border-stone-800">
+                      <span className="text-[10px] text-stone-400 block font-sans">Skor</span>
+                      <span className="font-bold text-emerald-700 dark:text-emerald-400">{teacher.overallScore}%</span>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-
-          <div className="pt-2 text-[11px] text-stone-500 dark:text-stone-400 flex items-center justify-between border-t border-stone-100 dark:border-stone-800/80">
-            <span>Rata-rata Kepatuhan Mutu: <strong className="text-stone-800 dark:text-stone-200">95.2%</strong></span>
-            <span className="text-emerald-700 dark:text-emerald-400 font-bold">Melampaui Target</span>
-          </div>
         </div>
-      </div>
+      )}
 
-      {/* 5. Staff Performance Leaderboard & Teaching Analytics (Horizontal Bar & Table) */}
-      <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 p-6 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-stone-100 dark:border-stone-800 gap-2">
-          <div>
-            <span className="text-[10px] font-semibold text-[#52796F] uppercase tracking-wider block">
-              Evaluasi Tenaga Pendidik
-            </span>
-            <h3 className="text-base font-bold text-stone-900 dark:text-stone-100">
-              Peringkat & Kinerja Pengajaran Asatidz (Top 5)
-            </h3>
-          </div>
-          <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">
-            Menampilkan 5 asatidz terbaik unit {effectiveUnit}
-          </span>
-        </div>
-
-        {/* Top Performers Visual Comparison (Recharts Horizontal Bar) */}
-        <div className="space-y-3">
-          <h4 className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
-            Top 5 Asatidz dengan Indeks Kinerja Pengajaran Tertinggi
-          </h4>
-          <div className="h-56 w-full pt-1">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart 
-                layout="vertical" 
-                data={topTeachersChartData} 
-                margin={{ top: 5, right: 30, left: 30, bottom: 5 }}
+      {/* 6. Session Detail Modal (Minimalist Drawer) */}
+      {selectedSessionDetail && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 max-w-md w-full shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-4 border-b border-stone-150 dark:border-stone-800 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                  Rincian Sesi KBM
+                </h3>
+                <div className="text-[11px] text-stone-400 font-mono">
+                  {selectedSessionDetail.className} • {selectedSessionDetail.timeSlot}
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedSessionDetail(null)} 
+                className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 cursor-pointer"
               >
-                <XAxis 
-                  type="number" 
-                  domain={[0, 100]} 
-                  hide
-                />
-                <YAxis 
-                  dataKey="name" 
-                  type="category" 
-                  tickLine={false} 
-                  axisLine={false} 
-                  tick={{ fontSize: 11, fontWeight: 600, fill: '#475569' }} 
-                />
-                <Tooltip content={<PercentageTooltip />} cursor={{ fill: 'transparent' }} />
-                <Bar 
-                  dataKey="skorKinerja" 
-                  name="Skor" 
-                  fill="#1B4332" 
-                  radius={[0, 2, 2, 0]} 
-                  barSize={12} 
-                />
-              </BarChart>
-            </ResponsiveContainer>
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-3.5 text-xs">
+              <div className="flex justify-between py-1.5 border-b border-stone-100 dark:border-stone-800">
+                <div className="text-stone-500">Guru Bertugas:</div>
+                <div className="font-semibold text-stone-900 dark:text-stone-100">{selectedSessionDetail.actualTeacherName}</div>
+              </div>
+
+              {selectedSessionDetail.isBadal && (
+                <div className="flex justify-between py-1.5 border-b border-stone-100 dark:border-stone-800">
+                  <div className="text-stone-500">Guru Asli:</div>
+                  <div className="text-stone-700 dark:text-stone-300">{selectedSessionDetail.originalTeacherName} ({selectedSessionDetail.badalReason})</div>
+                </div>
+              )}
+
+              <div className="flex justify-between py-1.5 border-b border-stone-100 dark:border-stone-800">
+                <div className="text-stone-500">Status Check-In:</div>
+                <div className="font-mono font-semibold text-stone-900 dark:text-stone-100">
+                  {selectedSessionDetail.checkInTime ? `Pukul ${selectedSessionDetail.checkInTime}` : 'Belum Check-In'}
+                </div>
+              </div>
+
+              <div className="flex justify-between py-1.5 border-b border-stone-100 dark:border-stone-800">
+                <div className="text-stone-500">Status Jurnal:</div>
+                <div className={`font-semibold ${selectedSessionDetail.isJournalComplete ? 'text-emerald-600' : 'text-amber-600'}`}>
+                  {selectedSessionDetail.isJournalComplete ? 'Sudah Diserahkan' : 'Belum Diisi'}
+                </div>
+              </div>
+
+              {selectedSessionDetail.journalTopic && (
+                <div className="py-1.5 border-b border-stone-100 dark:border-stone-800">
+                  <div className="text-stone-500 mb-1">Materi yang Diajarkan:</div>
+                  <p className="p-2.5 bg-stone-50 dark:bg-stone-800 rounded-lg text-stone-800 dark:text-stone-200 italic">
+                    "{selectedSessionDetail.journalTopic}"
+                  </p>
+                </div>
+              )}
+
+              <div className="flex justify-between py-1.5">
+                <div className="text-stone-500">Presensi Santri:</div>
+                <div className="font-mono font-semibold text-stone-900 dark:text-stone-100">
+                  {selectedSessionDetail.studentPresentCount} / {selectedSessionDetail.totalStudents} Santri Hadir
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-stone-150 dark:border-stone-800 bg-stone-50 dark:bg-stone-850 flex justify-end">
+              <button
+                onClick={() => setSelectedSessionDetail(null)}
+                className="px-4 py-2 bg-stone-900 hover:bg-stone-800 dark:bg-stone-100 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-xs font-semibold rounded-lg cursor-pointer transition-colors"
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
+      )}
 
-        {/* Full Asatidz Teaching Analytics Table (No Salary Columns) */}
-        <div className="overflow-x-auto pt-2">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider text-[10px]">
-                <th className="py-3 px-4">Nama Asatidz</th>
-                <th className="py-3 px-4">Unit / Jabatan</th>
-                <th className="py-3 px-4 text-center">Beban KBM</th>
-                <th className="py-3 px-4 text-center">Ketepatan Waktu</th>
-                <th className="py-3 px-4 text-center">Ketaatan Jurnal</th>
-                <th className="py-3 px-4 text-center">Indeks Kinerja</th>
-                <th className="py-3 px-4 text-center">Status Evaluasi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-100 dark:divide-stone-800/80 text-stone-700 dark:text-stone-300">
-              {teacherPerformanceList.slice(0, 5).map((t, idx) => (
-                <tr key={t.id} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/20 transition-colors">
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-3">
-                      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold font-mono ${
-                        idx < 3 
-                          ? 'bg-[#1B4332]/10 text-[#1B4332] dark:bg-emerald-950/40 dark:text-emerald-300' 
-                          : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400'
-                      }`}>
-                        {idx + 1}
-                      </span>
-                      <div>
-                        <span className="font-semibold text-stone-900 dark:text-stone-100 block">
-                          {t.name}
-                        </span>
-                        <span className="text-[10px] text-stone-400 font-mono">NIP: {t.nip}</span>
-                      </div>
+      {/* 7. Top Teacher Scorecard Detail Modal */}
+      {selectedTopTeacherDetail && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 max-w-md w-full shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-4 border-b border-stone-150 dark:border-stone-800 flex items-center justify-between bg-stone-50/50 dark:bg-stone-850/50">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 border border-amber-200/60 dark:border-amber-800/40">
+                  <Trophy className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                    Rapor Kinerja Ustadz Terbaik
+                  </h3>
+                  <div className="text-[11px] text-stone-400 font-mono">
+                    {selectedTopTeacherDetail.unit} • {selectedTopTeacherDetail.nip}
+                  </div>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedTopTeacherDetail(null)} 
+                className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4 text-xs">
+              {/* Profile Card */}
+              <div className="flex items-center gap-3 p-3 bg-stone-50 dark:bg-stone-800 rounded-xl border border-stone-100 dark:border-stone-700">
+                <div className={`w-10 h-10 rounded-full ${selectedTopTeacherDetail.avatarColor} text-white flex items-center justify-center font-bold text-sm shadow-xs`}>
+                  {selectedTopTeacherDetail.name.charAt(0)}
+                </div>
+                <div>
+                  <h4 className="font-bold text-stone-900 dark:text-stone-100 text-sm">
+                    {selectedTopTeacherDetail.name}
+                  </h4>
+                  <p className="text-stone-500 text-xs">
+                    {selectedTopTeacherDetail.position}
+                  </p>
+                </div>
+              </div>
+
+              {/* Overall Score Highlight */}
+              <div className="p-4 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-xl border border-emerald-200/60 dark:border-emerald-900/40 text-center">
+                <span className="text-[10px] uppercase font-semibold text-emerald-800 dark:text-emerald-300 tracking-wider">
+                  Skor Performa Kumulatif
+                </span>
+                <div className="text-2xl font-mono font-bold text-emerald-900 dark:text-emerald-100 mt-0.5">
+                  {selectedTopTeacherDetail.overallScore}%
+                </div>
+                <div className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-1">
+                  Kategori: <span className="font-semibold">{selectedTopTeacherDetail.badgeLabel}</span>
+                </div>
+              </div>
+
+              {/* Metric Breakdown */}
+              <div className="space-y-2.5">
+                <div className="flex justify-between items-center py-1.5 border-b border-stone-100 dark:border-stone-800">
+                  <span className="text-stone-500">Kedisiplinan Check-In:</span>
+                  <span className="font-mono font-semibold text-stone-900 dark:text-stone-100">{selectedTopTeacherDetail.onTimeRate}% Tepat Waktu</span>
+                </div>
+
+                <div className="flex justify-between items-center py-1.5 border-b border-stone-100 dark:border-stone-800">
+                  <span className="text-stone-500">Kepatuhan Jurnal KBM:</span>
+                  <span className="font-mono font-semibold text-stone-900 dark:text-stone-100">{selectedTopTeacherDetail.journalRate}% Lengkap</span>
+                </div>
+
+                <div className="flex justify-between items-center py-1.5 border-b border-stone-100 dark:border-stone-800">
+                  <span className="text-stone-500">Total Jam Mengajar:</span>
+                  <span className="font-mono font-semibold text-stone-900 dark:text-stone-100">{selectedTopTeacherDetail.totalJP} JP / Bulan</span>
+                </div>
+
+                <div className="flex justify-between items-center py-1.5 border-b border-stone-100 dark:border-stone-800">
+                  <span className="text-stone-500">Rating Evaluasi Santri:</span>
+                  <span className="font-mono font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                    <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                    {selectedTopTeacherDetail.studentRating} / 5.0
+                  </span>
+                </div>
+              </div>
+
+              {/* Award / Achievements List */}
+              <div>
+                <span className="text-[11px] font-bold text-stone-700 dark:text-stone-300 block mb-2">
+                  Capaian & Catatan Positif:
+                </span>
+                <div className="space-y-1.5">
+                  {selectedTopTeacherDetail.awards?.map((award: string, i: number) => (
+                    <div key={i} className="flex items-center gap-2 text-[11px] text-stone-600 dark:text-stone-400">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>{award}</span>
                     </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-stone-50 dark:bg-stone-800/60 text-stone-600 dark:text-stone-300 border border-stone-200/40 dark:border-stone-700/40">
-                      {t.unit} • {t.position}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-center font-mono font-medium text-stone-600 dark:text-stone-400">
-                    {t.taughtHours} JP <span className="text-[10px] text-stone-400">({t.schedulesCount} Kelas)</span>
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <span className={`font-mono font-bold ${
-                      t.punctuality >= 95 ? 'text-[#1B4332] dark:text-emerald-400' : 'text-[#D97706]'
-                    }`}>
-                      {t.punctuality}%
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <span className={`font-mono font-bold ${
-                      t.journalRate === 100 ? 'text-[#1B4332] dark:text-emerald-400' : 'text-[#D97706]'
-                    }`}>
-                      {t.journalRate}%
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-center font-mono font-bold text-stone-900 dark:text-stone-100">
-                    {t.performanceScore} <span className="text-[10px] text-stone-400 font-normal">pts</span>
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    {t.statusTier === 'TELADAN' && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-[#1B4332]/10 text-[#1B4332] dark:bg-emerald-950/30 dark:text-emerald-300 border border-[#1B4332]/20 dark:border-emerald-900/30">
-                        <CheckCircle2 className="w-3 h-3" strokeWidth={1.5} />
-                        Teladan
-                      </span>
-                    )}
-                    {t.statusTier === 'OPTIMAL' && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-semibold bg-stone-55 dark:bg-stone-800/60 text-stone-600 dark:text-stone-300 border border-stone-200/60 dark:border-stone-700/60">
-                        Optimal
-                      </span>
-                    )}
-                    {t.statusTier === 'SUPERVISI' && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-[#D97706]/10 text-[#D97706] dark:bg-amber-950/30 dark:text-amber-300 border border-[#D97706]/20 dark:border-amber-900/30">
-                        <AlertCircle className="w-3 h-3" strokeWidth={1.5} />
-                        Supervisi
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-stone-150 dark:border-stone-800 bg-stone-50 dark:bg-stone-850 flex justify-end">
+              <button
+                onClick={() => setSelectedTopTeacherDetail(null)}
+                className="px-4 py-2 bg-stone-900 hover:bg-stone-800 dark:bg-stone-100 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-xs font-semibold rounded-lg cursor-pointer transition-colors"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
     </div>
   );
 };
+
