@@ -98,26 +98,26 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="bg-white dark:bg-[#1A221E] rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-stone-200 dark:border-stone-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs animate-in fade-in duration-150">
+      <div className="bg-white dark:bg-[#121f1a] rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200/90 dark:border-emerald-900/40">
         {/* Header */}
-        <div className="bg-[#141A17] text-white px-5 py-3.5 flex items-center justify-between border-b border-stone-800">
+        <div className="bg-[#09130f] text-white px-5 py-4 flex items-center justify-between border-b border-emerald-950">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="font-bold text-sm text-white">Presensi Masuk Sesi KBM</h2>
+              <h2 className="font-bold text-sm text-emerald-50">Absen</h2>
               {isBadalForMe && (
                 <span className="text-[10px] font-bold bg-emerald-600/90 text-white px-2 py-0.5 rounded font-mono">
                   BADAL
                 </span>
               )}
             </div>
-            <p className="text-xs text-stone-400 mt-0.5">
+            <p className="text-xs text-emerald-300/70 mt-0.5">
               {schedule.className} • {schedule.subject} ({schedule.hours} JP)
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-stone-400 hover:text-white p-1 rounded-lg hover:bg-stone-800 transition-colors cursor-pointer"
+            className="text-emerald-400 hover:text-white p-1 rounded-lg hover:bg-emerald-900/40 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -126,13 +126,13 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
         <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4">
           {/* Badal Assignment Indicator Card */}
           {isBadalForMe && originalTeacher && (
-            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-lg flex items-start gap-2.5 text-xs text-emerald-900 dark:text-emerald-200">
+            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 rounded-xl flex items-start gap-2.5 text-xs text-emerald-900 dark:text-emerald-200">
               <UserCheck className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" strokeWidth={1.5} />
               <div>
                 <p className="font-bold text-emerald-900 dark:text-emerald-200">
                   Tugas Guru Badal (Disetujui Kepsek)
                 </p>
-                <p className="text-[11px] text-emerald-800 dark:text-emerald-300 mt-0.5">
+                <p className="text-[11px] text-emerald-800 dark:text-emerald-300/90 mt-0.5">
                   Anda melakukan presensi menggantikan <strong>Ustadz {originalTeacher.name}</strong>. Hak honor JP dan transport KBM sesi ini dialokasikan penuh ke kafa'ah Anda.
                 </p>
               </div>
@@ -140,34 +140,34 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
           )}
 
           {/* Live Clock Card */}
-          <div className="bg-[#FBFBFA] dark:bg-[#141A17] rounded-xl p-4 text-center border border-stone-200 dark:border-stone-800">
-            <span className="text-[10px] font-semibold uppercase text-stone-400 tracking-wider block">
+          <div className="bg-slate-50 dark:bg-[#0e1713] rounded-2xl p-4 text-center border border-slate-200/80 dark:border-emerald-900/40">
+            <span className="text-[10px] font-semibold uppercase text-slate-400 dark:text-emerald-400/60 tracking-wider block">
               Waktu Server Presensi
             </span>
-            <div className="text-3xl sm:text-4xl font-mono font-bold text-stone-900 dark:text-stone-100 mt-1 tracking-tight">
+            <div className="text-3xl sm:text-4xl font-mono font-bold text-slate-900 dark:text-emerald-50 mt-1 tracking-tight">
               {liveSecondsTime}
             </div>
-            <p className="text-xs text-stone-500 mt-1">
-              Jadwal Masuk Mulai: <strong className="font-mono text-stone-800 dark:text-stone-200">{schedule.startTime} WIB</strong>
+            <p className="text-xs text-slate-500 dark:text-emerald-400/70 mt-1">
+              Jadwal Masuk Mulai: <strong className="font-mono text-slate-800 dark:text-emerald-200">{schedule.startTime} WIB</strong>
             </p>
           </div>
 
           {/* Real-time Status Card */}
           <div className={`p-3.5 rounded-xl border flex items-start gap-3 text-xs ${
             penaltyCalculation.lateMinutes <= 4
-              ? 'bg-emerald-50/70 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/40 text-[#1B4332] dark:text-emerald-300'
-              : 'bg-[#FFFDF5] dark:bg-[#221E14] border-[#E8DCB5] dark:border-[#534720] text-stone-800 dark:text-stone-200'
+              ? 'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/40 text-emerald-900 dark:text-emerald-200'
+              : 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/40 text-amber-900 dark:text-amber-200'
           }`}>
             {penaltyCalculation.lateMinutes <= 4 ? (
-              <CheckCircle2 className="w-4 h-4 text-[#1B4332] dark:text-emerald-400 shrink-0 mt-0.5" strokeWidth={1.5} />
+              <CheckCircle2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" strokeWidth={1.5} />
             ) : (
-              <AlertTriangle className="w-4 h-4 text-[#B08968] shrink-0 mt-0.5" strokeWidth={1.5} />
+              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" strokeWidth={1.5} />
             )}
             <div>
               <p className="font-bold">
                 {penaltyCalculation.lateMinutes <= 4 ? 'Status: Tepat Waktu' : `Terlambat ${penaltyCalculation.lateMinutes} Menit (${categoryInfo.label})`}
               </p>
-              <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-0.5">
+              <p className="text-[11px] text-slate-600 dark:text-emerald-300/70 mt-0.5">
                 {penaltyCalculation.lateMinutes <= 4 
                   ? 'Kafa\'ah honorarium dan transport KBM dibayarkan penuh.' 
                   : `Potongan disiplin: Rp ${penaltyCalculation.penalty.toLocaleString('id-ID')}`}
@@ -177,7 +177,7 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
 
           {/* Notes Input */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-stone-700 dark:text-stone-300">
+            <label className="text-xs font-semibold text-slate-700 dark:text-emerald-200">
               Catatan Kehadiran (Opsional)
             </label>
             <input
@@ -185,7 +185,7 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Contoh: Mengisi pengantar materi di lab..."
-              className="w-full text-xs px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:border-[#1B4332]"
+              className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-[#0e1713] text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-emerald-600"
             />
           </div>
 
@@ -194,17 +194,17 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-2 rounded-lg text-xs font-medium text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
+              className="px-3.5 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-emerald-300 hover:bg-slate-100 dark:hover:bg-[#182a23] transition-colors cursor-pointer"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center gap-1.5 bg-[#1B4332] hover:bg-[#143326] text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors cursor-pointer disabled:opacity-50 shadow-xs"
             >
               <Clock className="w-3.5 h-3.5" strokeWidth={1.5} />
-              <span>{isSubmitting ? 'Mencatat...' : 'Konfirmasi Presensi Masuk'}</span>
+              <span>{isSubmitting ? 'Mencatat...' : 'Konfirmasi Absen'}</span>
             </button>
           </div>
         </form>

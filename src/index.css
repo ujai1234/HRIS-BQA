@@ -9,12 +9,34 @@
   --color-pesantren-lime: #D4E157;
   --color-pesantren-emerald: #1B4332;
   --color-pesantren-dark: #141A17;
+
+  /* CoreUI Admin Palette Tokens */
+  --color-cui-primary: #321fdb;
+  --color-cui-secondary: #9da5b1;
+  --color-cui-success: #2eb85c;
+  --color-cui-info: #39f;
+  --color-cui-warning: #f9b115;
+  --color-cui-danger: #e55353;
+  --color-cui-dark: #2c384a;
+  --color-cui-sidebar: #212631;
+  --color-cui-bg: #ebedef;
+  --color-cui-bg-dark: #131924;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 html, body, button, input, select, textarea {
   font-family: 'Plus Jakarta Sans', 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  background-color: #f3f6f4;
+  color: #0f172a;
+}
+
+.dark body {
+  background-color: #09130f;
+  color: #f1f5f9;
 }
 
 @layer utilities {
@@ -57,13 +79,54 @@ html, body, button, input, select, textarea {
     }
   }
 
+  /* Islamic Modern Card & Widget Utilities */
+  .cui-card {
+    background-color: #ffffff;
+    border-radius: 0.875rem;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  .dark .cui-card {
+    background-color: #121e19;
+    border-color: rgba(16, 185, 129, 0.15);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Scrollbar custom styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.4);
+    border-radius: 9999px;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: rgba(16, 185, 129, 0.25);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.7);
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(16, 185, 129, 0.45);
+  }
+
   @keyframes bounceSubtle {
     0%, 100% {
-      transform: transtoneY(-2%);
+      transform: translateY(-2%);
       animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
     }
     50% {
-      transform: transtoneY(0);
+      transform: translateY(0);
       animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
     }
   }
@@ -72,4 +135,6 @@ html, body, button, input, select, textarea {
     animation: bounceSubtle 1.5s infinite;
   }
 }
+
+
 

@@ -10,23 +10,27 @@ import { SessionTimeoutManager } from './components/SessionTimeoutManager';
 import { LearningNeedManagement } from './components/LearningNeedManagement';
 import { BadalManagement } from './components/BadalManagement';
 import { GuruDeviceNotificationToast } from './components/GuruDeviceNotificationToast';
+import { CoreUIChartsView } from './components/pages/CoreUIChartsView';
+import { Page404 } from './components/pages/Page404';
+import { Page500 } from './components/pages/Page500';
 import { isKepsekRole } from './types';
 
 const MainContent: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarFolded, setSidebarFolded] = useState(false);
   const { isAuthenticated, currentRole, currentPath, isLoading } = useHRIS();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#FBFBFA] dark:bg-[#111614] flex items-center justify-center font-sans">
+      <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-5">
           <div className="relative">
-            <div className="w-12 h-12 border-2 border-stone-200 dark:border-stone-800 rounded-full"></div>
-            <div className="w-12 h-12 border-t-2 border-[#1B4332] dark:border-emerald-500 rounded-full animate-spin absolute top-0 left-0"></div>
+            <div className="w-12 h-12 border-2 border-slate-200 dark:border-slate-800 rounded-full"></div>
+            <div className="w-12 h-12 border-t-2 border-indigo-600 dark:border-indigo-400 rounded-full animate-spin absolute top-0 left-0"></div>
           </div>
           <div className="text-center space-y-1">
-            <p className="text-stone-900 dark:text-stone-100 font-bold text-sm tracking-tight">Baitul Qur'an Al-Ikhwan</p>
-            <p className="text-stone-400 dark:text-stone-500 text-[10px] uppercase tracking-widest font-bold">HRIS & Kafa'ah System</p>
+            <p className="text-slate-900 dark:text-slate-100 font-bold text-sm tracking-tight">Baitul Qur'an Al-Ikhwan</p>
+            <p className="text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest font-bold">HRIS & Kafa'ah System</p>
           </div>
         </div>
       </div>
@@ -40,9 +44,23 @@ const MainContent: React.FC = () => {
 
   // Dynamic router based on role and path matching user flow
   const renderDashboardByRole = () => {
+    // CoreUI Showcase & Error Pages
+    if (currentPath === '/dashboard/charts' || currentPath === '/pages/charts') {
+      return <CoreUIChartsView key="coreui-charts" />;
+    }
+    if (currentPath === '/pages/404') {
+      return <Page404 key="page-404" />;
+    }
+    if (currentPath === '/pages/500') {
+      return <Page500 key="page-500" />;
+    }
+
     if (currentRole === 'GURU' || currentPath.startsWith('/dashboard/guru')) {
       if (currentPath === '/dashboard/guru/slip') {
         return <GuruView initialTab="slip_gaji" key="guru-slip" />;
+      }
+      if (currentPath === '/dashboard/guru/jurnal') {
+        return <GuruView initialTab="clockin_journal" key="guru-jurnal" />;
       }
       if (currentPath === '/dashboard/guru/materi') {
         return <GuruView initialTab="kelas_materi" key="guru-materi" />;
@@ -91,26 +109,37 @@ const MainContent: React.FC = () => {
       if (currentPath === '/dashboard/kepsek/kebutuhan') {
         return <LearningNeedManagement key="kepsek-kebutuhan" />;
       }
-      return <KepsekView initialTab="ringkasan_kehadiran" key="kepsek-overview" />;
+      if (currentPath === '/dashboard/kepsek' || currentPath === '/') {
+        return <KepsekView initialTab="ringkasan_kehadiran" key="kepsek-overview" />;
+      }
+      return <Page404 key="page-404-fallback" />;
     }
 
-    return <GuruView initialTab="clockin_journal" key="default-guru" />;
+    // Default route check
+    if (currentPath === '/' || currentPath === '/dashboard') {
+      return <GuruView initialTab="overview" key="default-guru" />;
+    }
+
+    // If path is unknown, show real 404 error page
+    return <Page404 key="not-found-page" />;
   };
 
   return (
-    <div className="min-h-screen bg-[#FBFBFA] dark:bg-[#111614] text-stone-900 dark:text-stone-100 flex font-sans antialiased transition-colors duration-200">
+    <div className="min-h-screen bg-[#f3f6f4] dark:bg-[#09130f] text-slate-900 dark:text-slate-100 flex font-sans antialiased transition-colors duration-200">
       {/* Sidebar & Topbar Shell */}
       <Header 
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
+        sidebarFolded={sidebarFolded}
+        setSidebarFolded={setSidebarFolded}
       />
 
       {/* Real-time Guru Device Push Notification Floating Toast */}
       <GuruDeviceNotificationToast />
 
       {/* Main Workspace Area */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
-        {/* Top Spacer for Fixed Topbar */}
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${sidebarFolded ? 'lg:pl-20' : 'lg:pl-64'}`}>
+        {/* Top Spacer for Fixed Header (h-16) */}
         <div className="h-16" />
 
         {/* Content Container */}
@@ -118,17 +147,19 @@ const MainContent: React.FC = () => {
           {renderDashboardByRole()}
         </main>
 
-        {/* Professional Institutional Footer */}
-        <footer className="bg-white dark:bg-[#141A17] border-t border-stone-200 dark:border-stone-800/80 py-3.5 text-xs text-stone-500 dark:text-stone-400 mt-auto print:hidden">
+        {/* Institutional Footer */}
+        <footer className="bg-white dark:bg-[#0d1a15] border-t border-slate-200/80 dark:border-emerald-950/60 py-3.5 text-xs text-slate-500 dark:text-slate-400 mt-auto print:hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
             <div className="flex items-center gap-2">
-              <span className="text-stone-400 dark:text-stone-500 hidden md:inline">HRIS & Kafa'ah Asatidz</span>
+              <span className="font-semibold text-slate-700 dark:text-emerald-100">Baitul Qur'an Al-Ikhwan</span>
+              <span className="text-slate-300 dark:text-emerald-800">•</span>
+              <span className="text-slate-500 dark:text-emerald-400/80 hidden md:inline">HRIS & Kafa'ah Asatidz</span>
             </div>
 
-            <div className="flex items-center gap-2 text-stone-400 text-[11px]">
+            <div className="flex items-center gap-2 text-slate-400 dark:text-emerald-400/60 text-[11px]">
               <span>Tahun Ajaran 2026/2027</span>
               <span>•</span>
-              <span className="text-[#1B4332] dark:text-emerald-400 font-medium">Sistem Aktif</span>
+              <span className="text-emerald-700 dark:text-emerald-400 font-semibold">Sistem Aktif</span>
             </div>
           </div>
         </footer>

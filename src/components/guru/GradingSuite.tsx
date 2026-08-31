@@ -1,176 +1,309 @@
 import React, { useState } from 'react';
-import { 
-  Search, 
-  Filter, 
-  CheckCircle2, 
-  Clock, 
-  AlertCircle,
-  FileText,
-  MessageSquare
-} from 'lucide-react';
+
+interface Submission {
+  id: string;
+  name: string;
+  task: string;
+  status: 'SUBMITTED' | 'GRADED' | 'LATE';
+  date: string;
+  score: number | null;
+  feedback?: string;
+  content?: string;
+}
 
 export const GradingSuite: React.FC = () => {
   const [filter, setFilter] = useState<'ALL' | 'SUBMITTED' | 'GRADED' | 'LATE'>('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
   
-  // Dummy student submissions
-  const submissions = [
-    { id: '1', name: 'Ahmad Faris', task: 'Tugas Hafalan 1', status: 'SUBMITTED', date: 'Hari ini, 08:30', score: null },
-    { id: '2', name: 'Zahra Aulia', task: 'Tugas Hafalan 1', status: 'GRADED', date: 'Kemarin, 14:15', score: 95 },
-    { id: '3', name: 'Budi Santoso', task: 'Tugas Hafalan 1', status: 'LATE', date: 'Terlambat 2 hari', score: null },
-    { id: '4', name: 'Siti Aminah', task: 'Tugas Hafalan 1', status: 'SUBMITTED', date: 'Hari ini, 09:10', score: null },
-  ];
+  // Dummy student submissions with premium, realistic data
+  const [submissions, setSubmissions] = useState<Submission[]>([
+    { 
+      id: '1', 
+      name: 'Ahmad Faris', 
+      task: 'Setoran Surah Al-Mulk (Ayat 1-10)', 
+      status: 'SUBMITTED', 
+      date: 'Hari ini, 08:30', 
+      score: null,
+      content: 'Bismillah, berikut rekaman lisan setoran Surah Al-Mulk ayat 1-10 untuk dicek tajwid dan kelancarannya, Ustadz. Jazakallah khair.'
+    },
+    { 
+      id: '2', 
+      name: 'Zahra Aulia', 
+      task: 'Kuis Teori Tajwid (Hukum Nun Sukun)', 
+      status: 'GRADED', 
+      date: 'Kemarin, 14:15', 
+      score: 95,
+      feedback: 'Alhamdulillah, pemahaman sangat mendalam. Hanya perlu koreksi sedikit di nomor 4 terkait Idgham Bighunnah.',
+      content: 'Jawaban Kuis Teori: \n1. Idzhar Halqi: Membaca nun mati jelas.\n2. Idgham Bighunnah: Memasukkan suara dengan mendengung.\n3. Ikhfa Haqiqi: Menyamarkan bunyi.'
+    },
+    { 
+      id: '3', 
+      name: 'Budi Santoso', 
+      task: 'Hafalan Surah Ya-Sin (Ayat 1-15)', 
+      status: 'LATE', 
+      date: 'Terlambat 2 hari', 
+      score: null,
+      content: 'Mohon maaf Ustadz, baru bisa menyerahkan rekaman hari ini karena kemarin sempat kendala teknis mikrofon.'
+    },
+    { 
+      id: '4', 
+      name: 'Siti Aminah', 
+      task: 'Setoran Surah Al-Mulk (Ayat 1-10)', 
+      status: 'SUBMITTED', 
+      date: 'Hari ini, 09:10', 
+      score: null,
+      content: 'Setoran hafalan Surah Al-Mulk ayat 1-10 lengkap tanpa melihat mushaf. Mohon koreksinya.'
+    },
+  ]);
 
-  const filtered = submissions.filter(s => filter === 'ALL' || s.status === filter);
+  const [activeSubmission, setActiveSubmission] = useState<Submission>(submissions[0]);
+
+  const filtered = submissions.filter(s => {
+    const matchesFilter = filter === 'ALL' || s.status === filter;
+    const matchesSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.task.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
+  const [scores, setScores] = useState({
+    kelancaran: 'A',
+    makhraj: 'A',
+    tajwid: 'B'
+  });
+
+  const [inputScore, setInputScore] = useState<number | ''>('');
+  const [inputTextFeedback, setInputTextFeedback] = useState('');
+
+  const handleSaveGrade = () => {
+    if (activeSubmission) {
+      const finalScore = inputScore === '' ? 85 : Number(inputScore);
+      setSubmissions(submissions.map(s => {
+        if (s.id === activeSubmission.id) {
+          return {
+            ...s,
+            status: 'GRADED',
+            score: finalScore,
+            feedback: inputTextFeedback || 'Tugas dinilai dengan baik.'
+          };
+        }
+        return s;
+      }));
+      
+      // Update local view item
+      setActiveSubmission({
+        ...activeSubmission,
+        status: 'GRADED',
+        score: finalScore,
+        feedback: inputTextFeedback || 'Tugas dinilai dengan baik.'
+      });
+
+      // Clear scoring state
+      setInputScore('');
+      setInputTextFeedback('');
+    }
+  };
 
   return (
-    <div className="space-y-6 flex flex-col h-full">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
+    <div className="space-y-6">
+      {/* Coming Soon Banner */}
+      <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 p-3 rounded-lg text-center">
+        <p className="text-xs font-semibold text-amber-800 dark:text-amber-400">
+          🚧 Fitur Grading Suite ini masih dalam purwarupa visual (Coming Soon) dan belum menyimpan ke database utama.
+        </p>
+      </div>
+
+      {/* 1. Module Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-            Grading Suite
+          <h1 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            Penilaian & Koreksi Tugas
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Periksa tugas dan berikan penilaian siswa
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Evaluasi jawaban, periksa rubrik kelancaran tajwid, dan berikan nilai asatidz langsung ke database.
           </p>
         </div>
       </div>
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Submissions List */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-xl shadow-sm flex flex-col h-full max-h-[700px]">
-          <div className="p-4 border-b border-slate-200 dark:border-slate-800 space-y-4">
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input 
-                type="text" 
-                placeholder="Cari siswa atau tugas..."
-                className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-              />
-            </div>
+      {/* 2. Interactive Split-Screen Suite */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        
+        {/* Left Side: Submission List with Filters (1 Column) */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm flex flex-col">
+          
+          {/* Header Search and Filters */}
+          <div className="p-4 border-b border-slate-100 dark:border-slate-800 space-y-3 bg-slate-50/50 dark:bg-slate-900/40">
+            <input 
+              type="text" 
+              placeholder="Cari siswa atau materi tugas..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none focus:border-slate-900 dark:focus:border-slate-100"
+            />
             
-            <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
-              <button 
-                onClick={() => setFilter('ALL')}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${filter === 'ALL' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
-              >
-                Semua
-              </button>
-              <button 
-                onClick={() => setFilter('SUBMITTED')}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${filter === 'SUBMITTED' ? 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
-              >
-                <Clock className="w-3.5 h-3.5" /> Diserahkan
-              </button>
-              <button 
-                onClick={() => setFilter('GRADED')}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${filter === 'GRADED' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
-              >
-                <CheckCircle2 className="w-3.5 h-3.5" /> Dinilai
-              </button>
-              <button 
-                onClick={() => setFilter('LATE')}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${filter === 'LATE' ? 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
-              >
-                <AlertCircle className="w-3.5 h-3.5" /> Terlambat
-              </button>
+            <div className="flex gap-1 overflow-x-auto pb-1">
+              {(['ALL', 'SUBMITTED', 'GRADED', 'LATE'] as const).map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => setFilter(opt)}
+                  className={`px-2.5 py-1 rounded text-[10px] font-bold tracking-tight whitespace-nowrap transition-all duration-150 cursor-pointer ${
+                    filter === opt
+                      ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+                      : 'bg-white text-slate-500 hover:text-slate-800 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-slate-200 border border-slate-200 dark:border-slate-700'
+                  }`}
+                >
+                  {opt === 'ALL' ? 'Semua' : opt === 'SUBMITTED' ? 'Diserahkan' : opt === 'GRADED' ? 'Dinilai' : 'Terlambat'}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="overflow-y-auto flex-1 p-2 space-y-1">
-            {filtered.map(sub => (
-              <div key={sub.id} className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700 flex flex-col gap-2">
-                <div className="flex justify-between items-start">
-                  <div className="font-medium text-sm text-slate-900 dark:text-slate-100">{sub.name}</div>
-                  {sub.score ? (
-                    <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">{sub.score}</span>
-                  ) : (
-                    <span className="w-2 h-2 rounded-full bg-sky-500 mt-1.5" />
-                  )}
+          {/* Submissions Feed */}
+          <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-[500px] overflow-y-auto">
+            {filtered.map(sub => {
+              const isActive = activeSubmission.id === sub.id;
+              return (
+                <div 
+                  key={sub.id} 
+                  onClick={() => {
+                    setActiveSubmission(sub);
+                    setInputScore(sub.score || '');
+                    setInputTextFeedback(sub.feedback || '');
+                  }}
+                  className={`p-3.5 transition-all duration-150 cursor-pointer flex flex-col gap-1.5 ${
+                    isActive 
+                      ? 'bg-slate-50 dark:bg-slate-800/50 border-l-2 border-slate-900 dark:border-slate-100' 
+                      : 'hover:bg-slate-50/40 dark:hover:bg-slate-800/10'
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <span className="font-semibold text-xs text-slate-850 dark:text-slate-200">{sub.name}</span>
+                    {sub.score !== null ? (
+                      <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 px-1.5 py-0.5 rounded">
+                        {sub.score} Pts
+                      </span>
+                    ) : (
+                      <span className="text-[9px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/20 px-1.5 py-0.5 rounded">
+                        Koreksi
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="flex justify-between items-center text-[11px] text-slate-400 dark:text-slate-500">
+                    <span className="truncate max-w-[150px]">{sub.task}</span>
+                    <span className={`font-medium ${sub.status === 'LATE' ? 'text-rose-500' : ''}`}>{sub.date}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-500 dark:text-slate-400">{sub.task}</span>
-                  <span className={`
-                    ${sub.status === 'LATE' ? 'text-rose-500' : 'text-slate-400'}
-                  `}>{sub.date}</span>
-                </div>
+              );
+            })}
+            {filtered.length === 0 && (
+              <div className="p-8 text-center text-xs text-slate-400 dark:text-slate-500">
+                Tidak ada pengajuan tugas yang cocok.
               </div>
-            ))}
+            )}
           </div>
         </div>
 
-        {/* Grading Panel (Split View) */}
-        <div className="lg:col-span-2 flex flex-col bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-xl shadow-sm h-full max-h-[700px] overflow-hidden">
-          {/* Header */}
-          <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
-            <div>
-              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Ahmad Faris</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Tugas Hafalan 1 • Diserahkan Hari ini, 08:30</p>
+        {/* Right Side: Split Submission Review & Grading Rubric (2 Columns) */}
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm grid grid-cols-1 md:grid-cols-2">
+          
+          {/* Column A: Submission Response Content */}
+          <div className="p-5 border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800 space-y-4">
+            <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pengajuan Jawaban</span>
+              <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 mt-1">
+                {activeSubmission.name}
+              </h3>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                {activeSubmission.task}
+              </p>
             </div>
-            <button className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium rounded-lg flex items-center gap-2 hover:bg-slate-200 dark:hover:bg-slate-700">
-              <FileText className="w-4 h-4" /> Buka Lampiran
-            </button>
+
+            <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-lg border border-slate-100 dark:border-slate-850 min-h-[180px]">
+              <p className="text-xs text-slate-700 dark:text-slate-350 leading-relaxed whitespace-pre-line font-medium">
+                {activeSubmission.content || 'Tidak ada teks jawaban terlampir.'}
+              </p>
+            </div>
+
+            <div className="text-[11px] text-slate-400 dark:text-slate-500 italic">
+              Status: <span className="font-bold text-slate-600 dark:text-slate-400">{activeSubmission.status}</span>
+            </div>
           </div>
 
-          <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-            {/* Answer Viewer */}
-            <div className="flex-1 p-6 overflow-y-auto border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-lg shadow-sm">
-                <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
-                  "Bismillah, berikut setoran hafalan Surah Al-Mulk ayat 1-10 sesuai dengan tugas yang diberikan.
-                  
-                  Mohon bimbingannya ustadz apabila ada makhraj yang kurang pas."
-                  
-                  [Audio Lampiran: setoran_ahmad.mp3]
-                </p>
-              </div>
-            </div>
-
-            {/* Rubric & Score Input */}
-            <div className="w-full md:w-80 p-5 overflow-y-auto bg-white dark:bg-slate-900 flex flex-col gap-5">
-              <div>
-                <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">Rubrik Penilaian</label>
-                <div className="space-y-3">
-                  {['Kelancaran', 'Makharijul Huruf', 'Tajwid'].map((crit) => (
-                    <div key={crit} className="flex items-center justify-between">
-                      <span className="text-sm text-slate-700 dark:text-slate-300">{crit}</span>
-                      <select className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-md text-sm p-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                        <option>A (Sangat Baik)</option>
-                        <option>B (Baik)</option>
-                        <option>C (Cukup)</option>
-                      </select>
-                    </div>
-                  ))}
-                </div>
+          {/* Column B: Professional Rubric & Score Input */}
+          <div className="p-5 space-y-4 bg-slate-50/20 dark:bg-slate-900/10 flex flex-col justify-between">
+            <div className="space-y-4">
+              <div className="pb-2 border-b border-slate-100 dark:border-slate-800">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Rubrik Penilaian</span>
               </div>
 
-              <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
-                <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Nilai Akhir (0-100)</label>
+              {/* Rubric Evaluator Selectors */}
+              <div className="space-y-3">
+                {[
+                  { key: 'kelancaran', label: 'Kelancaran Hafalan' },
+                  { key: 'makhraj', label: 'Makharijul Huruf' },
+                  { key: 'tajwid', label: 'Hukum Tajwid & Harakat' }
+                ].map((rubric) => (
+                  <div key={rubric.key} className="flex items-center justify-between text-xs">
+                    <span className="text-slate-600 dark:text-slate-400 font-semibold">{rubric.label}</span>
+                    <select 
+                      value={(scores as any)[rubric.key]}
+                      onChange={(e) => setScores({ ...scores, [rubric.key]: e.target.value })}
+                      className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded p-1 text-[11px] text-slate-700 dark:text-slate-300 focus:outline-none"
+                    >
+                      <option value="A">A (Sangat Baik)</option>
+                      <option value="B">B (Baik / Layak)</option>
+                      <option value="C">C (Cukup / Mengulang)</option>
+                    </select>
+                  </div>
+                ))}
+              </div>
+
+              {/* Raw Grade Output */}
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                  Nilai Angka (0-100)
+                </label>
                 <input 
                   type="number" 
-                  placeholder="0"
-                  className="w-full text-2xl font-mono px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  min="0"
+                  max="100"
+                  value={inputScore}
+                  onChange={(e) => {
+                    const val = e.target.value === '' ? '' : Number(e.target.value);
+                    setInputScore(val);
+                  }}
+                  placeholder="Contoh: 85"
+                  className="w-full text-lg font-mono font-bold px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:border-slate-900 dark:focus:border-slate-100"
                 />
               </div>
 
+              {/* Feedback Input */}
               <div>
-                <label className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
-                  <MessageSquare className="w-3.5 h-3.5" /> Umpan Balik
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                  Catatan Umpan Balik (Feedback)
                 </label>
                 <textarea 
                   rows={3}
-                  placeholder="Berikan masukan untuk siswa..."
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  value={inputTextFeedback}
+                  onChange={(e) => setInputTextFeedback(e.target.value)}
+                  placeholder="Tulis saran kelancaran makhraj bagi santri..."
+                  className="w-full px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none"
                 />
               </div>
-
-              <div className="mt-auto pt-4 flex gap-2">
-                <button className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors">
-                  Simpan & Lanjut
-                </button>
-              </div>
             </div>
+
+            {/* Action Save Buttons */}
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-850">
+              <button 
+                onClick={handleSaveGrade}
+                className="w-full py-2 bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold text-xs rounded-lg shadow-sm transition-all duration-150 cursor-pointer text-center"
+              >
+                Simpan & Tandai Selesai
+              </button>
+            </div>
+
           </div>
         </div>
+
       </div>
     </div>
   );

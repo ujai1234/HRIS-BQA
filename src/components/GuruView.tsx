@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHRIS } from '../context/HRISContext';
-import { Overview } from './guru/Overview';
+import { TeacherDashboard } from './TeacherDashboard';
 import { CourseBuilder } from './guru/CourseBuilder';
 import { GradingSuite } from './guru/GradingSuite';
 import { StudentAnalytics } from './guru/StudentAnalytics';
@@ -24,7 +24,7 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'overview' }) =
 
   // Handle rendering based on activeSubTab
   if (activeSubTab === 'overview' || activeSubTab === 'clockin_journal' || activeSubTab === 'jadwal') {
-    return <Overview />;
+    return <TeacherDashboard />;
   }
   if (activeSubTab === 'kelas_materi') {
     return <CourseBuilder />;
@@ -39,5 +39,5 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'overview' }) =
     return <SlipGajiView />;
   }
   
-  return <Overview />;
+  return <TeacherDashboard />;
 };

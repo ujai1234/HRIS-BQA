@@ -1,5 +1,6 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useHRIS } from '../context/HRISContext';
+import { deviceNotificationService } from '../utils/deviceNotificationService';
 
 export type GuruNotifType = 'BADAL' | 'ATTENDANCE_OPEN' | 'JOURNAL_PENDING' | 'REQUEST_UPDATE';
 
@@ -232,12 +233,53 @@ export const useGuruNotifications = () => {
     n => !n.isRead && n.urgency === 'high' && !dismissedToastIds.includes(n.id)
   );
 
+  // Track dispatched push notifications to avoid duplicates in device OS shade
+  const dispatchedPushIdsRef = useRef<Set<string>>(new Set());
+  const [devicePermission, setDevicePermission] = useState<NotificationPermission>(() => 
+    deviceNotificationService.getPermission()
+  );
+
+  // Automatically trigger native OS notification on Phone / Tablet / Desktop
+  useEffect(() => {
+    if (activeDeviceAlerts.length > 0) {
+      const topAlert = activeDeviceAlerts[0];
+      if (!dispatchedPushIdsRef.current.has(topAlert.id)) {
+        dispatchedPushIdsRef.current.add(topAlert.id);
+        deviceNotificationService.sendDeviceAlert({
+          title: `BQA: ${topAlert.title}`,
+          body: topAlert.subtitle,
+          tag: topAlert.id,
+          url: topAlert.actionPath,
+          urgency: topAlert.urgency
+        });
+      }
+    }
+  }, [activeDeviceAlerts]);
+
+  // Request device notification permission
+  const requestDevicePermission = async () => {
+    const res = await deviceNotificationService.requestPermission();
+    setDevicePermission(res);
+    return res;
+  };
+
+  // Test device notification
+  const sendTestDeviceNotification = async () => {
+    const res = await deviceNotificationService.sendTestNotification();
+    setDevicePermission(deviceNotificationService.getPermission());
+    return res;
+  };
+
   return {
     notifications,
     unreadCount,
     activeDeviceAlerts,
+    devicePermission,
+    requestDevicePermission,
+    sendTestDeviceNotification,
     markAsRead,
     markAllAsRead,
     dismissToast
   };
 };
+

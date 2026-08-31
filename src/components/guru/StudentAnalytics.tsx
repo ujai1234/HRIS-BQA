@@ -1,10 +1,4 @@
-import React from 'react';
-import { 
-  Users, 
-  TrendingUp,
-  Search,
-  Filter
-} from 'lucide-react';
+import React, { useState } from 'react';
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -16,140 +10,231 @@ import {
   Tooltip
 } from 'recharts';
 
+interface Student {
+  id: string;
+  name: string;
+  class: string;
+  attendance: number;
+  score: number;
+  status: 'Baik' | 'Sangat Baik' | 'Perlu Perhatian';
+  lastSessionAttendance: 'HADIR' | 'IZIN' | 'SAKIT' | 'ALPA';
+}
+
 export const StudentAnalytics: React.FC = () => {
   const chartData = [
     { name: 'Pekan 1', hadir: 98, tugas: 85 },
     { name: 'Pekan 2', hadir: 96, tugas: 88 },
     { name: 'Pekan 3', hadir: 99, tugas: 90 },
-    { name: 'Pekan 4', hadir: 95, tugas: 86 },
+    { name: 'Pekan 4', hadir: 95, text: 86, tugas: 89 },
   ];
 
-  const students = [
-    { id: '1', name: 'Ahmad Faris', class: 'VII-A', attendance: 98, score: 85, status: 'Baik' },
-    { id: '2', name: 'Zahra Aulia', class: 'VII-A', attendance: 100, score: 95, status: 'Sangat Baik' },
-    { id: '3', name: 'Budi Santoso', class: 'VII-B', attendance: 85, score: 75, status: 'Perlu Perhatian' },
-  ];
+  const [students, setStudents] = useState<Student[]>([
+    { id: '1', name: 'Ahmad Faris', class: 'VII-A', attendance: 98, score: 85, status: 'Baik', lastSessionAttendance: 'HADIR' },
+    { id: '2', name: 'Zahra Aulia', class: 'VII-A', attendance: 100, score: 95, status: 'Sangat Baik', lastSessionAttendance: 'HADIR' },
+    { id: '3', name: 'Budi Santoso', class: 'VII-B', attendance: 85, score: 75, status: 'Perlu Perhatian', lastSessionAttendance: 'IZIN' },
+    { id: '4', name: 'Siti Aminah', class: 'VII-A', attendance: 94, score: 88, status: 'Baik', lastSessionAttendance: 'HADIR' },
+    { id: '5', name: 'Fakhri Hanif', class: 'VII-B', attendance: 92, score: 80, status: 'Baik', lastSessionAttendance: 'SAKIT' },
+  ]);
+
+  const [selectedClass, setSelectedClass] = useState('Semua Kelas');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const toggleStudentAttendance = (studentId: string, status: 'HADIR' | 'IZIN' | 'SAKIT' | 'ALPA') => {
+    setStudents(prev => prev.map(s => {
+      if (s.id === studentId) {
+        // Recalculate attendance rate dynamically for realism
+        let newAtt = s.attendance;
+        if (status === 'HADIR' && s.lastSessionAttendance !== 'HADIR') {
+          newAtt = Math.min(100, s.attendance + 2);
+        } else if (status === 'ALPA' && s.lastSessionAttendance === 'HADIR') {
+          newAtt = Math.max(0, s.attendance - 5);
+        }
+        return {
+          ...s,
+          lastSessionAttendance: status,
+          attendance: Math.round(newAtt)
+        };
+      }
+      return s;
+    }));
+  };
+
+  const filteredStudents = students.filter(s => {
+    const classMatch = selectedClass === 'Semua Kelas' || s.class === selectedClass;
+    const searchMatch = s.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return classMatch && searchMatch;
+  });
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
+      {/* Coming Soon Banner */}
+      <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 p-3 rounded-lg text-center">
+        <p className="text-xs font-semibold text-amber-800 dark:text-amber-400">
+          🚧 Fitur Analitik Santri ini masih dalam visualisasi pratinjau (Coming Soon) dan belum mengambil data presensi dari database siswa.
+        </p>
+      </div>
+
+      {/* 1. Header with minimalist controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-            Analitik & Performa Siswa
+          <h1 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            Analitik & Presensi Santri
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Pantau kehadiran dan tren nilai akademik
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Kelola kehadiran harian dan tinjau performa akademik secara berkala.
           </p>
         </div>
         <div className="flex gap-2">
-          <select className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500/50">
-            <option>Semua Kelas</option>
-            <option>VII-A (SMP)</option>
-            <option>VII-B (SMP)</option>
+          <select 
+            value={selectedClass}
+            onChange={(e) => setSelectedClass(e.target.value)}
+            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold rounded-lg px-3 py-1.5 outline-none focus:border-slate-900 dark:focus:border-slate-100"
+          >
+            <option value="Semua Kelas">Semua Kelas</option>
+            <option value="VII-A">Kelas VII-A</option>
+            <option value="VII-B">Kelas VII-B</option>
           </select>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Trend Chart */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-xl shadow-sm p-5">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Tren Performa Kelas</h3>
-            <div className="flex items-center gap-4 text-xs font-medium">
-              <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
-                <span className="w-2 h-2 rounded-full bg-slate-800 dark:bg-slate-200" /> Kehadiran
-              </div>
-              <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
-                <span className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-600" /> Nilai Rata-rata
-              </div>
+      {/* 2. Visual Analytics Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        
+        {/* Monochromatic Clean Line Chart (2 Columns) */}
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-xl shadow-sm p-4 sm:p-5">
+          <div className="flex items-center justify-between mb-5 pb-3 border-b border-slate-50 dark:border-slate-850">
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Tren Tingkat Kehadiran & Nilai</h3>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Rata-rata kumulatif per pekan</p>
+            </div>
+            
+            <div className="flex items-center gap-3 text-[11px] font-bold">
+              <span className="inline-flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
+                <span className="w-2.5 h-2.5 rounded bg-slate-900 dark:bg-slate-100" /> Kehadiran
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-slate-400 dark:text-slate-500">
+                <span className="w-2.5 h-2.5 rounded bg-slate-300 dark:bg-slate-700" /> Nilai Rata-rata
+              </span>
             </div>
           </div>
-          <div className="h-64">
+
+          <div className="h-60">
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" strokeOpacity={0.5} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
+              <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" strokeOpacity={0.4} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} dy={10} />
+                <YAxis domain={[50, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
-                  itemStyle={{ color: '#fff' }}
+                  contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '6px', color: '#fff', fontSize: '11px' }}
                 />
-                <Area type="monotone" dataKey="hadir" stroke="#1e293b" strokeWidth={2} fill="#1e293b" fillOpacity={0.05} />
-                <Line type="monotone" dataKey="tugas" stroke="#94a3b8" strokeWidth={2} dot={{ r: 4, strokeWidth: 2 }} />
+                <Area type="monotone" dataKey="hadir" stroke="#0f172a" strokeWidth={1.5} fill="#0f172a" fillOpacity={0.03} />
+                <Line type="monotone" dataKey="tugas" stroke="#94a3b8" strokeWidth={1.5} dot={{ r: 3 }} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Quick Stats */}
+        {/* Dynamic Target Metrics (1 Column) */}
         <div className="space-y-4">
           <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-5 rounded-xl shadow-sm">
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Total Kehadiran Bulan Ini</p>
-            <div className="flex items-end gap-2">
-              <span className="text-3xl font-semibold text-slate-900 dark:text-slate-100">97.5%</span>
-              <span className="text-xs text-emerald-600 font-medium flex items-center gap-0.5 mb-1"><TrendingUp className="w-3 h-3" /> +2.1%</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Rasio Kehadiran Unit</span>
+            <div className="flex items-baseline gap-1.5 mt-2">
+              <span className="text-2xl font-mono font-semibold text-slate-900 dark:text-slate-100">97.6%</span>
+              <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950/20 px-1.5 py-0.5 rounded">Tinggi</span>
             </div>
           </div>
+
           <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-5 rounded-xl shadow-sm">
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Rata-rata Nilai Tugas</p>
-            <div className="flex items-end gap-2">
-              <span className="text-3xl font-semibold text-slate-900 dark:text-slate-100">86.4</span>
-              <span className="text-xs text-emerald-600 font-medium flex items-center gap-0.5 mb-1"><TrendingUp className="w-3 h-3" /> +1.2</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Rerata Indeks Nilai</span>
+            <div className="flex items-baseline gap-1.5 mt-2">
+              <span className="text-2xl font-mono font-semibold text-slate-900 dark:text-slate-100">87.5 / 100</span>
+              <span className="text-[10px] text-slate-600 font-bold bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">Sesuai KKM</span>
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-5 rounded-xl shadow-sm flex flex-col items-center justify-center text-center gap-2 h-[120px]">
-            <button className="px-4 py-2 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-sm font-medium rounded-lg shadow-sm hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors w-full">
-              Export Laporan (.csv)
-            </button>
-          </div>
+
+          <button className="w-full py-2 bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold text-xs rounded-lg shadow-sm transition-colors duration-150 cursor-pointer">
+            Export Rapor Kumulatif (.CSV)
+          </button>
         </div>
       </div>
 
-      {/* Student List Table */}
+      {/* 3. Interactive Student Register & Rapid Attendance Log */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Rapor Siswa</h3>
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input 
-              type="text" 
-              placeholder="Cari siswa..."
-              className="w-full sm:w-64 pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-            />
+        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-900/40">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Presensi Cepat & Daftar Santri</h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Klik opsi presensi di baris siswa untuk memperbarui absensi sesi terakhir langsung.</p>
           </div>
+          <input 
+            type="text" 
+            placeholder="Cari nama santri..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none"
+          />
         </div>
+
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
-              <tr>
-                <th className="px-4 py-3 font-medium">Nama Siswa</th>
-                <th className="px-4 py-3 font-medium">Kelas</th>
-                <th className="px-4 py-3 font-medium">Kehadiran (%)</th>
-                <th className="px-4 py-3 font-medium">Nilai Rata-rata</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium text-right">Aksi</th>
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="bg-slate-50 dark:bg-slate-800/20 text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800 font-bold uppercase tracking-wider text-[10px]">
+                <th className="px-4 py-3">Nama Santri</th>
+                <th className="px-4 py-3">Kelas</th>
+                <th className="px-4 py-3">Rerata Presensi (%)</th>
+                <th className="px-4 py-3">Rerata Nilai</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3 text-center">Presensi Sesi Terakhir</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {students.map((student) => (
-                <tr key={student.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
-                  <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{student.name}</td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{student.class}</td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400 font-mono">{student.attendance}%</td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400 font-mono">{student.score}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex px-2 py-1 text-[10px] font-medium rounded-full ${
+              {filteredStudents.map((student) => (
+                <tr key={student.id} className="hover:bg-slate-50/30 dark:hover:bg-slate-800/10 transition-colors duration-150">
+                  <td className="px-4 py-3.5 font-semibold text-slate-900 dark:text-slate-100">
+                    {student.name}
+                  </td>
+                  <td className="px-4 py-3.5 text-slate-500 dark:text-slate-400">
+                    {student.class}
+                  </td>
+                  <td className="px-4 py-3.5 font-mono font-bold text-slate-700 dark:text-slate-300">
+                    {student.attendance}%
+                  </td>
+                  <td className="px-4 py-3.5 font-mono font-bold text-slate-700 dark:text-slate-300">
+                    {student.score}
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <span className={`inline-flex px-2 py-0.5 text-[9px] font-bold rounded ${
                       student.status === 'Perlu Perhatian' 
-                        ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
-                        : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                        ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/20 dark:text-rose-400'
+                        : student.status === 'Sangat Baik'
+                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400'
+                        : 'bg-slate-50 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                     }`}>
                       {student.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <button className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium text-xs">
-                      Detail
-                    </button>
+                  <td className="px-4 py-3.5">
+                    {/* Dynamic Rapid Attendance Switcher */}
+                    <div className="flex justify-center items-center gap-1">
+                      {(['HADIR', 'IZIN', 'SAKIT', 'ALPA'] as const).map((status) => {
+                        const isActive = student.lastSessionAttendance === status;
+                        const colors = {
+                          HADIR: isActive ? 'bg-emerald-600 text-white' : 'hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-slate-400',
+                          IZIN: isActive ? 'bg-blue-600 text-white' : 'hover:bg-blue-50 dark:hover:bg-blue-950/20 text-slate-400',
+                          SAKIT: isActive ? 'bg-amber-600 text-white' : 'hover:bg-amber-50 dark:hover:bg-amber-950/20 text-slate-400',
+                          ALPA: isActive ? 'bg-rose-600 text-white' : 'hover:bg-rose-50 dark:hover:bg-rose-950/20 text-slate-400'
+                        };
+
+                        return (
+                          <button
+                            key={status}
+                            onClick={() => toggleStudentAttendance(student.id, status)}
+                            className={`px-2 py-1 rounded text-[9px] font-bold tracking-wider transition-all duration-150 cursor-pointer ${colors[status]}`}
+                          >
+                            {status[0]}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -157,6 +242,7 @@ export const StudentAnalytics: React.FC = () => {
           </table>
         </div>
       </div>
+
     </div>
   );
 };

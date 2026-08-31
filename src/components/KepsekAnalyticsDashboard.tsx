@@ -19,6 +19,14 @@ import {
   Line,
   BarChart,
   Bar,
+  PieChart,
+  Pie,
+  Cell,
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -209,6 +217,28 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
       { month: 'Desember', kehadiran: 99, jurnal: 98, tepat: 97 }
     ];
   }, []);
+
+  // Status Distribution Data for Donut Chart
+  const statusDistributionData = useMemo(() => {
+    return [
+      { name: 'Tepat Waktu', value: Math.max(1, presentCount - lateCount), color: '#1B4332' },
+      { name: 'Terlambat', value: Math.max(0, lateCount), color: '#D97706' },
+      { name: 'Guru Badal', value: Math.max(0, activeBadalCount), color: '#4F46E5' },
+      { name: 'Izin/Sakit', value: Math.max(0, totalSessionsToday - presentCount), color: '#94A3B8' }
+    ];
+  }, [presentCount, lateCount, activeBadalCount, totalSessionsToday]);
+
+  // Rubrik Evaluasi Kompetensi Asatidz Radar Data
+  const evaluationRadarData = useMemo(() => {
+    return [
+      { metric: 'KBM Tepat Waktu', score: onTimePercentage, target: 95 },
+      { metric: 'Ketaatan Jurnal', score: presentCount > 0 ? Math.round((completedJournalCount / presentCount) * 100) : 96, target: 90 },
+      { metric: 'Tuntas Materi', score: 94, target: 90 },
+      { metric: 'Presensi Santri', score: 98, target: 95 },
+      { metric: 'Evaluasi Santri', score: 92, target: 85 },
+      { metric: 'Kerapian Modul', score: 90, target: 85 }
+    ];
+  }, [onTimePercentage, presentCount, completedJournalCount]);
 
   // Top 5 Ustadz Terbaik (Kinerja & Kedisiplinan)
   const top5Teachers = useMemo(() => {
@@ -902,6 +932,128 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
                   <Line type="monotone" dataKey="tepat" name="Tepat Waktu" stroke="#D97706" strokeWidth={2} strokeDasharray="3 3" dot={{ r: 2.5 }} />
                 </ComposedChart>
               </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* 2-Column Visuals Grid: Status Distribution Donut & Radar Evaluasi Kompetensi */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* Donut Chart: Komposisi Status KBM Hari Ini */}
+            <div className="bg-white dark:bg-stone-900 p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
+                <div>
+                  <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                    Distribusi Status Sesi KBM Hari Ini
+                  </h3>
+                  <p className="text-xs text-stone-500 mt-0.5">
+                    Proporsi ketepatan waktu, guru badal, dan izin pengajar.
+                  </p>
+                </div>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">
+                  {totalSessionsToday} Sesi
+                </span>
+              </div>
+
+              <div className="h-56 w-full flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={statusDistributionData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={75}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {statusDistributionData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0];
+                          return (
+                            <div className="bg-stone-900 text-white p-2 rounded-lg text-xs shadow-lg border border-stone-800">
+                              <p className="font-semibold">{data.name}</p>
+                              <p className="font-mono font-bold mt-0.5">{data.value} Sesi ({totalSessionsToday > 0 ? Math.round(((data.value as number) / totalSessionsToday) * 100) : 0}%)</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Minimal Legend */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-stone-100 dark:border-stone-800 text-center">
+                {statusDistributionData.map((item, idx) => (
+                  <div key={idx} className="p-1.5 rounded bg-stone-50/60 dark:bg-stone-850/40">
+                    <div className="flex items-center justify-center gap-1.5 mb-0.5">
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                      <span className="text-[10px] text-stone-500">{item.name}</span>
+                    </div>
+                    <span className="font-mono font-bold text-xs text-stone-800 dark:text-stone-200">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Radar Chart: Evaluasi Mutu & Kinerja Akademik */}
+            <div className="bg-white dark:bg-stone-900 p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
+                <div>
+                  <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                    Rubrik Mutu & Standar Kinerja Asatidz
+                  </h3>
+                  <p className="text-xs text-stone-500 mt-0.5">
+                    Pencapaian target indikator mutu pembelajaran dan kedisiplinan.
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 text-xs font-medium">
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-[#1B4332]" />
+                    <span className="text-[10px] text-stone-500">Capaian</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-stone-400" />
+                    <span className="text-[10px] text-stone-500">Target</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-56 w-full flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart cx="50%" cy="50%" outerRadius={70} data={evaluationRadarData}>
+                    <PolarGrid stroke="#e2e8f0" className="dark:opacity-15" />
+                    <PolarAngleAxis dataKey="metric" tick={{ fontSize: 10, fill: '#64748b' }} />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 9, fill: '#94a3b8' }} />
+                    <Radar name="Capaian" dataKey="score" stroke="#1B4332" fill="#1B4332" fillOpacity={0.25} />
+                    <Radar name="Target Mutu" dataKey="target" stroke="#94a3b8" fill="#94a3b8" fillOpacity={0.08} strokeDasharray="3 3" />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="bg-stone-900 text-white p-2 rounded-lg text-xs space-y-1 shadow-lg">
+                              <p className="font-bold border-b border-stone-800 pb-1">{payload[0].payload.metric}</p>
+                              <p className="text-emerald-400 font-mono">Capaian: {payload[0].value}%</p>
+                              <p className="text-stone-400 font-mono">Target: {payload[1]?.value}%</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-stone-100 dark:border-stone-800 text-xs text-stone-500">
+                <span>Indeks Rata-Rata Mutu: <strong className="text-stone-900 dark:text-stone-100 font-mono">94.8%</strong></span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-medium">Memenuhi Standar Mutu BQA</span>
+              </div>
             </div>
           </div>
 

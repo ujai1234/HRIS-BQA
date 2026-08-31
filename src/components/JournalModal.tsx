@@ -154,27 +154,27 @@ export const JournalModal: React.FC<JournalModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-950/70 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-150">
-      <div className="bg-white dark:bg-[#1A221E] rounded-xl shadow-2xl max-w-xl w-full overflow-hidden border border-stone-200 dark:border-stone-800 my-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-150">
+      <div className="bg-white dark:bg-[#121f1a] rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden border border-slate-200/90 dark:border-emerald-900/40 my-auto">
         {/* Header */}
-        <div className="bg-[#141A17] text-white px-5 py-3.5 flex items-center justify-between border-b border-stone-800">
+        <div className="bg-[#09130f] text-white px-5 py-4 flex items-center justify-between border-b border-emerald-950">
           <div>
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-emerald-400" strokeWidth={1.5} />
-              <h2 className="font-bold text-sm text-white">Jurnal Pembelajaran KBM</h2>
+              <h2 className="font-bold text-sm text-emerald-50">Jurnal Pembelajaran KBM</h2>
               {isBadalForMe && (
                 <span className="text-[10px] font-bold bg-emerald-600/90 text-white px-2 py-0.5 rounded font-mono">
                   GURU BADAL
                 </span>
               )}
             </div>
-            <p className="text-xs text-stone-400 mt-0.5">
+            <p className="text-xs text-emerald-300/70 mt-0.5">
               Kelas {schedule.className} • {schedule.subject} ({schedule.hours} JP)
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-stone-400 hover:text-white p-1 rounded-lg hover:bg-stone-800 transition-colors cursor-pointer"
+            className="text-emerald-400 hover:text-white p-1 rounded-lg hover:bg-emerald-900/40 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -182,7 +182,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({
 
         {/* Badal Banner */}
         {isBadalForMe && originalTeacher && (
-          <div className="bg-emerald-50 dark:bg-emerald-950/30 border-b border-emerald-200 dark:border-emerald-900/40 p-3 flex items-start gap-2.5 text-xs text-emerald-900 dark:text-emerald-300">
+          <div className="bg-emerald-50 dark:bg-emerald-950/40 border-b border-emerald-200 dark:border-emerald-900/40 p-3 flex items-start gap-2.5 text-xs text-emerald-900 dark:text-emerald-300">
             <UserCheck className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" strokeWidth={1.5} />
             <div>
               <p className="font-bold">Pengisian Jurnal Guru Badal (Disetujui Kepsek)</p>
@@ -195,7 +195,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({
 
         {/* Expired Unfilled Alert */}
         {isExpiredUnfilled && (
-          <div className="bg-rose-50 dark:bg-rose-950/30 border-b border-rose-200 dark:border-rose-900/40 p-3 flex items-start gap-2.5 text-xs text-rose-800 dark:text-rose-300">
+          <div className="bg-rose-50 dark:bg-rose-950/40 border-b border-rose-200 dark:border-rose-900/40 p-3 flex items-start gap-2.5 text-xs text-rose-800 dark:text-rose-300">
             <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" strokeWidth={1.5} />
             <div>
               <p className="font-bold">Batas Waktu Pengisian Telah Berakhir</p>
@@ -209,16 +209,16 @@ export const JournalModal: React.FC<JournalModalProps> = ({
         <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
           {/* Quick Template Fill Button */}
           {!isExpiredUnfilled && (
-            <div className="flex items-center justify-between bg-[#FBFBFA] dark:bg-[#141A17] p-2.5 rounded-lg border border-stone-200 dark:border-stone-800">
-              <span className="text-stone-600 dark:text-stone-400 text-[11px]">
+            <div className="flex items-center justify-between bg-slate-50 dark:bg-[#0e1713] p-2.5 rounded-xl border border-slate-200/80 dark:border-emerald-900/40">
+              <span className="text-slate-600 dark:text-emerald-300/80 text-[11px]">
                 Gunakan template cepat sesuai mata pelajaran:
               </span>
               <button
                 type="button"
                 onClick={handleFillSample}
-                className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1B4332] dark:text-emerald-400 hover:underline cursor-pointer"
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer"
               >
-                <Sparkles className="w-3 h-3" strokeWidth={1.5} />
+                <Sparkles className="w-3.5 h-3.5" strokeWidth={1.5} />
                 <span>Isi Contoh Materi</span>
               </button>
             </div>
@@ -226,7 +226,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({
 
           {/* Topic / Materi Pokok */}
           <div className="space-y-1">
-            <label className="font-semibold text-stone-800 dark:text-stone-200 block">
+            <label className="font-semibold text-slate-800 dark:text-emerald-100 block">
               Pokok Bahasan / Materi Pembelajaran <span className="text-rose-500">*</span>
             </label>
             <input
@@ -236,13 +236,13 @@ export const JournalModal: React.FC<JournalModalProps> = ({
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="Contoh: Bab 4 I'rab Fi'il Mudhari'..."
-              className="w-full text-xs px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:border-[#1B4332] disabled:bg-stone-100 dark:disabled:bg-stone-900"
+              className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-[#0e1713] text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-emerald-600 disabled:bg-slate-100 dark:disabled:bg-[#09130f]"
             />
           </div>
 
           {/* Learning Objectives */}
           <div className="space-y-1">
-            <label className="font-semibold text-stone-800 dark:text-stone-200 block">
+            <label className="font-semibold text-slate-800 dark:text-emerald-100 block">
               Target Capaian & Tujuan Pembelajaran
             </label>
             <textarea
@@ -251,39 +251,39 @@ export const JournalModal: React.FC<JournalModalProps> = ({
               value={learningObjectives}
               onChange={(e) => setLearningObjectives(e.target.value)}
               placeholder="Contoh: Santri mampu mengidentifikasi huruf jazm dan mempraktikkannya dalam ayat..."
-              className="w-full text-xs px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:border-[#1B4332] disabled:bg-stone-100 dark:disabled:bg-stone-900"
+              className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-[#0e1713] text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-emerald-600 disabled:bg-slate-100 dark:disabled:bg-[#09130f]"
             />
           </div>
 
           {/* Student Attendance Summary Grid */}
           <div className="space-y-2 pt-1">
-            <label className="font-semibold text-stone-800 dark:text-stone-200 block">
+            <label className="font-semibold text-slate-800 dark:text-emerald-100 block">
               Rekap Kehadiran Santri di Kelas
             </label>
             <div className="grid grid-cols-5 gap-2 text-center">
-              <div className="bg-[#FBFBFA] dark:bg-[#141A17] p-2 rounded-lg border border-stone-200 dark:border-stone-800">
-                <span className="text-[10px] text-stone-400 block uppercase">Total</span>
+              <div className="bg-slate-50 dark:bg-[#0e1713] p-2 rounded-xl border border-slate-200/80 dark:border-emerald-900/40">
+                <span className="text-[10px] text-slate-400 dark:text-emerald-400/60 block uppercase font-medium">Total</span>
                 <input
                   type="number"
                   disabled={isExpiredUnfilled}
                   value={studentAttendance.totalStudents}
                   onChange={(e) => handleStudentCountChange('totalStudents', parseInt(e.target.value) || 0)}
-                  className="w-full text-center font-bold text-xs bg-transparent border-none focus:outline-none text-stone-900 dark:text-stone-100 mt-0.5"
+                  className="w-full text-center font-bold text-xs bg-transparent border-none focus:outline-none text-slate-900 dark:text-emerald-50 mt-0.5"
                 />
               </div>
 
-              <div className="bg-emerald-50 dark:bg-emerald-950/20 p-2 rounded-lg border border-emerald-200/60 dark:border-emerald-900/40">
-                <span className="text-[10px] text-[#1B4332] dark:text-emerald-400 font-bold block uppercase">Hadir</span>
+              <div className="bg-emerald-50 dark:bg-emerald-950/30 p-2 rounded-xl border border-emerald-200/80 dark:border-emerald-800/40">
+                <span className="text-[10px] text-emerald-800 dark:text-emerald-400 font-bold block uppercase">Hadir</span>
                 <input
                   type="number"
                   disabled={isExpiredUnfilled}
                   value={studentAttendance.presentCount}
                   onChange={(e) => handleStudentCountChange('presentCount', parseInt(e.target.value) || 0)}
-                  className="w-full text-center font-bold text-xs bg-transparent border-none focus:outline-none text-[#1B4332] dark:text-emerald-400 mt-0.5"
+                  className="w-full text-center font-bold text-xs bg-transparent border-none focus:outline-none text-emerald-800 dark:text-emerald-400 mt-0.5"
                 />
               </div>
 
-              <div className="bg-amber-50 dark:bg-amber-950/20 p-2 rounded-lg border border-amber-200/60 dark:border-amber-900/40">
+              <div className="bg-amber-50 dark:bg-amber-950/30 p-2 rounded-xl border border-amber-200/80 dark:border-amber-800/40">
                 <span className="text-[10px] text-amber-700 dark:text-amber-400 font-bold block uppercase">Sakit</span>
                 <input
                   type="number"
@@ -294,7 +294,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({
                 />
               </div>
 
-              <div className="bg-sky-50 dark:bg-sky-950/20 p-2 rounded-lg border border-sky-200/60 dark:border-sky-900/40">
+              <div className="bg-sky-50 dark:bg-sky-950/30 p-2 rounded-xl border border-sky-200/80 dark:border-sky-800/40">
                 <span className="text-[10px] text-sky-700 dark:text-sky-400 font-bold block uppercase">Izin</span>
                 <input
                   type="number"
@@ -305,7 +305,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({
                 />
               </div>
 
-              <div className="bg-rose-50 dark:bg-rose-950/20 p-2 rounded-lg border border-rose-200/60 dark:border-rose-900/40">
+              <div className="bg-rose-50 dark:bg-rose-950/30 p-2 rounded-xl border border-rose-200/80 dark:border-rose-800/40">
                 <span className="text-[10px] text-rose-700 dark:text-rose-400 font-bold block uppercase">Alpa</span>
                 <input
                   type="number"
@@ -321,7 +321,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({
           {/* Notes & Assignments */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
             <div className="space-y-1">
-              <label className="font-semibold text-stone-800 dark:text-stone-200 block">
+              <label className="font-semibold text-slate-800 dark:text-emerald-100 block">
                 Catatan Evaluasi / Kedisiplinan
               </label>
               <textarea
@@ -330,12 +330,12 @@ export const JournalModal: React.FC<JournalModalProps> = ({
                 value={classNotes}
                 onChange={(e) => setClassNotes(e.target.value)}
                 placeholder="Catatan keaktifan santri..."
-                className="w-full text-xs px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:border-[#1B4332]"
+                className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-[#0e1713] text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-emerald-600"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="font-semibold text-stone-800 dark:text-stone-200 block">
+              <label className="font-semibold text-slate-800 dark:text-emerald-100 block">
                 Tugas / Pekerjaan Rumah (PR)
               </label>
               <textarea
@@ -344,17 +344,17 @@ export const JournalModal: React.FC<JournalModalProps> = ({
                 value={assignmentGiven}
                 onChange={(e) => setAssignmentGiven(e.target.value)}
                 placeholder="Tugas mandiri atau hafalan..."
-                className="w-full text-xs px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:border-[#1B4332]"
+                className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-[#0e1713] text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-emerald-600"
               />
             </div>
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-3 border-t border-stone-200 dark:border-stone-800 flex items-center justify-end gap-2">
+          <div className="pt-3 border-t border-slate-200 dark:border-emerald-900/30 flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-2 rounded-lg text-xs font-medium text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
+              className="px-3.5 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-emerald-300 hover:bg-slate-100 dark:hover:bg-[#182a23] transition-colors cursor-pointer"
             >
               {isExpiredUnfilled ? 'Tutup' : 'Batal'}
             </button>
@@ -362,7 +362,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex items-center gap-1.5 bg-[#1B4332] hover:bg-[#143326] text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors cursor-pointer disabled:opacity-50 shadow-xs"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" strokeWidth={1.5} />
                 <span>{isSubmitting ? 'Menyimpan...' : 'Simpan Jurnal KBM'}</span>
