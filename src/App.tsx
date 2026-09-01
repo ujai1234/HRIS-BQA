@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Toaster } from 'sonner';
+import { motion } from 'motion/react';
 import { HRISProvider, useHRIS } from './context/HRISContext';
 import { LoginPage } from './components/LoginPage';
 import { Header } from './components/Header';
@@ -59,22 +60,10 @@ const MainContent: React.FC = () => {
       if (currentPath === '/dashboard/guru/slip') {
         return <GuruView initialTab="slip_gaji" key="guru-slip" />;
       }
-      if (currentPath === '/dashboard/guru/jurnal') {
-        return <GuruView initialTab="clockin_journal" key="guru-jurnal" />;
-      }
-      if (currentPath === '/dashboard/guru/materi') {
-        return <GuruView initialTab="kelas_materi" key="guru-materi" />;
-      }
-      if (currentPath === '/dashboard/guru/penilaian') {
-        return <GuruView initialTab="penilaian_tugas" key="guru-penilaian" />;
-      }
-      if (currentPath === '/dashboard/guru/analitik') {
-        return <GuruView initialTab="presensi_analitik" key="guru-analitik" />;
-      }
       if (currentPath === '/dashboard/guru/kebutuhan') {
         return <LearningNeedManagement key="guru-kebutuhan" />;
       }
-      return <GuruView initialTab="overview" key="guru-overview" />;
+      return <GuruView initialTab="clockin_journal" key="guru-jurnal" />;
     }
 
     if (currentRole === 'ADMIN' || currentPath.startsWith('/dashboard/admin')) {
@@ -95,6 +84,9 @@ const MainContent: React.FC = () => {
       }
       if (currentPath === '/dashboard/admin/kebutuhan') {
         return <LearningNeedManagement key="admin-kebutuhan" />;
+      }
+      if (currentPath === '/dashboard/admin/settings' || currentPath === '/dashboard/admin/lokasi') {
+        return <AdminView initialTab="settings_lokasi" key="admin-settings" />;
       }
       return <AdminView initialTab="dashboard" key="admin-dashboard" />;
     }
@@ -117,7 +109,7 @@ const MainContent: React.FC = () => {
 
     // Default route check
     if (currentPath === '/' || currentPath === '/dashboard') {
-      return <GuruView initialTab="overview" key="default-guru" />;
+      return <GuruView initialTab="clockin_journal" key="default-guru" />;
     }
 
     // If path is unknown, show real 404 error page
@@ -144,7 +136,14 @@ const MainContent: React.FC = () => {
 
         {/* Content Container */}
         <main id="main-content" className="flex-1 p-4 sm:p-6 lg:p-6 max-w-7xl w-full mx-auto space-y-5">
-          {renderDashboardByRole()}
+          <motion.div
+            key={currentPath}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+          >
+            {renderDashboardByRole()}
+          </motion.div>
         </main>
 
         {/* Institutional Footer */}

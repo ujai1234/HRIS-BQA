@@ -1,43 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { useHRIS } from '../context/HRISContext';
+import { motion, AnimatePresence } from 'motion/react';
 import { TeacherDashboard } from './TeacherDashboard';
-import { CourseBuilder } from './guru/CourseBuilder';
-import { GradingSuite } from './guru/GradingSuite';
-import { StudentAnalytics } from './guru/StudentAnalytics';
 import { SlipGajiView } from './SlipGajiView';
-import { ClockInModal } from './ClockInModal';
-import { JournalModal } from './JournalModal';
+import { LearningNeedManagement } from './LearningNeedManagement';
 
-export type GuruTabType = 'overview' | 'clockin_journal' | 'kelas_materi' | 'penilaian_tugas' | 'presensi_analitik' | 'jadwal' | 'slip_gaji';
+export type GuruTabType = 'clockin_journal' | 'slip_gaji' | 'kebutuhan';
 
 interface GuruViewProps {
   initialTab?: GuruTabType;
 }
 
-export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'overview' }) => {
-  const { setCurrentPath } = useHRIS();
+export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journal' }) => {
   const [activeSubTab, setActiveSubTab] = useState<GuruTabType>(initialTab);
 
   useEffect(() => {
     setActiveSubTab(initialTab);
   }, [initialTab]);
 
-  // Handle rendering based on activeSubTab
-  if (activeSubTab === 'overview' || activeSubTab === 'clockin_journal' || activeSubTab === 'jadwal') {
-    return <TeacherDashboard />;
-  }
-  if (activeSubTab === 'kelas_materi') {
-    return <CourseBuilder />;
-  }
-  if (activeSubTab === 'penilaian_tugas') {
-    return <GradingSuite />;
-  }
-  if (activeSubTab === 'presensi_analitik') {
-    return <StudentAnalytics />;
-  }
-  if (activeSubTab === 'slip_gaji') {
-    return <SlipGajiView />;
-  }
-  
-  return <TeacherDashboard />;
+  const renderContent = () => {
+    switch (activeSubTab) {
+      case 'slip_gaji':
+        return <SlipGajiView />;
+      case 'kebutuhan':
+        return <LearningNeedManagement />;
+      case 'clockin_journal':
+      default:
+        return <TeacherDashboard />;
+    }
+  };
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={activeSubTab}
+        initial={{ opacity: 0, x: 8 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -8 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+      >
+        {renderContent()}
+      </motion.div>
+    </AnimatePresence>
+  );
 };
+

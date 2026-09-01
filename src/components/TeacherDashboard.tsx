@@ -6,17 +6,16 @@ import {
   CheckCircle2, 
   AlertCircle, 
   FileText, 
-  CreditCard,
-  Bell,
-  Smartphone,
+  CalendarOff,
   Check
 } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
 import { ClassSchedule, AttendanceRecord } from '../types';
 import { ClockInModal } from './ClockInModal';
 import { JournalModal } from './JournalModal';
-import { SalarySlipModal } from './SalarySlipModal';
-import { useGuruNotifications } from '../hooks/useGuruNotifications';
+import { TeacherLeaveModal } from './TeacherLeaveModal';
+import { GpsPermissionPromptModal } from './GpsPermissionPromptModal';
+import { preCheckDeviceGps, GpsPreCheckState } from '../services/geofenceService';
 
 export const TeacherDashboard: React.FC = () => {
   const { 
@@ -28,25 +27,37 @@ export const TeacherDashboard: React.FC = () => {
     calculateTeacherPayroll 
   } = useHRIS();
 
-  const { 
-    devicePermission, 
-    requestDevicePermission, 
-    sendTestDeviceNotification 
-  } = useGuruNotifications();
-
-  const [testSent, setTestSent] = useState(false);
-
   // Selected day for simulator (defaults to today's Indonesian day name)
   const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] as const;
-  const [selectedDay, setSelectedDay] = useState<string>('Senin');
+
+  const getTodayIndonesianDay = (): string => {
+    const dayIndex = new Date().getDay();
+    const map: Record<number, string> = {
+      1: 'Senin',
+      2: 'Selasa',
+      3: 'Rabu',
+      4: 'Kamis',
+      5: 'Jumat',
+      6: 'Sabtu',
+      0: 'Senin', // Default to Senin if Sunday
+    };
+    return map[dayIndex] || 'Senin';
+  };
+
+  const realTodayName = getTodayIndonesianDay();
+  const [selectedDay, setSelectedDay] = useState<string>(realTodayName);
 
   // Modals state
   const [activeClockInSchedule, setActiveClockInSchedule] = useState<ClassSchedule | null>(null);
+  const [gpsPromptSchedule, setGpsPromptSchedule] = useState<ClassSchedule | null>(null);
+  const [gpsPromptState, setGpsPromptState] = useState<GpsPreCheckState>('PERMISSION_BLOCKED');
+  const [isPreCheckingGps, setIsPreCheckingGps] = useState(false);
   const [activeJournalData, setActiveJournalData] = useState<{
     attendance: AttendanceRecord;
     schedule: ClassSchedule;
   } | null>(null);
-  const [showSlipModal, setShowSlipModal] = useState(false);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [leaveTargetSchedule, setLeaveTargetSchedule] = useState<ClassSchedule | null>(null);
 
   const teacherPayroll = calculateTeacherPayroll(currentUser.id, selectedPeriod);
 
@@ -94,10 +105,24 @@ export const TeacherDashboard: React.FC = () => {
     setActiveJournalData({ attendance: att as AttendanceRecord, schedule });
   };
 
-  const handleTestDeviceAlert = async () => {
-    await sendTestDeviceNotification();
-    setTestSent(true);
-    setTimeout(() => setTestSent(false), 4000);
+  // Pre-check GPS verification step when clicking "Absen"
+  const handleInitiateClockIn = async (schedule: ClassSchedule) => {
+    setIsPreCheckingGps(true);
+    try {
+      const checkResult = await preCheckDeviceGps();
+      setIsPreCheckingGps(false);
+
+      if (checkResult.state === 'PERMISSION_BLOCKED' || checkResult.state === 'LOCATION_DISABLED') {
+        setGpsPromptSchedule(schedule);
+        setGpsPromptState(checkResult.state);
+      } else {
+        // Ready or prompt supported
+        setActiveClockInSchedule(schedule);
+      }
+    } catch {
+      setIsPreCheckingGps(false);
+      setActiveClockInSchedule(schedule);
+    }
   };
 
   return (
@@ -119,13 +144,17 @@ export const TeacherDashboard: React.FC = () => {
             </p>
           </div>
 
+          {/* Action: Guru Izin / Sakit Button */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowSlipModal(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#182a23] hover:bg-slate-200 dark:hover:bg-[#1f362c] text-slate-700 dark:text-emerald-200 transition-colors border border-slate-200 dark:border-emerald-800/40 cursor-pointer shadow-xs"
+              onClick={() => {
+                setLeaveTargetSchedule(null);
+                setShowLeaveModal(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-950/60 text-amber-800 dark:text-amber-300 transition-colors border border-amber-200/80 dark:border-amber-800/40 cursor-pointer shadow-xs"
             >
-              <CreditCard className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>Slip Kafa'ah</span>
+              <CalendarOff className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              <span>Ajukan Izin / Sakit</span>
             </button>
           </div>
         </div>
@@ -160,81 +189,44 @@ export const TeacherDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Device Push Notification Info Banner */}
-      <div className="bg-white dark:bg-[#121f1a] rounded-2xl p-4 border border-slate-200/90 dark:border-emerald-900/30 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-colors">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/40 flex items-center justify-center shrink-0">
-            <Smartphone className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-emerald-50">
-                Pemberitahuan Layar Kunci HP & Tablet
-              </h3>
-              {devicePermission === 'granted' ? (
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-                  <Check className="w-2.5 h-2.5" /> Aktif di Perangkat
-                </span>
-              ) : (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                  Perlu Izin
-                </span>
-              )}
-            </div>
-            <p className="text-[11px] text-slate-500 dark:text-emerald-300/70 mt-0.5">
-              Pengingat jam presensi, tugas badal, dan jurnal mengajar akan berbunyi & bergetar langsung di HP pengguna.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
-          {devicePermission !== 'granted' ? (
-            <button
-              onClick={requestDevicePermission}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white transition-colors cursor-pointer shadow-xs"
-            >
-              <Bell className="w-3.5 h-3.5" />
-              <span>Aktifkan Notifikasi HP</span>
-            </button>
-          ) : (
-            <button
-              onClick={handleTestDeviceAlert}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#182a23] hover:bg-slate-200 dark:hover:bg-[#1f362c] text-slate-700 dark:text-emerald-200 transition-colors border border-slate-200 dark:border-emerald-800/40 cursor-pointer shadow-xs"
-            >
-              <Bell className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>{testSent ? 'Notifikasi Terkirim ✓' : 'Uji Notifikasi Luar Aplikasi'}</span>
-            </button>
-          )}
-        </div>
-      </div>
-
       {/* Sesi KBM Hari Ini & Jadwal */}
       <div className="bg-white dark:bg-[#121f1a] rounded-2xl p-5 border border-slate-200/90 dark:border-emerald-900/30 shadow-xs space-y-4 transition-colors">
         {/* Day Selector Bar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-emerald-900/30">
           <div>
-            <h2 className="text-sm font-bold text-slate-900 dark:text-emerald-50">
-              Jadwal & Absen
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-emerald-50">
+                Jadwal & Presensi KBM
+              </h2>
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#1a2d24] text-slate-600 dark:text-emerald-300">
+                {selectedDay === realTodayName ? 'Hari Ini' : `Hari ${selectedDay}`}
+              </span>
+            </div>
             <p className="text-xs text-slate-500 dark:text-emerald-400/60 mt-0.5">
-              Pilih hari untuk absen dan isi jurnal.
+              Jadwal menyesuaikan hari aktif secara otomatis.
             </p>
           </div>
 
-          <div className="inline-flex bg-slate-100 dark:bg-[#0f1a15] p-1 rounded-xl border border-slate-200/80 dark:border-emerald-900/40 overflow-x-auto max-w-full">
-            {daysOfWeek.map((day) => (
-              <button
-                key={day}
-                onClick={() => setSelectedDay(day)}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  selectedDay === day
-                    ? 'bg-white dark:bg-[#1c3027] text-emerald-800 dark:text-emerald-300 shadow-xs border border-slate-200/80 dark:border-emerald-700/50'
-                    : 'text-slate-600 dark:text-emerald-400/60 hover:text-slate-900 dark:hover:text-emerald-200'
-                }`}
-              >
-                {day}
-              </button>
-            ))}
+          <div className="inline-flex bg-slate-100 dark:bg-[#0f1a15] p-1 rounded-xl border border-slate-200/80 dark:border-emerald-900/40 overflow-x-auto max-w-full gap-0.5">
+            {daysOfWeek.map((day) => {
+              const isToday = day === realTodayName;
+              return (
+                <button
+                  key={day}
+                  onClick={() => setSelectedDay(day)}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    selectedDay === day
+                      ? 'bg-white dark:bg-[#1c3027] text-emerald-800 dark:text-emerald-300 shadow-xs border border-slate-200/80 dark:border-emerald-700/50'
+                      : 'text-slate-600 dark:text-emerald-400/60 hover:text-slate-900 dark:hover:text-emerald-200'
+                  }`}
+                >
+                  <span>{day}</span>
+                  {isToday && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="Hari Ini" />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -255,6 +247,8 @@ export const TeacherDashboard: React.FC = () => {
 
               const isCompleted = att?.status === 'SELESAI';
               const isClockedInNoJournal = att?.status === 'HADIR_JURNAL_KOSONG';
+              const isIzin = att?.status === 'IZIN';
+              const isSakit = att?.status === 'SAKIT';
               const isNotPresent = !att || att.status === 'BELUM_HADIR';
 
               return (
@@ -265,6 +259,10 @@ export const TeacherDashboard: React.FC = () => {
                       ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/40'
                       : isClockedInNoJournal
                       ? 'bg-amber-50/40 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/40'
+                      : isSakit
+                      ? 'bg-amber-50/50 dark:bg-amber-950/25 border-amber-300 dark:border-amber-800/50'
+                      : isIzin
+                      ? 'bg-sky-50/50 dark:bg-sky-950/25 border-sky-300 dark:border-sky-800/50'
                       : isSubstituted
                       ? 'bg-slate-50 dark:bg-[#0e1713] border-slate-200 dark:border-emerald-950/50 opacity-75'
                       : 'bg-white dark:bg-[#14231d] border-slate-200/90 dark:border-emerald-900/40'
@@ -296,6 +294,14 @@ export const TeacherDashboard: React.FC = () => {
                         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 dark:text-amber-400">
                           <AlertCircle className="w-3.5 h-3.5" /> Jurnal Belum Diisi
                         </span>
+                      ) : isSakit ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 dark:text-amber-400">
+                          <AlertCircle className="w-3.5 h-3.5" /> Sakit (Tercatat)
+                        </span>
+                      ) : isIzin ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-700 dark:text-sky-400">
+                          <CalendarOff className="w-3.5 h-3.5" /> Izin Tercatat
+                        </span>
                       ) : isSubstituted ? (
                         <span className="text-[11px] text-slate-500 dark:text-emerald-400/60">
                           Dialihkan ke Badal
@@ -322,14 +328,23 @@ export const TeacherDashboard: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Clock-in info if exists */}
+                    {/* Clock-in / Leave info if exists */}
                     {att && (
-                      <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0e1713] text-xs text-slate-600 dark:text-emerald-200/80 flex items-center justify-between border border-slate-100 dark:border-emerald-900/30">
-                        <span>Waktu Absen: <strong>{att.clockInTime} WIB</strong></span>
-                        {att.journal?.topic && (
-                          <span className="truncate max-w-[140px] text-slate-500 dark:text-emerald-400/60">
-                            {att.journal.topic}
-                          </span>
+                      <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0e1713] text-xs text-slate-600 dark:text-emerald-200/80 flex flex-col gap-1 border border-slate-100 dark:border-emerald-900/30">
+                        {att.clockInTime && (
+                          <div className="flex items-center justify-between">
+                            <span>Waktu Absen: <strong>{att.clockInTime} WIB</strong></span>
+                            {att.journal?.topic && (
+                              <span className="truncate max-w-[140px] text-slate-500 dark:text-emerald-400/60">
+                                {att.journal.topic}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {att.notes && (
+                          <p className="text-[11px] text-slate-600 dark:text-emerald-300/80 italic">
+                            Catatan: {att.notes}
+                          </p>
                         )}
                       </div>
                     )}
@@ -339,11 +354,12 @@ export const TeacherDashboard: React.FC = () => {
                   <div className="mt-4 pt-3 border-t border-slate-100 dark:border-emerald-900/30">
                     {isNotPresent && !isSubstituted && (
                       <button
-                        onClick={() => setActiveClockInSchedule(schedule)}
-                        className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                        onClick={() => handleInitiateClockIn(schedule)}
+                        disabled={isPreCheckingGps}
+                        className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-75"
                       >
                         <Clock className="w-3.5 h-3.5" />
-                        <span>Absen</span>
+                        <span>{isPreCheckingGps ? 'Memeriksa GPS...' : 'Absen'}</span>
                       </button>
                     )}
 
@@ -365,6 +381,14 @@ export const TeacherDashboard: React.FC = () => {
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                         <span>Lihat / Edit Jurnal</span>
                       </button>
+                    )}
+
+                    {(isIzin || isSakit) && (
+                      <div className="text-center py-1">
+                        <span className="text-[11px] text-amber-700 dark:text-amber-300/90 font-medium">
+                          Status {isSakit ? 'Sakit' : 'Izin'} Tercatat • Koordinasi Guru Badal
+                        </span>
+                      </div>
                     )}
 
                     {isSubstituted && (
@@ -454,6 +478,18 @@ export const TeacherDashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* GPS Permission Prompt Modal (Polite & Non-intrusive) */}
+      <GpsPermissionPromptModal
+        isOpen={!!gpsPromptSchedule}
+        schedule={gpsPromptSchedule}
+        initialState={gpsPromptState}
+        onClose={() => setGpsPromptSchedule(null)}
+        onGpsGranted={(sched) => {
+          setGpsPromptSchedule(null);
+          setActiveClockInSchedule(sched);
+        }}
+      />
+
       {/* Clock In Modal */}
       {activeClockInSchedule && (
         <ClockInModal
@@ -475,13 +511,16 @@ export const TeacherDashboard: React.FC = () => {
         />
       )}
 
-      {/* Salary Slip Modal */}
-      {showSlipModal && (
-        <SalarySlipModal
-          payroll={teacherPayroll}
-          onClose={() => setShowSlipModal(false)}
-        />
-      )}
+      {/* Teacher Leave / Izin Modal */}
+      <TeacherLeaveModal
+        isOpen={showLeaveModal}
+        onClose={() => {
+          setShowLeaveModal(false);
+          setLeaveTargetSchedule(null);
+        }}
+        initialSchedule={leaveTargetSchedule}
+        selectedDateInitial={todayStr}
+      />
     </div>
   );
 };

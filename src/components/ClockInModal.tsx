@@ -2,14 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Clock, 
-  CheckCircle2, 
-  AlertTriangle,
+  Check, 
+  AlertCircle,
+  MapPin,
+  RefreshCw,
   UserCheck
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { ClassSchedule, Teacher } from '../types';
 import { useHRIS } from '../context/HRISContext';
 import { calculateLatePenalty, getLateCategoryLabel } from '../utils/formatters';
+import { validateAttendanceLocation, LocationValidationResult } from '../utils/geoUtils';
 
 interface ClockInModalProps {
   schedule: ClassSchedule;
@@ -24,7 +27,7 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const { clockIn, currentUser, teachers, badalAssignments } = useHRIS();
+  const { clockIn, currentUser, teachers, badalAssignments, geofenceSettings } = useHRIS();
   const effectiveTeacher = teacher || currentUser;
 
   const todayStr = new Date().toISOString().split('T')[0];
@@ -49,6 +52,12 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // GPS and Geofence state
+  const [userLat, setUserLat] = useState<number | null>(null);
+  const [userLng, setUserLng] = useState<number | null>(null);
+  const [isLocating, setIsLocating] = useState<boolean>(true);
+  const [gpsError, setGpsError] = useState<string | null>(null);
+
   // Update live clock every second
   useEffect(() => {
     const timer = setInterval(() => {
@@ -57,6 +66,52 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Detect GPS on component mount
+  const detectLocation = () => {
+    if (!navigator.geolocation) {
+      setGpsError('Browser atau perangkat ini tidak mendukung geolokasi GPS.');
+      setIsLocating(false);
+      return;
+    }
+
+    setIsLocating(true);
+    setGpsError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLat(pos.coords.latitude);
+        setUserLng(pos.coords.longitude);
+        setIsLocating(false);
+      },
+      (err) => {
+        let msg = 'Izin lokasi tidak aktif.';
+        if (err.code === 1) {
+          msg = 'Izin lokasi ditolak. Silakan izinkan akses lokasi pada browser/HP.';
+        } else if (err.code === 2) {
+          msg = 'Lokasi tidak terdeteksi. Pastikan GPS HP aktif.';
+        } else if (err.code === 3) {
+          msg = 'Waktu permintaan lokasi habis. Silakan muat ulang lokasi.';
+        }
+        setGpsError(msg);
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
+  useEffect(() => {
+    detectLocation();
+  }, []);
+
+  // Compute location validation result
+  const hasGps = userLat !== null && userLng !== null;
+  const locationValidation: LocationValidationResult = validateAttendanceLocation(
+    userLat,
+    userLng,
+    geofenceSettings,
+    false
+  );
 
   const penaltyCalculation = calculateLatePenalty(
     currentTime, 
@@ -67,20 +122,36 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
   );
   const categoryInfo = getLateCategoryLabel(penaltyCalculation.category);
 
+  // Must have active GPS and be within Pesantren radius
+  const isGpsRequiredMissing = !hasGps || isLocating;
+  const isOutsideRadius = hasGps && !locationValidation.isValid;
+  const isBlocked = isGpsRequiredMissing || isOutsideRadius;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isBlocked) {
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const recordedTime = getRealTimeString();
-      clockIn(schedule.id, recordedTime, notes);
+      const locDetail = userLat && userLng 
+        ? ` [Lokasi: Pesantren (~${locationValidation.distanceMeters}m)]`
+        : '';
+      
+      const finalNotes = (notes ? `${notes}${locDetail}` : locDetail).trim();
+
+      clockIn(schedule.id, recordedTime, finalNotes);
 
       try {
         confetti({
-          particleCount: 50,
-          spread: 50,
+          particleCount: 40,
+          spread: 45,
           origin: { y: 0.6 },
-          colors: ['#1B4332', '#2D6A4F', '#52B788', '#B08968'],
+          colors: ['#059669', '#10B981', '#34D399'],
         });
       } catch (err) {
         console.error(err);
@@ -90,7 +161,7 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
         setIsSubmitting(false);
         onSuccess(schedule);
         onClose();
-      }, 250);
+      }, 200);
     } catch (err) {
       console.error(err);
       setIsSubmitting(false);
@@ -98,94 +169,164 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white dark:bg-[#121f1a] rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200/90 dark:border-emerald-900/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+      <div className="bg-white dark:bg-[#101714] rounded-xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-800">
+        
         {/* Header */}
-        <div className="bg-[#09130f] text-white px-5 py-4 flex items-center justify-between border-b border-emerald-950">
+        <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="font-bold text-sm text-emerald-50">Absen</h2>
+              <h2 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+                Presensi KBM
+              </h2>
               {isBadalForMe && (
-                <span className="text-[10px] font-bold bg-emerald-600/90 text-white px-2 py-0.5 rounded font-mono">
-                  BADAL
+                <span className="text-[10px] font-medium bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 px-1.5 py-0.5 rounded">
+                  Badal
                 </span>
               )}
             </div>
-            <p className="text-xs text-emerald-300/70 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               {schedule.className} • {schedule.subject} ({schedule.hours} JP)
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-emerald-400 hover:text-white p-1 rounded-lg hover:bg-emerald-900/40 transition-colors cursor-pointer"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4">
-          {/* Badal Assignment Indicator Card */}
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          
+          {/* Badal Notice */}
           {isBadalForMe && originalTeacher && (
-            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 rounded-xl flex items-start gap-2.5 text-xs text-emerald-900 dark:text-emerald-200">
-              <UserCheck className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" strokeWidth={1.5} />
-              <div>
-                <p className="font-bold text-emerald-900 dark:text-emerald-200">
-                  Tugas Guru Badal (Disetujui Kepsek)
-                </p>
-                <p className="text-[11px] text-emerald-800 dark:text-emerald-300/90 mt-0.5">
-                  Anda melakukan presensi menggantikan <strong>Ustadz {originalTeacher.name}</strong>. Hak honor JP dan transport KBM sesi ini dialokasikan penuh ke kafa'ah Anda.
-                </p>
-              </div>
+            <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-lg border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2">
+              <UserCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <p>
+                Menggantikan <strong>Ustadz {originalTeacher.name}</strong>. Hak honorarium KBM dialokasikan ke Anda.
+              </p>
             </div>
           )}
 
-          {/* Live Clock Card */}
-          <div className="bg-slate-50 dark:bg-[#0e1713] rounded-2xl p-4 text-center border border-slate-200/80 dark:border-emerald-900/40">
-            <span className="text-[10px] font-semibold uppercase text-slate-400 dark:text-emerald-400/60 tracking-wider block">
-              Waktu Server Presensi
+          {/* Time Display */}
+          <div className="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-3 text-center border border-slate-200/70 dark:border-slate-800">
+            <span className="text-[11px] text-slate-400 dark:text-slate-500 block">
+              Waktu Presensi
             </span>
-            <div className="text-3xl sm:text-4xl font-mono font-bold text-slate-900 dark:text-emerald-50 mt-1 tracking-tight">
+            <div className="text-2xl font-mono font-semibold text-slate-900 dark:text-slate-100 mt-0.5 tracking-tight">
               {liveSecondsTime}
             </div>
-            <p className="text-xs text-slate-500 dark:text-emerald-400/70 mt-1">
-              Jadwal Masuk Mulai: <strong className="font-mono text-slate-800 dark:text-emerald-200">{schedule.startTime} WIB</strong>
-            </p>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">
+              Jadwal: {schedule.startTime} WIB
+            </span>
           </div>
 
-          {/* Real-time Status Card */}
-          <div className={`p-3.5 rounded-xl border flex items-start gap-3 text-xs ${
-            penaltyCalculation.lateMinutes <= 4
-              ? 'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/40 text-emerald-900 dark:text-emerald-200'
-              : 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/40 text-amber-900 dark:text-amber-200'
-          }`}>
-            {penaltyCalculation.lateMinutes <= 4 ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" strokeWidth={1.5} />
-            ) : (
-              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" strokeWidth={1.5} />
-            )}
-            <div>
-              <p className="font-bold">
-                {penaltyCalculation.lateMinutes <= 4 ? 'Status: Tepat Waktu' : `Terlambat ${penaltyCalculation.lateMinutes} Menit (${categoryInfo.label})`}
-              </p>
-              <p className="text-[11px] text-slate-600 dark:text-emerald-300/70 mt-0.5">
-                {penaltyCalculation.lateMinutes <= 4 
-                  ? 'Kafa\'ah honorarium dan transport KBM dibayarkan penuh.' 
-                  : `Potongan disiplin: Rp ${penaltyCalculation.penalty.toLocaleString('id-ID')}`}
-              </p>
+          {/* Location / GPS Mandatory Section */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                Lokasi Presensi
+              </span>
+              {isLocating && (
+                <span className="text-[11px] text-slate-400 flex items-center gap-1">
+                  <RefreshCw className="w-3 h-3 animate-spin" />
+                  Mencari GPS...
+                </span>
+              )}
             </div>
+
+            {/* GPS Status Box */}
+            {isLocating ? (
+              <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 text-xs text-slate-500 text-center">
+                Mendeteksi koordinat GPS smartphone Anda...
+              </div>
+            ) : gpsError || !hasGps ? (
+              <div className="p-3 rounded-lg border border-rose-200 dark:border-rose-950 bg-rose-50/70 dark:bg-rose-950/30 space-y-2">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+                  <div className="text-xs text-rose-900 dark:text-rose-200">
+                    <p className="font-medium">Wajib Menyalakan Lokasi / GPS</p>
+                    <p className="text-[11px] text-rose-700 dark:text-rose-300/80 mt-0.5">
+                      {gpsError || 'Aktifkan fitur Lokasi (GPS) pada smartphone Anda untuk presensi di wilayah pesantren.'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={detectLocation}
+                  className="w-full text-center py-1.5 text-xs font-medium bg-rose-600 hover:bg-rose-700 text-white rounded-md transition-colors cursor-pointer"
+                >
+                  Cek Ulang Lokasi GPS
+                </button>
+              </div>
+            ) : isOutsideRadius ? (
+              <div className="p-3 rounded-lg border border-amber-200 dark:border-amber-950 bg-amber-50/70 dark:bg-amber-950/30 space-y-2">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div className="text-xs text-amber-900 dark:text-amber-200">
+                    <p className="font-medium">Di Luar Wilayah Pesantren</p>
+                    <p className="text-[11px] text-amber-700 dark:text-amber-300/80 mt-0.5">
+                      Jarak Anda {locationValidation.distanceMeters}m dari pusat pesantren (Maksimal {geofenceSettings?.radiusMeters || 150}m).
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={detectLocation}
+                  className="w-full text-center py-1.5 text-xs font-medium bg-amber-600 hover:bg-amber-700 text-white rounded-md transition-colors cursor-pointer"
+                >
+                  Perbarui Lokasi GPS
+                </button>
+              </div>
+            ) : (
+              <div className="p-2.5 rounded-lg border border-emerald-200 dark:border-emerald-950 bg-emerald-50/60 dark:bg-emerald-950/30 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <div className="text-xs text-emerald-900 dark:text-emerald-200">
+                    <span className="font-medium">Di Wilayah Pesantren</span>
+                    <span className="text-[11px] text-emerald-700 dark:text-emerald-300/80 ml-1.5">
+                      ({locationValidation.distanceMeters}m dari pusat)
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={detectLocation}
+                  title="Perbarui GPS"
+                  className="text-[11px] text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer"
+                >
+                  Segarkan
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Notes Input */}
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-700 dark:text-emerald-200">
-              Catatan Kehadiran (Opsional)
+          {/* Punctuality Status */}
+          <div className="text-xs flex items-center justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900/40 border border-slate-200/70 dark:border-slate-800">
+            <span className="text-slate-600 dark:text-slate-400">
+              Kedisiplinan:
+            </span>
+            <span className={`font-medium ${
+              penaltyCalculation.lateMinutes <= 4
+                ? 'text-emerald-700 dark:text-emerald-400'
+                : 'text-amber-700 dark:text-amber-400'
+            }`}>
+              {penaltyCalculation.lateMinutes <= 4 ? 'Tepat Waktu' : `Terlambat ${penaltyCalculation.lateMinutes} mnt`}
+            </span>
+          </div>
+
+          {/* Optional Notes */}
+          <div>
+            <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
+              Catatan (Opsional)
             </label>
             <input
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Contoh: Mengisi pengantar materi di lab..."
-              className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-[#0e1713] text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-emerald-600"
+              placeholder="Tambahkan catatan jika ada..."
+              className="w-full text-xs px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-600"
             />
           </div>
 
@@ -194,17 +335,27 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-emerald-300 hover:bg-slate-100 dark:hover:bg-[#182a23] transition-colors cursor-pointer"
+              className="px-3.5 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
             >
               Batal
             </button>
+
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="inline-flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors cursor-pointer disabled:opacity-50 shadow-xs"
+              disabled={isSubmitting || isBlocked}
+              className={`px-4 py-2 text-xs font-medium rounded-lg transition-colors cursor-pointer shadow-xs ${
+                isBlocked
+                  ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                  : 'bg-emerald-700 hover:bg-emerald-800 text-white'
+              }`}
             >
-              <Clock className="w-3.5 h-3.5" strokeWidth={1.5} />
-              <span>{isSubmitting ? 'Mencatat...' : 'Konfirmasi Absen'}</span>
+              {isSubmitting 
+                ? 'Memproses...' 
+                : isGpsRequiredMissing 
+                  ? 'Nyalakan GPS HP' 
+                  : isOutsideRadius 
+                    ? 'Di Luar Wilayah Pesantren' 
+                    : 'Konfirmasi Absen'}
             </button>
           </div>
         </form>

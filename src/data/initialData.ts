@@ -1777,6 +1777,39 @@ export const INITIAL_BADAL_ASSIGNMENTS: BadalAssignment[] = [
     notes: 'Mengisi KBM Fiqih Ibadah Praktis di Aula Utama.',
     createdAt: '2026-08-23T15:30:00.000Z',
   },
+  {
+    id: 'BDL-REQ-001',
+    date: '2026-08-25',
+    scheduleId: 'SCH-01',
+    originalTeacherId: 'T-04', // Ust Syuhada AA (SMP)
+    badalTeacherId: '',
+    reason: 'Sakit',
+    status: 'PENDING',
+    notes: 'Kondisi flu berat dan demam tinggi, istirahat dokter 1 hari.',
+    createdAt: '2026-08-24T20:00:00.000Z',
+  },
+  {
+    id: 'BDL-REQ-002',
+    date: '2026-08-25',
+    scheduleId: 'SCH-14',
+    originalTeacherId: 'T-20', // Ustz Nurul Hidayah (MA)
+    badalTeacherId: '',
+    reason: 'Izin Keperluan',
+    status: 'PENDING',
+    notes: 'Keperluan keluarga mendesak di luar kota.',
+    createdAt: '2026-08-24T21:15:00.000Z',
+  },
+  {
+    id: 'BDL-REQ-003',
+    date: '2026-08-25',
+    scheduleId: 'SCH-29',
+    originalTeacherId: 'T-12', // Ust Hasbiyallah (Pesantren)
+    badalTeacherId: '',
+    reason: 'Tugas Kedinasan Pesantren',
+    status: 'PENDING',
+    notes: 'Tugas pendampingan kafilah santri musabaqah tilawatil quran.',
+    createdAt: '2026-08-25T06:30:00.000Z',
+  },
 ];
 
 export const INITIAL_AUDIT_LOGS: AuditLog[] = [

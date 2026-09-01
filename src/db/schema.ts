@@ -87,7 +87,7 @@ export const badalAssignments = pgTable('badal_assignments', {
   date: text('date').notNull(),
   scheduleId: text('schedule_id').references(() => schedules.id).notNull(),
   originalTeacherId: text('original_teacher_id').references(() => teachers.id).notNull(),
-  badalTeacherId: text('badal_teacher_id').references(() => teachers.id).notNull(),
+  badalTeacherId: text('badal_teacher_id'),
   reason: text('reason').notNull(),
   status: text('status').notNull().default('PENDING'),
   notes: text('notes'),
@@ -118,3 +118,17 @@ export const learningNeedRequests = pgTable('learning_need_requests', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
+
+export const geofenceSettings = pgTable('geofence_settings', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull().default("Baitul Qur'an Al-Ikhwan"),
+  latitude: doublePrecision('latitude').notNull().default(-6.589250),
+  longitude: doublePrecision('longitude').notNull().default(106.792880),
+  radiusMeters: integer('radius_meters').notNull().default(150),
+  strictMode: boolean('strict_mode').notNull().default(true),
+  enableMockBypass: boolean('enable_mock_bypass').notNull().default(true),
+  addressNotes: text('address_notes').default("Jl. KH. Al-Ikhwan No. 09, Gerbang Utama Pesantren"),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  updatedBy: text('updated_by').default("Administrator"),
+});
+

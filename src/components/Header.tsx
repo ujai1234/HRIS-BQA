@@ -30,11 +30,13 @@ import {
   ChevronLeft,
   Sliders,
   Home,
-  CheckCircle2
+  CheckCircle2,
+  MapPin
 } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
 import { UserRole, isKepsekRole } from '../types';
 import { useGuruNotifications, GuruNotificationItem, GuruNotifType } from '../hooks/useGuruNotifications';
+import { BrandLogo } from './BrandLogo';
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -65,7 +67,6 @@ export const Header: React.FC<HeaderProps> = ({
   } = useHRIS();
 
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [logoState, setLogoState] = useState<'jpeg' | 'jpg' | 'png' | 'fallback'>('jpeg');
 
   const handleRefresh = async () => {
     if (isRefreshing || isLoading) return;
@@ -126,7 +127,7 @@ export const Header: React.FC<HeaderProps> = ({
       crumbs.push({ label: 'Guru', path: '/dashboard/guru' });
       if (currentPath === '/dashboard/guru/slip') crumbs.push({ label: 'Slip Kafa\'ah', path: currentPath });
       else if (currentPath === '/dashboard/guru/kebutuhan') crumbs.push({ label: 'Ajuan Fasilitas', path: currentPath });
-      else crumbs.push({ label: 'Absensi & Jurnal Mengajar', path: currentPath });
+      else crumbs.push({ label: 'Absen & Jurnal', path: currentPath });
     } else if (currentRole === 'ADMIN' || currentPath.startsWith('/dashboard/admin')) {
       crumbs.push({ label: 'Admin', path: '/dashboard/admin' });
       if (currentPath === '/dashboard/admin/guru') crumbs.push({ label: 'Data Asatidz & Kafa\'ah', path: currentPath });
@@ -135,6 +136,7 @@ export const Header: React.FC<HeaderProps> = ({
       else if (currentPath === '/dashboard/admin/kebutuhan') crumbs.push({ label: 'Monitoring Kebutuhan', path: currentPath });
       else if (currentPath === '/dashboard/admin/payroll') crumbs.push({ label: 'Rekapitulasi Gaji', path: currentPath });
       else if (currentPath === '/dashboard/admin/audit') crumbs.push({ label: 'Log Audit Keamanan', path: currentPath });
+      else if (currentPath === '/dashboard/admin/settings' || currentPath === '/dashboard/admin/lokasi') crumbs.push({ label: 'Radius Presensi', path: currentPath });
       else crumbs.push({ label: 'Monitoring Dashboard', path: currentPath });
     } else if (isKepsekRole(currentRole) || currentPath.startsWith('/dashboard/kepsek')) {
       const unit = currentRole === 'KEPALA_SMP' ? 'SMP' : currentRole === 'KEPALA_MA' ? 'MA' : 'Pesantren';
@@ -164,14 +166,9 @@ export const Header: React.FC<HeaderProps> = ({
     if (currentRole === 'GURU') {
       sections = [
         {
-          title: 'PORTAL AKADEMIK',
+          title: 'PORTAL GURU',
           items: [
             { path: '/dashboard/guru', label: 'Absen & Jurnal', icon: CheckCircle2 },
-          ]
-        },
-        {
-          title: 'LAYANAN & KAFA\'AH',
-          items: [
             { path: '/dashboard/guru/slip', label: 'Slip Kafa\'ah', icon: CreditCard },
             { path: '/dashboard/guru/kebutuhan', label: 'Ajuan Fasilitas', icon: ClipboardList },
           ]
@@ -194,6 +191,12 @@ export const Header: React.FC<HeaderProps> = ({
             { path: '/dashboard/admin/kebutuhan', label: 'Monitoring Kebutuhan', icon: ClipboardList },
             { path: '/dashboard/admin/payroll', label: 'Rekapitulasi Gaji', icon: CreditCard },
             { path: '/dashboard/admin/audit', label: 'Log Audit Keamanan', icon: ShieldCheck },
+          ]
+        },
+        {
+          title: 'SISTEM & KONFIGURASI',
+          items: [
+            { path: '/dashboard/admin/settings', label: 'Radius Presensi', icon: MapPin },
           ]
         }
       ];
@@ -243,25 +246,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Sidebar Brand Header - High Contrast Sharp BQA Logo */}
           <div className="h-16 px-4 border-b border-[#16382a] dark:border-[#122e23] flex items-center justify-between shrink-0 bg-[#091a13] dark:bg-[#05100c]">
             <div className="flex items-center gap-3 overflow-hidden">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 overflow-hidden ${
-                logoState !== 'fallback' ? 'bg-white p-1 shadow-md border border-emerald-400/40' : 'bg-emerald-800 text-white'
-              }`}>
-                {logoState !== 'fallback' ? (
-                  <img 
-                    src={logoState === 'jpeg' ? '/logo.jpeg' : (logoState === 'jpg' ? '/logo.jpg' : '/logo.png')} 
-                    alt="Logo Baitul Qur'an" 
-                    className="w-full h-full object-contain" 
-                    onError={() => {
-                      if (logoState === 'jpeg') setLogoState('jpg');
-                      else if (logoState === 'jpg') setLogoState('png');
-                      else setLogoState('fallback');
-                    }}
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <span className="font-bold text-xs tracking-wider text-emerald-200">BQA</span>
-                )}
-              </div>
+              <BrandLogo size="md" className="filter drop-shadow-md" />
               
               {!sidebarFolded && (
                 <div className="leading-tight overflow-hidden">
@@ -292,7 +277,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <div className="space-y-1">
                   {section.items.map((item) => {
                     const IconComponent = item.icon;
-                    const isActive = currentPath === item.path || (item.path.endsWith('guru') && currentPath === '/dashboard/guru');
+                    const isActive = currentPath === item.path;
                     return (
                       <button
                         key={item.path}
@@ -404,25 +389,7 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* BQA Islamic Brand Header */}
             <div className="flex items-center gap-2.5">
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden ${
-                logoState !== 'fallback' ? 'bg-white p-0.5 shadow-xs border border-emerald-600/30' : 'bg-emerald-800 text-white'
-              }`}>
-                {logoState !== 'fallback' ? (
-                  <img 
-                    src={logoState === 'jpeg' ? '/logo.jpeg' : (logoState === 'jpg' ? '/logo.jpg' : '/logo.png')} 
-                    alt="Logo BQA" 
-                    className="w-full h-full object-contain"
-                    onError={() => {
-                      if (logoState === 'jpeg') setLogoState('jpg');
-                      else if (logoState === 'jpg') setLogoState('png');
-                      else setLogoState('fallback');
-                    }}
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <span className="font-bold text-[10px] text-emerald-200 tracking-wider">BQA</span>
-                )}
-              </div>
+              <BrandLogo size="md" className="filter drop-shadow-sm" />
 
               <div className="leading-tight">
                 <div className="flex items-center gap-1.5">

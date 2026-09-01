@@ -527,28 +527,31 @@ async function startServer() {
       const result = await db.insert(schema.badalAssignments).values(req.body).returning();
       const assignment = result[0];
 
-      // Send WhatsApp to Badal Teacher
-      try {
-        const badalTeacher = await db.query.teachers.findFirst({
-          where: eq(schema.teachers.id, assignment.badalTeacherId)
-        });
-        const originalTeacher = await db.query.teachers.findFirst({
-          where: eq(schema.teachers.id, assignment.originalTeacherId)
-        });
-        const schedule = await db.query.schedules.findFirst({
-          where: eq(schema.schedules.id, assignment.scheduleId)
-        });
+      // Send WhatsApp to Badal Teacher if assigned and approved
+      if (assignment.badalTeacherId && assignment.status === 'APPROVED') {
+        try {
+          const badalTeacher = await db.query.teachers.findFirst({
+            where: eq(schema.teachers.id, assignment.badalTeacherId)
+          });
+          const originalTeacher = await db.query.teachers.findFirst({
+            where: eq(schema.teachers.id, assignment.originalTeacherId)
+          });
+          const schedule = await db.query.schedules.findFirst({
+            where: eq(schema.schedules.id, assignment.scheduleId)
+          });
 
-        if (badalTeacher?.phone && badalTeacher.phone.trim() !== '') {
-          const message = `[JADWAL GURU BADAL]\nAssalamu'alaikum Wr. Wb. Ustadz/ah ${badalTeacher.name}.\n\nAnda ditugaskan sebagai GURU BADAL untuk:\n- Guru: ${originalTeacher?.name}\n- Mapel: ${schedule?.subject}\n- Kelas: ${schedule?.className}\n- Waktu: ${schedule?.startTime}\n- Tanggal: ${assignment.date}\n- Alasan: ${assignment.reason}\n\nMohon kehadirannya tepat waktu. Jazakumullah Khairan.\n- HRIS Baitul Qur'an Al-Ikhwan`;
-          await sendWhatsApp(badalTeacher.phone, message);
+          if (badalTeacher?.phone && badalTeacher.phone.trim() !== '') {
+            const message = `[JADWAL GURU BADAL]\nAssalamu'alaikum Wr. Wb. Ustadz/ah ${badalTeacher.name}.\n\nAnda ditugaskan sebagai GURU BADAL untuk:\n- Guru: ${originalTeacher?.name}\n- Mapel: ${schedule?.subject}\n- Kelas: ${schedule?.className}\n- Waktu: ${schedule?.startTime}\n- Tanggal: ${assignment.date}\n- Alasan: ${assignment.reason}\n\nMohon kehadirannya tepat waktu. Jazakumullah Khairan.\n- HRIS Baitul Qur'an Al-Ikhwan`;
+            await sendWhatsApp(badalTeacher.phone, message);
+          }
+        } catch (waError) {
+          console.error('Failed to send badal WA notification:', waError);
         }
-      } catch (waError) {
-        console.error('Failed to send badal WA notification:', waError);
       }
 
       res.json(assignment);
     } catch (error) {
+      console.error('Failed to create badal assignment:', error);
       res.status(500).json({ error: 'Failed to create badal assignment' });
     }
   });
@@ -559,8 +562,33 @@ async function startServer() {
         .set(req.body)
         .where(eq(schema.badalAssignments.id, req.params.id))
         .returning();
-      res.json(result[0]);
+      const assignment = result[0];
+
+      // If approved or badal teacher assigned, notify via WhatsApp
+      if (assignment && assignment.badalTeacherId && assignment.status === 'APPROVED') {
+        try {
+          const badalTeacher = await db.query.teachers.findFirst({
+            where: eq(schema.teachers.id, assignment.badalTeacherId)
+          });
+          const originalTeacher = await db.query.teachers.findFirst({
+            where: eq(schema.teachers.id, assignment.originalTeacherId)
+          });
+          const schedule = await db.query.schedules.findFirst({
+            where: eq(schema.schedules.id, assignment.scheduleId)
+          });
+
+          if (badalTeacher?.phone && badalTeacher.phone.trim() !== '') {
+            const message = `[JADWAL GURU BADAL - DISETUJUI KEPALA SEKOLAH]\nAssalamu'alaikum Wr. Wb. Ustadz/ah ${badalTeacher.name}.\n\nPengajuan izin telah disetujui. Anda resmi ditugaskan sebagai GURU BADAL untuk:\n- Guru Utama: ${originalTeacher?.name}\n- Mapel: ${schedule?.subject}\n- Kelas: ${schedule?.className}\n- Waktu: ${schedule?.startTime}\n- Tanggal: ${assignment.date}\n- Alasan: ${assignment.reason}\n\nJazakumullah Khairan.\n- HRIS Baitul Qur'an Al-Ikhwan`;
+            await sendWhatsApp(badalTeacher.phone, message);
+          }
+        } catch (waError) {
+          console.error('Failed to send badal WA notification on approval:', waError);
+        }
+      }
+
+      res.json(assignment);
     } catch (error) {
+      console.error('Failed to update badal assignment:', error);
       res.status(500).json({ error: 'Failed to update badal assignment' });
     }
   });
@@ -926,6 +954,136 @@ async function startServer() {
       res.status(500).json({ error: 'Failed to delete learning need request' });
     }
   });
+
+  // ==========================================
+  // Geofence & GPS Attendance Settings API
+  // ==========================================
+  app.get('/api/settings/geofence', async (req, res) => {
+    try {
+      let settings: any = await db.query.geofenceSettings.findFirst({
+        where: eq(schema.geofenceSettings.id, 'default_geofence')
+      });
+
+      if (!settings) {
+        // Fallback search any record
+        const allSettings = await db.query.geofenceSettings.findMany();
+        if (allSettings.length > 0) {
+          settings = allSettings[0];
+        } else {
+          // Create default
+          const created = await db.insert(schema.geofenceSettings).values({
+            id: 'default_geofence',
+            name: "Baitul Qur'an Al-Ikhwan Central Campus",
+            latitude: -6.589250,
+            longitude: 106.792880,
+            radiusMeters: 150,
+            strictMode: true,
+            enableMockBypass: true,
+            addressNotes: "Jl. KH. Al-Ikhwan No. 09, Gerbang Utama & Area Gedung KBM",
+            updatedAt: new Date(),
+            updatedBy: "Administrator"
+          }).returning();
+          settings = created[0];
+        }
+      }
+
+      res.json({
+        ...settings,
+        updatedAt: settings.updatedAt instanceof Date ? settings.updatedAt.toISOString() : (settings.updatedAt || new Date().toISOString())
+      });
+    } catch (error) {
+      console.error('Failed to fetch geofence settings:', error);
+      res.status(500).json({ error: 'Failed to fetch geofence settings' });
+    }
+  });
+
+  app.post('/api/settings/geofence', async (req, res) => {
+    try {
+      const {
+        id = 'default_geofence',
+        name = "Baitul Qur'an Al-Ikhwan",
+        latitude,
+        longitude,
+        radiusMeters = 150,
+        strictMode = true,
+        enableMockBypass = true,
+        addressNotes = '',
+        updatedBy = 'Administrator'
+      } = req.body;
+
+      const numLat = typeof latitude === 'string' ? parseFloat(latitude) : Number(latitude);
+      const numLng = typeof longitude === 'string' ? parseFloat(longitude) : Number(longitude);
+      const numRadius = typeof radiusMeters === 'string' ? parseInt(radiusMeters, 10) : Number(radiusMeters);
+
+      if (isNaN(numLat) || isNaN(numLng) || isNaN(numRadius)) {
+        return res.status(400).json({ error: 'Koordinat atau radius tidak valid' });
+      }
+
+      const existing = await db.query.geofenceSettings.findFirst({
+        where: eq(schema.geofenceSettings.id, id)
+      });
+
+      let result;
+      if (existing) {
+        result = await db.update(schema.geofenceSettings)
+          .set({
+            name,
+            latitude: numLat,
+            longitude: numLng,
+            radiusMeters: numRadius,
+            strictMode: Boolean(strictMode),
+            enableMockBypass: Boolean(enableMockBypass),
+            addressNotes,
+            updatedAt: new Date(),
+            updatedBy,
+          })
+          .where(eq(schema.geofenceSettings.id, id))
+          .returning();
+      } else {
+        result = await db.insert(schema.geofenceSettings).values({
+          id,
+          name,
+          latitude: numLat,
+          longitude: numLng,
+          radiusMeters: numRadius,
+          strictMode: Boolean(strictMode),
+          enableMockBypass: Boolean(enableMockBypass),
+          addressNotes,
+          updatedAt: new Date(),
+          updatedBy,
+        }).returning();
+      }
+
+      const saved = result[0];
+      const serialized = {
+        ...saved,
+        updatedAt: saved.updatedAt instanceof Date ? saved.updatedAt.toISOString() : (saved.updatedAt || new Date().toISOString())
+      };
+
+      // Add audit log
+      try {
+        await db.insert(schema.auditLogs).values({
+          id: `LOG-${Date.now()}`,
+          userId: 'T-00',
+          userName: updatedBy || 'Administrator',
+          userRole: 'ADMIN',
+          action: 'UPDATE_GEOFENCE',
+          category: 'SYSTEM',
+          details: `Pembaruan Geofence Presensi: Titik ${numLat.toFixed(6)}, ${numLng.toFixed(6)} (Radius ${numRadius}m, Strict: ${strictMode ? 'Aktif' : 'Non-aktif'})`,
+          severity: 'INFO',
+          timestamp: new Date().toISOString(),
+        });
+      } catch (logErr) {
+        console.error('Failed to log geofence update:', logErr);
+      }
+
+      res.json(serialized);
+    } catch (error) {
+      console.error('Failed to save geofence settings:', error);
+      res.status(500).json({ error: 'Failed to save geofence settings', details: String(error) });
+    }
+  });
+
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {

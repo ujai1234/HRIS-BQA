@@ -39,21 +39,45 @@ class DeviceNotificationService {
     return Notification.permission;
   }
 
+  // Check if running inside iframe (which may restrict browser native permission dialogs)
+  public isInIframe(): boolean {
+    if (typeof window === 'undefined') return false;
+    try {
+      return window.self !== window.top;
+    } catch {
+      return true;
+    }
+  }
+
   // Request user permission for device OS push notifications
   public async requestPermission(): Promise<NotificationPermission> {
+    // Always unlock audio chime on user click
+    this.playChime();
+
     if (!this.isSupported()) {
       return 'denied';
     }
 
     try {
-      const permission = await Notification.requestPermission();
+      // Modern Promise-based API with callback fallback for older Safari / Mobile Webviews
+      let permission: NotificationPermission;
+      
+      const req = Notification.requestPermission();
+      if (req && typeof req.then === 'function') {
+        permission = await req;
+      } else {
+        permission = await new Promise<NotificationPermission>((resolve) => {
+          Notification.requestPermission((p) => resolve(p));
+        });
+      }
+
       if (permission === 'granted') {
         await this.initServiceWorker();
       }
       return permission;
     } catch (err) {
-      console.error('Error requesting notification permission:', err);
-      return 'denied';
+      console.warn('Notification permission request returned error (likely iframe restriction):', err);
+      return this.getPermission();
     }
   }
 

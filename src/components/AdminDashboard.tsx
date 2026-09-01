@@ -992,257 +992,98 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
         </div>
       </div>
 
-      {/* 6. Grid: Timeline Jurnal & Antrean Kebutuhan (Pristine, No Icons) */}
+      {/* 6. Grid: Timeline Jurnal & Antrean Kebutuhan (Clean & Minimalist) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        {/* Timeline Jurnal & Aktivitas Terbaru */}
+        {/* Card 1: Timeline Aktivitas */}
         <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 overflow-hidden flex flex-col justify-between shadow-sm">
           <div>
-            {/* Card Header */}
-            <div className="p-4 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between">
+            {/* Header with Category Filter */}
+            <div className="p-4 border-b border-stone-100 dark:border-stone-800 flex flex-wrap items-center justify-between gap-2">
               <h2 className="font-semibold text-sm text-stone-900 dark:text-stone-100">
-                Timeline Aktivitas Terbaru
+                Timeline Aktivitas
               </h2>
-              <span className="text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest font-mono">
-                Log Real-Time
-              </span>
-            </div>
 
-            {/* Quick Stats Summary Widget */}
-            <div className="p-4 bg-stone-50/50 dark:bg-stone-900/40 border-b border-stone-100 dark:border-stone-850 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider block">
-                  Ringkasan Aktivitas ({todayStats.isActualToday ? 'Hari Ini' : formatIndonesianDate(todayStats.date)})
-                </span>
-                {!todayStats.isActualToday && (
-                  <span className="text-[9px] font-semibold text-amber-800 bg-amber-50 dark:bg-amber-950/20 dark:text-amber-400 px-1.5 py-0.5 rounded">
-                    Histori Terkini
-                  </span>
-                )}
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="bg-white dark:bg-stone-850 p-2.5 rounded-lg border border-stone-200/60 dark:border-stone-800 text-center">
-                  <span className="text-[10px] text-stone-400 dark:text-stone-500 block">Presensi</span>
-                  <span className="text-sm font-bold text-stone-900 dark:text-stone-100 mt-0.5 block">{todayStats.kehadiran}</span>
-                </div>
-
-                <div className="bg-white dark:bg-stone-850 p-2.5 rounded-lg border border-stone-200/60 dark:border-stone-800 text-center">
-                  <span className="text-[10px] text-stone-400 dark:text-stone-500 block">Jurnal</span>
-                  <span className="text-sm font-bold text-stone-900 dark:text-stone-100 mt-0.5 block">{todayStats.jurnal}</span>
-                </div>
-
-                <div className="bg-white dark:bg-stone-850 p-2.5 rounded-lg border border-stone-200/60 dark:border-stone-800 text-center">
-                  <span className="text-[10px] text-stone-400 dark:text-stone-500 block">Badal</span>
-                  <span className="text-sm font-bold text-stone-900 dark:text-stone-100 mt-0.5 block">{todayStats.badal}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Interactive Filters Panel */}
-            <div className="p-4 border-b border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900 space-y-3">
-              {/* Category selector */}
-              <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider block">
-                  Kategori Aktivitas
-                </span>
-                <div className="flex flex-wrap gap-1">
-                  {[
-                    { id: 'ALL', label: 'Semua' },
-                    { id: 'KEHADIRAN', label: 'Presensi', count: timelineActivities.filter(a => a.type === 'KEHADIRAN').length },
-                    { id: 'JURNAL', label: 'Jurnal', count: timelineActivities.filter(a => a.type === 'JURNAL').length },
-                    { id: 'BADAL', label: 'Badal', count: timelineActivities.filter(a => a.type === 'BADAL').length }
-                  ].map((cat) => {
-                    const isSelected = timelineCategory === cat.id;
-                    return (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => setTimelineCategory(cat.id as any)}
-                        className={`text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs'
-                            : 'bg-stone-100 text-stone-600 hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-400 dark:hover:bg-stone-750'
-                        }`}
-                      >
-                        {cat.label} {cat.count !== undefined && <span className="ml-1 opacity-60 font-mono">({cat.count})</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Date Range Selector */}
-              <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider block">
-                  Rentang Waktu
-                </span>
-                <div className="flex flex-wrap gap-1">
-                  {[
-                    { id: 'SEMUA', label: 'Semua Waktu' },
-                    { id: 'HARI_INI', label: 'Hari Ini' },
-                    { id: '3_HARI', label: '3 Hari Terakhir' },
-                    { id: 'MINGGU_INI', label: '1 Minggu Terakhir' }
-                  ].map((rng) => {
-                    const isSelected = timelineRange === rng.id;
-                    return (
-                      <button
-                        key={rng.id}
-                        type="button"
-                        onClick={() => setTimelineRange(rng.id as any)}
-                        className={`text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-emerald-800 text-white dark:bg-emerald-600 dark:text-white shadow-xs'
-                            : 'bg-stone-50 text-stone-500 hover:bg-stone-100 dark:bg-stone-850 dark:text-stone-400 dark:hover:bg-stone-800'
-                        }`}
-                      >
-                        {rng.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Timeline Content */}
-            <div className="p-4 max-h-[460px] overflow-y-auto">
-              {filteredTimelineActivities.length === 0 ? (
-                <div className="py-16 text-center space-y-2">
-                  <p className="text-xs text-stone-450 dark:text-stone-500">Tidak ada aktivitas yang sesuai filter.</p>
+              <div className="flex items-center gap-1">
+                {[
+                  { id: 'ALL', label: 'Semua' },
+                  { id: 'KEHADIRAN', label: 'Presensi' },
+                  { id: 'JURNAL', label: 'Jurnal' },
+                  { id: 'BADAL', label: 'Badal' }
+                ].map((cat) => (
                   <button
+                    key={cat.id}
                     type="button"
-                    onClick={() => {
-                      setTimelineCategory('ALL');
-                      setTimelineRange('SEMUA');
-                    }}
-                    className="text-[11px] font-semibold text-emerald-700 hover:underline dark:text-emerald-400 mt-2 cursor-pointer"
+                    onClick={() => setTimelineCategory(cat.id as any)}
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded transition-colors cursor-pointer ${
+                      timelineCategory === cat.id
+                        ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900'
+                        : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200'
+                    }`}
                   >
-                    Reset Filter
+                    {cat.label}
                   </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Timeline Feed */}
+            <div className="p-4 max-h-[440px] overflow-y-auto">
+              {filteredTimelineActivities.length === 0 ? (
+                <div className="py-12 text-center text-xs text-stone-400 dark:text-stone-500">
+                  Tidak ada aktivitas yang sesuai.
                 </div>
               ) : (
-                <div className="relative pl-4 border-l border-stone-150 dark:border-stone-800 space-y-5 my-1">
-                  {filteredTimelineActivities.slice(0, 15).map((act) => {
+                <div className="divide-y divide-stone-100 dark:divide-stone-800">
+                  {filteredTimelineActivities.slice(0, 12).map((act) => {
                     const isExpanded = !!expandedJournalIds[act.id];
                     return (
-                      <div key={act.id} className="relative group">
-                        {/* Timeline Circle Bullet Node */}
-                        <div className={`absolute -left-[21.5px] top-1.5 w-2.5 h-2.5 rounded-full bg-white dark:bg-stone-900 border-2 group-hover:scale-125 transition-transform duration-150 ${
-                          act.type === 'JURNAL' ? 'border-emerald-600 dark:border-emerald-500' :
-                          act.type === 'BADAL' ? 'border-indigo-600 dark:border-indigo-500' :
-                          'border-slate-500 dark:border-slate-400'
-                        }`} />
-                        
-                        <div className="space-y-1">
-                          {/* Header: Teacher, Unit, Time */}
-                          <div className="flex items-center justify-between gap-2 flex-wrap">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="font-bold text-xs text-stone-900 dark:text-stone-100 transition-colors">
-                                {act.teacherName}
-                              </span>
-                              <span className={`text-[8px] font-black px-1 rounded ${
-                                act.unit === 'SMP' ? 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300' :
-                                act.unit === 'MA' ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300' :
-                                'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
-                              }`}>
-                                {act.unit}
-                              </span>
-                              <span className={`text-[8px] font-semibold px-1.5 py-0.2 rounded-full ${act.badgeColor}`}>
-                                {act.type === 'JURNAL' ? 'Jurnal' : act.type === 'BADAL' ? 'Badal' : 'Presensi'}
-                              </span>
-                            </div>
-                            <span className="text-[10px] text-stone-400 dark:text-stone-500 font-mono">
-                              {act.time || 'KBM'} • {formatShortDate(act.date)}
+                      <div key={act.id} className="py-3 first:pt-0 last:pb-0 space-y-1">
+                        <div className="flex items-center justify-between gap-2 text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-stone-900 dark:text-stone-100">
+                              {act.teacherName}
+                            </span>
+                            <span className="text-[10px] font-mono text-stone-400 dark:text-stone-500">
+                              {act.unit}
                             </span>
                           </div>
-
-                          {/* Action Title / Subject */}
-                          <p className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
-                            {act.subject} • Kelas {act.className}
-                          </p>
-
-                          {/* Description Box */}
-                          <div className="bg-stone-50 dark:bg-stone-850 p-2.5 rounded-lg border border-stone-150 dark:border-stone-800/80">
-                            <p className="text-xs font-semibold text-stone-850 dark:text-stone-200">
-                              {act.description}
-                            </p>
-                          </div>
-
-                          {/* Conditional Metadata & Details */}
-                          {act.type === 'KEHADIRAN' && (
-                            <div className="flex flex-wrap gap-1.5 text-[9px] pt-1">
-                              <span className={`px-2 py-0.5 rounded font-mono font-medium ${
-                                act.meta.lateMinutes > 0 
-                                  ? 'bg-rose-50 text-rose-750 dark:bg-rose-950/20 dark:text-rose-400' 
-                                  : 'bg-emerald-50 text-emerald-750 dark:bg-emerald-950/20 dark:text-emerald-400'
-                              }`}>
-                                {act.meta.lateMinutes > 0 ? `Terlambat ${act.meta.lateMinutes} menit` : 'Tepat Waktu'}
-                              </span>
-                              {act.meta.status && (
-                                <span className="px-2 py-0.5 rounded bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 font-medium">
-                                  Status: {act.meta.status}
-                                </span>
-                              )}
-                            </div>
-                          )}
-
-                          {act.type === 'BADAL' && (
-                            <div className="flex items-center gap-1 text-[9px] pt-1 text-indigo-750 dark:text-indigo-400 font-semibold">
-                              <span>Menyulih KBM utama Ustadz {act.meta.originalTeacher}</span>
-                            </div>
-                          )}
-
-                          {act.type === 'JURNAL' && (
-                            <>
-                              {/* Interactive Expand Details Button */}
-                              <button
-                                type="button"
-                                onClick={() => toggleJournalExpand(act.id)}
-                                className="text-[10px] font-bold text-stone-500 hover:text-emerald-700 dark:text-stone-400 dark:hover:text-emerald-400 transition-colors cursor-pointer pt-1"
-                              >
-                                {isExpanded ? 'Sembunyikan detail' : 'Lihat Detail PBM'}
-                              </button>
-
-                              {/* Expanded Content Drawer */}
-                              {isExpanded && act.journal && (
-                                <div className="bg-stone-50/50 dark:bg-stone-900/60 p-3 rounded-lg border border-dashed border-stone-200 dark:border-stone-800 space-y-2 mt-1.5 transition-all">
-                                  {act.journal.learningObjectives && (
-                                    <div>
-                                      <span className="text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider block">Capaian / Tujuan</span>
-                                      <p className="text-xs text-stone-700 dark:text-stone-300 leading-normal mt-0.5">{act.journal.learningObjectives}</p>
-                                    </div>
-                                  )}
-                                  
-                                  {act.journal.classNotes && (
-                                    <div>
-                                      <span className="text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider block">Catatan PBM & Kendala</span>
-                                      <p className="text-xs text-stone-700 dark:text-stone-300 leading-normal mt-0.5">{act.journal.classNotes}</p>
-                                    </div>
-                                  )}
-
-                                  {act.journal.assignmentGiven && (
-                                    <div>
-                                      <span className="text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider block">Tugas Rumah / Hafalan</span>
-                                      <p className="text-xs text-stone-700 dark:text-stone-300 leading-normal mt-0.5">{act.journal.assignmentGiven}</p>
-                                    </div>
-                                  )}
-
-                                  {act.journal.studentAttendance && (
-                                    <div className="pt-2 border-t border-stone-150 dark:border-stone-800">
-                                      <span className="text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider block mb-1">Presensi Santri</span>
-                                      <div className="flex flex-wrap gap-1.5 text-[10px]">
-                                        <span className="px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-800 font-medium text-stone-600 dark:text-stone-400 font-mono">Total: {act.journal.studentAttendance.totalStudents}</span>
-                                        <span className="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/30 text-emerald-750 dark:text-emerald-400 font-bold font-mono">Hadir: {act.journal.studentAttendance.presentCount}</span>
-                                        <span className="px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 font-medium font-mono font-mono">Sakit: {act.journal.studentAttendance.sickCount}</span>
-                                        <span className="px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 font-medium font-mono">Izin: {act.journal.studentAttendance.permittedCount}</span>
-                                        <span className="px-2 py-0.5 rounded bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 font-bold font-mono">Alpa: {act.journal.studentAttendance.absentCount}</span>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </>
-                          )}
+                          <span className="text-[10px] font-mono text-stone-400 dark:text-stone-500">
+                            {act.time || 'KBM'} • {formatShortDate(act.date)}
+                          </span>
                         </div>
+
+                        <p className="text-xs text-stone-600 dark:text-stone-400">
+                          {act.description}
+                        </p>
+
+                        {act.type === 'JURNAL' && (
+                          <div>
+                            <button
+                              type="button"
+                              onClick={() => toggleJournalExpand(act.id)}
+                              className="text-[10px] font-medium text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer"
+                            >
+                              {isExpanded ? 'Sembunyikan' : 'Rincian Jurnal'}
+                            </button>
+
+                            {isExpanded && act.journal && (
+                              <div className="mt-2 text-xs text-stone-600 dark:text-stone-400 space-y-1.5 pt-2 border-t border-stone-100 dark:border-stone-800 font-sans">
+                                {act.journal.learningObjectives && (
+                                  <p><strong>Capaian:</strong> {act.journal.learningObjectives}</p>
+                                )}
+                                {act.journal.classNotes && (
+                                  <p><strong>Catatan:</strong> {act.journal.classNotes}</p>
+                                )}
+                                {act.journal.studentAttendance && (
+                                  <p className="font-mono text-[11px] text-stone-500 dark:text-stone-400">
+                                    Santri: {act.journal.studentAttendance.presentCount}/{act.journal.studentAttendance.totalStudents} Hadir
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -1250,66 +1091,55 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
               )}
             </div>
           </div>
-          <div className="p-3 bg-stone-50 dark:bg-stone-800/50 text-center border-t border-stone-100 dark:border-stone-800 flex items-center justify-between px-4">
-            <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
-              Total Log: {filteredTimelineActivities.length} Entri
-            </span>
-            <span className="text-[10px] font-bold text-emerald-750 dark:text-emerald-400">
-              Menampilkan {Math.min(filteredTimelineActivities.length, 15)} Log Terbaru
-            </span>
+
+          <div className="p-3 bg-stone-50 dark:bg-stone-800/40 text-center border-t border-stone-100 dark:border-stone-800 text-xs text-stone-500 dark:text-stone-400 font-mono">
+            {filteredTimelineActivities.length} Aktivitas Tercatat
           </div>
         </div>
 
-        {/* Antrean Pengajuan Kebutuhan Guru */}
+        {/* Card 2: Antrean Pengajuan Kebutuhan */}
         <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 overflow-hidden flex flex-col justify-between shadow-sm">
           <div>
             <div className="p-4 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between">
               <h2 className="font-semibold text-sm text-stone-900 dark:text-stone-100">
-                Antrean Pengajuan Kebutuhan
+                Pengajuan Kebutuhan Guru
               </h2>
               <button 
                 type="button"
                 onClick={() => setCurrentPath('/dashboard/admin/kebutuhan')}
-                className="text-[10px] font-bold text-emerald-700 hover:text-emerald-850 dark:text-emerald-400 dark:hover:text-emerald-300 uppercase tracking-widest transition-colors cursor-pointer hover:underline"
+                className="text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 transition-colors cursor-pointer"
               >
-                Lihat Semua
+                Kelola Semua
               </button>
             </div>
 
-            <div className="p-0">
+            <div className="p-4 max-h-[440px] overflow-y-auto">
               {pendingRequests.length === 0 ? (
-                <div className="p-12 text-center space-y-1">
-                  <p className="text-xs text-stone-400">Semua pengajuan telah ditindaklanjuti.</p>
+                <div className="py-12 text-center text-xs text-stone-400 dark:text-stone-500">
+                  Tidak ada pengajuan pending.
                 </div>
               ) : (
                 <div className="divide-y divide-stone-100 dark:divide-stone-800">
                   {pendingRequests.map((req) => {
                     const teacher = teachers.find(t => t.id === req.teacherId);
                     return (
-                      <div key={req.id} className="p-4 hover:bg-stone-50 dark:hover:bg-stone-800/30 transition-colors">
-                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-6 h-6 rounded-lg ${teacher?.avatarColor || 'bg-emerald-700'} flex items-center justify-center text-[10px] font-bold text-white shrink-0`}>
-                              {teacher?.name?.charAt(0)}
-                            </div>
-                            <div>
-                              <h4 className="text-xs font-bold text-stone-900 dark:text-stone-100 leading-tight">
-                                {req.title}
-                              </h4>
-                              <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">
-                                Oleh: {teacher?.name} • {req.category}
-                              </p>
-                            </div>
-                          </div>
-                          <span className="text-[10px] text-stone-400 dark:text-stone-500 font-mono italic shrink-0">
-                            {formatIndonesianDate(req.createdAt)}
+                      <div key={req.id} className="py-3 first:pt-0 last:pb-0 space-y-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-semibold text-xs text-stone-900 dark:text-stone-100">
+                            {req.title}
+                          </span>
+                          <span className="text-[10px] font-mono text-stone-400 dark:text-stone-500">
+                            {formatShortDate(req.createdAt)}
                           </span>
                         </div>
-                        <div className="bg-stone-50 dark:bg-stone-800/50 p-3 rounded-lg border border-stone-100 dark:border-stone-800/50">
-                          <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed line-clamp-2">
-                            {req.description}
-                          </p>
-                        </div>
+
+                        <p className="text-[11px] text-stone-500 dark:text-stone-400 font-mono">
+                          {teacher?.name} • {req.category}
+                        </p>
+
+                        <p className="text-xs text-stone-600 dark:text-stone-400 line-clamp-2">
+                          {req.description}
+                        </p>
                       </div>
                     );
                   })}
@@ -1317,15 +1147,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
               )}
             </div>
           </div>
-          
-          <div className="p-3 bg-stone-50 dark:bg-stone-800/50 text-center border-t border-stone-100 dark:border-stone-800">
-            <button 
-              type="button"
-              onClick={() => setCurrentPath('/dashboard/admin/kebutuhan')}
-              className="text-[11px] font-semibold text-stone-600 dark:text-stone-400 hover:text-emerald-750 dark:hover:text-emerald-400 transition-colors cursor-pointer"
-            >
-              Kelola {learningNeedRequests.length} Pengajuan Kebutuhan
-            </button>
+
+          <div className="p-3 bg-stone-50 dark:bg-stone-800/40 text-center border-t border-stone-100 dark:border-stone-800 text-xs text-stone-500 dark:text-stone-400 font-mono">
+            {pendingRequests.length} Ajuan Perlu Ditindaklanjuti
           </div>
         </div>
 

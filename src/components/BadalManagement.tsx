@@ -11,10 +11,12 @@ import {
   X,
   Check,
   AlertTriangle,
-  AlertCircle
+  AlertCircle,
+  CalendarOff,
+  User,
+  BookOpen,
+  ArrowRight
 } from 'lucide-react';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { toast } from 'sonner';
 import { useHRIS } from '../context/HRISContext';
 import { BadalAssignment, DayOfWeek, UnitType, isKepsekRole, getRoleUnit } from '../types';
@@ -38,17 +40,20 @@ export const BadalManagement: React.FC = () => {
 
   const userUnit = getRoleUnit(currentRole, currentUser?.unit);
   
-  // Kepsek default unit
+  // Unit filter state
   const [selectedUnit, setSelectedUnit] = useState<'ALL' | UnitType>(
     userUnit === 'ALL' ? 'ALL' : userUnit as UnitType
   );
 
-  // Sub tab for Kepsek: 'daftar_penugasan' | 'cari_guru'
+  // Sub tab: 'daftar_penugasan' | 'cari_guru'
   const [activeTab, setActiveTab] = useState<'daftar_penugasan' | 'cari_guru'>('daftar_penugasan');
 
   // Filter and Search states
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'APPROVED' | 'PENDING' | 'COMPLETED'>('ALL');
+
+  // Inline selection of badal teacher for pending requests: badalId -> teacherId
+  const [pendingBadalTeacherSelections, setPendingBadalTeacherSelections] = useState<Record<string, string>>({});
 
   // Modal States
   const [showAddModal, setShowAddModal] = useState(false);
@@ -63,10 +68,10 @@ export const BadalManagement: React.FC = () => {
   // Confirmation Modals State
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [badalToCancel, setBadalToCancel] = useState<BadalAssignment | null>(null);
-  const [badalToApprove, setBadalToApprove] = useState<BadalAssignment | null>(null);
+  const [badalToApprove, setBadalToApprove] = useState<{ badal: BadalAssignment; badalTeacherId: string } | null>(null);
   const [showBadalReportModal, setShowBadalReportModal] = useState(false);
  
-  // Finder Filter (for Kepsek Smart Finder)
+  // Finder Filter (for Smart Finder)
   const [finderDay, setFinderDay] = useState<DayOfWeek>('Senin');
   const [finderUnit, setFinderUnit] = useState<UnitType>(userUnit === 'ALL' ? 'SMP' : userUnit as UnitType);
   const [finderTimeSlot, setFinderTimeSlot] = useState<string>('ALL');
@@ -103,7 +108,6 @@ export const BadalManagement: React.FC = () => {
       setSelectedScheduleId(validScheds[0].id);
       setSelectedOriginalTeacherId(validScheds[0].teacherId);
     } else {
-      // fallback to any schedule in unit
       const fallback = schedules.find(s => s.unit === effectiveUnit);
       if (fallback) {
         setSelectedScheduleId(fallback.id);
@@ -117,7 +121,6 @@ export const BadalManagement: React.FC = () => {
     const sched = schedules.find((s) => s.id === schedId);
     if (sched) {
       setSelectedOriginalTeacherId(sched.teacherId);
-      // If currently selected badal teacher is the same as original teacher, pick someone else
       if (selectedBadalTeacherId === sched.teacherId) {
         const otherTeacher = teachers.find(t => t.id !== sched.teacherId && t.isActive);
         if (otherTeacher) setSelectedBadalTeacherId(otherTeacher.id);
@@ -129,7 +132,6 @@ export const BadalManagement: React.FC = () => {
   const handleQuickAssignFromFinder = (teacherId: string, day: DayOfWeek, unit: UnitType) => {
     const targetUnit = userUnit === 'ALL' ? unit : (userUnit as UnitType);
     setModalUnit(targetUnit);
-    // Find matching schedule for day in unit
     const matchingSched = schedules.find(s => s.unit === targetUnit && s.dayOfWeek === day && s.teacherId !== teacherId);
     if (matchingSched) {
       setSelectedScheduleId(matchingSched.id);
@@ -153,8 +155,6 @@ export const BadalManagement: React.FC = () => {
       toast.error('Guru pengganti tidak boleh sama dengan guru utama!');
       return;
     }
-
-    // Open confirmation dialog before actual execution
     setShowSubmitConfirm(true);
   };
 
@@ -165,6 +165,7 @@ export const BadalManagement: React.FC = () => {
       originalTeacherId: selectedOriginalTeacherId,
       badalTeacherId: selectedBadalTeacherId,
       reason,
+      status: 'APPROVED',
       notes: notes.trim() || undefined,
     });
 
@@ -177,17 +178,37 @@ export const BadalManagement: React.FC = () => {
   const handleConfirmCancel = () => {
     if (!badalToCancel) return;
     deleteBadalAssignment(badalToCancel.id);
-    toast.success('Penugasan guru badal berhasil dibatalkan');
+    toast.success('Penugasan / pengajuan izin badal berhasil dibatalkan');
     setBadalToCancel(null);
   };
 
-  const handleConfirmApprove = () => {
+  const handleApprovePendingItem = (badal: BadalAssignment) => {
+    const sched = schedules.find(s => s.id === badal.scheduleId);
+    const unitForSchedule = sched?.unit || 'SMP';
+    
+    // Find candidate teacher from state, or from item, or first available teacher in unit
+    const chosenTeacherId = pendingBadalTeacherSelections[badal.id] || badal.badalTeacherId;
+    if (!chosenTeacherId) {
+      // Find suitable peer in unit
+      const candidate = teachers.find(t => t.isActive && t.id !== badal.originalTeacherId && (t.unit === unitForSchedule || t.unit === 'PESANTREN'));
+      if (candidate) {
+        setBadalToApprove({ badal, badalTeacherId: candidate.id });
+        return;
+      }
+      toast.error('Harap pilih guru pengganti (badal) terlebih dahulu sebelum menyetujui');
+      return;
+    }
+
+    setBadalToApprove({ badal, badalTeacherId: chosenTeacherId });
+  };
+
+  const handleExecuteApprove = () => {
     if (!badalToApprove) return;
-    approveBadalAssignment(badalToApprove.id);
+    approveBadalAssignment(badalToApprove.badal.id, badalToApprove.badalTeacherId);
     setBadalToApprove(null);
   };
 
-  // Filtered Badal Assignments strictly scoped for Kepsek
+  // Filtered Badal Assignments
   const filteredBadal = useMemo(() => {
     return badalAssignments.filter((b) => {
       const sched = schedules.find((s) => s.id === b.scheduleId);
@@ -213,7 +234,20 @@ export const BadalManagement: React.FC = () => {
     });
   }, [badalAssignments, schedules, teachers, selectedUnit, statusFilter, searchQuery, userUnit]);
 
-  // Statistics strictly scoped to active unit
+  // Pending Leave Requests for the current scoped unit(s)
+  const pendingLeaveRequests = useMemo(() => {
+    return badalAssignments.filter((b) => {
+      if (b.status !== 'PENDING') return false;
+      const sched = schedules.find((s) => s.id === b.scheduleId);
+      if (!sched) return false;
+      if (userUnit === 'ALL') {
+        return selectedUnit === 'ALL' || sched.unit === selectedUnit;
+      }
+      return sched.unit === userUnit;
+    });
+  }, [badalAssignments, schedules, selectedUnit, userUnit]);
+
+  // Statistics
   const stats = useMemo(() => {
     const relevantList = userUnit === 'ALL'
       ? (selectedUnit === 'ALL' 
@@ -261,8 +295,7 @@ export const BadalManagement: React.FC = () => {
     const effectiveUnit = userUnit === 'ALL' ? finderUnit : (userUnit as UnitType);
     const daySchedules = schedules.filter(s => s.dayOfWeek === finderDay && s.unit === effectiveUnit);
     
-    // Busy teacher IDs at selected time slot
-    const busyTeacherMap = new Map<string, string>(); // teacherId -> schedule summary
+    const busyTeacherMap = new Map<string, string>();
     daySchedules.forEach(s => {
       if (finderTimeSlot === 'ALL' || s.startTime === finderTimeSlot) {
         busyTeacherMap.set(s.teacherId, `${s.subject} (${s.className}) [${s.startTime}-${s.endTime}]`);
@@ -287,151 +320,38 @@ export const BadalManagement: React.FC = () => {
     return { available, busy };
   }, [teachers, schedules, finderDay, finderUnit, finderTimeSlot, userUnit]);
 
-  // Export PDF (Admin or Kepsek formal report)
-  const handleExportPDF = () => {
-    try {
-      const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-
-      const todayStr = new Date().toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      });
-
-      const scopeTitle = selectedUnit === 'ALL' 
-        ? 'Seluruh Unit (SMP, MA, Pesantren)' 
-        : `Unit ${selectedUnit}`;
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(13);
-      doc.setTextColor(15, 23, 42);
-      doc.text("PESANTREN BAITUL QUR'AN AL-IKHWAN", 14, 18);
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(71, 85, 105);
-      doc.text("Rekapitulasi Penugasan & Kafa'ah Guru Pengganti (Badal KBM)", 14, 24);
-
-      doc.setDrawColor(226, 232, 240);
-      doc.setLineWidth(0.5);
-      doc.line(14, 28, 196, 28);
-
-      doc.setFontSize(8.5);
-      doc.setTextColor(100, 116, 139);
-      doc.text(`Tanggal Cetak: ${todayStr}`, 14, 34);
-      doc.text(`Lingkup: ${scopeTitle}`, 110, 34);
-      doc.text(`Otoritas: ${currentUser?.name || 'Administrator'} (${currentUser?.position || 'Pengelola'})`, 14, 39);
-      doc.text(`Total Penugasan: ${filteredBadal.length} Sesi (${stats.totalJP} JP)`, 110, 39);
-
-      const tableRows = filteredBadal.map((b, idx) => {
-        const sched = schedules.find((s) => s.id === b.scheduleId);
-        const origTeacher = teachers.find((t) => t.id === b.originalTeacherId);
-        const badalTeacher = teachers.find((t) => t.id === b.badalTeacherId);
-        const jp = sched ? sched.hours : 2;
-        const rate = badalTeacher ? badalTeacher.hourlyRate : 40000;
-
-        return [
-          String(idx + 1),
-          formatIndonesianDate(b.date),
-          sched?.unit || '-',
-          `${sched?.subject || 'KBM'} (${sched?.className || '-'})`,
-          origTeacher?.name || '-',
-          badalTeacher?.name || '-',
-          b.reason,
-          `${jp} JP`,
-          formatRupiah(jp * rate),
-          b.status === 'COMPLETED' ? 'Selesai' : b.status === 'APPROVED' ? 'Disetujui' : 'Menunggu'
-        ];
-      });
-
-      autoTable(doc, {
-        startY: 44,
-        head: [['No', 'Tanggal', 'Unit', 'Mapel & Kelas', 'Guru Utama', 'Guru Badal', 'Alasan', 'JP', 'Kafa’ah', 'Status']],
-        body: tableRows.length > 0 ? tableRows : [['-', '-', '-', 'Tidak ada data penugasan badal', '-', '-', '-', '-', '-', '-']],
-        theme: 'striped',
-        headStyles: {
-          fillColor: [27, 67, 50],
-          textColor: [255, 255, 255],
-          fontSize: 7.5,
-          fontStyle: 'bold',
-          halign: 'left',
-          cellPadding: 2.5
-        },
-        bodyStyles: {
-          fontSize: 7,
-          textColor: [30, 41, 59],
-          cellPadding: 2
-        },
-        alternateRowStyles: {
-          fillColor: [248, 250, 252]
-        },
-        columnStyles: {
-          0: { cellWidth: 7, halign: 'center' },
-          1: { cellWidth: 18 },
-          2: { cellWidth: 12 },
-          3: { cellWidth: 32 },
-          4: { cellWidth: 28 },
-          5: { cellWidth: 28 },
-          6: { cellWidth: 20 },
-          7: { cellWidth: 11, halign: 'center' },
-          8: { cellWidth: 20, halign: 'right' },
-          9: { cellWidth: 16 }
-        },
-        margin: { left: 14, right: 14 },
-        didDrawPage: (data) => {
-          const pageCount = (doc as any).internal.getNumberOfPages();
-          doc.setFontSize(7.5);
-          doc.setTextColor(148, 163, 184);
-          doc.text(
-            `Halaman ${data.pageNumber} dari ${pageCount} • Baitul Qur'an HRIS`,
-            14,
-            doc.internal.pageSize.height - 10
-          );
-        }
-      });
-
-      const fileDate = new Date().toISOString().slice(0, 10);
-      doc.save(`Rekap_Guru_Badal_BQ_${fileDate}.pdf`);
-      toast.success('Laporan rekapitulasi guru badal berhasil diunduh');
-    } catch (err) {
-      console.error('Error generating PDF:', err);
-      toast.error('Gagal mengunduh laporan PDF');
-    }
-  };
-
   return (
     <div className="space-y-6">
       {/* 1. Header and Context Banner */}
       <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight font-sans">
-              Penugasan Guru Badal
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight font-sans">
+                Penugasan Guru Badal
+              </h1>
+              <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40">
+                {isKepsek ? `Otoritas Kepala ${userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}` : 'Panel Administrator'}
+              </span>
+            </div>
             <p className="text-xs text-stone-500 dark:text-stone-400">
               {isKepsek 
-                ? `Manajemen penugasan guru pengganti Unit ${userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}` 
-                : 'Pencatatan dan rekapitulasi guru pengganti KBM'}
+                ? `Persetujuan izin guru dan penunjukan Asatidz Badal pengganti KBM Unit ${userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}` 
+                : 'Pusat integrasi pengesahan izin guru dan rekapitulasi Kafa\'ah KBM Badal (SMP, MA, Pesantren)'}
             </p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* Download / Preview PDF button */}
             <button
               id="btn-export-pdf-badal"
               onClick={() => setShowBadalReportModal(true)}
-              className="inline-flex items-center justify-center gap-1.5 bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 px-3.5 py-2 rounded-lg text-xs font-semibold border border-stone-200 dark:border-stone-700 transition-all cursor-pointer"
+              className="inline-flex items-center justify-center gap-1.5 bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 px-3.5 py-2 rounded-lg text-xs font-semibold border border-stone-200 dark:border-stone-700 transition-all cursor-pointer shadow-xs"
             >
               <FileText className="w-3.5 h-3.5 text-stone-400" strokeWidth={1.5} />
               <span>Pratinjau & Unduh Laporan</span>
             </button>
 
-            {/* Action for Kepsek Only */}
-            {isKepsek && (
+            {(isKepsek || isAdmin) && (
               <button
                 id="btn-tunjuk-badal-modal"
                 onClick={() => {
@@ -470,6 +390,16 @@ export const BadalManagement: React.FC = () => {
           </span>
         </div>
 
+        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Izin Menunggu Persetujuan</span>
+          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-amber-600 dark:text-amber-400 mt-1">
+            {stats.pendingCount} <span className="text-xs font-normal text-stone-500 font-sans">Pengajuan</span>
+          </p>
+          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
+            {isKepsek ? `Unit ${userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}` : 'Seluruh Unit'}
+          </span>
+        </div>
+
         {isKepsek ? (
           <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
             <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Badal Disetujui</span>
@@ -482,7 +412,7 @@ export const BadalManagement: React.FC = () => {
           </div>
         ) : (
           <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
-            <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Alokasi Kafa'ah</span>
+            <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Alokasi Kafa'ah Badal</span>
             <p className="text-xl sm:text-2xl font-semibold font-mono tracking-tight text-emerald-700 dark:text-emerald-400 mt-1 truncate">
               {formatRupiah(stats.totalHonor)}
             </p>
@@ -491,31 +421,140 @@ export const BadalManagement: React.FC = () => {
             </span>
           </div>
         )}
-
-        {isKepsek ? (
-          <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
-            <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Menunggu Konfirmasi</span>
-            <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-amber-600 dark:text-amber-400 mt-1">
-              {stats.pendingCount} <span className="text-xs font-normal text-stone-500 font-sans">Sesi</span>
-            </p>
-            <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
-              Unit {userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}
-            </span>
-          </div>
-        ) : (
-          <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
-            <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Distribusi Unit</span>
-            <p className="text-sm font-medium text-stone-800 dark:text-stone-200 mt-2">
-              SMP: <strong className="font-mono text-stone-900 dark:text-stone-100">{stats.smpCount}</strong> • MA: <strong className="font-mono text-stone-900 dark:text-stone-100">{stats.maCount}</strong> • Ponpes: <strong className="font-mono text-stone-900 dark:text-stone-100">{stats.ponpesCount}</strong>
-            </p>
-            <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
-              Rincian per jenjang
-            </span>
-          </div>
-        )}
       </div>
 
-      {/* 3. Navigation Subtabs (For Kepsek) */}
+      {/* 3. DEDICATED SECTION: PENGAJUAN IZIN GURU MENUNGGU PERSETUJUAN KEPALA SEKOLAH */}
+      {pendingLeaveRequests.length > 0 && (
+        <div className="bg-amber-50/50 dark:bg-amber-950/20 rounded-2xl border border-amber-200/80 dark:border-amber-900/40 p-5 space-y-4 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/60 dark:border-amber-900/30 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                <CalendarOff className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-slate-900 dark:text-amber-100 flex items-center gap-2">
+                  <span>Pengajuan Izin Guru Menunggu Persetujuan</span>
+                  <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500 text-white">
+                    {pendingLeaveRequests.length}
+                  </span>
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-amber-300/70">
+                  Periksa jenis izin & keterangan guru di bawah ini, lalu pilih Guru Badal pengganti dan klik Setujui.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3.5">
+            {pendingLeaveRequests.map((b) => {
+              const sched = schedules.find((s) => s.id === b.scheduleId);
+              const origTeacher = teachers.find((t) => t.id === b.originalTeacherId);
+              const unitForSchedule = sched?.unit || 'SMP';
+              
+              // Teachers available in this unit
+              const availablePeerTeachers = teachers.filter(
+                (t) => t.isActive && t.id !== b.originalTeacherId && (userUnit === 'ALL' || t.unit === unitForSchedule || t.unit === 'PESANTREN')
+              );
+
+              const currentSelectedTeacherId = pendingBadalTeacherSelections[b.id] || b.badalTeacherId || (availablePeerTeachers[0]?.id || '');
+
+              return (
+                <div 
+                  key={b.id} 
+                  className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-slate-200/90 dark:border-stone-800 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+                >
+                  {/* Left Column: Teacher & Leave Information */}
+                  <div className="space-y-2 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300/60 dark:border-amber-800/40">
+                        {b.reason}
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-stone-800 text-slate-700 dark:text-stone-300 border border-slate-200 dark:border-stone-700">
+                        Unit {unitForSchedule}
+                      </span>
+                      <span className="text-xs font-semibold text-slate-700 dark:text-stone-300 font-mono">
+                        {formatIndonesianDate(b.date)}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                      <div>
+                        <p className="text-xs text-slate-400 dark:text-stone-500">Guru yang Mengajukan Izin:</p>
+                        <p className="text-sm font-bold text-slate-900 dark:text-stone-100 flex items-center gap-1.5">
+                          <User className="w-3.5 h-3.5 text-slate-400" />
+                          <span>{origTeacher?.name || 'Guru Utama'}</span>
+                          <span className="text-[11px] font-normal text-slate-500">({origTeacher?.position})</span>
+                        </p>
+                      </div>
+
+                      <div className="sm:border-l sm:border-slate-200 dark:sm:border-stone-800 sm:pl-4">
+                        <p className="text-xs text-slate-400 dark:text-stone-500">Mata Pelajaran & Sesi KBM:</p>
+                        <p className="text-xs font-semibold text-slate-800 dark:text-stone-200">
+                          {sched?.subject} ({sched?.className}) • {sched?.startTime}-{sched?.endTime} WIB ({sched?.hours || 2} JP)
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Keterangan / Alasan Izin (Prominently Highlighted) */}
+                    <div className="bg-slate-50 dark:bg-stone-800/50 p-2.5 rounded-lg border border-slate-200/60 dark:border-stone-800 text-xs">
+                      <span className="font-semibold text-slate-700 dark:text-stone-300">Keterangan / Alasan: </span>
+                      <span className="text-slate-600 dark:text-stone-400 italic">
+                        "{b.notes || 'Tidak ada catatan tambahan'}"
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Guru Badal Selector & Action Buttons */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 lg:border-l lg:border-slate-200 dark:lg:border-stone-800 lg:pl-4 shrink-0">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-slate-600 dark:text-stone-400 block">
+                        Tugaskan Guru Badal:
+                      </label>
+                      <select
+                        value={currentSelectedTeacherId}
+                        onChange={(e) => {
+                          setPendingBadalTeacherSelections(prev => ({
+                            ...prev,
+                            [b.id]: e.target.value
+                          }));
+                        }}
+                        className="w-full sm:w-56 text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-slate-900 dark:text-stone-100 focus:outline-none focus:border-emerald-600"
+                      >
+                        <option value="">-- Pilih Guru Pengganti --</option>
+                        {availablePeerTeachers.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.name} ({t.position} - {t.unit})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-2 sm:pt-4">
+                      <button
+                        onClick={() => handleApprovePendingItem(b)}
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-[#1B4332] hover:bg-[#143326] text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-colors cursor-pointer shadow-xs"
+                      >
+                        <Check className="w-3.5 h-3.5" strokeWidth={2} />
+                        <span>Setujui & Tugaskan</span>
+                      </button>
+
+                      <button
+                        onClick={() => setBadalToCancel(b)}
+                        title="Tolak / Hapus Pengajuan"
+                        className="p-2 rounded-lg bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 dark:text-rose-400 transition-colors cursor-pointer border border-rose-200/60 dark:border-rose-900/40"
+                      >
+                        <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* 4. Navigation Subtabs (For Kepsek) */}
       {isKepsek && (
         <div className="flex items-center gap-1 border-b border-stone-200 dark:border-stone-800 pb-px">
           <button
@@ -544,12 +583,12 @@ export const BadalManagement: React.FC = () => {
         </div>
       )}
 
-      {/* 4. CONTENT VIEW: DAFTAR PENUGASAN BADAL */}
+      {/* 5. CONTENT VIEW: DAFTAR PENUGASAN BADAL */}
       {(!isKepsek || activeTab === 'daftar_penugasan') && (
         <div className="space-y-4">
           {/* Filter Bar */}
           <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
-            {/* Unit Filter - Only show for Admin */}
+            {/* Unit Filter - For Admin */}
             {isAdmin && (
               <div className="flex items-center gap-1 bg-stone-100 dark:bg-stone-800 p-1 rounded-lg text-xs overflow-x-auto max-w-full">
                 {(['ALL', 'SMP', 'MA', 'PESANTREN'] as const).map((unit) => (
@@ -574,7 +613,7 @@ export const BadalManagement: React.FC = () => {
                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" strokeWidth={1.5} />
                 <input
                   type="text"
-                  placeholder="Cari guru / mapel..."
+                  placeholder="Cari guru / mapel / alasan..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-8 pr-3 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-xs text-stone-900 dark:text-stone-100 focus:outline-none focus:border-[#1B4332]"
@@ -587,9 +626,9 @@ export const BadalManagement: React.FC = () => {
                 className="px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-xs text-stone-700 dark:text-stone-300 focus:outline-none"
               >
                 <option value="ALL">Semua Status</option>
+                <option value="PENDING">Menunggu Persetujuan</option>
                 <option value="APPROVED">Disetujui</option>
-                <option value="COMPLETED">Selesai</option>
-                <option value="PENDING">Menunggu</option>
+                <option value="COMPLETED">Selesai KBM</option>
               </select>
             </div>
           </div>
@@ -603,22 +642,22 @@ export const BadalManagement: React.FC = () => {
                     <th className="py-3 px-4">Tanggal</th>
                     <th className="py-3 px-4">Unit</th>
                     <th className="py-3 px-4">Mata Pelajaran & Sesi</th>
-                    <th className="py-3 px-4">Guru Utama</th>
+                    <th className="py-3 px-4">Guru Utama (Izin)</th>
+                    <th className="py-3 px-4">Jenis Izin & Keterangan</th>
                     <th className="py-3 px-4">Guru Badal</th>
-                    <th className="py-3 px-4">Alasan</th>
                     {isKepsek ? (
                       <th className="py-3 px-4 text-center">Beban (JP)</th>
                     ) : (
                       <th className="py-3 px-4 text-right">Kafa'ah</th>
                     )}
                     <th className="py-3 px-4 text-center">Status</th>
-                    {isKepsek && <th className="py-3 px-4 text-center w-24">Aksi</th>}
+                    <th className="py-3 px-4 text-center w-24">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-100 dark:divide-stone-800 text-stone-700 dark:text-stone-300">
                   {filteredBadal.length === 0 ? (
                     <tr>
-                      <td colSpan={isKepsek ? 9 : 8} className="py-12 text-center text-stone-400 dark:text-stone-500 font-medium">
+                      <td colSpan={isKepsek ? 9 : 9} className="py-12 text-center text-stone-400 dark:text-stone-500 font-medium">
                         Tidak ada catatan penugasan guru badal yang sesuai filter.
                       </td>
                     </tr>
@@ -639,7 +678,7 @@ export const BadalManagement: React.FC = () => {
                             <p className="font-semibold text-stone-900 dark:text-stone-100">{formatIndonesianDate(b.date)}</p>
                           </td>
                           <td className="py-3.5 px-4 whitespace-nowrap">
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-750 dark:text-stone-350 border border-stone-200/40">
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200/40">
                               {sched?.unit || 'SMP'}
                             </span>
                           </td>
@@ -648,24 +687,32 @@ export const BadalManagement: React.FC = () => {
                             <p className="text-[10px] text-stone-400 dark:text-stone-500 font-mono">
                               {sched?.className} • {sched?.startTime} - {sched?.endTime} ({jp} JP)
                             </p>
-                            {b.notes && (
-                              <p className="text-[10px] text-stone-500 dark:text-stone-400 italic mt-1 line-clamp-1">
-                                Amanah: "{b.notes}"
-                              </p>
-                            )}
                           </td>
                           <td className="py-3.5 px-4">
                             <p className="text-stone-800 dark:text-stone-200 font-medium">{origTeacher?.name || 'Guru Utama'}</p>
                             <span className="text-[10px] text-stone-400">{origTeacher?.position}</span>
                           </td>
-                          <td className="py-3.5 px-4">
-                            <p className="font-bold text-[#1B4332] dark:text-emerald-400">{badalTeacher?.name || 'Guru Badal'}</p>
-                            <span className="text-[10px] text-stone-400">{badalTeacher?.position}</span>
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <span className="text-[10px] font-bold text-stone-650 dark:text-stone-400 bg-stone-50 dark:bg-stone-850 border border-stone-200/50 dark:border-stone-800 px-2 py-0.5 rounded">
+                          <td className="py-3.5 px-4 max-w-xs">
+                            <span className="inline-block text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/50 dark:border-amber-800/40 px-2 py-0.5 rounded mb-1">
                               {b.reason}
                             </span>
+                            {b.notes && (
+                              <p className="text-[11px] text-stone-600 dark:text-stone-400 italic line-clamp-2">
+                                "{b.notes}"
+                              </p>
+                            )}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            {badalTeacher ? (
+                              <div>
+                                <p className="font-bold text-[#1B4332] dark:text-emerald-400">{badalTeacher.name}</p>
+                                <span className="text-[10px] text-stone-400">{badalTeacher.position}</span>
+                              </div>
+                            ) : (
+                              <span className="text-[11px] italic text-amber-600 dark:text-amber-400">
+                                Menunggu Penugasan
+                              </span>
+                            )}
                           </td>
                           {isKepsek ? (
                             <td className="py-3.5 px-4 text-center font-mono font-bold text-stone-800 dark:text-stone-200">
@@ -679,36 +726,34 @@ export const BadalManagement: React.FC = () => {
                           <td className="py-3.5 px-4 text-center whitespace-nowrap">
                             <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded ${
                               isApproved 
-                                ? 'bg-[#1B4332]/10 text-[#1B4332] border border-[#1B4332]/25' 
+                                ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50' 
                                 : isCompleted 
                                 ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200/40' 
-                                : 'bg-[#D97706]/10 text-[#D97706] border border-[#D97706]/25'
+                                : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/50'
                             }`}>
-                              {isApproved ? 'Disetujui' : isCompleted ? 'Selesai' : 'Menunggu'}
+                              {isApproved ? 'Disetujui Kepsek' : isCompleted ? 'Selesai KBM' : 'Menunggu Persetujuan'}
                             </span>
                           </td>
-                          {isKepsek && (
-                            <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                              <div className="inline-flex items-center gap-1.5">
-                                {isPending && (
-                                  <button
-                                    onClick={() => setBadalToApprove(b)}
-                                    title="Setujui Penugasan"
-                                    className="p-1.5 rounded bg-[#1B4332]/10 hover:bg-[#1B4332]/20 text-[#1B4332] transition-colors cursor-pointer"
-                                  >
-                                    <Check className="w-3.5 h-3.5" strokeWidth={2} />
-                                  </button>
-                                )}
+                          <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                            <div className="inline-flex items-center gap-1.5">
+                              {isPending && (
                                 <button
-                                  onClick={() => setBadalToCancel(b)}
-                                  title="Batalkan Penugasan"
-                                  className="p-1.5 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors cursor-pointer"
+                                  onClick={() => handleApprovePendingItem(b)}
+                                  title="Setujui & Tugaskan Badal"
+                                  className="p-1.5 rounded bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 transition-colors cursor-pointer border border-emerald-200/60"
                                 >
-                                  <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+                                  <Check className="w-3.5 h-3.5" strokeWidth={2} />
                                 </button>
-                              </div>
-                            </td>
-                          )}
+                              )}
+                              <button
+                                onClick={() => setBadalToCancel(b)}
+                                title="Batalkan Penugasan"
+                                className="p-1.5 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+                              </button>
+                            </div>
+                          </td>
                         </tr>
                       );
                     })
@@ -720,10 +765,9 @@ export const BadalManagement: React.FC = () => {
         </div>
       )}
 
-      {/* 5. CONTENT VIEW: SMART FINDER */}
+      {/* 6. CONTENT VIEW: SMART FINDER */}
       {isKepsek && activeTab === 'cari_guru' && (
         <div className="space-y-4 animate-in fade-in duration-200">
-          {/* Smart Finder Filter Control */}
           <div className="bg-white dark:bg-stone-900 p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
             <h3 className="text-xs font-bold text-stone-900 dark:text-stone-100 mb-4 flex items-center gap-2 uppercase tracking-wider">
               <UserCheck className="w-4 h-4 text-[#1B4332] dark:text-emerald-400" strokeWidth={1.5} />
@@ -837,8 +881,8 @@ export const BadalManagement: React.FC = () => {
         </div>
       )}
 
-      {/* 6. ADD BADAL ASSIGNMENT MODAL */}
-      {showAddModal && isKepsek && (
+      {/* 7. ADD MANUAL BADAL MODAL */}
+      {showAddModal && (isKepsek || isAdmin) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-2xs">
           <div className="bg-white dark:bg-stone-900 rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-stone-200 dark:border-stone-800">
             <div className="px-5 py-4 border-b border-stone-150 dark:border-stone-800 flex items-center justify-between">
@@ -988,7 +1032,111 @@ export const BadalManagement: React.FC = () => {
         </div>
       )}
 
-      {/* 7. MODAL KONFIRMASI SUBMIT PENUGASAN BADAL */}
+      {/* 8. MODAL KONFIRMASI APPROVAL DARI KEPSEK */}
+      {badalToApprove && (() => {
+        const sched = schedules.find(s => s.id === badalToApprove.badal.scheduleId);
+        const origTeacher = teachers.find(t => t.id === badalToApprove.badal.originalTeacherId);
+        const badalTeacher = teachers.find(t => t.id === badalToApprove.badalTeacherId);
+
+        return (
+          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-stone-950/50 backdrop-blur-2xs animate-in fade-in duration-150">
+            <div className="bg-white dark:bg-stone-900 rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-stone-200 dark:border-stone-800">
+              <div className="p-5 border-b border-stone-150 dark:border-stone-800 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-[#1B4332]/10 text-[#1B4332] dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <Check className="w-4 h-4" strokeWidth={2} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100">
+                      Persetujuan Izin & Penugasan Badal
+                    </h3>
+                    <p className="text-[11px] text-stone-500">
+                      Konfirmasi pengesahan izin guru dan guru pengganti
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setBadalToApprove(null)}
+                  className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 p-1 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer"
+                >
+                  <X className="w-4 h-4" strokeWidth={1.5} />
+                </button>
+              </div>
+
+              <div className="p-5 space-y-4 text-xs">
+                <div className="bg-stone-50 dark:bg-stone-800/60 rounded-xl p-3.5 border border-stone-200/70 dark:border-stone-700/60 space-y-2.5">
+                  <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
+                    <span className="text-stone-500 dark:text-stone-400">Tanggal KBM:</span>
+                    <span className="font-semibold text-stone-900 dark:text-stone-100 font-mono">
+                      {formatIndonesianDate(badalToApprove.badal.date)}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
+                    <span className="text-stone-500 dark:text-stone-400">Guru Utama (Izin):</span>
+                    <span className="font-semibold text-stone-900 dark:text-stone-100">
+                      {origTeacher?.name} ({origTeacher?.position})
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
+                    <span className="text-stone-500 dark:text-stone-400">Jenis Izin:</span>
+                    <span className="font-bold text-amber-700 dark:text-amber-400">
+                      {badalToApprove.badal.reason}
+                    </span>
+                  </div>
+
+                  {badalToApprove.badal.notes && (
+                    <div className="pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
+                      <span className="text-stone-500 dark:text-stone-400 block mb-0.5">Keterangan / Alasan:</span>
+                      <p className="text-stone-700 dark:text-stone-300 italic font-sans">
+                        "{badalToApprove.badal.notes}"
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
+                    <span className="text-stone-500 dark:text-stone-400">Mapel & Sesi:</span>
+                    <span className="font-medium text-stone-800 dark:text-stone-200">
+                      {sched?.subject} ({sched?.className}) • {sched?.startTime}-{sched?.endTime} ({sched?.hours || 2} JP)
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-stone-500 dark:text-stone-400">Guru Badal Pengganti:</span>
+                    <span className="font-bold text-[#1B4332] dark:text-emerald-400">
+                      {badalTeacher?.name || 'Belum dipilih'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-900/40 rounded-lg p-3 text-[11px] text-emerald-800 dark:text-emerald-300 leading-relaxed">
+                  Setelah disetujui, penugasan ini akan otomatis masuk ke jadwal presensi guru pengganti dan dapat dimonitor oleh Admin.
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setBadalToApprove(null)}
+                    className="px-4 py-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer font-medium"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExecuteApprove}
+                    className="px-4 py-2 rounded-lg bg-[#1B4332] hover:bg-[#143326] text-white font-semibold shadow-xs cursor-pointer"
+                  >
+                    Ya, Setujui & Tetapkan
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* 9. MODAL KONFIRMASI SUBMIT MANUAL BADAL */}
       {showSubmitConfirm && (() => {
         const sched = schedules.find(s => s.id === selectedScheduleId);
         const origTeacher = teachers.find(t => t.id === selectedOriginalTeacherId);
@@ -1036,13 +1184,6 @@ export const BadalManagement: React.FC = () => {
                   </div>
 
                   <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
-                    <span className="text-stone-500 dark:text-stone-400">Waktu & Durasi:</span>
-                    <span className="font-semibold text-stone-900 dark:text-stone-100 font-mono">
-                      {sched?.startTime} - {sched?.endTime} ({sched?.hours} JP)
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
                     <span className="text-stone-500 dark:text-stone-400">Guru Berhalangan:</span>
                     <span className="font-medium text-stone-700 dark:text-stone-300">
                       {origTeacher?.name || 'Guru Utama'}
@@ -1057,24 +1198,11 @@ export const BadalManagement: React.FC = () => {
                   </div>
 
                   <div className="flex justify-between items-center">
-                    <span className="text-stone-500 dark:text-stone-400">Alasan Penugasan:</span>
+                    <span className="text-stone-500 dark:text-stone-400">Alasan:</span>
                     <span className="font-medium text-stone-800 dark:text-stone-200">
                       {reason}
                     </span>
                   </div>
-
-                  {notes && (
-                    <div className="pt-2 border-t border-stone-200/50 dark:border-stone-700/50">
-                      <span className="text-stone-500 dark:text-stone-400 block mb-0.5">Catatan / Amanah:</span>
-                      <p className="text-stone-700 dark:text-stone-300 italic font-sans bg-white dark:bg-stone-900 p-2 rounded border border-stone-200/50 dark:border-stone-700/50">
-                        "{notes}"
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-900/40 rounded-lg p-3 text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
-                  Setelah dikonfirmasi, penugasan ini akan otomatis masuk ke jadwal KBM guru pengganti dan siap dilakukan presensi mengajar.
                 </div>
 
                 <div className="flex items-center justify-end gap-2 pt-2">
@@ -1099,11 +1227,10 @@ export const BadalManagement: React.FC = () => {
         );
       })()}
 
-      {/* 8. MODAL KONFIRMASI PEMBATALAN PENUGASAN BADAL */}
+      {/* 10. MODAL KONFIRMASI PEMBATALAN BADAL */}
       {badalToCancel && (() => {
         const sched = schedules.find(s => s.id === badalToCancel.scheduleId);
         const origTeacher = teachers.find(t => t.id === badalToCancel.originalTeacherId);
-        const badalTeacher = teachers.find(t => t.id === badalToCancel.badalTeacherId);
 
         return (
           <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-stone-950/50 backdrop-blur-2xs animate-in fade-in duration-150">
@@ -1115,10 +1242,10 @@ export const BadalManagement: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                      Batalkan Penugasan Guru Badal?
+                      Batalkan Penugasan / Pengajuan Badal?
                     </h3>
                     <p className="text-[11px] text-stone-500">
-                      Konfirmasi pembatalan jadwal guru pengganti
+                      Konfirmasi pembatalan catatan penugasan guru pengganti
                     </p>
                   </div>
                 </div>
@@ -1140,13 +1267,6 @@ export const BadalManagement: React.FC = () => {
                   </div>
 
                   <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
-                    <span className="text-stone-500 dark:text-stone-400">Mapel & Sesi:</span>
-                    <span className="font-semibold text-stone-900 dark:text-stone-100">
-                      {sched?.subject} ({sched?.className}) • {sched?.startTime}-{sched?.endTime}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
                     <span className="text-stone-500 dark:text-stone-400">Guru Utama:</span>
                     <span className="font-medium text-stone-700 dark:text-stone-300">
                       {origTeacher?.name || 'Guru Utama'}
@@ -1154,15 +1274,15 @@ export const BadalManagement: React.FC = () => {
                   </div>
 
                   <div className="flex justify-between items-center">
-                    <span className="text-stone-500 dark:text-stone-400">Guru Badal:</span>
-                    <span className="font-bold text-rose-600 dark:text-rose-400">
-                      {badalTeacher?.name || 'Guru Badal'}
+                    <span className="text-stone-500 dark:text-stone-400">Mata Pelajaran:</span>
+                    <span className="font-semibold text-stone-900 dark:text-stone-100">
+                      {sched?.subject} ({sched?.className})
                     </span>
                   </div>
                 </div>
 
                 <div className="bg-rose-50 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40 rounded-lg p-3 text-[11px] text-rose-800 dark:text-rose-300 leading-relaxed">
-                  Peringatan: Jadwal pengganti ini akan dihapus dari antrean KBM guru badal dan perhitungan honor mengajar badal akan dibatalkan.
+                  Peringatan: Catatan penugasan ini akan dihapus dari antrean dan jadwal guru pengganti.
                 </div>
 
                 <div className="flex items-center justify-end gap-2 pt-2">
@@ -1178,65 +1298,7 @@ export const BadalManagement: React.FC = () => {
                     onClick={handleConfirmCancel}
                     className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-semibold shadow-xs cursor-pointer"
                   >
-                    Ya, Batalkan Penugasan
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* 9. MODAL KONFIRMASI PERSETUJUAN PENUGASAN BADAL */}
-      {badalToApprove && (() => {
-        const sched = schedules.find(s => s.id === badalToApprove.scheduleId);
-        const origTeacher = teachers.find(t => t.id === badalToApprove.originalTeacherId);
-        const badalTeacher = teachers.find(t => t.id === badalToApprove.badalTeacherId);
-
-        return (
-          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-stone-950/50 backdrop-blur-2xs animate-in fade-in duration-150">
-            <div className="bg-white dark:bg-stone-900 rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-stone-200 dark:border-stone-800">
-              <div className="p-5 border-b border-stone-150 dark:border-stone-800 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-[#1B4332]/10 text-[#1B4332] dark:text-emerald-400 flex items-center justify-center shrink-0">
-                    <Check className="w-4 h-4" strokeWidth={2} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                      Setujui Penugasan Badal
-                    </h3>
-                    <p className="text-[11px] text-stone-500">
-                      Konfirmasi persetujuan guru pengganti KBM
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setBadalToApprove(null)}
-                  className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 p-1 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer"
-                >
-                  <X className="w-4 h-4" strokeWidth={1.5} />
-                </button>
-              </div>
-
-              <div className="p-5 space-y-4 text-xs">
-                <p className="text-stone-600 dark:text-stone-400 leading-relaxed">
-                  Apakah Anda yakin ingin menyetujui penugasan <strong>{badalTeacher?.name}</strong> untuk menggantikan <strong>{origTeacher?.name}</strong> pada mata pelajaran <strong>{sched?.subject} ({sched?.className})</strong>?
-                </p>
-
-                <div className="flex items-center justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setBadalToApprove(null)}
-                    className="px-4 py-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer font-medium"
-                  >
-                    Batal
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleConfirmApprove}
-                    className="px-4 py-2 rounded-lg bg-[#1B4332] hover:bg-[#143326] text-white font-semibold shadow-xs cursor-pointer"
-                  >
-                    Ya, Setujui
+                    Ya, Batalkan
                   </button>
                 </div>
               </div>

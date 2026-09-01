@@ -239,6 +239,18 @@ export const useGuruNotifications = () => {
     deviceNotificationService.getPermission()
   );
 
+  // Auto request permission on mobile/browser when opened if default
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+      const timer = setTimeout(() => {
+        deviceNotificationService.requestPermission().then((perm) => {
+          setDevicePermission(perm);
+        }).catch(() => {});
+      }, 1200);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   // Automatically trigger native OS notification on Phone / Tablet / Desktop
   useEffect(() => {
     if (activeDeviceAlerts.length > 0) {

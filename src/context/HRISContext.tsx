@@ -15,6 +15,8 @@ import {
   AuditSeverity,
   LearningNeedRequest,
   LearningNeedStatus,
+  GeofenceSettings,
+  DEFAULT_GEOFENCE_SETTINGS,
   isKepsekRole,
   getRoleUnit,
   getRoleDisplayName,
@@ -61,8 +63,8 @@ interface HRISContextType {
   markAttendanceDirect: (scheduleId: string, teacherId: string, status: AttendanceRecord['status'], notes?: string) => void;
   
   // Guru Badal
-  createBadalAssignment: (data: Omit<BadalAssignment, 'id' | 'createdAt' | 'status'>) => void;
-  approveBadalAssignment: (badalId: string) => void;
+  createBadalAssignment: (data: Omit<BadalAssignment, 'id' | 'createdAt'> & { id?: string; status?: 'PENDING' | 'APPROVED' | 'COMPLETED'; createdAt?: string }) => void;
+  approveBadalAssignment: (badalId: string, badalTeacherId?: string) => void;
   deleteBadalAssignment: (badalId: string) => void;
   
   // Master Data
@@ -95,6 +97,10 @@ interface HRISContextType {
   updateLearningNeedRequestStatus: (id: string, status: LearningNeedStatus, adminComment?: string) => void;
   deleteLearningNeedRequest: (id: string) => void;
 
+  // Geofence & Location Settings
+  geofenceSettings: GeofenceSettings;
+  updateGeofenceSettings: (settings: Partial<GeofenceSettings>) => Promise<boolean>;
+
   // Reset & Sync
   refreshData: () => Promise<void>;
   isLoading: boolean;
@@ -120,6 +126,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [badalAssignments, setBadalAssignments] = useState<BadalAssignment[]>([]);
   const [learningNeedRequests, setLearningNeedRequests] = useState<LearningNeedRequest[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
+  const [geofenceSettings, setGeofenceSettings] = useState<GeofenceSettings>(DEFAULT_GEOFENCE_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
 
   // Derived current user object - with array check safety
@@ -167,22 +174,24 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchAllData = async () => {
     setIsLoading(true);
     try {
-      const [tRes, sRes, aRes, bRes, lRes, lnRes] = await Promise.all([
+      const [tRes, sRes, aRes, bRes, lRes, lnRes, gRes] = await Promise.all([
         fetch('/api/teachers'),
         fetch('/api/schedules'),
         fetch('/api/attendances'),
         fetch('/api/badal'),
         fetch('/api/audit-logs'),
-        fetch('/api/learning-needs')
+        fetch('/api/learning-needs'),
+        fetch('/api/settings/geofence')
       ]);
 
-      const [t, s, a, b, l, ln] = await Promise.all([
+      const [t, s, a, b, l, ln, g] = await Promise.all([
         tRes.json(),
         sRes.json(),
         aRes.json(),
         bRes.json(),
         lRes.ok ? lRes.json() : [],
-        lnRes.json()
+        lnRes.json(),
+        gRes.ok ? gRes.json() : null
       ]);
 
       if (t.length === 0) {
@@ -197,6 +206,20 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLearningNeedRequests(Array.isArray(ln) ? ln : []);
       if (Array.isArray(l) && l.length > 0) {
         setAuditLogs(l);
+      }
+      if (g && g.latitude !== undefined && g.longitude !== undefined) {
+        setGeofenceSettings({
+          id: g.id || 'default_geofence',
+          name: g.name || "Baitul Qur'an Al-Ikhwan Central Campus",
+          latitude: Number(g.latitude),
+          longitude: Number(g.longitude),
+          radiusMeters: Number(g.radiusMeters || 150),
+          strictMode: g.strictMode !== undefined ? Boolean(g.strictMode) : true,
+          enableMockBypass: g.enableMockBypass !== undefined ? Boolean(g.enableMockBypass) : true,
+          addressNotes: g.addressNotes || '',
+          updatedAt: g.updatedAt || new Date().toISOString(),
+          updatedBy: g.updatedBy || 'Administrator',
+        });
       }
     } catch (error) {
       console.error('Failed to fetch data', error);
@@ -309,7 +332,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
     
     // Trigger path change based on role
-    if (role === 'GURU') setCurrentPath('/dashboard/guru/clockin');
+    if (role === 'GURU') setCurrentPath('/dashboard/guru');
     else if (role === 'ADMIN') setCurrentPath('/dashboard/admin');
     else if (isKepsekRole(role)) setCurrentPath('/dashboard/kepsek/audit');
 
@@ -562,43 +585,101 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Guru Badal Handlers
-  const createBadalAssignment = (data: Omit<BadalAssignment, 'id' | 'createdAt' | 'status'>) => {
+  const createBadalAssignment = (data: Omit<BadalAssignment, 'id' | 'createdAt'> & { id?: string; status?: 'PENDING' | 'APPROVED' | 'COMPLETED'; createdAt?: string }) => {
     const newBadal: BadalAssignment = {
       ...data,
-      id: `BDL-${Date.now()}`,
-      status: 'APPROVED',
-      createdAt: new Date().toISOString(),
+      id: data.id || `BDL-${Date.now()}`,
+      status: data.status || 'APPROVED',
+      badalTeacherId: data.badalTeacherId || '',
+      createdAt: data.createdAt || new Date().toISOString(),
     };
+
+    setBadalAssignments(prev => [newBadal, ...prev.filter(b => b.id !== newBadal.id)]);
+
     fetch('/api/badal', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newBadal)
-    }).then(() => fetchAllData());
+    }).then(() => fetchAllData()).catch(err => {
+      console.error('Failed to save badal to server:', err);
+    });
 
     const orig = teachers.find(t => t.id === data.originalTeacherId)?.name || data.originalTeacherId;
-    const badal = teachers.find(t => t.id === data.badalTeacherId)?.name || data.badalTeacherId;
+    const badal = teachers.find(t => t.id === data.badalTeacherId)?.name || (data.badalTeacherId ? data.badalTeacherId : 'Menunggu Penetapan Kepsek');
+    
     logActivity(
       'ASSIGN_BADAL',
       'BADAL',
-      `Penugasan Badal Baru: ${badal} menggantikan ${orig} (${data.reason})`,
-      'WARNING'
+      newBadal.status === 'PENDING'
+        ? `Pengajuan Izin Guru: ${orig} (${data.reason}) - Menunggu Persetujuan & Penugasan Badal oleh Kepala Sekolah`
+        : `Penugasan Badal Baru: ${badal} menggantikan ${orig} (${data.reason})`,
+      newBadal.status === 'PENDING' ? 'WARNING' : 'INFO'
     );
   };
 
-  const approveBadalAssignment = (badalId: string) => {
+  const approveBadalAssignment = (badalId: string, assignedBadalTeacherId?: string) => {
+    const patchBody: { status: 'APPROVED'; badalTeacherId?: string } = { status: 'APPROVED' };
+    if (assignedBadalTeacherId) {
+      patchBody.badalTeacherId = assignedBadalTeacherId;
+    }
+
+    setBadalAssignments(prev =>
+      prev.map(b => (b.id === badalId ? { ...b, ...patchBody } : b))
+    );
+
+    // Also update or insert attendance for this schedule to enable badal teacher clock-in
+    const targetBadal = badalAssignments.find(b => b.id === badalId);
+    if (targetBadal) {
+      const finalBadalTeacherId = assignedBadalTeacherId || targetBadal.badalTeacherId;
+      if (finalBadalTeacherId) {
+        const existingAtt = attendances.find(a => a.scheduleId === targetBadal.scheduleId && a.date === targetBadal.date);
+        const updatedAtt: AttendanceRecord = existingAtt ? {
+          ...existingAtt,
+          actualTeacherId: finalBadalTeacherId,
+          isBadal: true,
+          status: 'GURU_BADAL'
+        } : {
+          id: `ATT-BDL-${Date.now()}`,
+          scheduleId: targetBadal.scheduleId,
+          teacherId: targetBadal.originalTeacherId,
+          actualTeacherId: finalBadalTeacherId,
+          isBadal: true,
+          date: targetBadal.date,
+          lateMinutes: 0,
+          lateCategory: 'TEPAT_WAKTU',
+          latePenalty: 0,
+          status: 'GURU_BADAL'
+        };
+
+        setAttendances(prev => [
+          updatedAtt,
+          ...prev.filter(a => !(a.scheduleId === targetBadal.scheduleId && a.date === targetBadal.date))
+        ]);
+
+        fetch('/api/attendances', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedAtt)
+        }).catch(err => console.error('Failed to sync badal attendance:', err));
+      }
+    }
+
     fetch(`/api/badal/${badalId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'APPROVED' })
+      body: JSON.stringify(patchBody)
     }).then(() => {
       fetchAllData();
-      toast.success('Penugasan guru badal berhasil disetujui');
+      toast.success('Pengajuan izin disetujui & Guru Badal berhasil ditugaskan');
+    }).catch(err => {
+      console.error('Failed to approve badal:', err);
     });
 
+    const bTeacher = teachers.find(t => t.id === (assignedBadalTeacherId || targetBadal?.badalTeacherId));
     logActivity(
       'APPROVE_BADAL',
       'BADAL',
-      `Persetujuan penugasan badal ID ${badalId} oleh ${currentUser.name}`,
+      `Persetujuan Pengajuan Izin & Penugasan Guru Badal (Pengganti: ${bTeacher?.name || 'Asatidz'}) oleh ${currentUser.name}`,
       'INFO'
     );
   };
@@ -1088,6 +1169,52 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateGeofenceSettings = async (settingsUpdate: Partial<GeofenceSettings>): Promise<boolean> => {
+    const merged: GeofenceSettings = {
+      ...geofenceSettings,
+      ...settingsUpdate,
+      updatedAt: new Date().toISOString(),
+      updatedBy: currentUser?.name || 'Administrator',
+    };
+
+    // Optimistically update
+    setGeofenceSettings(merged);
+
+    try {
+      const res = await fetch('/api/settings/geofence', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(merged),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to save geofence settings');
+      }
+
+      const saved = await res.json();
+      setGeofenceSettings({
+        id: saved.id || 'default_geofence',
+        name: saved.name || merged.name,
+        latitude: Number(saved.latitude),
+        longitude: Number(saved.longitude),
+        radiusMeters: Number(saved.radiusMeters),
+        strictMode: Boolean(saved.strictMode),
+        enableMockBypass: Boolean(saved.enableMockBypass),
+        addressNotes: saved.addressNotes || '',
+        updatedAt: saved.updatedAt || new Date().toISOString(),
+        updatedBy: saved.updatedBy || currentUser?.name || 'Administrator',
+      });
+
+      toast.success('Pengaturan Geofence & Titik GPS berhasil disimpan ke database!');
+      return true;
+    } catch (error) {
+      console.error('Error updating geofence settings:', error);
+      toast.error('Gagal menyimpan pengaturan lokasi ke database');
+      fetchAllData();
+      return false;
+    }
+  };
+
   const resetToDefault = () => {
     logActivity(
       'RESET_DATABASE',
@@ -1111,6 +1238,8 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         badalAssignments,
         auditLogs,
         learningNeedRequests,
+        geofenceSettings,
+        updateGeofenceSettings,
         currentUser,
         currentRole,
         selectedPeriod,

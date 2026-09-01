@@ -215,3 +215,30 @@ export interface LearningNeedRequest {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface GeofenceSettings {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  radiusMeters: number;
+  strictMode: boolean;
+  enableMockBypass: boolean;
+  addressNotes?: string;
+  updatedAt?: string;
+  updatedBy?: string;
+}
+
+export const DEFAULT_GEOFENCE_SETTINGS: GeofenceSettings = {
+  id: 'default_geofence',
+  name: "Baitul Qur'an Al-Ikhwan Central Campus",
+  latitude: -6.589250,
+  longitude: 106.792880,
+  radiusMeters: 150,
+  strictMode: true,
+  enableMockBypass: true,
+  addressNotes: "Jl. KH. Al-Ikhwan No. 09, Gerbang Utama & Area Gedung KBM",
+  updatedAt: new Date().toISOString(),
+  updatedBy: "Administrator"
+};
+

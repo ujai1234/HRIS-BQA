@@ -18,6 +18,7 @@ import { RegisterPage } from './auth/RegisterPage';
 import { ForgotPasswordPage } from './auth/ForgotPasswordPage';
 import { Page404 } from './pages/Page404';
 import { Page500 } from './pages/Page500';
+import { BrandLogo } from './BrandLogo';
 
 export const LoginPage: React.FC = () => {
   const { login, isDarkMode, toggleDarkMode } = useHRIS();
@@ -27,7 +28,6 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [logoState, setLogoState] = useState<'jpeg' | 'jpg' | 'png' | 'fallback'>('jpeg');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,28 +127,10 @@ export const LoginPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Main Brand Section - Proportional Logo & Islamic Modern Typography */}
+      {/* Main Brand Section - Proportional Transparent Prominent Logo & Islamic Modern Typography */}
       <div className="flex flex-col items-center text-center mb-6 max-w-md w-full">
-        <div className="mb-3 relative group">
-          {logoState !== 'fallback' ? (
-            <div className="w-20 h-20 sm:w-24 sm:h-24 p-2 bg-white dark:bg-emerald-950/60 rounded-2xl shadow-md border border-emerald-900/10 dark:border-emerald-700/30 flex items-center justify-center transition-transform duration-300 hover:scale-105">
-              <img 
-                src={logoState === 'jpeg' ? '/logo.jpeg' : (logoState === 'jpg' ? '/logo.jpg' : '/logo.png')} 
-                alt="Logo Baitul Qur'an Al-Ikhwan" 
-                className="w-full h-full object-contain"
-                onError={() => {
-                  if (logoState === 'jpeg') setLogoState('jpg');
-                  else if (logoState === 'jpg') setLogoState('png');
-                  else setLogoState('fallback');
-                }}
-                referrerPolicy="no-referrer"
-              />
-            </div>
-          ) : (
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-emerald-800 text-emerald-100 flex items-center justify-center font-bold text-2xl tracking-widest shadow-md">
-              BQA
-            </div>
-          )}
+        <div className="mb-4 relative group">
+          <BrandLogo size="xl" className="transition-transform duration-300 hover:scale-105 filter drop-shadow-xl" />
         </div>
 
         {/* Islamic Greeting / Bismillah */}
