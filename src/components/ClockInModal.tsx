@@ -11,7 +11,7 @@ import {
 import confetti from 'canvas-confetti';
 import { ClassSchedule, Teacher } from '../types';
 import { useHRIS } from '../context/HRISContext';
-import { calculateLatePenalty, getLateCategoryLabel } from '../utils/formatters';
+import { calculateLatePenalty, getLateCategoryLabel, validateScheduleTimeWindow } from '../utils/formatters';
 import { validateAttendanceLocation, LocationValidationResult } from '../utils/geoUtils';
 
 interface ClockInModalProps {
@@ -27,10 +27,13 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const { clockIn, currentUser, teachers, badalAssignments, geofenceSettings } = useHRIS();
+  const { clockIn, currentUser, teachers, badalAssignments, geofenceSettings, attendances } = useHRIS();
   const effectiveTeacher = teacher || currentUser;
 
   const todayStr = new Date().toISOString().split('T')[0];
+  const existingAtt = attendances.find(a => a.scheduleId === schedule.id && a.date === todayStr);
+  const isAlreadyClockedIn = !!existingAtt && (existingAtt.status === 'SELESAI' || existingAtt.status === 'HADIR_JURNAL_KOSONG' || existingAtt.status === 'IZIN' || existingAtt.status === 'SAKIT');
+
   const activeBadal = badalAssignments.find(
     (b) => b.scheduleId === schedule.id && (b.date === todayStr || !b.date) && (b.status === 'APPROVED' || b.status === 'COMPLETED')
   );
@@ -122,10 +125,14 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
   );
   const categoryInfo = getLateCategoryLabel(penaltyCalculation.category);
 
-  // Must have active GPS and be within Pesantren radius
+  // Schedule time window validation
+  const timeValidation = validateScheduleTimeWindow(schedule, currentTime);
+
+  // Must have active GPS and be within Pesantren radius AND within schedule time window
   const isGpsRequiredMissing = !hasGps || isLocating;
   const isOutsideRadius = hasGps && !locationValidation.isValid;
-  const isBlocked = isGpsRequiredMissing || isOutsideRadius;
+  const isOutsideTimeWindow = !timeValidation.canClockIn;
+  const isBlocked = isGpsRequiredMissing || isOutsideRadius || isAlreadyClockedIn || isOutsideTimeWindow;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,17 +216,40 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
             </div>
           )}
 
-          {/* Time Display */}
-          <div className="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-3 text-center border border-slate-200/70 dark:border-slate-800">
-            <span className="text-[11px] text-slate-400 dark:text-slate-500 block">
-              Waktu Presensi
+          {/* Time Display & Window Validation */}
+          <div className={`rounded-xl p-3.5 text-center border transition-all ${
+            timeValidation.canClockIn
+              ? 'bg-slate-50 dark:bg-[#0f1b16] border-slate-200/80 dark:border-emerald-900/40'
+              : 'bg-rose-50/70 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/50'
+          }`}>
+            <span className="text-[11px] text-slate-400 dark:text-slate-400 block font-medium">
+              Waktu Presensi Sekarang
             </span>
-            <div className="text-2xl font-mono font-semibold text-slate-900 dark:text-slate-100 mt-0.5 tracking-tight">
+            <div className={`text-2xl font-mono font-bold mt-0.5 tracking-tight ${
+              timeValidation.canClockIn
+                ? 'text-slate-900 dark:text-emerald-50'
+                : 'text-rose-700 dark:text-rose-300'
+            }`}>
               {liveSecondsTime}
             </div>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">
-              Jadwal: {schedule.startTime} WIB
-            </span>
+            
+            <div className="flex items-center justify-center gap-2 text-xs mt-2 pt-2 border-t border-slate-200/60 dark:border-emerald-900/30">
+              <span className="text-slate-500 dark:text-slate-400">
+                Waktu Sesi: <strong>{schedule.startTime} - {schedule.endTime} WIB</strong>
+              </span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-[#1a2d24] text-slate-700 dark:text-emerald-300 font-semibold">
+                Buka: {timeValidation.allowedStartTime} WIB
+              </span>
+            </div>
+
+            {!timeValidation.canClockIn && (
+              <div className="mt-2.5 p-2 rounded-lg bg-rose-100/70 dark:bg-rose-900/40 border border-rose-200 dark:border-rose-800/60 text-left flex items-start gap-2 text-xs text-rose-800 dark:text-rose-200">
+                <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+                <p className="leading-tight text-[11px]">
+                  <strong>Di Luar Waktu Yang Ditetapkan:</strong> {timeValidation.message}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Location / GPS Mandatory Section */}
@@ -351,11 +381,19 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
             >
               {isSubmitting 
                 ? 'Memproses...' 
-                : isGpsRequiredMissing 
-                  ? 'Nyalakan GPS HP' 
-                  : isOutsideRadius 
-                    ? 'Di Luar Wilayah Pesantren' 
-                    : 'Konfirmasi Absen'}
+                : isAlreadyClockedIn
+                  ? 'Presensi Sudah Selesai'
+                  : !timeValidation.canClockIn
+                    ? timeValidation.status === 'TOO_EARLY'
+                      ? `Belum Waktunya (Buka ${timeValidation.allowedStartTime})`
+                      : timeValidation.status === 'EXPIRED'
+                        ? 'Waktu Absen Telah Berakhir'
+                        : `Jadwal Hari ${schedule.dayOfWeek}`
+                    : isGpsRequiredMissing 
+                      ? 'Nyalakan GPS HP' 
+                      : isOutsideRadius 
+                        ? 'Di Luar Wilayah Pesantren' 
+                        : 'Konfirmasi Absen'}
             </button>
           </div>
         </form>

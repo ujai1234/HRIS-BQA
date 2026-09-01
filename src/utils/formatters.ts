@@ -105,6 +105,117 @@ export function getLateCategoryLabel(category: LateCategory): { label: string; c
   }
 }
 
+export type ScheduleTimeStatus = 'OPEN' | 'NOT_TODAY' | 'TOO_EARLY' | 'EXPIRED';
+
+export interface ScheduleTimeValidation {
+  status: ScheduleTimeStatus;
+  canClockIn: boolean;
+  message: string;
+  allowedStartTime: string;
+  allowedEndTime: string;
+  minutesDiff?: number;
+}
+
+export function getTodayIndonesianDayName(dateObj: Date = new Date()): string {
+  const dayIndex = dateObj.getDay();
+  const map: Record<number, string> = {
+    0: 'Ahad',
+    1: 'Senin',
+    2: 'Selasa',
+    3: 'Rabu',
+    4: 'Kamis',
+    5: 'Jumat',
+    6: 'Sabtu',
+  };
+  return map[dayIndex] || 'Senin';
+}
+
+/**
+ * Validates if the current time and day are within the designated schedule time window.
+ * Buffer: 15 minutes before startTime up to endTime.
+ */
+export function validateScheduleTimeWindow(
+  schedule: { dayOfWeek: string; startTime: string; endTime: string },
+  currentTimeStr?: string,
+  referenceDate: Date = new Date()
+): ScheduleTimeValidation {
+  const currentDayName = getTodayIndonesianDayName(referenceDate);
+
+  // Normalize comparison for Ahad / Minggu
+  const schedDay = schedule.dayOfWeek === 'Minggu' ? 'Ahad' : schedule.dayOfWeek;
+  const todayDay = currentDayName === 'Minggu' ? 'Ahad' : currentDayName;
+
+  // 1. Day of week check
+  if (schedDay !== todayDay) {
+    return {
+      status: 'NOT_TODAY',
+      canClockIn: false,
+      message: `Jadwal hari ${schedule.dayOfWeek}. Hanya dapat diabsen pada hari ${schedule.dayOfWeek}.`,
+      allowedStartTime: schedule.startTime,
+      allowedEndTime: schedule.endTime,
+    };
+  }
+
+  // 2. Parse schedule start and end time
+  const [schedStartH, schedStartM] = schedule.startTime.split(':').map(Number);
+  const [schedEndH, schedEndM] = schedule.endTime.split(':').map(Number);
+
+  const schedStartMinutes = schedStartH * 60 + schedStartM;
+  const schedEndMinutes = schedEndH * 60 + schedEndM;
+
+  // Allowed early window: 15 minutes before start
+  const earlyBufferMinutes = 15;
+  const allowedStartMinutes = Math.max(0, schedStartMinutes - earlyBufferMinutes);
+
+  const allowedStartH = Math.floor(allowedStartMinutes / 60);
+  const allowedStartM = allowedStartMinutes % 60;
+  const allowedStartTimeStr = `${String(allowedStartH).padStart(2, '0')}:${String(allowedStartM).padStart(2, '0')}`;
+
+  // 3. Parse current time
+  let currentTotalMinutes: number;
+  if (currentTimeStr) {
+    const [curH, curM] = currentTimeStr.split(':').map(Number);
+    currentTotalMinutes = curH * 60 + curM;
+  } else {
+    currentTotalMinutes = referenceDate.getHours() * 60 + referenceDate.getMinutes();
+  }
+
+  // Check if too early
+  if (currentTotalMinutes < allowedStartMinutes) {
+    const minutesLeft = allowedStartMinutes - currentTotalMinutes;
+    return {
+      status: 'TOO_EARLY',
+      canClockIn: false,
+      message: `Belum masuk waktu absensi. Dibuka pukul ${allowedStartTimeStr} WIB (${minutesLeft} menit lagi).`,
+      allowedStartTime: allowedStartTimeStr,
+      allowedEndTime: schedule.endTime,
+      minutesDiff: minutesLeft,
+    };
+  }
+
+  // Check if expired / passed session end time
+  if (currentTotalMinutes > schedEndMinutes) {
+    const minutesPassed = currentTotalMinutes - schedEndMinutes;
+    return {
+      status: 'EXPIRED',
+      canClockIn: false,
+      message: `Waktu absensi telah berakhir (Sesi KBM selesai pukul ${schedule.endTime} WIB).`,
+      allowedStartTime: allowedStartTimeStr,
+      allowedEndTime: schedule.endTime,
+      minutesDiff: minutesPassed,
+    };
+  }
+
+  // Valid and open
+  return {
+    status: 'OPEN',
+    canClockIn: true,
+    message: `Waktu absensi aktif (${schedule.startTime} - ${schedule.endTime} WIB).`,
+    allowedStartTime: allowedStartTimeStr,
+    allowedEndTime: schedule.endTime,
+  };
+}
+
 export function terbilang(n: number): string {
   if (n < 0) return 'Minus ' + terbilang(Math.abs(n));
   if (n === 0) return 'Nol Rupiah';

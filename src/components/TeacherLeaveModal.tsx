@@ -28,6 +28,8 @@ export const TeacherLeaveModal: React.FC<TeacherLeaveModalProps> = ({
   const { 
     currentUser, 
     schedules, 
+    attendances,
+    badalAssignments,
     markAttendanceDirect, 
     createBadalAssignment,
     logActivity 
@@ -53,6 +55,27 @@ export const TeacherLeaveModal: React.FC<TeacherLeaveModalProps> = ({
     return schedules.filter(s => s.teacherId === currentUser.id && s.dayOfWeek === dayName);
   }, [schedules, currentUser.id, dayName]);
 
+  // Helper to check if a schedule on selectedDate is already processed (attended, permitted, or has badal)
+  const getScheduleStatusOnDate = (scheduleId: string) => {
+    const existingAtt = attendances.find(a => a.scheduleId === scheduleId && a.date === selectedDate);
+    const existingBadal = badalAssignments.find(b => b.scheduleId === scheduleId && (b.date === selectedDate || !b.date));
+    
+    if (existingAtt) {
+      if (existingAtt.status === 'SELESAI') return { isLocked: true, label: 'Jurnal Selesai (Terkunci)' };
+      if (existingAtt.status === 'HADIR_JURNAL_KOSONG') return { isLocked: true, label: 'Sudah Presensi Masuk' };
+      if (existingAtt.status === 'IZIN') return { isLocked: true, label: 'Izin Sudah Tercatat' };
+      if (existingAtt.status === 'SAKIT') return { isLocked: true, label: 'Sakit Sudah Tercatat' };
+    }
+    if (existingBadal) {
+      return { isLocked: true, label: `Pengajuan Badal (${existingBadal.status})` };
+    }
+    return { isLocked: false, label: 'Tersedia' };
+  };
+
+  const availableSchedules = useMemo(() => {
+    return mySchedulesOnDate.filter(s => !getScheduleStatusOnDate(s.id).isLocked);
+  }, [mySchedulesOnDate, attendances, badalAssignments, selectedDate]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,13 +92,22 @@ export const TeacherLeaveModal: React.FC<TeacherLeaveModalProps> = ({
         toast.error('Harap pilih sesi pelajaran yang diajukan izin');
         return;
       }
+      const st = getScheduleStatusOnDate(sch.id);
+      if (st.isLocked) {
+        toast.warning(`Sesi ${sch.subject} sudah tercatat (${st.label}) dan tidak dapat diajukan izin kembali.`);
+        return;
+      }
       targetSchedules.push(sch);
     } else {
       if (mySchedulesOnDate.length === 0) {
         toast.error(`Tidak ada jadwal mengajar terdaftar pada hari ${dayName}`);
         return;
       }
-      targetSchedules.push(...mySchedulesOnDate);
+      if (availableSchedules.length === 0) {
+        toast.warning(`Semua jadwal pada hari ${dayName} (${selectedDate}) sudah memiliki catatan kehadiran atau izin aktif.`);
+        return;
+      }
+      targetSchedules.push(...availableSchedules);
     }
 
     setIsSubmitting(true);
@@ -254,11 +286,14 @@ export const TeacherLeaveModal: React.FC<TeacherLeaveModalProps> = ({
                   required
                 >
                   <option value="">-- Pilih Sesi Pelajaran --</option>
-                  {mySchedulesOnDate.map((sch) => (
-                    <option key={sch.id} value={sch.id}>
-                      {sch.subject} ({sch.className}) • {sch.startTime}-{sch.endTime} WIB ({sch.hours} JP)
-                    </option>
-                  ))}
+                  {mySchedulesOnDate.map((sch) => {
+                    const st = getScheduleStatusOnDate(sch.id);
+                    return (
+                      <option key={sch.id} value={sch.id} disabled={st.isLocked}>
+                        {sch.subject} ({sch.className}) • {sch.startTime}-{sch.endTime} WIB ({sch.hours} JP) {st.isLocked ? `[${st.label}]` : ''}
+                      </option>
+                    );
+                  })}
                 </select>
               )}
             </div>

@@ -5,7 +5,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   BookOpen,
-  UserCheck
+  UserCheck,
+  Lock
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { AttendanceRecord, ClassSchedule, Teacher, StudentAttendance } from '../types';
@@ -36,9 +37,10 @@ export const JournalModal: React.FC<JournalModalProps> = ({
   const todayStr = new Date().toISOString().split('T')[0];
   const isPastShift = resolvedAttendance?.date ? resolvedAttendance.date < todayStr : false;
   const existingJournal = resolvedAttendance?.journal;
+  const isAlreadyFinished = resolvedAttendance?.status === 'SELESAI' || !!existingJournal;
+  const isReadOnly = isAlreadyFinished || isPastShift;
   const isExpired = isPastShift;
   const isExpiredUnfilled = isExpired && !existingJournal;
-  const isExpiredFilled = isExpired && existingJournal;
 
   const activeBadal = badalAssignments.find(
     (b) => b.scheduleId === schedule.id && (b.date === todayStr || !b.date) && (b.status === 'APPROVED' || b.status === 'COMPLETED')
@@ -68,6 +70,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleStudentCountChange = (field: keyof StudentAttendance, value: number) => {
+    if (isReadOnly) return;
     const val = Math.max(0, value);
     setStudentAttendance((prev) => {
       const updated = { ...prev, [field]: val };
@@ -82,7 +85,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({
   };
 
   const handleFillSample = () => {
-    if (!schedule) return;
+    if (isReadOnly || !schedule) return;
     const subj = schedule.subject || '';
     if (subj.toLowerCase().includes('nahwu') || subj.toLowerCase().includes('sharaf') || subj.toLowerCase().includes('kitab')) {
       setTopic('Pembahasan Bab I’rab & Pembagian I’rab (Kitab Jurumiyyah)');
@@ -104,6 +107,10 @@ export const JournalModal: React.FC<JournalModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isReadOnly) {
+      onClose();
+      return;
+    }
     if (!topic.trim()) {
       alert('Mohon isi pokok materi KBM terlebih dahulu.');
       return;
@@ -161,7 +168,14 @@ export const JournalModal: React.FC<JournalModalProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-emerald-400" strokeWidth={1.5} />
-              <h2 className="font-bold text-sm text-emerald-50">Jurnal Pembelajaran KBM</h2>
+              <h2 className="font-bold text-sm text-emerald-50">
+                {isAlreadyFinished ? 'Jurnal Pembelajaran KBM (Terkunci)' : 'Jurnal Pembelajaran KBM'}
+              </h2>
+              {isAlreadyFinished && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-emerald-900/80 text-emerald-300 border border-emerald-700/60 px-2 py-0.5 rounded">
+                  <Lock className="w-2.5 h-2.5" /> TERKUNCI
+                </span>
+              )}
               {isBadalForMe && (
                 <span className="text-[10px] font-bold bg-emerald-600/90 text-white px-2 py-0.5 rounded font-mono">
                   GURU BADAL
@@ -193,6 +207,19 @@ export const JournalModal: React.FC<JournalModalProps> = ({
           </div>
         )}
 
+        {/* Already Finished & Locked Banner */}
+        {isAlreadyFinished && (
+          <div className="bg-emerald-50/90 dark:bg-emerald-950/40 border-b border-emerald-200/80 dark:border-emerald-900/50 p-3 flex items-start gap-2.5 text-xs text-emerald-900 dark:text-emerald-200">
+            <CheckCircle2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold">Jurnal KBM Telah Terisi & Selesai (Dikunci)</p>
+              <p className="text-[11px] text-emerald-800/80 dark:text-emerald-300/80 mt-0.5">
+                Sesi ini telah diselesaikan dan disimpan secara permanen. Pengisian ulang atau perubahan telah dinonaktifkan (di-terminate) demi integritas data akademik.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Expired Unfilled Alert */}
         {isExpiredUnfilled && (
           <div className="bg-rose-50 dark:bg-rose-950/40 border-b border-rose-200 dark:border-rose-900/40 p-3 flex items-start gap-2.5 text-xs text-rose-800 dark:text-rose-300">
@@ -208,7 +235,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
           {/* Quick Template Fill Button */}
-          {!isExpiredUnfilled && (
+          {!isReadOnly && (
             <div className="flex items-center justify-between bg-slate-50 dark:bg-[#0e1713] p-2.5 rounded-xl border border-slate-200/80 dark:border-emerald-900/40">
               <span className="text-slate-600 dark:text-emerald-300/80 text-[11px]">
                 Gunakan template cepat sesuai mata pelajaran:
@@ -226,17 +253,25 @@ export const JournalModal: React.FC<JournalModalProps> = ({
 
           {/* Topic / Materi Pokok */}
           <div className="space-y-1">
-            <label className="font-semibold text-slate-800 dark:text-emerald-100 block">
-              Pokok Bahasan / Materi Pembelajaran <span className="text-rose-500">*</span>
+            <label className="font-semibold text-slate-800 dark:text-emerald-100 block flex items-center justify-between">
+              <span>Pokok Bahasan / Materi Pembelajaran {!isReadOnly && <span className="text-rose-500">*</span>}</span>
+              {isReadOnly && (
+                <span className="text-[10px] text-slate-400 font-normal flex items-center gap-1">
+                  <Lock className="w-3 h-3" /> Terkunci
+                </span>
+              )}
             </label>
             <input
               type="text"
               required
-              disabled={isExpiredUnfilled}
+              disabled={isReadOnly}
+              readOnly={isReadOnly}
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="Contoh: Bab 4 I'rab Fi'il Mudhari'..."
-              className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-[#0e1713] text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-emerald-600 disabled:bg-slate-100 dark:disabled:bg-[#09130f]"
+              className={`w-full text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-[#0e1713] text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-emerald-600 ${
+                isReadOnly ? 'bg-slate-50/80 dark:bg-[#0c1612] text-slate-700 dark:text-emerald-200 cursor-not-allowed border-dashed' : ''
+              }`}
             />
           </div>
 
@@ -247,11 +282,14 @@ export const JournalModal: React.FC<JournalModalProps> = ({
             </label>
             <textarea
               rows={2}
-              disabled={isExpiredUnfilled}
+              disabled={isReadOnly}
+              readOnly={isReadOnly}
               value={learningObjectives}
               onChange={(e) => setLearningObjectives(e.target.value)}
               placeholder="Contoh: Santri mampu mengidentifikasi huruf jazm dan mempraktikkannya dalam ayat..."
-              className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-[#0e1713] text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-emerald-600 disabled:bg-slate-100 dark:disabled:bg-[#09130f]"
+              className={`w-full text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-[#0e1713] text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-emerald-600 ${
+                isReadOnly ? 'bg-slate-50/80 dark:bg-[#0c1612] text-slate-700 dark:text-emerald-200 cursor-not-allowed border-dashed' : ''
+              }`}
             />
           </div>
 
@@ -265,10 +303,13 @@ export const JournalModal: React.FC<JournalModalProps> = ({
                 <span className="text-[10px] text-slate-400 dark:text-emerald-400/60 block uppercase font-medium">Total</span>
                 <input
                   type="number"
-                  disabled={isExpiredUnfilled}
+                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
                   value={studentAttendance.totalStudents}
                   onChange={(e) => handleStudentCountChange('totalStudents', parseInt(e.target.value) || 0)}
-                  className="w-full text-center font-bold text-xs bg-transparent border-none focus:outline-none text-slate-900 dark:text-emerald-50 mt-0.5"
+                  className={`w-full text-center font-bold text-xs bg-transparent border-none focus:outline-none text-slate-900 dark:text-emerald-50 mt-0.5 ${
+                    isReadOnly ? 'cursor-not-allowed' : ''
+                  }`}
                 />
               </div>
 
@@ -276,10 +317,13 @@ export const JournalModal: React.FC<JournalModalProps> = ({
                 <span className="text-[10px] text-emerald-800 dark:text-emerald-400 font-bold block uppercase">Hadir</span>
                 <input
                   type="number"
-                  disabled={isExpiredUnfilled}
+                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
                   value={studentAttendance.presentCount}
                   onChange={(e) => handleStudentCountChange('presentCount', parseInt(e.target.value) || 0)}
-                  className="w-full text-center font-bold text-xs bg-transparent border-none focus:outline-none text-emerald-800 dark:text-emerald-400 mt-0.5"
+                  className={`w-full text-center font-bold text-xs bg-transparent border-none focus:outline-none text-emerald-800 dark:text-emerald-400 mt-0.5 ${
+                    isReadOnly ? 'cursor-not-allowed' : ''
+                  }`}
                 />
               </div>
 
@@ -287,10 +331,13 @@ export const JournalModal: React.FC<JournalModalProps> = ({
                 <span className="text-[10px] text-amber-700 dark:text-amber-400 font-bold block uppercase">Sakit</span>
                 <input
                   type="number"
-                  disabled={isExpiredUnfilled}
+                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
                   value={studentAttendance.sickCount}
                   onChange={(e) => handleStudentCountChange('sickCount', parseInt(e.target.value) || 0)}
-                  className="w-full text-center font-bold text-xs bg-transparent border-none focus:outline-none text-amber-700 dark:text-amber-400 mt-0.5"
+                  className={`w-full text-center font-bold text-xs bg-transparent border-none focus:outline-none text-amber-700 dark:text-amber-400 mt-0.5 ${
+                    isReadOnly ? 'cursor-not-allowed' : ''
+                  }`}
                 />
               </div>
 
@@ -298,10 +345,13 @@ export const JournalModal: React.FC<JournalModalProps> = ({
                 <span className="text-[10px] text-sky-700 dark:text-sky-400 font-bold block uppercase">Izin</span>
                 <input
                   type="number"
-                  disabled={isExpiredUnfilled}
+                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
                   value={studentAttendance.permittedCount}
                   onChange={(e) => handleStudentCountChange('permittedCount', parseInt(e.target.value) || 0)}
-                  className="w-full text-center font-bold text-xs bg-transparent border-none focus:outline-none text-sky-700 dark:text-sky-400 mt-0.5"
+                  className={`w-full text-center font-bold text-xs bg-transparent border-none focus:outline-none text-sky-700 dark:text-sky-400 mt-0.5 ${
+                    isReadOnly ? 'cursor-not-allowed' : ''
+                  }`}
                 />
               </div>
 
@@ -309,10 +359,13 @@ export const JournalModal: React.FC<JournalModalProps> = ({
                 <span className="text-[10px] text-rose-700 dark:text-rose-400 font-bold block uppercase">Alpa</span>
                 <input
                   type="number"
-                  disabled={isExpiredUnfilled}
+                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
                   value={studentAttendance.absentCount}
                   onChange={(e) => handleStudentCountChange('absentCount', parseInt(e.target.value) || 0)}
-                  className="w-full text-center font-bold text-xs bg-transparent border-none focus:outline-none text-rose-700 dark:text-rose-400 mt-0.5"
+                  className={`w-full text-center font-bold text-xs bg-transparent border-none focus:outline-none text-rose-700 dark:text-rose-400 mt-0.5 ${
+                    isReadOnly ? 'cursor-not-allowed' : ''
+                  }`}
                 />
               </div>
             </div>
@@ -326,11 +379,14 @@ export const JournalModal: React.FC<JournalModalProps> = ({
               </label>
               <textarea
                 rows={2}
-                disabled={isExpiredUnfilled}
+                disabled={isReadOnly}
+                readOnly={isReadOnly}
                 value={classNotes}
                 onChange={(e) => setClassNotes(e.target.value)}
                 placeholder="Catatan keaktifan santri..."
-                className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-[#0e1713] text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-emerald-600"
+                className={`w-full text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-[#0e1713] text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-emerald-600 ${
+                  isReadOnly ? 'bg-slate-50/80 dark:bg-[#0c1612] text-slate-700 dark:text-emerald-200 cursor-not-allowed border-dashed' : ''
+                }`}
               />
             </div>
 
@@ -340,11 +396,14 @@ export const JournalModal: React.FC<JournalModalProps> = ({
               </label>
               <textarea
                 rows={2}
-                disabled={isExpiredUnfilled}
+                disabled={isReadOnly}
+                readOnly={isReadOnly}
                 value={assignmentGiven}
                 onChange={(e) => setAssignmentGiven(e.target.value)}
                 placeholder="Tugas mandiri atau hafalan..."
-                className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-[#0e1713] text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-emerald-600"
+                className={`w-full text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-[#0e1713] text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-emerald-600 ${
+                  isReadOnly ? 'bg-slate-50/80 dark:bg-[#0c1612] text-slate-700 dark:text-emerald-200 cursor-not-allowed border-dashed' : ''
+                }`}
               />
             </div>
           </div>
@@ -354,11 +413,11 @@ export const JournalModal: React.FC<JournalModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-emerald-300 hover:bg-slate-100 dark:hover:bg-[#182a23] transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-xl text-xs font-medium bg-slate-100 dark:bg-[#182a23] hover:bg-slate-200 dark:hover:bg-[#1f362c] text-slate-700 dark:text-emerald-200 transition-colors cursor-pointer"
             >
-              {isExpiredUnfilled ? 'Tutup' : 'Batal'}
+              {isReadOnly ? 'Tutup' : 'Batal'}
             </button>
-            {!isExpiredUnfilled && (
+            {!isReadOnly && (
               <button
                 type="submit"
                 disabled={isSubmitting}

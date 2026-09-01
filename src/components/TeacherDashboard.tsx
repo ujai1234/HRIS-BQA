@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Clock, 
   BookOpen, 
@@ -7,8 +7,10 @@ import {
   AlertCircle, 
   FileText, 
   CalendarOff,
-  Check
+  Check,
+  Lock
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useHRIS } from '../context/HRISContext';
 import { ClassSchedule, AttendanceRecord } from '../types';
 import { ClockInModal } from './ClockInModal';
@@ -16,6 +18,7 @@ import { JournalModal } from './JournalModal';
 import { TeacherLeaveModal } from './TeacherLeaveModal';
 import { GpsPermissionPromptModal } from './GpsPermissionPromptModal';
 import { preCheckDeviceGps, GpsPreCheckState } from '../services/geofenceService';
+import { validateScheduleTimeWindow, getTodayIndonesianDayName } from '../utils/formatters';
 
 export const TeacherDashboard: React.FC = () => {
   const { 
@@ -46,6 +49,15 @@ export const TeacherDashboard: React.FC = () => {
 
   const realTodayName = getTodayIndonesianDay();
   const [selectedDay, setSelectedDay] = useState<string>(realTodayName);
+  const [currentTick, setCurrentTick] = useState<number>(Date.now());
+
+  // Ticker to refresh schedule status every 10 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTick(Date.now());
+    }, 10000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Modals state
   const [activeClockInSchedule, setActiveClockInSchedule] = useState<ClassSchedule | null>(null);
@@ -105,8 +117,14 @@ export const TeacherDashboard: React.FC = () => {
     setActiveJournalData({ attendance: att as AttendanceRecord, schedule });
   };
 
-  // Pre-check GPS verification step when clicking "Absen"
+  // Pre-check GPS and Time Window verification step when clicking "Absen"
   const handleInitiateClockIn = async (schedule: ClassSchedule) => {
+    const timeValidation = validateScheduleTimeWindow(schedule);
+    if (!timeValidation.canClockIn) {
+      toast.warning(timeValidation.message);
+      return;
+    }
+
     setIsPreCheckingGps(true);
     try {
       const checkResult = await preCheckDeviceGps();
@@ -251,6 +269,8 @@ export const TeacherDashboard: React.FC = () => {
               const isSakit = att?.status === 'SAKIT';
               const isNotPresent = !att || att.status === 'BELUM_HADIR';
 
+              const timeValidation = validateScheduleTimeWindow(schedule);
+
               return (
                 <div
                   key={schedule.id}
@@ -265,6 +285,8 @@ export const TeacherDashboard: React.FC = () => {
                       ? 'bg-sky-50/50 dark:bg-sky-950/25 border-sky-300 dark:border-sky-800/50'
                       : isSubstituted
                       ? 'bg-slate-50 dark:bg-[#0e1713] border-slate-200 dark:border-emerald-950/50 opacity-75'
+                      : timeValidation.canClockIn
+                      ? 'bg-white dark:bg-[#14231d] border-emerald-300 dark:border-emerald-700/60 shadow-xs'
                       : 'bg-white dark:bg-[#14231d] border-slate-200/90 dark:border-emerald-900/40'
                   }`}
                 >
@@ -288,7 +310,7 @@ export const TeacherDashboard: React.FC = () => {
                       {/* Status Tag */}
                       {isCompleted ? (
                         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Jurnal Terisi
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Selesai & Terkunci
                         </span>
                       ) : isClockedInNoJournal ? (
                         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 dark:text-amber-400">
@@ -296,19 +318,31 @@ export const TeacherDashboard: React.FC = () => {
                         </span>
                       ) : isSakit ? (
                         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 dark:text-amber-400">
-                          <AlertCircle className="w-3.5 h-3.5" /> Sakit (Tercatat)
+                          <AlertCircle className="w-3.5 h-3.5" /> Sakit (Terkunci)
                         </span>
                       ) : isIzin ? (
                         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-700 dark:text-sky-400">
-                          <CalendarOff className="w-3.5 h-3.5" /> Izin Tercatat
+                          <CalendarOff className="w-3.5 h-3.5" /> Izin (Terkunci)
                         </span>
                       ) : isSubstituted ? (
                         <span className="text-[11px] text-slate-500 dark:text-emerald-400/60">
                           Dialihkan ke Badal
                         </span>
+                      ) : timeValidation.canClockIn ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Waktu Absen Aktif
+                        </span>
+                      ) : timeValidation.status === 'TOO_EARLY' ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 dark:text-amber-400">
+                          <Lock className="w-3.5 h-3.5" /> Buka {timeValidation.allowedStartTime}
+                        </span>
+                      ) : timeValidation.status === 'EXPIRED' ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-rose-700 dark:text-rose-400">
+                          <AlertCircle className="w-3.5 h-3.5" /> Waktu Berakhir
+                        </span>
                       ) : (
                         <span className="text-[11px] text-slate-500 dark:text-emerald-400/60">
-                          Belum Absen
+                          Jadwal {schedule.dayOfWeek}
                         </span>
                       )}
                     </div>
@@ -353,14 +387,52 @@ export const TeacherDashboard: React.FC = () => {
                   {/* Actions */}
                   <div className="mt-4 pt-3 border-t border-slate-100 dark:border-emerald-900/30">
                     {isNotPresent && !isSubstituted && (
-                      <button
-                        onClick={() => handleInitiateClockIn(schedule)}
-                        disabled={isPreCheckingGps}
-                        className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-75"
-                      >
-                        <Clock className="w-3.5 h-3.5" />
-                        <span>{isPreCheckingGps ? 'Memeriksa GPS...' : 'Absen'}</span>
-                      </button>
+                      <div>
+                        {timeValidation.canClockIn ? (
+                          <button
+                            onClick={() => handleInitiateClockIn(schedule)}
+                            disabled={isPreCheckingGps}
+                            className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-75"
+                          >
+                            <Clock className="w-3.5 h-3.5" />
+                            <span>{isPreCheckingGps ? 'Memeriksa GPS...' : 'Absen Sekarang'}</span>
+                          </button>
+                        ) : timeValidation.status === 'TOO_EARLY' ? (
+                          <div>
+                            <button
+                              disabled
+                              className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#15231c] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-emerald-900/40 flex items-center justify-center gap-1.5 cursor-not-allowed opacity-80"
+                            >
+                              <Lock className="w-3.5 h-3.5" />
+                              <span>Belum Waktunya (Buka {timeValidation.allowedStartTime})</span>
+                            </button>
+                            <p className="text-[10px] text-center text-slate-400 dark:text-emerald-400/60 mt-1">
+                              Dibuka 15 mnt sebelum sesi ({timeValidation.allowedStartTime} - {schedule.endTime} WIB)
+                            </p>
+                          </div>
+                        ) : timeValidation.status === 'EXPIRED' ? (
+                          <div>
+                            <button
+                              disabled
+                              className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-rose-50/70 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/30 flex items-center justify-center gap-1.5 cursor-not-allowed opacity-85"
+                            >
+                              <AlertCircle className="w-3.5 h-3.5" />
+                              <span>Waktu Absen Telah Berakhir</span>
+                            </button>
+                            <p className="text-[10px] text-center text-rose-500/80 dark:text-rose-400/70 mt-1">
+                              Sesi KBM telah selesai (Pukul {schedule.endTime} WIB)
+                            </p>
+                          </div>
+                        ) : (
+                          <button
+                            disabled
+                            className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#15231c] text-slate-400 border border-slate-200 dark:border-emerald-900/40 flex items-center justify-center gap-1.5 cursor-not-allowed"
+                          >
+                            <Clock className="w-3.5 h-3.5" />
+                            <span>Hanya Aktif di Hari {schedule.dayOfWeek}</span>
+                          </button>
+                        )}
+                      </div>
                     )}
 
                     {isClockedInNoJournal && att && (
@@ -379,14 +451,14 @@ export const TeacherDashboard: React.FC = () => {
                         className="w-full py-1.5 px-3 rounded-xl text-xs font-medium bg-slate-100 dark:bg-[#182a23] hover:bg-slate-200 dark:hover:bg-[#1f362c] text-slate-700 dark:text-emerald-200 transition-colors flex items-center justify-center gap-1.5 border border-slate-200 dark:border-emerald-800/40 cursor-pointer shadow-xs"
                       >
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                        <span>Lihat / Edit Jurnal</span>
+                        <span>Lihat Jurnal (Terkunci)</span>
                       </button>
                     )}
 
                     {(isIzin || isSakit) && (
-                      <div className="text-center py-1">
+                      <div className="text-center py-1 bg-slate-50 dark:bg-[#0e1713] rounded-xl border border-slate-100 dark:border-emerald-900/30">
                         <span className="text-[11px] text-amber-700 dark:text-amber-300/90 font-medium">
-                          Status {isSakit ? 'Sakit' : 'Izin'} Tercatat • Koordinasi Guru Badal
+                          Status {isSakit ? 'Sakit' : 'Izin'} Terkunci • Tugas Badal
                         </span>
                       </div>
                     )}

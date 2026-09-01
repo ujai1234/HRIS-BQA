@@ -29,7 +29,7 @@ import {
   INITIAL_BADAL_ASSIGNMENTS,
   INITIAL_AUDIT_LOGS
 } from '../data/initialData';
-import { calculateLatePenalty } from '../utils/formatters';
+import { calculateLatePenalty, validateScheduleTimeWindow } from '../utils/formatters';
 
 interface HRISContextType {
   teachers: Teacher[];
@@ -142,7 +142,16 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const saved = localStorage.getItem('hris_pbq_auth_v1');
-    return saved === 'true';
+    if (saved !== 'true') return false;
+    
+    // Validasi apakah sesi 5 menit (300.000 ms) masih berlaku
+    const lastActivity = Number(localStorage.getItem('hris_pbq_session_last_activity') || 0);
+    if (!lastActivity || Date.now() - lastActivity > 5 * 60 * 1000) {
+      localStorage.removeItem('hris_pbq_session_last_activity');
+      localStorage.setItem('hris_pbq_auth_v1', 'false');
+      return false;
+    }
+    return true;
   });
 
   const [currentPath, setCurrentPath] = useState<string>(() => {
@@ -318,6 +327,8 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const login = (role: UserRole, teacherId?: string) => {
+    const now = Date.now();
+    localStorage.setItem('hris_pbq_session_last_activity', now.toString());
     setIsAuthenticated(true);
     setCurrentRoleState(role);
     if (teacherId) setCurrentUserId(teacherId);
@@ -352,6 +363,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCurrentPath('/');
     localStorage.removeItem(STORAGE_KEYS.CURRENT_USER_ID);
     localStorage.removeItem(STORAGE_KEYS.CURRENT_ROLE);
+    localStorage.removeItem('hris_pbq_session_last_activity');
     localStorage.setItem('hris_pbq_auth_v1', 'false');
     toast.info('Anda telah keluar dari sistem');
   };
@@ -381,8 +393,23 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!schedule) throw new Error('Jadwal tidak ditemukan');
 
     const todayStr = new Date().toISOString().split('T')[0];
+    const existingAtt = attendances.find(a => a.scheduleId === scheduleId && a.date === todayStr);
+
+    // Prevent duplicate clock-in if already completed or has recorded leave
+    if (existingAtt && (existingAtt.status === 'SELESAI' || existingAtt.status === 'IZIN' || existingAtt.status === 'SAKIT')) {
+      toast.warning('Presensi untuk sesi KBM ini sudah tercatat/selesai dan tidak dapat dilakukan kembali.');
+      return existingAtt;
+    }
+
     const now = new Date();
     const actualClockIn = timeString || `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    // Validate that attendance is strictly within designated schedule day and time window
+    const timeValidation = validateScheduleTimeWindow(schedule, actualClockIn, now);
+    if (!timeValidation.canClockIn) {
+      toast.error(timeValidation.message);
+      throw new Error(timeValidation.message);
+    }
 
     // Check if there is an approved badal assignment for this schedule today
     const activeBadal = badalAssignments.find(
@@ -402,7 +429,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     const newRecord: AttendanceRecord = {
-      id: `ATT-${Date.now()}`,
+      id: existingAtt?.id || `ATT-${Date.now()}`,
       scheduleId,
       teacherId: schedule.teacherId,
       actualTeacherId,
@@ -457,7 +484,14 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     journalInput: Partial<TeachingJournal> & { topic: string; studentAttendance: StudentAttendance }
   ) => {
     const todayStr = new Date().toISOString().split('T')[0];
-    const targetAtt = attendances.find(a => a.id === attendanceId);
+    const targetAtt = attendances.find(a => a.id === attendanceId || (journalInput.scheduleId && a.scheduleId === journalInput.scheduleId && a.date === todayStr));
+    
+    // Prevent re-submission if already completed
+    if (targetAtt && targetAtt.status === 'SELESAI' && targetAtt.journal) {
+      toast.info('Jurnal KBM sesi ini telah dikunci & selesai.');
+      return;
+    }
+
     const scheduleId = journalInput.scheduleId || targetAtt?.scheduleId || 'SCH-01';
     const date = journalInput.date || targetAtt?.date || todayStr;
     const teacherId = journalInput.teacherId || targetAtt?.actualTeacherId || targetAtt?.teacherId || currentUser?.id || 'T-08';
