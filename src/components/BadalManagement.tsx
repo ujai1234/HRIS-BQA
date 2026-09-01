@@ -328,7 +328,7 @@ export const BadalManagement: React.FC = () => {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight font-sans">
-                Penugasan Guru Badal
+                Penugasan Guru Pengganti
               </h1>
               <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40">
                 {isKepsek ? `Otoritas Kepala ${userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}` : 'Panel Administrator'}
@@ -361,7 +361,7 @@ export const BadalManagement: React.FC = () => {
                 className="inline-flex items-center justify-center gap-1.5 bg-[#1B4332] hover:bg-[#1B4332]/95 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" strokeWidth={1.5} />
-                <span>Tunjuk Guru Badal</span>
+                <span>Tunjuk Guru Pengganti</span>
               </button>
             )}
           </div>
@@ -371,7 +371,7 @@ export const BadalManagement: React.FC = () => {
       {/* 2. Stat Metric Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
-          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Total Sesi Badal</span>
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Total Sesi Pengganti</span>
           <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-stone-900 dark:text-stone-100 mt-1">
             {stats.totalSessions} <span className="text-xs font-normal text-stone-500 font-sans">Sesi</span>
           </p>
@@ -391,7 +391,7 @@ export const BadalManagement: React.FC = () => {
         </div>
 
         <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
-          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Izin Menunggu Persetujuan</span>
+          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Izin & Pengganti</span>
           <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-amber-600 dark:text-amber-400 mt-1">
             {stats.pendingCount} <span className="text-xs font-normal text-stone-500 font-sans">Pengajuan</span>
           </p>
@@ -402,7 +402,7 @@ export const BadalManagement: React.FC = () => {
 
         {isKepsek ? (
           <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
-            <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Badal Disetujui</span>
+            <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Sesi Pengganti Disetujui</span>
             <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-emerald-700 dark:text-emerald-400 mt-1">
               {stats.approvedCount} <span className="text-xs font-normal text-stone-500 font-sans">Sesi</span>
             </p>
@@ -412,7 +412,7 @@ export const BadalManagement: React.FC = () => {
           </div>
         ) : (
           <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
-            <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Alokasi Kafa'ah Badal</span>
+            <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Alokasi Kafa'ah Pengganti</span>
             <p className="text-xl sm:text-2xl font-semibold font-mono tracking-tight text-emerald-700 dark:text-emerald-400 mt-1 truncate">
               {formatRupiah(stats.totalHonor)}
             </p>
@@ -557,7 +557,7 @@ export const BadalManagement: React.FC = () => {
       {/* 4. Navigation Subtabs (For Kepsek) */}
       {isKepsek && (
         <div className="flex items-center gap-1 border-b border-stone-200 dark:border-stone-800 pb-px">
-          <button
+            <button
             id="tab-daftar-badal"
             onClick={() => setActiveTab('daftar_penugasan')}
             className={`px-4 py-2 border-b-2 text-xs font-bold transition-all cursor-pointer ${
@@ -566,7 +566,7 @@ export const BadalManagement: React.FC = () => {
                 : 'border-transparent text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
             }`}
           >
-            Daftar Penugasan Badal ({filteredBadal.length})
+            Daftar Penugasan Pengganti ({filteredBadal.length})
           </button>
           <button
             id="tab-cari-guru"
@@ -644,7 +644,7 @@ export const BadalManagement: React.FC = () => {
                     <th className="py-3 px-4">Mata Pelajaran & Sesi</th>
                     <th className="py-3 px-4">Guru Utama (Izin)</th>
                     <th className="py-3 px-4">Jenis Izin & Keterangan</th>
-                    <th className="py-3 px-4">Guru Badal</th>
+                    <th className="py-3 px-4">Guru Pengganti</th>
                     {isKepsek ? (
                       <th className="py-3 px-4 text-center">Beban (JP)</th>
                     ) : (
@@ -866,7 +866,7 @@ export const BadalManagement: React.FC = () => {
                     className="mt-4 w-full inline-flex items-center justify-center gap-1.5 bg-[#1B4332] hover:bg-[#1B4332]/95 text-white text-[11px] font-semibold py-2 rounded-lg transition-colors cursor-pointer"
                   >
                     <UserCheck className="w-3.5 h-3.5" strokeWidth={1.5} />
-                    <span>Tunjuk Sebagai Badal</span>
+                    <span>Tunjuk Sebagai Pengganti</span>
                   </button>
                 </div>
               ))}
@@ -888,7 +888,7 @@ export const BadalManagement: React.FC = () => {
             <div className="px-5 py-4 border-b border-stone-150 dark:border-stone-800 flex items-center justify-between">
               <div>
                 <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                  Penugasan Guru Badal (Pengganti KBM)
+                  Penugasan Guru Pengganti
                 </h3>
                 <p className="text-[11px] text-stone-500">
                   Otoritas Kepala Sekolah Unit {modalUnit}
@@ -962,7 +962,7 @@ export const BadalManagement: React.FC = () => {
 
               <div>
                 <label className="block text-stone-500 dark:text-stone-400 mb-1.5 font-medium">
-                  Guru Pengganti (Badal) Ditugaskan
+                  Guru Pengganti Ditugaskan
                 </label>
                 <select
                   value={selectedBadalTeacherId}
@@ -1048,7 +1048,7 @@ export const BadalManagement: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                      Persetujuan Izin & Penugasan Badal
+                      Persetujuan Izin & Penugasan Pengganti
                     </h3>
                     <p className="text-[11px] text-stone-500">
                       Konfirmasi pengesahan izin guru dan guru pengganti
@@ -1103,7 +1103,7 @@ export const BadalManagement: React.FC = () => {
                   </div>
 
                   <div className="flex justify-between items-center">
-                    <span className="text-stone-500 dark:text-stone-400">Guru Badal Pengganti:</span>
+                    <span className="text-stone-500 dark:text-stone-400">Guru Pengganti:</span>
                     <span className="font-bold text-[#1B4332] dark:text-emerald-400">
                       {badalTeacher?.name || 'Belum dipilih'}
                     </span>
@@ -1152,7 +1152,7 @@ export const BadalManagement: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                      Konfirmasi Penugasan Badal
+                      Konfirmasi Penugasan Pengganti
                     </h3>
                     <p className="text-[11px] text-stone-500">
                       Periksa kembali rincian data sebelum diterbitkan
@@ -1191,7 +1191,7 @@ export const BadalManagement: React.FC = () => {
                   </div>
 
                   <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
-                    <span className="text-stone-500 dark:text-stone-400">Guru Pengganti (Badal):</span>
+                    <span className="text-stone-500 dark:text-stone-400">Guru Pengganti:</span>
                     <span className="font-bold text-[#1B4332] dark:text-emerald-400">
                       {badalTeacher?.name || 'Guru Badal'}
                     </span>
@@ -1242,7 +1242,7 @@ export const BadalManagement: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                      Batalkan Penugasan / Pengajuan Badal?
+                      Batalkan Penugasan / Pengajuan Pengganti?
                     </h3>
                     <p className="text-[11px] text-stone-500">
                       Konfirmasi pembatalan catatan penugasan guru pengganti

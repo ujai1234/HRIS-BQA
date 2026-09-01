@@ -264,9 +264,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
           date: att.date,
           time: sched?.startTime || '07:00',
           timestamp: new Date(`${att.date}T${sched?.startTime || '07:00'}`).getTime() + 10,
-          teacherName: actualTeacher?.name || 'Guru Badal',
+          teacherName: actualTeacher?.name || 'Guru Pengganti',
           teacherAvatar: actualTeacher?.avatarColor || 'bg-indigo-700',
-          title: 'Tugas Badal (Inval)',
+          title: 'Tugas Guru Pengganti',
           description: `Menggantikan Ustadz ${origTeacher?.name || 'Utama'} di kelas ${className} (Mapel: ${subject}).`,
           badgeColor: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300',
           meta: {
@@ -482,7 +482,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
               <span className="font-mono text-white font-medium">{data?.terlambat}</span>
             </div>
             <div className="flex justify-between gap-4">
-              <span className="text-stone-400">Badal:</span>
+              <span className="text-stone-400">Pengganti:</span>
               <span className="font-mono text-white font-medium">{data?.badal}</span>
             </div>
           </div>
@@ -664,7 +664,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
                 <span className="w-2 h-2 rounded-sm bg-amber-500" /> Terlambat
               </span>
               <span className="inline-flex items-center gap-1 text-stone-600 dark:text-stone-400">
-                <span className="w-2 h-2 rounded-sm bg-indigo-500" /> Badal
+                <span className="w-2 h-2 rounded-sm bg-indigo-500" /> Pengganti
               </span>
               <span className="inline-flex items-center gap-1 text-stone-600 dark:text-stone-400">
                 <span className="w-3 h-0.5 bg-stone-900 dark:bg-stone-200" /> Hadir %
@@ -703,7 +703,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
                 <Tooltip content={<AttendanceTooltip />} />
                 <Bar yAxisId="left" dataKey="tepatWaktu" name="Tepat Waktu" stackId="a" fill="#059669" radius={[0, 0, 0, 0]} maxBarSize={28} />
                 <Bar yAxisId="left" dataKey="terlambat" name="Terlambat" stackId="a" fill="#f59e0b" radius={[0, 0, 0, 0]} maxBarSize={28} />
-                <Bar yAxisId="left" dataKey="badal" name="Badal" stackId="a" fill="#6366f1" radius={[3, 3, 0, 0]} maxBarSize={28} />
+                <Bar yAxisId="left" dataKey="badal" name="Pengganti" stackId="a" fill="#6366f1" radius={[3, 3, 0, 0]} maxBarSize={28} />
                 <Line yAxisId="right" type="monotone" dataKey="rate" name="Tingkat Hadir" stroke="#1c1917" strokeWidth={2} dot={{ r: 3, fill: '#1c1917' }} />
               </ComposedChart>
             </ResponsiveContainer>
@@ -851,7 +851,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
                             </p>
                             {isBadal && (
                               <span className="text-[10px] text-purple-750 dark:text-purple-400 font-semibold block">
-                                Badal: {origTeacher?.name}
+                                Pengganti: {origTeacher?.name}
                               </span>
                             )}
                           </div>
@@ -1009,7 +1009,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
                   { id: 'ALL', label: 'Semua' },
                   { id: 'KEHADIRAN', label: 'Presensi' },
                   { id: 'JURNAL', label: 'Jurnal' },
-                  { id: 'BADAL', label: 'Badal' }
+                  { id: 'BADAL', label: 'Pengganti' }
                 ].map((cat) => (
                   <button
                     key={cat.id}

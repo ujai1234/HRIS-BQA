@@ -494,10 +494,10 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
           </div>
         </div>
 
-        {/* Metric 3: Guru Pengganti (Badal) */}
+        {/* Metric 3: Guru Pengganti */}
         <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
           <div className="text-xs font-medium text-stone-500 dark:text-stone-400">
-            Guru Pengganti (Badal)
+            Guru Pengganti
           </div>
           <div className="text-2xl sm:text-3xl font-mono font-bold text-amber-600 dark:text-amber-400 mt-1">
             {activeBadalCount}
@@ -739,7 +739,7 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
                 <thead>
                   <tr className="border-b border-stone-200 dark:border-stone-800 text-stone-500 font-semibold uppercase tracking-wider text-[10px] bg-stone-50/50 dark:bg-stone-850/40">
                     <th className="py-3 px-4">Guru Utama (Berhalangan)</th>
-                    <th className="py-3 px-4">Guru Pengganti (Badal)</th>
+                    <th className="py-3 px-4">Guru Pengganti</th>
                     <th className="py-3 px-4">Kelas & Mapel</th>
                     <th className="py-3 px-4">Waktu</th>
                     <th className="py-3 px-4">Alasan Badal</th>

@@ -132,7 +132,7 @@ export const Header: React.FC<HeaderProps> = ({
       crumbs.push({ label: 'Admin', path: '/dashboard/admin' });
       if (currentPath === '/dashboard/admin/guru') crumbs.push({ label: 'Data Asatidz & Kafa\'ah', path: currentPath });
       else if (currentPath === '/dashboard/admin/jadwal') crumbs.push({ label: 'Jadwal Pelajaran', path: currentPath });
-      else if (currentPath === '/dashboard/admin/badal') crumbs.push({ label: 'Guru Pengganti (Badal)', path: currentPath });
+      else if (currentPath === '/dashboard/admin/badal') crumbs.push({ label: 'Guru Pengganti', path: currentPath });
       else if (currentPath === '/dashboard/admin/kebutuhan') crumbs.push({ label: 'Monitoring Kebutuhan', path: currentPath });
       else if (currentPath === '/dashboard/admin/payroll') crumbs.push({ label: 'Rekapitulasi Gaji', path: currentPath });
       else if (currentPath === '/dashboard/admin/audit') crumbs.push({ label: 'Log Audit Keamanan', path: currentPath });
@@ -182,7 +182,7 @@ export const Header: React.FC<HeaderProps> = ({
             { path: '/dashboard/admin', label: 'Dashboard Admin', icon: LayoutDashboard },
             { path: '/dashboard/admin/guru', label: "Data Guru & Kafa'ah", icon: Users },
             { path: '/dashboard/admin/jadwal', label: 'Jadwal Pelajaran', icon: CalendarDays },
-            { path: '/dashboard/admin/badal', label: 'Guru Pengganti (Badal)', icon: UserCheck },
+            { path: '/dashboard/admin/badal', label: 'Guru Pengganti', icon: UserCheck },
           ]
         },
         {

@@ -956,7 +956,7 @@ export const AdminOfficialReportModal: React.FC<AdminOfficialReportModalProps> =
                         <th className="py-2 px-2">Tanggal</th>
                         <th className="py-2 px-2.5">Mata Pelajaran & Sesi</th>
                         <th className="py-2 px-2">Guru Utama</th>
-                        <th className="py-2 px-2 font-bold text-indigo-900">Guru Pengganti (Badal)</th>
+                        <th className="py-2 px-2 font-bold text-indigo-900">Guru Pengganti</th>
                         <th className="py-2 px-2">Alasan</th>
                         <th className="py-2 px-2 text-right">Kafa'ah Hak</th>
                       </tr>
