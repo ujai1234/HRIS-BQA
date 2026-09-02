@@ -57,6 +57,7 @@ export interface Teacher {
   role: UserRole;
   phone?: string;
   avatarColor?: string;
+  avatarUrl?: string;
   isActive: boolean;
   username?: string;
   password?: string;

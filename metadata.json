@@ -1,6 +1,8 @@
 {
   "name": "HRIS Pesantren Baitul Qur'an Al-Ikhwan",
   "description": "Sistem Informasi Manajemen Sumber Daya Manusia Terpadu untuk Pesantren Baitul Qur'an Al-Ikhwan. Mencakup manajemen asatidz, presensi KBM, jurnal mengajar, dan penggajian otomatis.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": [
+    "camera"
+  ],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

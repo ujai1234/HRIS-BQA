@@ -31,6 +31,7 @@ export const teachers = pgTable('teachers', {
   role: userRoleEnum('role').notNull().default('GURU'),
   phone: text('phone'),
   avatarColor: text('avatar_color'),
+  avatarUrl: text('avatar_url'),
   isActive: boolean('is_active').notNull().default(true),
   username: text('username').unique(),
   password: text('password'),

@@ -849,11 +849,17 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateTeacher = (id: string, updates: Partial<Teacher>) => {
     const origTeacher = teachers.find(t => t.id === id);
+
+    // Optimistically update local state for instant UI update
+    setTeachers(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+
     fetch(`/api/teachers/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates)
-    }).then(() => fetchAllData());
+    }).then(() => fetchAllData()).catch(err => {
+      console.error('Failed to patch teacher:', err);
+    });
 
     const isFinancial = 'baseSalary' in updates || 'hourlyRate' in updates || 'dailyTransport' in updates;
     const details = isFinancial 

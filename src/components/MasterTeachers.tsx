@@ -5,6 +5,7 @@ import { Teacher } from '../types';
 import { formatRupiah, formatCurrencyInput, parseCurrencyInput, validateCurrencyRate, terbilang } from '../utils/formatters';
 import { BulkTeacherUploadModal } from './BulkTeacherUploadModal';
 import { KafaahManagementView } from './KafaahManagementView';
+import { TeacherAvatar } from './TeacherAvatar';
 
 export const MasterTeachers: React.FC = () => {
   const { teachers, addTeacher, updateTeacher, deleteTeacher, resetTeachers } = useHRIS();
@@ -239,8 +240,13 @@ export const MasterTeachers: React.FC = () => {
                         {idx + 1}
                       </td>
                       <td className="py-2.5 px-4">
-                        <p className="font-medium text-stone-900 dark:text-stone-100">{t.name || '-'}</p>
-                        <p className="text-[11px] text-stone-400 dark:text-stone-500 font-mono">{t.nip || '-'}</p>
+                        <div className="flex items-center gap-2.5">
+                          <TeacherAvatar teacher={t} size="sm" />
+                          <div>
+                            <p className="font-medium text-stone-900 dark:text-stone-100">{t.name || '-'}</p>
+                            <p className="text-[11px] text-stone-400 dark:text-stone-500 font-mono">{t.nip || '-'}</p>
+                          </div>
+                        </div>
                       </td>
                       <td className="py-2.5 px-3 text-stone-700 dark:text-stone-300">
                         {t.position}

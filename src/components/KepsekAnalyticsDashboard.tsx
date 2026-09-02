@@ -34,6 +34,7 @@ import {
 } from 'recharts';
 import { useHRIS } from '../context/HRISContext';
 import { UnitType, getRoleUnit, AttendanceRecord, ClassSchedule } from '../types';
+import { TeacherAvatar } from './TeacherAvatar';
 
 interface KepsekAnalyticsDashboardProps {
   onNavigateToAudit?: () => void;
@@ -1218,9 +1219,7 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
             <div className="p-5 space-y-4 text-xs">
               {/* Profile Card */}
               <div className="flex items-center gap-3 p-3 bg-stone-50 dark:bg-stone-800 rounded-xl border border-stone-100 dark:border-stone-700">
-                <div className={`w-10 h-10 rounded-full ${selectedTopTeacherDetail.avatarColor} text-white flex items-center justify-center font-bold text-sm shadow-xs`}>
-                  {selectedTopTeacherDetail.name.charAt(0)}
-                </div>
+                <TeacherAvatar teacher={selectedTopTeacherDetail} size="lg" />
                 <div>
                   <h4 className="font-bold text-stone-900 dark:text-stone-100 text-sm">
                     {selectedTopTeacherDetail.name}

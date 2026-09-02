@@ -8,7 +8,8 @@ import {
   FileText, 
   CalendarOff,
   Check,
-  Lock
+  Lock,
+  Camera
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useHRIS } from '../context/HRISContext';
@@ -17,6 +18,8 @@ import { ClockInModal } from './ClockInModal';
 import { JournalModal } from './JournalModal';
 import { TeacherLeaveModal } from './TeacherLeaveModal';
 import { GpsPermissionPromptModal } from './GpsPermissionPromptModal';
+import { TeacherAvatar } from './TeacherAvatar';
+import { UserProfileModal } from './UserProfileModal';
 import { preCheckDeviceGps, GpsPreCheckState } from '../services/geofenceService';
 import { validateScheduleTimeWindow, getTodayIndonesianDayName } from '../utils/formatters';
 
@@ -70,6 +73,7 @@ export const TeacherDashboard: React.FC = () => {
   } | null>(null);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [leaveTargetSchedule, setLeaveTargetSchedule] = useState<ClassSchedule | null>(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const teacherPayroll = calculateTeacherPayroll(currentUser.id, selectedPeriod);
 
@@ -148,22 +152,45 @@ export const TeacherDashboard: React.FC = () => {
       {/* Clean Teacher Header (Minimalist & Modern, No Money Figures) */}
       <div className="bg-white dark:bg-[#121f1a] rounded-2xl p-5 border border-slate-200/90 dark:border-emerald-900/30 shadow-xs transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-slate-900 dark:text-emerald-50">
-                Absen & Jurnal
-              </h1>
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40">
-                Unit {currentUser?.unit || 'Pesantren'}
-              </span>
+          <div className="flex items-center gap-3.5">
+            {/* Interactive Profile Avatar with Camera Badge */}
+            <button
+              type="button"
+              onClick={() => setShowProfileModal(true)}
+              className="relative group shrink-0 cursor-pointer focus:outline-none"
+              title="Klik untuk ubah foto profil via kamera"
+            >
+              <TeacherAvatar teacher={currentUser} size="xl" />
+              <div className="absolute -bottom-1 -right-1 p-1 bg-emerald-700 group-hover:bg-emerald-800 text-white rounded-full shadow-xs border-2 border-white dark:border-[#121f1a] transition-transform group-hover:scale-110">
+                <Camera className="w-3 h-3" />
+              </div>
+            </button>
+
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg font-bold text-slate-900 dark:text-emerald-50">
+                  {currentUser?.name || 'Asatidz'}
+                </h1>
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40">
+                  Unit {currentUser?.unit || 'Pesantren'}
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-emerald-300/70 mt-0.5">
+                {currentUser?.position || 'Pengajar'} • NIP: {currentUser?.nip || '-'}
+              </p>
             </div>
-            <p className="text-xs text-slate-500 dark:text-emerald-300/70 mt-1">
-              {currentUser?.name || 'Asatidz'} • {currentUser?.position || 'Pengajar'}
-            </p>
           </div>
 
-          {/* Action: Guru Izin / Sakit Button */}
+          {/* Action Buttons */}
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowProfileModal(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200/80 dark:bg-[#182922] dark:hover:bg-[#1f352c] text-slate-700 dark:text-emerald-200 transition-colors border border-slate-200/70 dark:border-emerald-800/40 cursor-pointer shadow-xs"
+            >
+              <Camera className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>Foto Profil</span>
+            </button>
+
             <button
               onClick={() => {
                 setLeaveTargetSchedule(null);
@@ -592,6 +619,12 @@ export const TeacherDashboard: React.FC = () => {
         }}
         initialSchedule={leaveTargetSchedule}
         selectedDateInitial={todayStr}
+      />
+
+      {/* User Profile Modal */}
+      <UserProfileModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
       />
     </div>
   );
