@@ -331,13 +331,13 @@ export const BadalManagement: React.FC = () => {
                 Penugasan Guru Pengganti
               </h1>
               <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40">
-                {isKepsek ? `Otoritas Kepala ${userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}` : 'Panel Administrator'}
+                {isKepsek ? `Otoritas Kepala ${userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}` : 'Monitoring Admin (View-Only)'}
               </span>
             </div>
             <p className="text-xs text-stone-500 dark:text-stone-400">
               {isKepsek 
                 ? `Persetujuan izin guru dan penunjukan Asatidz Badal pengganti KBM Unit ${userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}` 
-                : 'Pusat integrasi pengesahan izin guru dan rekapitulasi Kafa\'ah KBM Badal (SMP, MA, Pesantren)'}
+                : 'Monitoring & rekapitulasi data penugasan Guru Badal (Hak persetujuan & penunjukan dipegang Kepala Sekolah unit masing-masing)'}
             </p>
           </div>
 
@@ -351,7 +351,7 @@ export const BadalManagement: React.FC = () => {
               <span>Pratinjau & Unduh Laporan</span>
             </button>
 
-            {(isKepsek || isAdmin) && (
+            {isKepsek && (
               <button
                 id="btn-tunjuk-badal-modal"
                 onClick={() => {
@@ -423,8 +423,21 @@ export const BadalManagement: React.FC = () => {
         )}
       </div>
 
+      {/* Admin Monitoring Banner */}
+      {isAdmin && (
+        <div className="bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/50 rounded-xl p-4 flex items-center gap-3 text-xs text-blue-900 dark:text-blue-200 shadow-xs">
+          <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />
+          <div>
+            <p className="font-bold">Mode Monitoring Administrator (Read-Only)</p>
+            <p className="text-[11px] text-blue-700 dark:text-blue-300 mt-0.5">
+              Fitur persetujuan pengajuan izin guru dan penunjukan guru pengganti (badal) secara penuh dipegang oleh Kepala Sekolah masing-masing unit (SMP, MA, Pesantren). Admin hanya dapat melihat rekapitulasi data Kafa'ah.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* 3. DEDICATED SECTION: PENGAJUAN IZIN GURU MENUNGGU PERSETUJUAN KEPALA SEKOLAH */}
-      {pendingLeaveRequests.length > 0 && (
+      {isKepsek && pendingLeaveRequests.length > 0 && (
         <div className="bg-amber-50/50 dark:bg-amber-950/20 rounded-2xl border border-amber-200/80 dark:border-amber-900/40 p-5 space-y-4 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/60 dark:border-amber-900/30 pb-3">
             <div className="flex items-center gap-2.5">
@@ -735,24 +748,30 @@ export const BadalManagement: React.FC = () => {
                             </span>
                           </td>
                           <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                            <div className="inline-flex items-center gap-1.5">
-                              {isPending && (
+                            {isKepsek ? (
+                              <div className="inline-flex items-center gap-1.5">
+                                {isPending && (
+                                  <button
+                                    onClick={() => handleApprovePendingItem(b)}
+                                    title="Setujui & Tugaskan Badal"
+                                    className="p-1.5 rounded bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 transition-colors cursor-pointer border border-emerald-200/60"
+                                  >
+                                    <Check className="w-3.5 h-3.5" strokeWidth={2} />
+                                  </button>
+                                )}
                                 <button
-                                  onClick={() => handleApprovePendingItem(b)}
-                                  title="Setujui & Tugaskan Badal"
-                                  className="p-1.5 rounded bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 transition-colors cursor-pointer border border-emerald-200/60"
+                                  onClick={() => setBadalToCancel(b)}
+                                  title="Batalkan Penugasan"
+                                  className="p-1.5 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors cursor-pointer"
                                 >
-                                  <Check className="w-3.5 h-3.5" strokeWidth={2} />
+                                  <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
                                 </button>
-                              )}
-                              <button
-                                onClick={() => setBadalToCancel(b)}
-                                title="Batalkan Penugasan"
-                                className="p-1.5 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors cursor-pointer"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
-                              </button>
-                            </div>
+                              </div>
+                            ) : (
+                              <span className="text-[10px] text-stone-400 font-semibold italic">
+                                Read-Only Admin
+                              </span>
+                            )}
                           </td>
                         </tr>
                       );
@@ -882,7 +901,7 @@ export const BadalManagement: React.FC = () => {
       )}
 
       {/* 7. ADD MANUAL BADAL MODAL */}
-      {showAddModal && (isKepsek || isAdmin) && (
+      {showAddModal && isKepsek && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-2xs">
           <div className="bg-white dark:bg-stone-900 rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-stone-200 dark:border-stone-800">
             <div className="px-5 py-4 border-b border-stone-150 dark:border-stone-800 flex items-center justify-between">

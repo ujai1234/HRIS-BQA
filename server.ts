@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'path';
 import cors from 'cors';
 import { createServer as createViteServer } from 'vite';
-import { db } from './src/db';
+import { db, sqliteDb } from './src/db';
 import * as schema from './src/db/schema';
 import { eq, and, or, inArray } from 'drizzle-orm';
 import { 
@@ -977,8 +977,8 @@ async function startServer() {
             latitude: -6.589250,
             longitude: 106.792880,
             radiusMeters: 150,
-            strictMode: true,
-            enableMockBypass: true,
+            strictMode: true as any,
+            enableMockBypass: true as any,
             addressNotes: "Jl. KH. Al-Ikhwan No. 09, Gerbang Utama & Area Gedung KBM",
             updatedAt: new Date(),
             updatedBy: "Administrator"
@@ -1031,8 +1031,8 @@ async function startServer() {
             latitude: numLat,
             longitude: numLng,
             radiusMeters: numRadius,
-            strictMode: Boolean(strictMode),
-            enableMockBypass: Boolean(enableMockBypass),
+            strictMode: Boolean(strictMode) as any,
+            enableMockBypass: Boolean(enableMockBypass) as any,
             addressNotes,
             updatedAt: new Date(),
             updatedBy,
@@ -1046,8 +1046,8 @@ async function startServer() {
           latitude: numLat,
           longitude: numLng,
           radiusMeters: numRadius,
-          strictMode: Boolean(strictMode),
-          enableMockBypass: Boolean(enableMockBypass),
+          strictMode: Boolean(strictMode) as any,
+          enableMockBypass: Boolean(enableMockBypass) as any,
           addressNotes,
           updatedAt: new Date(),
           updatedBy,
@@ -1084,6 +1084,119 @@ async function startServer() {
     }
   });
 
+  // ==========================================
+  // Database Explorer API (SQLite + Drizzle ORM Inspector)
+  // ==========================================
+  app.get('/api/db-explorer/tables', (req, res) => {
+    try {
+      const tablesInfo = sqliteDb.prepare(`
+        SELECT name FROM sqlite_master 
+        WHERE type='table' AND name NOT LIKE 'sqlite_%'
+        ORDER BY name ASC
+      `).all() as { name: string }[];
+
+      const tables = tablesInfo.map(t => {
+        const countRes = sqliteDb.prepare(`SELECT COUNT(*) as count FROM "${t.name}"`).get() as { count: number };
+        const columnsInfo = sqliteDb.prepare(`PRAGMA table_info("${t.name}")`).all() as { cid: number; name: string; type: string; notnull: number; dflt_value: any; pk: number }[];
+        return {
+          name: t.name,
+          rowCount: countRes ? countRes.count : 0,
+          columns: columnsInfo.map(c => ({
+            name: c.name,
+            type: c.type,
+            notNull: Boolean(c.notnull),
+            isPk: Boolean(c.pk),
+            defaultValue: c.dflt_value
+          }))
+        };
+      });
+
+      res.json({
+        engine: 'SQLite (better-sqlite3)',
+        orm: 'Drizzle ORM',
+        databaseFile: process.env.DATABASE_URL || 'sqlite.db',
+        tables
+      });
+    } catch (error) {
+      console.error('DB Explorer tables error:', error);
+      res.status(500).json({ error: 'Failed to fetch database metadata' });
+    }
+  });
+
+  app.get('/api/db-explorer/data/:tableName', (req, res) => {
+    try {
+      const tableName = req.params.tableName;
+      // Sanitize table name against SQL injection
+      const validTables = sqliteDb.prepare(`
+        SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'
+      `).all().map((t: any) => t.name);
+
+      if (!validTables.includes(tableName)) {
+        return res.status(404).json({ error: 'Table not found' });
+      }
+
+      const limit = parseInt(req.query.limit as string) || 100;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const search = (req.query.search as string || '').trim();
+
+      const columnsInfo = sqliteDb.prepare(`PRAGMA table_info("${tableName}")`).all() as { name: string }[];
+      const colNames = columnsInfo.map(c => c.name);
+
+      let whereClause = '';
+      const params: any[] = [];
+      if (search && colNames.length > 0) {
+        const searchConditions = colNames.map(col => `"${col}" LIKE ?`).join(' OR ');
+        whereClause = `WHERE ${searchConditions}`;
+        colNames.forEach(() => params.push(`%${search}%`));
+      }
+
+      const countStmt = sqliteDb.prepare(`SELECT COUNT(*) as count FROM "${tableName}" ${whereClause}`);
+      const totalRows = (countStmt.get(...params) as { count: number }).count;
+
+      const dataStmt = sqliteDb.prepare(`SELECT * FROM "${tableName}" ${whereClause} LIMIT ? OFFSET ?`);
+      const rows = dataStmt.all(...params, limit, offset);
+
+      res.json({
+        tableName,
+        totalRows,
+        limit,
+        offset,
+        columns: colNames,
+        rows
+      });
+    } catch (error) {
+      console.error('DB Explorer data error:', error);
+      res.status(500).json({ error: 'Failed to fetch table data' });
+    }
+  });
+
+  app.post('/api/db-explorer/query', (req, res) => {
+    try {
+      const { query } = req.body;
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ error: 'Query parameter is required' });
+      }
+
+      const trimmed = query.trim();
+      if (!trimmed.toUpperCase().startsWith('SELECT') && !trimmed.toUpperCase().startsWith('PRAGMA') && !trimmed.toUpperCase().startsWith('EXPLAIN')) {
+        return res.status(400).json({ error: 'Hanya query SELECT/PRAGMA/EXPLAIN yang diizinkan melalui API explorer' });
+      }
+
+      const rows = sqliteDb.prepare(trimmed).all();
+      const columns = rows.length > 0 ? Object.keys(rows[0] as object) : [];
+
+      res.json({
+        query: trimmed,
+        rowCount: rows.length,
+        columns,
+        rows
+      });
+    } catch (error) {
+      console.error('DB Explorer custom query error:', error);
+      res.status(400).json({ error: 'Query execution failed', details: String(error) });
+    }
+  });
+
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
@@ -1095,7 +1208,7 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*all', (req, res) => {
+    app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }

@@ -33,7 +33,8 @@ import {
   CheckCircle2,
   MapPin,
   Camera,
-  User
+  User,
+  Database
 } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
 import { UserRole, isKepsekRole } from '../types';
@@ -41,6 +42,7 @@ import { useGuruNotifications, GuruNotificationItem, GuruNotifType } from '../ho
 import { BrandLogo } from './BrandLogo';
 import { TeacherAvatar } from './TeacherAvatar';
 import { UserProfileModal } from './UserProfileModal';
+import { DatabaseExplorerModal } from './DatabaseExplorerModal';
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -94,6 +96,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [showNotifPopover, setShowNotifPopover] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showDbModal, setShowDbModal] = useState(false);
   const [filterType, setFilterType] = useState<'ALL' | 'BADAL' | 'KBM' | 'REQUEST'>('ALL');
   const notifRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -431,6 +434,17 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="hidden sm:inline">Segarkan</span>
             </button>
 
+            {/* Database Explorer Modal Button */}
+            <button
+              id="btn-db-explorer"
+              onClick={() => setShowDbModal(true)}
+              className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-[#0e271d] dark:hover:bg-[#143628] border border-emerald-300 dark:border-emerald-700/50 text-emerald-800 dark:text-emerald-200 py-1.5 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-95 shadow-xs"
+              title="Buka Viewer Database SQLite & Drizzle ORM"
+            >
+              <Database className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span className="hidden sm:inline">DB Viewer</span>
+            </button>
+
             {/* Period Selector (CoreUI Form Select) */}
             <div className="relative hidden md:block">
               <select
@@ -621,6 +635,12 @@ export const Header: React.FC<HeaderProps> = ({
       <UserProfileModal
         isOpen={showProfileModal}
         onClose={() => setShowProfileModal(false)}
+      />
+
+      {/* Database Explorer Modal (SQLite & Drizzle Viewer) */}
+      <DatabaseExplorerModal
+        isOpen={showDbModal}
+        onClose={() => setShowDbModal(false)}
       />
     </>
   );
