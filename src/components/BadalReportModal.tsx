@@ -216,7 +216,7 @@ export const BadalReportModal: React.FC<BadalReportModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-950/70 backdrop-blur-xs animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150">
       {/* Printable Style definition */}
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
@@ -242,9 +242,9 @@ export const BadalReportModal: React.FC<BadalReportModalProps> = ({
         }
       ` }} />
 
-      <div className="bg-stone-900 border border-stone-800 rounded-xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+      <div className="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Modal Top Control Bar */}
-        <div className="px-4 py-3 bg-stone-900 border-b border-stone-800 flex items-center justify-between gap-3 text-stone-200">
+        <div className="px-4 py-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between gap-3 text-slate-200">
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4 text-emerald-400" />
             <h3 className="text-xs font-semibold text-white tracking-wide">
@@ -255,7 +255,7 @@ export const BadalReportModal: React.FC<BadalReportModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-medium border border-stone-700 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition-colors cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Cetak</span>
@@ -271,7 +271,7 @@ export const BadalReportModal: React.FC<BadalReportModalProps> = ({
 
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-white transition-colors cursor-pointer ml-1"
+              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer ml-1"
               title="Tutup (Esc)"
             >
               <X className="w-4 h-4" />
@@ -280,48 +280,48 @@ export const BadalReportModal: React.FC<BadalReportModalProps> = ({
         </div>
 
         {/* Paper Document Preview Area */}
-        <div className="overflow-y-auto p-4 sm:p-8 bg-stone-950/40">
+        <div className="overflow-y-auto p-4 sm:p-8 bg-slate-950/40">
           <div
             id="badal-report-paper"
-            className="bg-white text-stone-900 rounded-lg p-6 sm:p-10 shadow-lg max-w-3xl mx-auto space-y-5 text-xs font-serif"
+            className="bg-white text-slate-900 rounded-lg p-6 sm:p-10 shadow-lg max-w-3xl mx-auto space-y-5 text-xs font-serif"
           >
             {/* 1. Official Letterhead (KOP SURAT) */}
-            <div className="border-b-2 border-stone-900 pb-3 font-sans">
+            <div className="border-b-2 border-slate-900 pb-3 font-sans">
               <div className="flex items-center justify-between gap-4">
-                <div className="w-14 h-14 rounded-lg bg-stone-900 text-white flex items-center justify-center font-extrabold text-xl shrink-0">
+                <div className="w-14 h-14 rounded-lg bg-slate-900 text-white flex items-center justify-center font-extrabold text-xl shrink-0">
                   BQA
                 </div>
                 <div className="text-center flex-1 space-y-0.5">
                   <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-widest">
                     Yayasan Al-Ikhwan Mandiri Sejahtera
                   </p>
-                  <h1 className="text-base sm:text-lg font-extrabold tracking-tight text-stone-950 uppercase leading-none">
+                  <h1 className="text-base sm:text-lg font-extrabold tracking-tight text-slate-950 uppercase leading-none">
                     PONDOK PESANTREN BAITUL QUR'AN AL-IKHWAN
                   </h1>
-                  <p className="text-[11px] font-semibold text-stone-700">
+                  <p className="text-[11px] font-semibold text-slate-700">
                     Lembaga Pendidikan Islam & Tahfiz Quran • SMP IT • MA • Pesantren
                   </p>
-                  <p className="text-[10px] text-stone-500 font-medium">
+                  <p className="text-[10px] text-slate-500 font-medium">
                     Jl. Sungai Kendal No.21, RT.8/RW.5, Marunda, Cilincing, Jakarta Utara 14150
                   </p>
-                  <p className="text-[9px] text-stone-400 font-mono">
+                  <p className="text-[9px] text-slate-400 font-mono">
                     Hotline: 0858-8302-2643 / 0812-8294-9922 • Email: sekretariat@bqa.sch.id
                   </p>
                 </div>
                 <div className="w-14 text-right hidden sm:block">
-                  <span className="text-[8px] font-bold text-stone-900 block uppercase">Jakarta Utara</span>
-                  <span className="text-[8px] font-mono text-stone-400 block">NSPP: 510032</span>
+                  <span className="text-[8px] font-bold text-slate-900 block uppercase">Jakarta Utara</span>
+                  <span className="text-[8px] font-mono text-slate-400 block">NSPP: 510032</span>
                 </div>
               </div>
-              <div className="mt-2 border-t border-stone-300" />
+              <div className="mt-2 border-t border-slate-300" />
             </div>
 
             {/* 2. Document Title */}
             <div className="text-center font-sans space-y-1 pt-1">
-              <h2 className="text-sm sm:text-base font-bold text-stone-950 underline underline-offset-4 uppercase tracking-wide">
+              <h2 className="text-sm sm:text-base font-bold text-slate-950 underline underline-offset-4 uppercase tracking-wide">
                 LAPORAN REKAPITULASI PENUGASAN GURU BADAL
               </h2>
-              <div className="flex items-center justify-center gap-2 text-xs text-stone-500 font-mono pt-1">
+              <div className="flex items-center justify-center gap-2 text-xs text-slate-500 font-mono pt-1">
                 <span>Nomor: <strong>{docNumber}</strong></span>
                 <span>•</span>
                 <span>{scopeTitle}</span>
@@ -329,23 +329,23 @@ export const BadalReportModal: React.FC<BadalReportModalProps> = ({
             </div>
 
             {/* 3. Summary Metadata Box */}
-            <div className="bg-stone-50 border border-stone-200 rounded-lg p-3 text-xs font-sans grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-sans grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
-                <span className="text-[10px] text-stone-500 block">Tanggal Dokumen</span>
-                <span className="font-medium text-stone-900">{todayStr}</span>
+                <span className="text-[10px] text-slate-500 block">Tanggal Dokumen</span>
+                <span className="font-medium text-slate-900">{todayStr}</span>
               </div>
               <div>
-                <span className="text-[10px] text-stone-500 block">Lingkup Satuan</span>
-                <span className="font-medium text-stone-900">{scopeTitle}</span>
+                <span className="text-[10px] text-slate-500 block">Lingkup Satuan</span>
+                <span className="font-medium text-slate-900">{scopeTitle}</span>
               </div>
               <div>
-                <span className="text-[10px] text-stone-500 block">Total Sesi & Jam</span>
-                <span className="font-semibold text-stone-900 font-mono">
+                <span className="text-[10px] text-slate-500 block">Total Sesi & Jam</span>
+                <span className="font-semibold text-slate-900 font-mono">
                   {badalList.length} Sesi ({totalJP} JP)
                 </span>
               </div>
               <div>
-                <span className="text-[10px] text-stone-500 block">Total Kafa'ah Badal</span>
+                <span className="text-[10px] text-slate-500 block">Total Kafa'ah Badal</span>
                 <span className="font-bold text-emerald-700 font-mono">
                   {formatRupiah(totalHonor)}
                 </span>
@@ -354,24 +354,24 @@ export const BadalReportModal: React.FC<BadalReportModalProps> = ({
 
             {/* 4. Structured Table */}
             <div className="font-sans overflow-x-auto">
-              <table className="w-full text-left text-[11px] border-collapse border border-stone-300">
+              <table className="w-full text-left text-[11px] border-collapse border border-slate-300">
                 <thead>
-                  <tr className="bg-stone-100 text-stone-700 font-bold border-b border-stone-300 text-[10px] uppercase">
-                    <th className="p-2 border-r border-stone-300 text-center w-8">No</th>
-                    <th className="p-2 border-r border-stone-300">Tanggal</th>
-                    <th className="p-2 border-r border-stone-300">Unit</th>
-                    <th className="p-2 border-r border-stone-300">Mapel & Kelas</th>
-                    <th className="p-2 border-r border-stone-300">Guru Utama</th>
-                    <th className="p-2 border-r border-stone-300">Guru Badal</th>
-                    <th className="p-2 border-r border-stone-300 text-center">JP</th>
-                    <th className="p-2 border-r border-stone-300 text-right">Kafa'ah</th>
+                  <tr className="bg-slate-100 text-slate-700 font-bold border-b border-slate-300 text-[10px] uppercase">
+                    <th className="p-2 border-r border-slate-300 text-center w-8">No</th>
+                    <th className="p-2 border-r border-slate-300">Tanggal</th>
+                    <th className="p-2 border-r border-slate-300">Unit</th>
+                    <th className="p-2 border-r border-slate-300">Mapel & Kelas</th>
+                    <th className="p-2 border-r border-slate-300">Guru Utama</th>
+                    <th className="p-2 border-r border-slate-300">Guru Badal</th>
+                    <th className="p-2 border-r border-slate-300 text-center">JP</th>
+                    <th className="p-2 border-r border-slate-300 text-right">Kafa'ah</th>
                     <th className="p-2 text-center">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-200">
+                <tbody className="divide-y divide-slate-200">
                   {badalList.length === 0 ? (
                     <tr>
-                      <td colSpan={9} className="p-4 text-center text-stone-400 italic">
+                      <td colSpan={9} className="p-4 text-center text-slate-400 italic">
                         Tidak ada penugasan guru badal pada periode ini.
                       </td>
                     </tr>
@@ -384,32 +384,32 @@ export const BadalReportModal: React.FC<BadalReportModalProps> = ({
                       const rate = badalTeacher ? badalTeacher.hourlyRate : 40000;
 
                       return (
-                        <tr key={b.id} className={idx % 2 === 1 ? 'bg-stone-50/50' : 'bg-white'}>
-                          <td className="p-2 border-r border-stone-200 text-center text-stone-500 font-mono">
+                        <tr key={b.id} className={idx % 2 === 1 ? 'bg-slate-50/50' : 'bg-white'}>
+                          <td className="p-2 border-r border-slate-200 text-center text-slate-500 font-mono">
                             {idx + 1}
                           </td>
-                          <td className="p-2 border-r border-stone-200 whitespace-nowrap">
+                          <td className="p-2 border-r border-slate-200 whitespace-nowrap">
                             {formatIndonesianDate(b.date)}
                           </td>
-                          <td className="p-2 border-r border-stone-200 font-medium">
+                          <td className="p-2 border-r border-slate-200 font-medium">
                             {sched?.unit || '-'}
                           </td>
-                          <td className="p-2 border-r border-stone-200">
-                            <span className="font-semibold text-stone-900 block">
+                          <td className="p-2 border-r border-slate-200">
+                            <span className="font-semibold text-slate-900 block">
                               {sched?.subject || 'KBM'}
                             </span>
-                            <span className="text-[10px] text-stone-500">{sched?.className}</span>
+                            <span className="text-[10px] text-slate-500">{sched?.className}</span>
                           </td>
-                          <td className="p-2 border-r border-stone-200 text-stone-700">
+                          <td className="p-2 border-r border-slate-200 text-slate-700">
                             {origTeacher?.name || '-'}
                           </td>
-                          <td className="p-2 border-r border-stone-200 font-medium text-stone-900">
+                          <td className="p-2 border-r border-slate-200 font-medium text-slate-900">
                             {badalTeacher?.name || '-'}
                           </td>
-                          <td className="p-2 border-r border-stone-200 text-center font-mono font-medium">
+                          <td className="p-2 border-r border-slate-200 text-center font-mono font-medium">
                             {jp} JP
                           </td>
-                          <td className="p-2 border-r border-stone-200 text-right font-mono font-semibold text-emerald-800">
+                          <td className="p-2 border-r border-slate-200 text-right font-mono font-semibold text-emerald-800">
                             {formatRupiah(jp * rate)}
                           </td>
                           <td className="p-2 text-center font-medium">
@@ -435,14 +435,14 @@ export const BadalReportModal: React.FC<BadalReportModalProps> = ({
                   )}
                 </tbody>
                 <tfoot>
-                  <tr className="bg-stone-100 font-bold text-stone-900 border-t-2 border-stone-300">
-                    <td colSpan={6} className="p-2 border-r border-stone-300 text-right">
+                  <tr className="bg-slate-100 font-bold text-slate-900 border-t-2 border-slate-300">
+                    <td colSpan={6} className="p-2 border-r border-slate-300 text-right">
                       Total Akumulasi
                     </td>
-                    <td className="p-2 border-r border-stone-300 text-center font-mono">
+                    <td className="p-2 border-r border-slate-300 text-center font-mono">
                       {totalJP} JP
                     </td>
-                    <td className="p-2 border-r border-stone-300 text-right font-mono text-emerald-800">
+                    <td className="p-2 border-r border-slate-300 text-right font-mono text-emerald-800">
                       {formatRupiah(totalHonor)}
                     </td>
                     <td className="p-2"></td>
@@ -453,28 +453,28 @@ export const BadalReportModal: React.FC<BadalReportModalProps> = ({
 
             {/* 5. Official Signatures Block */}
             <div className="pt-6 font-sans">
-              <div className="grid grid-cols-2 gap-8 text-center text-xs text-stone-800">
+              <div className="grid grid-cols-2 gap-8 text-center text-xs text-slate-800">
                 <div className="space-y-12">
-                  <p className="font-semibold text-stone-700">
+                  <p className="font-semibold text-slate-700">
                     Mengetahui,<br />Kepala Unit / Mudir
                   </p>
                   <div className="space-y-0.5">
-                    <p className="font-bold underline text-stone-900">
+                    <p className="font-bold underline text-slate-900">
                       Ust. H. Ahmad Dahlan, Lc.
                     </p>
-                    <p className="text-[10px] text-stone-500 font-mono">NIP. BQA-DIR-001</p>
+                    <p className="text-[10px] text-slate-500 font-mono">NIP. BQA-DIR-001</p>
                   </div>
                 </div>
 
                 <div className="space-y-12">
-                  <p className="font-semibold text-stone-700">
+                  <p className="font-semibold text-slate-700">
                     Jakarta Utara, {todayStr}<br />Penanggung Jawab Kurikulum / Badal
                   </p>
                   <div className="space-y-0.5">
-                    <p className="font-bold underline text-stone-900">
+                    <p className="font-bold underline text-slate-900">
                       Ust. Muhammad Faiz, S.Pd.I
                     </p>
-                    <p className="text-[10px] text-stone-500 font-mono">NIP. BQA-KUR-003</p>
+                    <p className="text-[10px] text-slate-500 font-mono">NIP. BQA-KUR-003</p>
                   </div>
                 </div>
               </div>

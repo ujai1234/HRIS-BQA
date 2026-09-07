@@ -323,18 +323,18 @@ export const BadalManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* 1. Header and Context Banner */}
-      <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 p-5 sm:p-6 shadow-xs">
+      <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight font-sans">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-emerald-50 tracking-tight font-sans">
                 Penugasan Guru Pengganti
               </h1>
               <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40">
                 {isKepsek ? `Otoritas Kepala ${userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}` : 'Monitoring Admin (View-Only)'}
               </span>
             </div>
-            <p className="text-xs text-stone-500 dark:text-stone-400">
+            <p className="text-xs text-slate-500 dark:text-emerald-400/70">
               {isKepsek 
                 ? `Persetujuan izin guru dan penunjukan Asatidz Badal pengganti KBM Unit ${userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}` 
                 : 'Monitoring & rekapitulasi data penugasan Guru Badal (Hak persetujuan & penunjukan dipegang Kepala Sekolah unit masing-masing)'}
@@ -345,9 +345,9 @@ export const BadalManagement: React.FC = () => {
             <button
               id="btn-export-pdf-badal"
               onClick={() => setShowBadalReportModal(true)}
-              className="inline-flex items-center justify-center gap-1.5 bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 px-3.5 py-2 rounded-lg text-xs font-semibold border border-stone-200 dark:border-stone-700 transition-all cursor-pointer shadow-xs"
+              className="inline-flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-[#0f1a15] hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-emerald-100 px-3.5 py-2 rounded-lg text-xs font-semibold border border-slate-200 dark:border-emerald-800/40 transition-all cursor-pointer shadow-xs"
             >
-              <FileText className="w-3.5 h-3.5 text-stone-400" strokeWidth={1.5} />
+              <FileText className="w-3.5 h-3.5 text-slate-400" strokeWidth={1.5} />
               <span>Pratinjau & Unduh Laporan</span>
             </button>
 
@@ -370,53 +370,53 @@ export const BadalManagement: React.FC = () => {
 
       {/* 2. Stat Metric Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
-          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Total Sesi Pengganti</span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-stone-900 dark:text-stone-100 mt-1">
-            {stats.totalSessions} <span className="text-xs font-normal text-stone-500 font-sans">Sesi</span>
+        <div className="bg-white dark:bg-[#121f1a] p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs">
+          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">Total Sesi Pengganti</span>
+          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-slate-900 dark:text-emerald-50 mt-1">
+            {stats.totalSessions} <span className="text-xs font-normal text-slate-500 font-sans">Sesi</span>
           </p>
-          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
+          <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-1.5 block">
             Penggantian KBM aktif
           </span>
         </div>
 
-        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
-          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Total Jam Mengajar</span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-stone-900 dark:text-stone-100 mt-1">
-            {stats.totalJP} <span className="text-xs font-normal text-stone-500 font-sans">JP</span>
+        <div className="bg-white dark:bg-[#121f1a] p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs">
+          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">Total Jam Mengajar</span>
+          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-slate-900 dark:text-emerald-50 mt-1">
+            {stats.totalJP} <span className="text-xs font-normal text-slate-500 font-sans">JP</span>
           </p>
-          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
+          <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-1.5 block">
             Beban JP teralihkan
           </span>
         </div>
 
-        <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
-          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Izin & Pengganti</span>
+        <div className="bg-white dark:bg-[#121f1a] p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs">
+          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">Izin & Pengganti</span>
           <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-amber-600 dark:text-amber-400 mt-1">
-            {stats.pendingCount} <span className="text-xs font-normal text-stone-500 font-sans">Pengajuan</span>
+            {stats.pendingCount} <span className="text-xs font-normal text-slate-500 font-sans">Pengajuan</span>
           </p>
-          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
+          <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-1.5 block">
             {isKepsek ? `Unit ${userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}` : 'Seluruh Unit'}
           </span>
         </div>
 
         {isKepsek ? (
-          <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
-            <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Sesi Pengganti Disetujui</span>
+          <div className="bg-white dark:bg-[#121f1a] p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs">
+            <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">Sesi Pengganti Disetujui</span>
             <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-emerald-700 dark:text-emerald-400 mt-1">
-              {stats.approvedCount} <span className="text-xs font-normal text-stone-500 font-sans">Sesi</span>
+              {stats.approvedCount} <span className="text-xs font-normal text-slate-500 font-sans">Sesi</span>
             </p>
-            <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
+            <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-1.5 block">
               Telah disahkan Kepala Unit
             </span>
           </div>
         ) : (
-          <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
-            <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">Alokasi Kafa'ah Pengganti</span>
+          <div className="bg-white dark:bg-[#121f1a] p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs">
+            <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">Alokasi Kafa'ah Pengganti</span>
             <p className="text-xl sm:text-2xl font-semibold font-mono tracking-tight text-emerald-700 dark:text-emerald-400 mt-1 truncate">
               {formatRupiah(stats.totalHonor)}
             </p>
-            <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block font-mono">
+            <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-1.5 block font-mono">
               Honor pengganti KBM
             </span>
           </div>
@@ -474,7 +474,7 @@ export const BadalManagement: React.FC = () => {
               return (
                 <div 
                   key={b.id} 
-                  className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-xl border border-slate-200/90 dark:border-stone-800 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+                  className="bg-white dark:bg-[#121f1a] p-4 sm:p-5 rounded-xl border border-slate-200/90 dark:border-emerald-900/40 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4"
                 >
                   {/* Left Column: Teacher & Leave Information */}
                   <div className="space-y-2 flex-1">
@@ -482,45 +482,45 @@ export const BadalManagement: React.FC = () => {
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300/60 dark:border-amber-800/40">
                         {b.reason}
                       </span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-stone-800 text-slate-700 dark:text-stone-300 border border-slate-200 dark:border-stone-700">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-[#0f1a15] text-slate-700 dark:text-emerald-300/80 border border-slate-200 dark:border-emerald-800/40">
                         Unit {unitForSchedule}
                       </span>
-                      <span className="text-xs font-semibold text-slate-700 dark:text-stone-300 font-mono">
+                      <span className="text-xs font-semibold text-slate-700 dark:text-emerald-300/80 font-mono">
                         {formatIndonesianDate(b.date)}
                       </span>
                     </div>
 
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                       <div>
-                        <p className="text-xs text-slate-400 dark:text-stone-500">Guru yang Mengajukan Izin:</p>
-                        <p className="text-sm font-bold text-slate-900 dark:text-stone-100 flex items-center gap-1.5">
+                        <p className="text-xs text-slate-400 dark:text-emerald-500/60">Guru yang Mengajukan Izin:</p>
+                        <p className="text-sm font-bold text-slate-900 dark:text-emerald-50 flex items-center gap-1.5">
                           <User className="w-3.5 h-3.5 text-slate-400" />
                           <span>{origTeacher?.name || 'Guru Utama'}</span>
                           <span className="text-[11px] font-normal text-slate-500">({origTeacher?.position})</span>
                         </p>
                       </div>
 
-                      <div className="sm:border-l sm:border-slate-200 dark:sm:border-stone-800 sm:pl-4">
-                        <p className="text-xs text-slate-400 dark:text-stone-500">Mata Pelajaran & Sesi KBM:</p>
-                        <p className="text-xs font-semibold text-slate-800 dark:text-stone-200">
+                      <div className="sm:border-l sm:border-slate-200 dark:sm:border-slate-800 sm:pl-4">
+                        <p className="text-xs text-slate-400 dark:text-emerald-500/60">Mata Pelajaran & Sesi KBM:</p>
+                        <p className="text-xs font-semibold text-slate-800 dark:text-emerald-100">
                           {sched?.subject} ({sched?.className}) • {sched?.startTime}-{sched?.endTime} WIB ({sched?.hours || 2} JP)
                         </p>
                       </div>
                     </div>
 
                     {/* Keterangan / Alasan Izin (Prominently Highlighted) */}
-                    <div className="bg-slate-50 dark:bg-stone-800/50 p-2.5 rounded-lg border border-slate-200/60 dark:border-stone-800 text-xs">
-                      <span className="font-semibold text-slate-700 dark:text-stone-300">Keterangan / Alasan: </span>
-                      <span className="text-slate-600 dark:text-stone-400 italic">
+                    <div className="bg-slate-50 dark:bg-[#0f1a15]/50 p-2.5 rounded-lg border border-slate-200/60 dark:border-emerald-900/40 text-xs">
+                      <span className="font-semibold text-slate-700 dark:text-emerald-300/80">Keterangan / Alasan: </span>
+                      <span className="text-slate-600 dark:text-emerald-400/70 italic">
                         "{b.notes || 'Tidak ada catatan tambahan'}"
                       </span>
                     </div>
                   </div>
 
                   {/* Right Column: Guru Badal Selector & Action Buttons */}
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 lg:border-l lg:border-slate-200 dark:lg:border-stone-800 lg:pl-4 shrink-0">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 lg:border-l lg:border-slate-200 dark:lg:border-slate-800 lg:pl-4 shrink-0">
                     <div className="space-y-1">
-                      <label className="text-[11px] font-medium text-slate-600 dark:text-stone-400 block">
+                      <label className="text-[11px] font-medium text-slate-600 dark:text-emerald-400/70 block">
                         Tugaskan Guru Badal:
                       </label>
                       <select
@@ -531,7 +531,7 @@ export const BadalManagement: React.FC = () => {
                             [b.id]: e.target.value
                           }));
                         }}
-                        className="w-full sm:w-56 text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-slate-900 dark:text-stone-100 focus:outline-none focus:border-emerald-600"
+                        className="w-full sm:w-56 text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-emerald-800/40 bg-white dark:bg-[#0f1a15] text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-emerald-600"
                       >
                         <option value="">-- Pilih Guru Pengganti --</option>
                         {availablePeerTeachers.map((t) => (
@@ -569,14 +569,14 @@ export const BadalManagement: React.FC = () => {
 
       {/* 4. Navigation Subtabs (For Kepsek) */}
       {isKepsek && (
-        <div className="flex items-center gap-1 border-b border-stone-200 dark:border-stone-800 pb-px">
+        <div className="flex items-center gap-1 border-b border-slate-200 dark:border-emerald-900/40 pb-px">
             <button
             id="tab-daftar-badal"
             onClick={() => setActiveTab('daftar_penugasan')}
             className={`px-4 py-2 border-b-2 text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'daftar_penugasan'
                 ? 'border-[#1B4332] text-[#1B4332] dark:text-emerald-400'
-                : 'border-transparent text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
+                : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
             Daftar Penugasan Pengganti ({filteredBadal.length})
@@ -587,7 +587,7 @@ export const BadalManagement: React.FC = () => {
             className={`px-4 py-2 border-b-2 text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 ${
               activeTab === 'cari_guru'
                 ? 'border-[#1B4332] text-[#1B4332] dark:text-emerald-400'
-                : 'border-transparent text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
+                : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
             <UserCheck className="w-3.5 h-3.5" strokeWidth={1.5} />
@@ -600,18 +600,18 @@ export const BadalManagement: React.FC = () => {
       {(!isKepsek || activeTab === 'daftar_penugasan') && (
         <div className="space-y-4">
           {/* Filter Bar */}
-          <div className="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="bg-white dark:bg-[#121f1a] p-4 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
             {/* Unit Filter - For Admin */}
             {isAdmin && (
-              <div className="flex items-center gap-1 bg-stone-100 dark:bg-stone-800 p-1 rounded-lg text-xs overflow-x-auto max-w-full">
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#0f1a15] p-1 rounded-lg text-xs overflow-x-auto max-w-full">
                 {(['ALL', 'SMP', 'MA', 'PESANTREN'] as const).map((unit) => (
                   <button
                     key={unit}
                     onClick={() => setSelectedUnit(unit)}
                     className={`px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer shrink-0 ${
                       selectedUnit === unit
-                        ? 'bg-white dark:bg-stone-900 text-[#1B4332] dark:text-emerald-400 shadow-xs'
-                        : 'text-stone-500 hover:text-stone-900 dark:hover:text-stone-200'
+                        ? 'bg-white dark:bg-[#121f1a] text-[#1B4332] dark:text-emerald-400 shadow-xs'
+                        : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
                     }`}
                   >
                     {unit === 'ALL' ? 'Semua Unit' : unit === 'PESANTREN' ? 'Pesantren' : unit}
@@ -623,20 +623,20 @@ export const BadalManagement: React.FC = () => {
             {/* Search Input & Status Filter */}
             <div className="flex items-center gap-3 w-full sm:w-auto ml-auto">
               <div className="relative flex-1 sm:w-56">
-                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" strokeWidth={1.5} />
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth={1.5} />
                 <input
                   type="text"
                   placeholder="Cari guru / mapel / alasan..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-xs text-stone-900 dark:text-stone-100 focus:outline-none focus:border-[#1B4332]"
+                  className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-xs text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-[#1B4332]"
                 />
               </div>
 
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-xs text-stone-700 dark:text-stone-300 focus:outline-none"
+                className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-xs text-slate-700 dark:text-emerald-300/80 focus:outline-none"
               >
                 <option value="ALL">Semua Status</option>
                 <option value="PENDING">Menunggu Persetujuan</option>
@@ -647,11 +647,11 @@ export const BadalManagement: React.FC = () => {
           </div>
 
           {/* Badal Records Table */}
-          <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 overflow-hidden shadow-xs">
+          <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="bg-stone-50/75 dark:bg-stone-800 text-stone-500 dark:text-stone-400 font-bold border-b border-stone-200/70 dark:border-stone-700 text-[10px] uppercase tracking-wider">
+                  <tr className="bg-slate-50 dark:bg-[#0f1a15]/75 dark:bg-[#0f1a15] text-slate-500 dark:text-emerald-400/70 font-bold border-b border-slate-200/70 dark:border-emerald-800/40 text-[10px] uppercase tracking-wider">
                     <th className="py-3 px-4">Tanggal</th>
                     <th className="py-3 px-4">Unit</th>
                     <th className="py-3 px-4">Mata Pelajaran & Sesi</th>
@@ -667,10 +667,10 @@ export const BadalManagement: React.FC = () => {
                     <th className="py-3 px-4 text-center w-24">Aksi</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-100 dark:divide-stone-800 text-stone-700 dark:text-stone-300">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-emerald-300/80">
                   {filteredBadal.length === 0 ? (
                     <tr>
-                      <td colSpan={isKepsek ? 9 : 9} className="py-12 text-center text-stone-400 dark:text-stone-500 font-medium">
+                      <td colSpan={isKepsek ? 9 : 9} className="py-12 text-center text-slate-400 dark:text-emerald-500/60 font-medium">
                         Tidak ada catatan penugasan guru badal yang sesuai filter.
                       </td>
                     </tr>
@@ -686,31 +686,31 @@ export const BadalManagement: React.FC = () => {
                       const isPending = b.status === 'PENDING';
 
                       return (
-                        <tr key={b.id} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/20 transition-colors">
+                        <tr key={b.id} className="hover:bg-slate-50 dark:bg-[#0f1a15]/50 dark:hover:bg-[#162720]/50/20 transition-colors">
                           <td className="py-3.5 px-4 whitespace-nowrap">
-                            <p className="font-semibold text-stone-900 dark:text-stone-100">{formatIndonesianDate(b.date)}</p>
+                            <p className="font-semibold text-slate-900 dark:text-emerald-50">{formatIndonesianDate(b.date)}</p>
                           </td>
                           <td className="py-3.5 px-4 whitespace-nowrap">
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200/40">
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#0f1a15] text-slate-700 dark:text-emerald-300/80 border border-slate-200/40">
                               {sched?.unit || 'SMP'}
                             </span>
                           </td>
                           <td className="py-3.5 px-4">
-                            <p className="font-semibold text-stone-900 dark:text-stone-100">{sched?.subject || 'KBM'}</p>
-                            <p className="text-[10px] text-stone-400 dark:text-stone-500 font-mono">
+                            <p className="font-semibold text-slate-900 dark:text-emerald-50">{sched?.subject || 'KBM'}</p>
+                            <p className="text-[10px] text-slate-400 dark:text-emerald-500/60 font-mono">
                               {sched?.className} • {sched?.startTime} - {sched?.endTime} ({jp} JP)
                             </p>
                           </td>
                           <td className="py-3.5 px-4">
-                            <p className="text-stone-800 dark:text-stone-200 font-medium">{origTeacher?.name || 'Guru Utama'}</p>
-                            <span className="text-[10px] text-stone-400">{origTeacher?.position}</span>
+                            <p className="text-slate-800 dark:text-emerald-100 font-medium">{origTeacher?.name || 'Guru Utama'}</p>
+                            <span className="text-[10px] text-slate-400">{origTeacher?.position}</span>
                           </td>
                           <td className="py-3.5 px-4 max-w-xs">
                             <span className="inline-block text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/50 dark:border-amber-800/40 px-2 py-0.5 rounded mb-1">
                               {b.reason}
                             </span>
                             {b.notes && (
-                              <p className="text-[11px] text-stone-600 dark:text-stone-400 italic line-clamp-2">
+                              <p className="text-[11px] text-slate-600 dark:text-emerald-400/70 italic line-clamp-2">
                                 "{b.notes}"
                               </p>
                             )}
@@ -719,7 +719,7 @@ export const BadalManagement: React.FC = () => {
                             {badalTeacher ? (
                               <div>
                                 <p className="font-bold text-[#1B4332] dark:text-emerald-400">{badalTeacher.name}</p>
-                                <span className="text-[10px] text-stone-400">{badalTeacher.position}</span>
+                                <span className="text-[10px] text-slate-400">{badalTeacher.position}</span>
                               </div>
                             ) : (
                               <span className="text-[11px] italic text-amber-600 dark:text-amber-400">
@@ -728,7 +728,7 @@ export const BadalManagement: React.FC = () => {
                             )}
                           </td>
                           {isKepsek ? (
-                            <td className="py-3.5 px-4 text-center font-mono font-bold text-stone-800 dark:text-stone-200">
+                            <td className="py-3.5 px-4 text-center font-mono font-bold text-slate-800 dark:text-emerald-100">
                               {jp} JP
                             </td>
                           ) : (
@@ -768,7 +768,7 @@ export const BadalManagement: React.FC = () => {
                                 </button>
                               </div>
                             ) : (
-                              <span className="text-[10px] text-stone-400 font-semibold italic">
+                              <span className="text-[10px] text-slate-400 font-semibold italic">
                                 Read-Only Admin
                               </span>
                             )}
@@ -787,19 +787,19 @@ export const BadalManagement: React.FC = () => {
       {/* 6. CONTENT VIEW: SMART FINDER */}
       {isKepsek && activeTab === 'cari_guru' && (
         <div className="space-y-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-stone-900 p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 shadow-xs">
-            <h3 className="text-xs font-bold text-stone-900 dark:text-stone-100 mb-4 flex items-center gap-2 uppercase tracking-wider">
+          <div className="bg-white dark:bg-[#121f1a] p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs">
+            <h3 className="text-xs font-bold text-slate-900 dark:text-emerald-50 mb-4 flex items-center gap-2 uppercase tracking-wider">
               <UserCheck className="w-4 h-4 text-[#1B4332] dark:text-emerald-400" strokeWidth={1.5} />
               <span>Pencocokan Jadwal Guru Kosong (Smart Finder)</span>
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
               <div>
-                <label className="block text-stone-500 dark:text-stone-400 mb-1.5 font-medium">Hari KBM</label>
+                <label className="block text-slate-500 dark:text-emerald-400/70 mb-1.5 font-medium">Hari KBM</label>
                 <select
                   value={finderDay}
                   onChange={(e) => setFinderDay(e.target.value as DayOfWeek)}
-                  className="w-full px-2.5 py-2 bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-stone-100 focus:outline-none"
+                  className="w-full px-2.5 py-2 bg-slate-50 dark:bg-[#0f1a15] rounded-lg border border-slate-200 dark:border-emerald-800/40 text-slate-900 dark:text-emerald-50 focus:outline-none"
                 >
                   {(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Ahad'] as DayOfWeek[]).map(day => (
                     <option key={day} value={day}>{day}</option>
@@ -808,15 +808,15 @@ export const BadalManagement: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-stone-500 dark:text-stone-400 mb-1.5 font-medium">Unit Sekolah</label>
+                <label className="block text-slate-500 dark:text-emerald-400/70 mb-1.5 font-medium">Unit Sekolah</label>
                 <select
                   value={finderUnit}
                   disabled={userUnit !== 'ALL'}
                   onChange={(e) => setFinderUnit(e.target.value as UnitType)}
                   className={`w-full px-2.5 py-2 rounded-lg border focus:outline-none transition-all ${
                     userUnit !== 'ALL'
-                      ? 'bg-stone-100 dark:bg-stone-850 border-stone-200 dark:border-stone-850 text-stone-400 dark:text-stone-500 cursor-not-allowed'
-                      : 'bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-900 dark:text-stone-100'
+                      ? 'bg-slate-100 dark:bg-[#0f1a15] border-slate-200 dark:border-emerald-900/40 text-slate-400 dark:text-emerald-500/60 cursor-not-allowed'
+                      : 'bg-slate-50 dark:bg-[#0f1a15] border-slate-200 dark:border-emerald-800/40 text-slate-900 dark:text-emerald-50'
                   }`}
                 >
                   <option value="SMP">Unit SMP</option>
@@ -826,11 +826,11 @@ export const BadalManagement: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-stone-500 dark:text-stone-400 mb-1.5 font-medium">Sesi Jam KBM</label>
+                <label className="block text-slate-500 dark:text-emerald-400/70 mb-1.5 font-medium">Sesi Jam KBM</label>
                 <select
                   value={finderTimeSlot}
                   onChange={(e) => setFinderTimeSlot(e.target.value)}
-                  className="w-full px-2.5 py-2 bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-stone-100 focus:outline-none"
+                  className="w-full px-2.5 py-2 bg-slate-50 dark:bg-[#0f1a15] rounded-lg border border-slate-200 dark:border-emerald-800/40 text-slate-900 dark:text-emerald-50 focus:outline-none"
                 >
                   <option value="ALL">Semua Jam Pelajaran</option>
                   <option value="07:30">07:30 - 08:50</option>
@@ -849,10 +849,10 @@ export const BadalManagement: React.FC = () => {
           {/* Results: Available Teachers List */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold text-stone-900 dark:text-stone-100">
+              <h4 className="text-xs font-bold text-slate-900 dark:text-emerald-50">
                 Daftar Guru Tersedia ({availableTeachersData.available.length} Asatidz)
               </h4>
-              <span className="text-[11px] text-stone-500 font-medium">
+              <span className="text-[11px] text-slate-500 font-medium">
                 Hari {finderDay} • Unit {finderUnit}
               </span>
             </div>
@@ -861,21 +861,21 @@ export const BadalManagement: React.FC = () => {
               {availableTeachersData.available.map((t) => (
                 <div 
                   key={t.id}
-                  className="bg-white dark:bg-stone-900 p-5 rounded-xl border border-stone-200/80 dark:border-stone-800 flex flex-col justify-between hover:border-[#1B4332] dark:hover:border-emerald-800 transition-all shadow-xs"
+                  className="bg-white dark:bg-[#121f1a] p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 flex flex-col justify-between hover:border-[#1B4332] dark:hover:border-emerald-800 transition-all shadow-xs"
                 >
                   <div className="space-y-1">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-xs font-bold text-stone-900 dark:text-stone-100 leading-tight">
+                      <p className="text-xs font-bold text-slate-900 dark:text-emerald-50 leading-tight">
                         {t.name}
                       </p>
                       <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-[#1B4332]/10 text-[#1B4332] dark:text-emerald-400">
                         Luang
                       </span>
                     </div>
-                    <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                    <p className="text-[11px] text-slate-500 dark:text-emerald-400/70">
                       {t.position} • {t.unit}
                     </p>
-                    <p className="text-[10px] text-stone-400 mt-1 font-mono">
+                    <p className="text-[10px] text-slate-400 mt-1 font-mono">
                       NIP: {t.nip}
                     </p>
                   </div>
@@ -892,7 +892,7 @@ export const BadalManagement: React.FC = () => {
             </div>
 
             {availableTeachersData.available.length === 0 && (
-              <div className="p-12 text-center bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 text-xs text-stone-400">
+              <div className="p-12 text-center bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 text-xs text-slate-400">
                 Seluruh guru pada unit ini sedang memiliki jadwal mengajar pada jam tersebut.
               </div>
             )}
@@ -902,20 +902,20 @@ export const BadalManagement: React.FC = () => {
 
       {/* 7. ADD MANUAL BADAL MODAL */}
       {showAddModal && isKepsek && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-2xs">
-          <div className="bg-white dark:bg-stone-900 rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-stone-200 dark:border-stone-800">
-            <div className="px-5 py-4 border-b border-stone-150 dark:border-stone-800 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-2xs">
+          <div className="bg-white dark:bg-[#121f1a] rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200 dark:border-emerald-900/40">
+            <div className="px-5 py-4 border-b border-stone-150 dark:border-emerald-900/40 flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100">
+                <h3 className="font-bold text-sm text-slate-900 dark:text-emerald-50">
                   Penugasan Guru Pengganti
                 </h3>
-                <p className="text-[11px] text-stone-500">
+                <p className="text-[11px] text-slate-500">
                   Otoritas Kepala Sekolah Unit {modalUnit}
                 </p>
               </div>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 p-1 rounded-lg hover:bg-stone-50"
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 p-1 rounded-lg hover:bg-slate-50 dark:bg-[#0f1a15]"
               >
                 <X className="w-4 h-4" strokeWidth={1.5} />
               </button>
@@ -924,30 +924,30 @@ export const BadalManagement: React.FC = () => {
             <form onSubmit={handleFormSubmit} className="p-5 space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-stone-500 dark:text-stone-400 mb-1.5 font-medium">Tanggal KBM</label>
+                  <label className="block text-slate-500 dark:text-emerald-400/70 mb-1.5 font-medium">Tanggal KBM</label>
                   <input
                     type="date"
                     value={selectedDate}
                     onChange={(e) => handleModalUnitOrDateChange(modalUnit, e.target.value)}
-                    className="w-full px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 focus:outline-none text-stone-900 dark:text-stone-100"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] rounded-lg border border-slate-200 dark:border-emerald-800/40 focus:outline-none text-slate-900 dark:text-emerald-50"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-stone-500 dark:text-stone-400 mb-1.5 font-medium">Unit Sekolah</label>
+                  <label className="block text-slate-500 dark:text-emerald-400/70 mb-1.5 font-medium">Unit Sekolah</label>
                   {userUnit === 'ALL' ? (
                     <select
                       value={modalUnit}
                       onChange={(e) => handleModalUnitOrDateChange(e.target.value as UnitType)}
-                      className="w-full px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 focus:outline-none text-stone-900 dark:text-stone-100"
+                      className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] rounded-lg border border-slate-200 dark:border-emerald-800/40 focus:outline-none text-slate-900 dark:text-emerald-50"
                     >
                       <option value="SMP">SMP IT</option>
                       <option value="MA">MA Al-Ikhwan</option>
                       <option value="PESANTREN">Pondok Pesantren</option>
                     </select>
                   ) : (
-                    <div className="w-full px-2.5 py-1.5 bg-stone-100 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 font-semibold text-stone-900 dark:text-stone-100">
+                    <div className="w-full px-2.5 py-1.5 bg-slate-100 dark:bg-[#0f1a15] rounded-lg border border-slate-200 dark:border-emerald-800/40 font-semibold text-slate-900 dark:text-emerald-50">
                       Unit {userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}
                     </div>
                   )}
@@ -955,13 +955,13 @@ export const BadalManagement: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-stone-500 dark:text-stone-400 mb-1.5 font-medium">
+                <label className="block text-slate-500 dark:text-emerald-400/70 mb-1.5 font-medium">
                   Sesi Jadwal KBM ({selectedDayOfWeek})
                 </label>
                 <select
                   value={selectedScheduleId}
                   onChange={(e) => handleScheduleChange(e.target.value)}
-                  className="w-full px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 focus:outline-none text-stone-900 dark:text-stone-100"
+                  className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] rounded-lg border border-slate-200 dark:border-emerald-800/40 focus:outline-none text-slate-900 dark:text-emerald-50"
                   required
                 >
                   {filteredModalSchedules.length === 0 ? (
@@ -980,13 +980,13 @@ export const BadalManagement: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-stone-500 dark:text-stone-400 mb-1.5 font-medium">
+                <label className="block text-slate-500 dark:text-emerald-400/70 mb-1.5 font-medium">
                   Guru Pengganti Ditugaskan
                 </label>
                 <select
                   value={selectedBadalTeacherId}
                   onChange={(e) => setSelectedBadalTeacherId(e.target.value)}
-                  className="w-full px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 focus:outline-none text-stone-900 dark:text-stone-100"
+                  className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] rounded-lg border border-slate-200 dark:border-emerald-800/40 focus:outline-none text-slate-900 dark:text-emerald-50"
                   required
                 >
                   <option value="">-- Pilih Guru Pengganti --</option>
@@ -1007,11 +1007,11 @@ export const BadalManagement: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-stone-500 dark:text-stone-400 mb-1.5 font-medium">Alasan Penggantian</label>
+                <label className="block text-slate-500 dark:text-emerald-400/70 mb-1.5 font-medium">Alasan Penggantian</label>
                 <select
                   value={reason}
                   onChange={(e) => setReason(e.target.value as any)}
-                  className="w-full px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 focus:outline-none text-stone-900 dark:text-stone-100"
+                  className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] rounded-lg border border-slate-200 dark:border-emerald-800/40 focus:outline-none text-slate-900 dark:text-emerald-50"
                 >
                   <option value="Sakit">Sakit</option>
                   <option value="Izin Keperluan">Izin Keperluan</option>
@@ -1021,21 +1021,21 @@ export const BadalManagement: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-stone-500 dark:text-stone-400 mb-1.5 font-medium">Amanah Materi KBM / Catatan (Opsional)</label>
+                <label className="block text-slate-500 dark:text-emerald-400/70 mb-1.5 font-medium">Amanah Materi KBM / Catatan (Opsional)</label>
                 <textarea
                   rows={2}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Materi yang dititipkan atau instruksi tugas santri..."
-                  className="w-full px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 focus:outline-none text-stone-900 dark:text-stone-100"
+                  className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] rounded-lg border border-slate-200 dark:border-emerald-800/40 focus:outline-none text-slate-900 dark:text-emerald-50"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-4 border-t border-stone-150 dark:border-stone-800">
+              <div className="flex items-center justify-end gap-2 pt-4 border-t border-stone-150 dark:border-emerald-900/40">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-850 cursor-pointer font-medium"
+                  className="px-4 py-2 rounded-lg border border-slate-200 dark:border-emerald-800/40 text-slate-600 dark:text-emerald-400/70 hover:bg-slate-50 dark:bg-[#0f1a15] dark:hover:bg-[#162720]/50 cursor-pointer font-medium"
                 >
                   Batal
                 </button>
@@ -1058,71 +1058,71 @@ export const BadalManagement: React.FC = () => {
         const badalTeacher = teachers.find(t => t.id === badalToApprove.badalTeacherId);
 
         return (
-          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-stone-950/50 backdrop-blur-2xs animate-in fade-in duration-150">
-            <div className="bg-white dark:bg-stone-900 rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-stone-200 dark:border-stone-800">
-              <div className="p-5 border-b border-stone-150 dark:border-stone-800 flex items-center justify-between">
+          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-2xs animate-in fade-in duration-150">
+            <div className="bg-white dark:bg-[#121f1a] rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-emerald-900/40">
+              <div className="p-5 border-b border-stone-150 dark:border-emerald-900/40 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-[#1B4332]/10 text-[#1B4332] dark:text-emerald-400 flex items-center justify-center shrink-0">
                     <Check className="w-4 h-4" strokeWidth={2} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100">
+                    <h3 className="font-bold text-sm text-slate-900 dark:text-emerald-50">
                       Persetujuan Izin & Penugasan Pengganti
                     </h3>
-                    <p className="text-[11px] text-stone-500">
+                    <p className="text-[11px] text-slate-500">
                       Konfirmasi pengesahan izin guru dan guru pengganti
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => setBadalToApprove(null)}
-                  className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 p-1 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer"
+                  className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-[#162720]/50 cursor-pointer"
                 >
                   <X className="w-4 h-4" strokeWidth={1.5} />
                 </button>
               </div>
 
               <div className="p-5 space-y-4 text-xs">
-                <div className="bg-stone-50 dark:bg-stone-800/60 rounded-xl p-3.5 border border-stone-200/70 dark:border-stone-700/60 space-y-2.5">
-                  <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
-                    <span className="text-stone-500 dark:text-stone-400">Tanggal KBM:</span>
-                    <span className="font-semibold text-stone-900 dark:text-stone-100 font-mono">
+                <div className="bg-slate-50 dark:bg-[#0f1a15]/60 rounded-xl p-3.5 border border-slate-200/70 dark:border-emerald-800/40/60 space-y-2.5">
+                  <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-emerald-800/40/50">
+                    <span className="text-slate-500 dark:text-emerald-400/70">Tanggal KBM:</span>
+                    <span className="font-semibold text-slate-900 dark:text-emerald-50 font-mono">
                       {formatIndonesianDate(badalToApprove.badal.date)}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
-                    <span className="text-stone-500 dark:text-stone-400">Guru Utama (Izin):</span>
-                    <span className="font-semibold text-stone-900 dark:text-stone-100">
+                  <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-emerald-800/40/50">
+                    <span className="text-slate-500 dark:text-emerald-400/70">Guru Utama (Izin):</span>
+                    <span className="font-semibold text-slate-900 dark:text-emerald-50">
                       {origTeacher?.name} ({origTeacher?.position})
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
-                    <span className="text-stone-500 dark:text-stone-400">Jenis Izin:</span>
+                  <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-emerald-800/40/50">
+                    <span className="text-slate-500 dark:text-emerald-400/70">Jenis Izin:</span>
                     <span className="font-bold text-amber-700 dark:text-amber-400">
                       {badalToApprove.badal.reason}
                     </span>
                   </div>
 
                   {badalToApprove.badal.notes && (
-                    <div className="pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
-                      <span className="text-stone-500 dark:text-stone-400 block mb-0.5">Keterangan / Alasan:</span>
-                      <p className="text-stone-700 dark:text-stone-300 italic font-sans">
+                    <div className="pb-2 border-b border-slate-200/50 dark:border-emerald-800/40/50">
+                      <span className="text-slate-500 dark:text-emerald-400/70 block mb-0.5">Keterangan / Alasan:</span>
+                      <p className="text-slate-700 dark:text-emerald-300/80 italic font-sans">
                         "{badalToApprove.badal.notes}"
                       </p>
                     </div>
                   )}
 
-                  <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
-                    <span className="text-stone-500 dark:text-stone-400">Mapel & Sesi:</span>
-                    <span className="font-medium text-stone-800 dark:text-stone-200">
+                  <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-emerald-800/40/50">
+                    <span className="text-slate-500 dark:text-emerald-400/70">Mapel & Sesi:</span>
+                    <span className="font-medium text-slate-800 dark:text-emerald-100">
                       {sched?.subject} ({sched?.className}) • {sched?.startTime}-{sched?.endTime} ({sched?.hours || 2} JP)
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center">
-                    <span className="text-stone-500 dark:text-stone-400">Guru Pengganti:</span>
+                    <span className="text-slate-500 dark:text-emerald-400/70">Guru Pengganti:</span>
                     <span className="font-bold text-[#1B4332] dark:text-emerald-400">
                       {badalTeacher?.name || 'Belum dipilih'}
                     </span>
@@ -1137,7 +1137,7 @@ export const BadalManagement: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setBadalToApprove(null)}
-                    className="px-4 py-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer font-medium"
+                    className="px-4 py-2 rounded-lg border border-slate-200 dark:border-emerald-800/40 text-slate-600 dark:text-emerald-400/70 hover:bg-slate-50 dark:bg-[#0f1a15] dark:hover:bg-[#162720]/50 cursor-pointer font-medium"
                   >
                     Batal
                   </button>
@@ -1162,63 +1162,63 @@ export const BadalManagement: React.FC = () => {
         const badalTeacher = teachers.find(t => t.id === selectedBadalTeacherId);
 
         return (
-          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-stone-950/50 backdrop-blur-2xs animate-in fade-in duration-150">
-            <div className="bg-white dark:bg-stone-900 rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-stone-200 dark:border-stone-800">
-              <div className="p-5 border-b border-stone-150 dark:border-stone-800 flex items-center justify-between">
+          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-2xs animate-in fade-in duration-150">
+            <div className="bg-white dark:bg-[#121f1a] rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-emerald-900/40">
+              <div className="p-5 border-b border-stone-150 dark:border-emerald-900/40 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-[#1B4332]/10 text-[#1B4332] dark:text-emerald-400 flex items-center justify-center shrink-0">
                     <UserCheck className="w-4 h-4" strokeWidth={1.5} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100">
+                    <h3 className="font-bold text-sm text-slate-900 dark:text-emerald-50">
                       Konfirmasi Penugasan Pengganti
                     </h3>
-                    <p className="text-[11px] text-stone-500">
+                    <p className="text-[11px] text-slate-500">
                       Periksa kembali rincian data sebelum diterbitkan
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowSubmitConfirm(false)}
-                  className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 p-1 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer"
+                  className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-[#162720]/50 cursor-pointer"
                 >
                   <X className="w-4 h-4" strokeWidth={1.5} />
                 </button>
               </div>
 
               <div className="p-5 space-y-4 text-xs">
-                <div className="bg-stone-50 dark:bg-stone-800/60 rounded-xl p-3.5 border border-stone-200/70 dark:border-stone-700/60 space-y-2.5">
-                  <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
-                    <span className="text-stone-500 dark:text-stone-400">Tanggal KBM:</span>
-                    <span className="font-semibold text-stone-900 dark:text-stone-100 font-mono">
+                <div className="bg-slate-50 dark:bg-[#0f1a15]/60 rounded-xl p-3.5 border border-slate-200/70 dark:border-emerald-800/40/60 space-y-2.5">
+                  <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-emerald-800/40/50">
+                    <span className="text-slate-500 dark:text-emerald-400/70">Tanggal KBM:</span>
+                    <span className="font-semibold text-slate-900 dark:text-emerald-50 font-mono">
                       {formatIndonesianDate(selectedDate)} ({selectedDayOfWeek})
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
-                    <span className="text-stone-500 dark:text-stone-400">Mata Pelajaran & Kelas:</span>
-                    <span className="font-semibold text-stone-900 dark:text-stone-100">
+                  <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-emerald-800/40/50">
+                    <span className="text-slate-500 dark:text-emerald-400/70">Mata Pelajaran & Kelas:</span>
+                    <span className="font-semibold text-slate-900 dark:text-emerald-50">
                       {sched?.subject} ({sched?.className})
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
-                    <span className="text-stone-500 dark:text-stone-400">Guru Berhalangan:</span>
-                    <span className="font-medium text-stone-700 dark:text-stone-300">
+                  <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-emerald-800/40/50">
+                    <span className="text-slate-500 dark:text-emerald-400/70">Guru Berhalangan:</span>
+                    <span className="font-medium text-slate-700 dark:text-emerald-300/80">
                       {origTeacher?.name || 'Guru Utama'}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
-                    <span className="text-stone-500 dark:text-stone-400">Guru Pengganti:</span>
+                  <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-emerald-800/40/50">
+                    <span className="text-slate-500 dark:text-emerald-400/70">Guru Pengganti:</span>
                     <span className="font-bold text-[#1B4332] dark:text-emerald-400">
                       {badalTeacher?.name || 'Guru Badal'}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center">
-                    <span className="text-stone-500 dark:text-stone-400">Alasan:</span>
-                    <span className="font-medium text-stone-800 dark:text-stone-200">
+                    <span className="text-slate-500 dark:text-emerald-400/70">Alasan:</span>
+                    <span className="font-medium text-slate-800 dark:text-emerald-100">
                       {reason}
                     </span>
                   </div>
@@ -1228,7 +1228,7 @@ export const BadalManagement: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowSubmitConfirm(false)}
-                    className="px-4 py-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer font-medium"
+                    className="px-4 py-2 rounded-lg border border-slate-200 dark:border-emerald-800/40 text-slate-600 dark:text-emerald-400/70 hover:bg-slate-50 dark:bg-[#0f1a15] dark:hover:bg-[#162720]/50 cursor-pointer font-medium"
                   >
                     Periksa Kembali
                   </button>
@@ -1252,49 +1252,49 @@ export const BadalManagement: React.FC = () => {
         const origTeacher = teachers.find(t => t.id === badalToCancel.originalTeacherId);
 
         return (
-          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-stone-950/50 backdrop-blur-2xs animate-in fade-in duration-150">
-            <div className="bg-white dark:bg-stone-900 rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-stone-200 dark:border-stone-800">
-              <div className="p-5 border-b border-stone-150 dark:border-stone-800 flex items-center justify-between">
+          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-2xs animate-in fade-in duration-150">
+            <div className="bg-white dark:bg-[#121f1a] rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-emerald-900/40">
+              <div className="p-5 border-b border-stone-150 dark:border-emerald-900/40 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
                     <AlertTriangle className="w-4 h-4" strokeWidth={1.5} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100">
+                    <h3 className="font-bold text-sm text-slate-900 dark:text-emerald-50">
                       Batalkan Penugasan / Pengajuan Pengganti?
                     </h3>
-                    <p className="text-[11px] text-stone-500">
+                    <p className="text-[11px] text-slate-500">
                       Konfirmasi pembatalan catatan penugasan guru pengganti
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => setBadalToCancel(null)}
-                  className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 p-1 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer"
+                  className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-[#162720]/50 cursor-pointer"
                 >
                   <X className="w-4 h-4" strokeWidth={1.5} />
                 </button>
               </div>
 
               <div className="p-5 space-y-4 text-xs">
-                <div className="bg-stone-50 dark:bg-stone-800/60 rounded-xl p-3.5 border border-stone-200/70 dark:border-stone-700/60 space-y-2">
-                  <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
-                    <span className="text-stone-500 dark:text-stone-400">Tanggal KBM:</span>
-                    <span className="font-semibold text-stone-900 dark:text-stone-100 font-mono">
+                <div className="bg-slate-50 dark:bg-[#0f1a15]/60 rounded-xl p-3.5 border border-slate-200/70 dark:border-emerald-800/40/60 space-y-2">
+                  <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-emerald-800/40/50">
+                    <span className="text-slate-500 dark:text-emerald-400/70">Tanggal KBM:</span>
+                    <span className="font-semibold text-slate-900 dark:text-emerald-50 font-mono">
                       {formatIndonesianDate(badalToCancel.date)}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center pb-2 border-b border-stone-200/50 dark:border-stone-700/50">
-                    <span className="text-stone-500 dark:text-stone-400">Guru Utama:</span>
-                    <span className="font-medium text-stone-700 dark:text-stone-300">
+                  <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-emerald-800/40/50">
+                    <span className="text-slate-500 dark:text-emerald-400/70">Guru Utama:</span>
+                    <span className="font-medium text-slate-700 dark:text-emerald-300/80">
                       {origTeacher?.name || 'Guru Utama'}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center">
-                    <span className="text-stone-500 dark:text-stone-400">Mata Pelajaran:</span>
-                    <span className="font-semibold text-stone-900 dark:text-stone-100">
+                    <span className="text-slate-500 dark:text-emerald-400/70">Mata Pelajaran:</span>
+                    <span className="font-semibold text-slate-900 dark:text-emerald-50">
                       {sched?.subject} ({sched?.className})
                     </span>
                   </div>
@@ -1308,7 +1308,7 @@ export const BadalManagement: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setBadalToCancel(null)}
-                    className="px-4 py-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer font-medium"
+                    className="px-4 py-2 rounded-lg border border-slate-200 dark:border-emerald-800/40 text-slate-600 dark:text-emerald-400/70 hover:bg-slate-50 dark:bg-[#0f1a15] dark:hover:bg-[#162720]/50 cursor-pointer font-medium"
                   >
                     Kembali
                   </button>

@@ -7,6 +7,7 @@ import { Header } from './components/Header';
 import { GuruView } from './components/GuruView';
 import { AdminView } from './components/AdminView';
 import { KepsekView } from './components/KepsekView';
+import { StaffView } from './components/StaffView';
 import { SessionTimeoutManager } from './components/SessionTimeoutManager';
 import { LearningNeedManagement } from './components/LearningNeedManagement';
 import { BadalManagement } from './components/BadalManagement';
@@ -63,6 +64,12 @@ const MainContent: React.FC = () => {
       if (currentPath === '/dashboard/guru/kebutuhan') {
         return <LearningNeedManagement key="guru-kebutuhan" />;
       }
+      if (currentPath === '/dashboard/guru/akademik') {
+        return <GuruView initialTab="akademik" key="guru-akademik" />;
+      }
+      if (currentPath === '/dashboard/guru/catatan') {
+        return <GuruView initialTab="buku_penghubung" key="guru-catatan" />;
+      }
       return <GuruView initialTab="clockin_journal" key="guru-jurnal" />;
     }
 
@@ -79,6 +86,12 @@ const MainContent: React.FC = () => {
       if (currentPath === '/dashboard/admin/payroll') {
         return <AdminView initialTab="generate_payroll" key="admin-payroll" />;
       }
+      if (currentPath === '/dashboard/admin/tahfidz-payroll') {
+        return <AdminView initialTab="tahfidz_payroll" key="admin-tahfidz-payroll" />;
+      }
+      if (currentPath === '/dashboard/admin/laporan-staff') {
+        return <AdminView initialTab="laporan_staff" key="admin-laporan-staff" />;
+      }
       if (currentPath === '/dashboard/admin/audit') {
         return <AdminView initialTab="audit_logs" key="admin-audit" />;
       }
@@ -87,6 +100,18 @@ const MainContent: React.FC = () => {
       }
       if (currentPath === '/dashboard/admin/settings' || currentPath === '/dashboard/admin/lokasi') {
         return <AdminView initialTab="settings_lokasi" key="admin-settings" />;
+      }
+      if (currentPath === '/dashboard/admin/santri') {
+        return <AdminView initialTab="master_santri" key="admin-santri" />;
+      }
+      if (currentPath === '/dashboard/admin/wali') {
+        return <AdminView initialTab="master_wali_santri" key="admin-wali" />;
+      }
+      if (currentPath === '/dashboard/admin/keuangan') {
+        return <AdminView initialTab="verifikasi_keuangan" key="admin-keuangan" />;
+      }
+      if (currentPath === '/dashboard/admin/catatan') {
+        return <AdminView initialTab="buku_penghubung" key="admin-catatan" />;
       }
       return <AdminView initialTab="dashboard" key="admin-dashboard" />;
     }
@@ -105,6 +130,13 @@ const MainContent: React.FC = () => {
         return <KepsekView initialTab="ringkasan_kehadiran" key="kepsek-overview" />;
       }
       return <Page404 key="page-404-fallback" />;
+    }
+
+    if (currentRole === 'STAFF' || currentPath.startsWith('/dashboard/staff')) {
+      if (currentPath === '/dashboard/staff/laporan') {
+        return <StaffView initialTab="laporan" key="staff-laporan" />;
+      }
+      return <StaffView initialTab="presensi" key="staff-presensi" />;
     }
 
     // Default route check

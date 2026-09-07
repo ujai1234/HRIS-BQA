@@ -115,7 +115,7 @@ export const MasterSchedules: React.FC = () => {
       case 'PESANTREN':
         return 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30';
       default:
-        return 'bg-stone-50 text-stone-700 border-stone-100 dark:bg-stone-850 dark:text-stone-350 dark:border-stone-800';
+        return 'bg-slate-50 dark:bg-[#0f1a15] text-slate-700 border-slate-100 dark:bg-[#0f1a15] dark:text-stone-350 dark:border-emerald-900/40';
     }
   };
 
@@ -124,41 +124,41 @@ export const MasterSchedules: React.FC = () => {
       
       {/* 1. Header Title */}
       <div className="flex items-center justify-between">
-        <h2 className="text-base sm:text-lg font-bold text-stone-900 dark:text-stone-100 tracking-tight">
+        <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-emerald-50 tracking-tight">
           Manajemen Jadwal KBM Asatidz
         </h2>
-        <span className="text-xs text-stone-400 dark:text-stone-500 font-mono">
+        <span className="text-xs text-slate-400 dark:text-emerald-500/60 font-mono">
           {schedules.length} Jam Pelajaran
         </span>
       </div>
 
       {/* 2. Advanced Search & Modern Filter Suite */}
-      <div className="bg-white dark:bg-[#121815] border border-stone-200/60 dark:border-stone-800/60 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-4">
+      <div className="bqa-card p-4 sm:p-5 space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           
           {/* Top Row Left: Clear, prominent search input */}
           <div className="relative w-full lg:max-w-md">
-            <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5 pointer-events-none" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari asatidz, mata pelajaran, kelas..."
-              className="w-full pl-10 pr-4 py-3 text-xs bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-stone-900 dark:text-stone-100 focus:bg-white transition-all font-sans"
+              className="w-full pl-10 pr-4 py-3 text-xs bg-slate-50 dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-emerald-50 focus:bg-white transition-all font-sans"
             />
           </div>
 
           {/* Top Row Right: Unit filter & Main operation buttons */}
           <div className="flex items-center gap-2.5 flex-wrap justify-end">
-            <div className="flex items-center bg-stone-50 dark:bg-stone-900 p-1 rounded-xl border border-stone-200/60 dark:border-stone-800/40">
+            <div className="flex items-center bg-slate-50 dark:bg-[#121f1a] p-1 rounded-xl border border-slate-200/60 dark:border-emerald-900/40/40">
               {['ALL', 'SMP', 'MA', 'PESANTREN'].map((unit) => (
                 <button
                   key={unit}
                   onClick={() => setSelectedUnitFilter(unit)}
                   className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
                     selectedUnitFilter === unit
-                      ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-3xs border border-stone-200/40 dark:border-stone-700/40'
-                      : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-300'
+                      ? 'bg-white dark:bg-[#0f1a15] text-slate-900 dark:text-emerald-50 shadow-3xs border border-slate-200/40 dark:border-emerald-800/40/40'
+                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
                   }`}
                 >
                   {unit === 'ALL' ? 'Semua Unit' : unit}
@@ -166,12 +166,12 @@ export const MasterSchedules: React.FC = () => {
               ))}
             </div>
 
-            <div className="h-6 w-[1px] bg-stone-200 dark:bg-stone-800 hidden sm:block" />
+            <div className="h-6 w-[1px] bg-slate-200 dark:bg-[#0f1a15] hidden sm:block" />
 
             <div className="flex items-center gap-2">
               <button
                 onClick={handleReset}
-                className="p-2 text-stone-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl border border-stone-200/60 dark:border-stone-800/60 transition-colors cursor-pointer"
+                className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl border border-slate-200/60 dark:border-emerald-900/40/60 transition-colors cursor-pointer"
                 title="Atur Ulang Semua Jadwal"
               >
                 <RotateCcw className="w-4 h-4" />
@@ -179,7 +179,7 @@ export const MasterSchedules: React.FC = () => {
 
               <button
                 onClick={() => setIsBulkUploadOpen(true)}
-                className="inline-flex items-center gap-1.5 bg-stone-50 hover:bg-stone-100 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs font-bold px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-850 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-[#0f1a15] hover:bg-slate-100 dark:bg-[#121f1a] dark:hover:bg-[#162720]/50 text-slate-700 dark:text-emerald-300/80 text-xs font-bold px-3 py-2 rounded-xl border border-slate-200 dark:border-emerald-900/40 transition-all cursor-pointer"
               >
                 <UploadCloud className="w-3.5 h-3.5 text-[#B08968]" />
                 <span>Unggah CSV</span>
@@ -197,20 +197,20 @@ export const MasterSchedules: React.FC = () => {
         </div>
 
         {/* Bottom Row: Elongated Day Selection Badges stretching beautifully below */}
-        <div className="space-y-2 pt-3 border-t border-stone-100/60 dark:border-stone-850/60">
+        <div className="space-y-2 pt-3 border-t border-slate-100/60 dark:border-emerald-900/40/60">
           <div className="flex items-center gap-1">
             <Info className="w-3 h-3 text-[#B08968]" />
-            <label className="text-[10px] font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+            <label className="text-[10px] font-bold text-slate-500 dark:text-emerald-400/70 uppercase tracking-wider">
               Pilih Hari Pembelajaran
             </label>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 p-1 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200/60 dark:border-stone-800/40 w-full">
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 p-1 bg-slate-50 dark:bg-[#121f1a] rounded-xl border border-slate-200/60 dark:border-emerald-900/40/40 w-full">
             <button
               onClick={() => setSelectedDayFilter('ALL')}
               className={`py-2 rounded-lg text-xs font-bold transition-all cursor-pointer text-center ${
                 selectedDayFilter === 'ALL'
                   ? 'bg-[#1B4332] text-white shadow-xs'
-                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-200/40 dark:hover:bg-stone-800/30'
+                  : 'text-slate-600 dark:text-emerald-400/70 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/40 dark:hover:bg-[#162720]/50/30'
               }`}
             >
               Semua Hari
@@ -222,7 +222,7 @@ export const MasterSchedules: React.FC = () => {
                 className={`py-2 rounded-lg text-xs font-bold transition-all cursor-pointer text-center ${
                   selectedDayFilter === day
                     ? 'bg-[#1B4332] text-white shadow-xs'
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-200/40 dark:hover:bg-stone-800/30'
+                    : 'text-slate-600 dark:text-emerald-400/70 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/40 dark:hover:bg-[#162720]/50/30'
                 }`}
               >
                 {day}
@@ -232,18 +232,18 @@ export const MasterSchedules: React.FC = () => {
         </div>
 
         {/* Subtle dynamic summary of loaded data */}
-        <div className="flex items-center gap-2 text-[10px] text-stone-400 dark:text-stone-500 font-semibold uppercase tracking-wider pl-1 border-t border-stone-100 dark:border-stone-850 pt-2.5">
+        <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-emerald-500/60 font-semibold uppercase tracking-wider pl-1 border-t border-slate-100 dark:border-emerald-900/40 pt-2.5">
           <Sparkles className="w-3 h-3 text-amber-500" />
           <span>Ditemukan {filteredSchedules.length} Jadwal Aktif dari total {schedules.length} jam pelajaran pekanan</span>
         </div>
       </div>
 
       {/* 3. Clean Spacious List Table View */}
-      <div className="bg-white dark:bg-[#121815] border border-stone-200/60 dark:border-stone-800/60 rounded-2xl overflow-hidden shadow-xs">
+      <div className="bqa-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="bg-stone-50 dark:bg-stone-900 text-stone-500 dark:text-stone-400 font-bold border-b border-stone-200/60 dark:border-stone-850 uppercase tracking-wider text-[9px]">
+              <tr className="bg-slate-50 dark:bg-[#121f1a] text-slate-500 dark:text-emerald-400/70 font-bold border-b border-slate-200/60 dark:border-emerald-900/40 uppercase tracking-wider text-[9px]">
                 <th className="py-3 px-4 text-center w-24">Hari</th>
                 <th className="py-3 px-4">Waktu Pelajaran</th>
                 <th className="py-3 px-4">Beban KBM</th>
@@ -254,11 +254,11 @@ export const MasterSchedules: React.FC = () => {
                 <th className="py-3 px-4 text-center w-24">Aksi Kontrol</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-stone-100 dark:divide-stone-850 text-stone-700 dark:text-stone-300">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-emerald-300/80">
               {filteredSchedules.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-stone-400 dark:text-stone-500">
-                    <BookOpen className="w-8 h-8 mx-auto opacity-30 text-stone-400 mb-2" />
+                  <td colSpan={8} className="py-12 text-center text-slate-400 dark:text-emerald-500/60">
+                    <BookOpen className="w-8 h-8 mx-auto opacity-30 text-slate-400 mb-2" />
                     <p className="text-xs font-semibold">Tidak ada jadwal KBM yang cocok dengan kriteria pencarian.</p>
                   </td>
                 </tr>
@@ -266,14 +266,14 @@ export const MasterSchedules: React.FC = () => {
                 filteredSchedules.map((s) => {
                   const teacher = teachers.find((t) => t.id === s.teacherId);
                   return (
-                    <tr key={s.id} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/30 transition-colors">
+                    <tr key={s.id} className="hover:bg-slate-50 dark:bg-[#0f1a15]/50 dark:hover:bg-[#162720]/50/30 transition-colors">
                       <td className="py-3.5 px-4 text-center">
                         <span className="inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold bg-[#1B4332]/5 dark:bg-emerald-950/20 text-[#1B4332] dark:text-emerald-400 border border-[#1B4332]/10 dark:border-emerald-900/30">
                           {s.dayOfWeek}
                         </span>
                       </td>
                       <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-1.5 font-mono font-bold text-stone-900 dark:text-stone-100">
+                        <div className="flex items-center gap-1.5 font-mono font-bold text-slate-900 dark:text-emerald-50">
                           <Clock className="w-3.5 h-3.5 text-[#B08968]" />
                           <span>{s.startTime} - {s.endTime}</span>
                         </div>
@@ -283,7 +283,7 @@ export const MasterSchedules: React.FC = () => {
                           {s.hours} JP
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 font-bold text-stone-950 dark:text-stone-100">
+                      <td className="py-3.5 px-4 font-bold text-slate-950 dark:text-emerald-50">
                         {s.subject}
                       </td>
                       <td className="py-3.5 px-4">
@@ -293,18 +293,18 @@ export const MasterSchedules: React.FC = () => {
                       </td>
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-stone-100 dark:bg-stone-850 text-stone-800 dark:text-stone-200 flex items-center justify-center font-bold text-[10px]">
+                          <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-[#0f1a15] text-slate-800 dark:text-emerald-100 flex items-center justify-center font-bold text-[10px]">
                             {teacher?.name ? teacher.name[0] : 'G'}
                           </div>
                           <div>
-                            <p className="font-bold text-stone-900 dark:text-stone-100">{teacher?.name || 'Guru'}</p>
-                            <p className="text-[10px] text-stone-400 dark:text-stone-500">{teacher?.position || '-'}</p>
+                            <p className="font-bold text-slate-900 dark:text-emerald-50">{teacher?.name || 'Guru'}</p>
+                            <p className="text-[10px] text-slate-400 dark:text-emerald-500/60">{teacher?.position || '-'}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 text-stone-600 dark:text-stone-400 font-medium">
+                      <td className="py-3.5 px-4 text-slate-600 dark:text-emerald-400/70 font-medium">
                         <div className="flex items-center gap-1">
-                          <MapPin className="w-3.5 h-3.5 text-stone-400" />
+                          <MapPin className="w-3.5 h-3.5 text-slate-400" />
                           <span>{s.room}</span>
                         </div>
                       </td>
@@ -312,7 +312,7 @@ export const MasterSchedules: React.FC = () => {
                         <div className="flex items-center justify-center gap-1.5">
                           <button
                             onClick={() => handleOpenEdit(s)}
-                            className="p-1.5 text-stone-400 hover:text-stone-950 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors cursor-pointer"
+                            className="p-1.5 text-slate-400 hover:text-slate-950 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-[#162720]/50 rounded-lg transition-colors cursor-pointer"
                             title="Sunting Jadwal"
                           >
                             <Edit3 className="w-3.5 h-3.5" />
@@ -323,7 +323,7 @@ export const MasterSchedules: React.FC = () => {
                                 deleteSchedule(s.id);
                               }
                             }}
-                            className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors cursor-pointer"
+                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors cursor-pointer"
                             title="Hapus"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -341,17 +341,17 @@ export const MasterSchedules: React.FC = () => {
 
       {/* 4. Refined Minimalist Dialog / Form Modal */}
       {(editingSchedule || isAddingSchedule) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 dark:bg-stone-950/70 backdrop-blur-xs transition-opacity">
-          <div className="bg-white dark:bg-[#121815] rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-stone-200/80 dark:border-stone-800 relative animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-[#0a120f]/70 backdrop-blur-xs transition-opacity">
+          <div className="bg-white dark:bg-[#121815] rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 relative animate-in fade-in zoom-in-95 duration-150">
             
             {/* Top decorative gradient bar */}
             <div className="h-1.5 bg-gradient-to-r from-[#1B4332] via-[#B08968] to-[#1B4332]" />
 
             {/* Modal Header */}
-            <div className="px-5 py-4 border-b border-stone-100 dark:border-stone-850 flex items-center justify-between">
+            <div className="px-5 py-4 border-b border-slate-100 dark:border-emerald-900/40 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-[#B08968]" />
-                <h3 className="font-serif font-bold text-sm text-stone-900 dark:text-stone-100">
+                <h3 className="font-serif font-bold text-sm text-slate-900 dark:text-emerald-50">
                   {editingSchedule ? 'Sunting Detail Jadwal' : 'Tambah Jadwal KBM Baru'}
                 </h3>
               </div>
@@ -360,7 +360,7 @@ export const MasterSchedules: React.FC = () => {
                   setEditingSchedule(null);
                   setIsAddingSchedule(false);
                 }}
-                className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 w-6 h-6 flex items-center justify-center rounded-lg hover:bg-stone-50 dark:hover:bg-stone-900 text-sm cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-50 dark:bg-[#0f1a15] dark:hover:bg-slate-900 text-sm cursor-pointer"
               >
                 ✕
               </button>
@@ -370,11 +370,11 @@ export const MasterSchedules: React.FC = () => {
             <form onSubmit={handleSave} className="p-5 space-y-4 text-xs">
               
               <div>
-                <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5">Asatidz Pengampu</label>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Asatidz Pengampu</label>
                 <select
                   value={formData.teacherId}
                   onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
-                  className="w-full px-3 py-2 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 focus:outline-none focus:border-[#1B4332] text-stone-900 dark:text-stone-100 focus:bg-white font-medium"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 focus:outline-none focus:border-[#1B4332] text-slate-900 dark:text-emerald-50 focus:bg-white font-medium"
                 >
                   {teachers.map((t) => (
                     <option key={t.id} value={t.id}>
@@ -385,33 +385,33 @@ export const MasterSchedules: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5">Mata Pelajaran</label>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Mata Pelajaran</label>
                 <input
                   type="text"
                   value={formData.subject}
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                   placeholder="Contoh: Fiqih Ibadah, Tahfidzul Qur'an"
-                  className="w-full px-3 py-2 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 focus:outline-none focus:border-[#1B4332] text-stone-900 dark:text-stone-100 focus:bg-white font-medium"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 focus:outline-none focus:border-[#1B4332] text-slate-900 dark:text-emerald-50 focus:bg-white font-medium"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5">Nama Kelas</label>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nama Kelas</label>
                   <input
                     type="text"
                     value={formData.className}
                     onChange={(e) => setFormData({ ...formData, className: e.target.value })}
-                    className="w-full px-3 py-2 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 focus:outline-none focus:border-[#1B4332] text-stone-900 dark:text-stone-100 focus:bg-white font-medium"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 focus:outline-none focus:border-[#1B4332] text-slate-900 dark:text-emerald-50 focus:bg-white font-medium"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5">Unit Pendidikan</label>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Unit Pendidikan</label>
                   <select
                     value={formData.unit}
                     onChange={(e) => setFormData({ ...formData, unit: e.target.value as any })}
-                    className="w-full px-3 py-2 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 focus:outline-none focus:border-[#1B4332] text-stone-900 dark:text-stone-100 focus:bg-white font-medium"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 focus:outline-none focus:border-[#1B4332] text-slate-900 dark:text-emerald-50 focus:bg-white font-medium"
                   >
                     <option value="SMP">SMP</option>
                     <option value="MA">MA</option>
@@ -422,11 +422,11 @@ export const MasterSchedules: React.FC = () => {
 
               <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5">Hari KBM</label>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Hari KBM</label>
                   <select
                     value={formData.dayOfWeek}
                     onChange={(e) => setFormData({ ...formData, dayOfWeek: e.target.value as any })}
-                    className="w-full px-2 py-2 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 focus:outline-none focus:border-[#1B4332] text-stone-900 dark:text-stone-100 focus:bg-white font-medium"
+                    className="w-full px-2 py-2 bg-slate-50 dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 focus:outline-none focus:border-[#1B4332] text-slate-900 dark:text-emerald-50 focus:bg-white font-medium"
                   >
                     {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].map((d) => (
                       <option key={d} value={d}>{d}</option>
@@ -434,57 +434,57 @@ export const MasterSchedules: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5">Jam Mulai</label>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Jam Mulai</label>
                   <input
                     type="time"
                     value={formData.startTime}
                     onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                    className="w-full px-2 py-2 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 focus:outline-none font-mono text-stone-900 dark:text-stone-100 font-bold focus:bg-white"
+                    className="w-full px-2 py-2 bg-slate-50 dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 focus:outline-none font-mono text-slate-900 dark:text-emerald-50 font-bold focus:bg-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5">Jam Selesai</label>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Jam Selesai</label>
                   <input
                     type="time"
                     value={formData.endTime}
                     onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                    className="w-full px-2 py-2 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 focus:outline-none font-mono text-stone-900 dark:text-stone-100 font-bold focus:bg-white"
+                    className="w-full px-2 py-2 bg-slate-50 dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 focus:outline-none font-mono text-slate-900 dark:text-emerald-50 font-bold focus:bg-white"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5">Beban Jam (JP)</label>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Beban Jam (JP)</label>
                   <input
                     type="number"
                     min="1"
                     max="6"
                     value={formData.hours}
                     onChange={(e) => setFormData({ ...formData, hours: parseInt(e.target.value) || 2 })}
-                    className="w-full px-3 py-2 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 focus:outline-none font-mono text-stone-900 dark:text-stone-100 font-bold focus:bg-white"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 focus:outline-none font-mono text-slate-900 dark:text-emerald-50 font-bold focus:bg-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5">Ruang Belajar</label>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Ruang Belajar</label>
                   <input
                     type="text"
                     value={formData.room}
                     onChange={(e) => setFormData({ ...formData, room: e.target.value })}
-                    className="w-full px-3 py-2 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 focus:outline-none focus:border-[#1B4332] text-stone-900 dark:text-stone-100 focus:bg-white font-medium"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 focus:outline-none focus:border-[#1B4332] text-slate-900 dark:text-emerald-50 focus:bg-white font-medium"
                   />
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-end gap-2 pt-4 border-t border-stone-100 dark:border-stone-850">
+              <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100 dark:border-emerald-900/40">
                 <button
                   type="button"
                   onClick={() => {
                     setEditingSchedule(null);
                     setIsAddingSchedule(false);
                   }}
-                  className="px-4 py-2 rounded-xl border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 font-bold hover:bg-stone-50 dark:hover:bg-stone-900 cursor-pointer transition-colors"
+                  className="px-4 py-2 rounded-xl border border-slate-200 dark:border-emerald-900/40 text-slate-600 dark:text-emerald-400/70 font-bold hover:bg-slate-50 dark:bg-[#0f1a15] dark:hover:bg-slate-900 cursor-pointer transition-colors"
                 >
                   Batal
                 </button>

@@ -123,6 +123,20 @@ export const TeacherDashboard: React.FC = () => {
 
   // Pre-check GPS and Time Window verification step when clicking "Absen"
   const handleInitiateClockIn = async (schedule: ClassSchedule) => {
+    // Validate 1x per day limit for non-Tahfidz schedules
+    const isTahfidz = schedule.subject.toLowerCase().includes('tahfidz');
+    if (!isTahfidz) {
+      const existingDaily = attendances.find(a => 
+        (a.actualTeacherId === currentUser.id || a.teacherId === currentUser.id) && 
+        a.date === todayStr && 
+        a.scheduleId !== schedule.id
+      );
+      if (existingDaily) {
+        toast.error('Anda sudah melakukan absensi hari ini. Absensi hanya diperbolehkan 1x dalam 1 hari.');
+        return;
+      }
+    }
+
     const timeValidation = validateScheduleTimeWindow(schedule);
     if (!timeValidation.canClockIn) {
       toast.warning(timeValidation.message);
@@ -150,7 +164,7 @@ export const TeacherDashboard: React.FC = () => {
   return (
     <div className="space-y-5">
       {/* Clean Teacher Header (Minimalist & Modern, No Money Figures) */}
-      <div className="bg-white dark:bg-[#121f1a] rounded-2xl p-5 border border-slate-200/90 dark:border-emerald-900/30 shadow-xs transition-colors">
+      <div className="bqa-card p-5 transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             {/* Interactive Profile Avatar with Camera Badge */}
@@ -235,7 +249,7 @@ export const TeacherDashboard: React.FC = () => {
       </div>
 
       {/* Sesi KBM Hari Ini & Jadwal */}
-      <div className="bg-white dark:bg-[#121f1a] rounded-2xl p-5 border border-slate-200/90 dark:border-emerald-900/30 shadow-xs space-y-4 transition-colors">
+      <div className="bqa-card p-5 space-y-4 transition-colors">
         {/* Day Selector Bar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-emerald-900/30">
           <div>
@@ -252,7 +266,7 @@ export const TeacherDashboard: React.FC = () => {
             </p>
           </div>
 
-          <div className="inline-flex bg-slate-100 dark:bg-[#0f1a15] p-1 rounded-xl border border-slate-200/80 dark:border-emerald-900/40 overflow-x-auto max-w-full gap-0.5">
+          <div className="inline-flex bg-slate-100 dark:bg-[#0f1a15] p-1 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 overflow-x-auto max-w-full gap-0.5">
             {daysOfWeek.map((day) => {
               const isToday = day === realTodayName;
               return (
@@ -261,7 +275,7 @@ export const TeacherDashboard: React.FC = () => {
                   onClick={() => setSelectedDay(day)}
                   className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
                     selectedDay === day
-                      ? 'bg-white dark:bg-[#1c3027] text-emerald-800 dark:text-emerald-300 shadow-xs border border-slate-200/80 dark:border-emerald-700/50'
+                      ? 'bg-white dark:bg-[#1c3027] text-emerald-800 dark:text-emerald-300 shadow-xs border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-700/50'
                       : 'text-slate-600 dark:text-emerald-400/60 hover:text-slate-900 dark:hover:text-emerald-200'
                   }`}
                 >
@@ -277,7 +291,7 @@ export const TeacherDashboard: React.FC = () => {
 
         {/* Schedule Cards */}
         {daySchedules.length === 0 ? (
-          <div className="text-center py-8 px-4 bg-slate-50/60 dark:bg-[#0e1713] rounded-xl border border-dashed border-slate-200 dark:border-emerald-900/40">
+          <div className="text-center py-8 px-4 bg-slate-50 dark:bg-[#0f1a15]/60 dark:bg-[#0e1713] rounded-xl border border-dashed border-slate-200 dark:border-emerald-900/40">
             <p className="text-xs text-slate-500 dark:text-emerald-400/60">
               Tidak ada jadwal mengajar pada hari <strong>{selectedDay}</strong>.
             </p>
@@ -413,73 +427,90 @@ export const TeacherDashboard: React.FC = () => {
 
                   {/* Actions */}
                   <div className="mt-4 pt-3 border-t border-slate-100 dark:border-emerald-900/30">
-                    {isNotPresent && !isSubstituted && (
+                    {schedule.subject.toLowerCase().includes('tahfidz') ? (
                       <div>
-                        {timeValidation.canClockIn ? (
-                          <button
-                            onClick={() => handleInitiateClockIn(schedule)}
-                            disabled={isPreCheckingGps}
-                            className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-75"
-                          >
-                            <Clock className="w-3.5 h-3.5" />
-                            <span>{isPreCheckingGps ? 'Memeriksa GPS...' : 'Absen Sekarang'}</span>
-                          </button>
-                        ) : timeValidation.status === 'TOO_EARLY' ? (
+                        <button
+                          disabled
+                          className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-[#15231c] text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/40 flex items-center justify-center gap-1.5 cursor-not-allowed opacity-90"
+                        >
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>Terintegrasi Aplikasi Tahfidz</span>
+                        </button>
+                        <p className="text-[10px] text-center text-slate-400 dark:text-emerald-400/60 mt-1">
+                          Data absensi langsung ditampilkan dari sistem Tahfidz
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        {isNotPresent && !isSubstituted && (
                           <div>
-                            <button
-                              disabled
-                              className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#15231c] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-emerald-900/40 flex items-center justify-center gap-1.5 cursor-not-allowed opacity-80"
-                            >
-                              <Lock className="w-3.5 h-3.5" />
-                              <span>Belum Waktunya (Buka {timeValidation.allowedStartTime})</span>
-                            </button>
-                            <p className="text-[10px] text-center text-slate-400 dark:text-emerald-400/60 mt-1">
-                              Dibuka 15 mnt sebelum sesi ({timeValidation.allowedStartTime} - {schedule.endTime} WIB)
-                            </p>
+                            {timeValidation.canClockIn ? (
+                              <button
+                                onClick={() => handleInitiateClockIn(schedule)}
+                                disabled={isPreCheckingGps}
+                                className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-75"
+                              >
+                                <Clock className="w-3.5 h-3.5" />
+                                <span>{isPreCheckingGps ? 'Memeriksa GPS...' : 'Absen Sekarang'}</span>
+                              </button>
+                            ) : timeValidation.status === 'TOO_EARLY' ? (
+                              <div>
+                                <button
+                                  disabled
+                                  className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#15231c] text-slate-500 dark:text-emerald-400/70 border border-slate-200 dark:border-emerald-900/40 flex items-center justify-center gap-1.5 cursor-not-allowed opacity-80"
+                                >
+                                  <Lock className="w-3.5 h-3.5" />
+                                  <span>Belum Waktunya (Buka {timeValidation.allowedStartTime})</span>
+                                </button>
+                                <p className="text-[10px] text-center text-slate-400 dark:text-emerald-400/60 mt-1">
+                                  Dibuka 15 mnt sebelum sesi ({timeValidation.allowedStartTime} - {schedule.endTime} WIB)
+                                </p>
+                              </div>
+                            ) : timeValidation.status === 'EXPIRED' ? (
+                              <div>
+                                <button
+                                  disabled
+                                  className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-rose-50/70 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/30 flex items-center justify-center gap-1.5 cursor-not-allowed opacity-85"
+                                >
+                                  <AlertCircle className="w-3.5 h-3.5" />
+                                  <span>Waktu Absen Telah Berakhir</span>
+                                </button>
+                                <p className="text-[10px] text-center text-rose-500/80 dark:text-rose-400/70 mt-1">
+                                  Sesi KBM telah selesai (Pukul {schedule.endTime} WIB)
+                                </p>
+                              </div>
+                            ) : (
+                              <button
+                                disabled
+                                className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#15231c] text-slate-400 border border-slate-200 dark:border-emerald-900/40 flex items-center justify-center gap-1.5 cursor-not-allowed"
+                              >
+                                <Clock className="w-3.5 h-3.5" />
+                                <span>Hanya Aktif di Hari {schedule.dayOfWeek}</span>
+                              </button>
+                            )}
                           </div>
-                        ) : timeValidation.status === 'EXPIRED' ? (
-                          <div>
-                            <button
-                              disabled
-                              className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-rose-50/70 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/30 flex items-center justify-center gap-1.5 cursor-not-allowed opacity-85"
-                            >
-                              <AlertCircle className="w-3.5 h-3.5" />
-                              <span>Waktu Absen Telah Berakhir</span>
-                            </button>
-                            <p className="text-[10px] text-center text-rose-500/80 dark:text-rose-400/70 mt-1">
-                              Sesi KBM telah selesai (Pukul {schedule.endTime} WIB)
-                            </p>
-                          </div>
-                        ) : (
+                        )}
+
+                        {isClockedInNoJournal && att && (
                           <button
-                            disabled
-                            className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#15231c] text-slate-400 border border-slate-200 dark:border-emerald-900/40 flex items-center justify-center gap-1.5 cursor-not-allowed"
+                            onClick={() => setActiveJournalData({ attendance: att, schedule })}
+                            className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
                           >
-                            <Clock className="w-3.5 h-3.5" />
-                            <span>Hanya Aktif di Hari {schedule.dayOfWeek}</span>
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>Isi Jurnal Mengajar Sekarang</span>
                           </button>
                         )}
-                      </div>
-                    )}
 
-                    {isClockedInNoJournal && att && (
-                      <button
-                        onClick={() => setActiveJournalData({ attendance: att, schedule })}
-                        className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
-                      >
-                        <FileText className="w-3.5 h-3.5" />
-                        <span>Isi Jurnal Mengajar Sekarang</span>
-                      </button>
-                    )}
-
-                    {isCompleted && att && (
-                      <button
-                        onClick={() => setActiveJournalData({ attendance: att, schedule })}
-                        className="w-full py-1.5 px-3 rounded-xl text-xs font-medium bg-slate-100 dark:bg-[#182a23] hover:bg-slate-200 dark:hover:bg-[#1f362c] text-slate-700 dark:text-emerald-200 transition-colors flex items-center justify-center gap-1.5 border border-slate-200 dark:border-emerald-800/40 cursor-pointer shadow-xs"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                        <span>Lihat Jurnal (Terkunci)</span>
-                      </button>
+                        {isCompleted && att && (
+                          <button
+                            onClick={() => setActiveJournalData({ attendance: att, schedule })}
+                            className="w-full py-1.5 px-3 rounded-xl text-xs font-medium bg-slate-100 dark:bg-[#182a23] hover:bg-slate-200 dark:hover:bg-[#1f362c] text-slate-700 dark:text-emerald-200 transition-colors flex items-center justify-center gap-1.5 border border-slate-200 dark:border-emerald-800/40 cursor-pointer shadow-xs"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                            <span>Presensi Selesai - Lihat Jurnal</span>
+                          </button>
+                        )}
+                      </>
                     )}
 
                     {(isIzin || isSakit) && (
@@ -504,7 +535,7 @@ export const TeacherDashboard: React.FC = () => {
       </div>
 
       {/* Teaching History & Journals Table */}
-      <div className="bg-white dark:bg-[#121f1a] rounded-2xl border border-slate-200/90 dark:border-emerald-900/30 shadow-xs overflow-hidden transition-colors">
+      <div className="bqa-card overflow-hidden transition-colors">
         <div className="p-4 border-b border-slate-100 dark:border-emerald-900/30">
           <h2 className="text-sm font-bold text-slate-900 dark:text-emerald-50">
             Riwayat Presensi & Jurnal Terkini
@@ -517,7 +548,7 @@ export const TeacherDashboard: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-slate-50/75 dark:bg-[#0e1713] border-b border-slate-200/80 dark:border-emerald-900/40 text-slate-500 dark:text-emerald-400/70 text-[11px] font-semibold">
+              <tr className="bg-slate-50 dark:bg-[#0f1a15]/75 dark:bg-[#0e1713] border-b border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 text-slate-500 dark:text-emerald-400/70 text-[11px] font-semibold">
                 <th className="py-2.5 px-4">Tanggal</th>
                 <th className="py-2.5 px-4">Mata Pelajaran & Kelas</th>
                 <th className="py-2.5 px-4">Jam Masuk</th>
@@ -534,7 +565,7 @@ export const TeacherDashboard: React.FC = () => {
                   const isDone = att.status === 'SELESAI';
 
                   return (
-                    <tr key={att.id} className="hover:bg-slate-50/60 dark:hover:bg-[#162720] transition-colors">
+                    <tr key={att.id} className="hover:bg-slate-50 dark:bg-[#0f1a15]/60 dark:hover:bg-[#162720] transition-colors">
                       <td className="py-2.5 px-4 font-medium text-slate-800 dark:text-emerald-100 whitespace-nowrap">
                         {att.date}
                       </td>

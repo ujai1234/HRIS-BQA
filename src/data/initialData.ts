@@ -1,4 +1,77 @@
-import { Teacher, ClassSchedule, AttendanceRecord, BadalAssignment, AuditLog, LearningNeedRequest } from '../types';
+import { Teacher, ClassSchedule, AttendanceRecord, BadalAssignment, AuditLog, LearningNeedRequest, ExpenseRecord, StaffJournalRecord } from '../types';
+
+export const INITIAL_STUDENTS = [
+  {
+    id: 'STU-001',
+    nis: '2023001',
+    nisn: '0051234561',
+    name: 'Ahmad Fauzi',
+    birthPlace: 'Jakarta',
+    birthDate: '2010-05-12',
+    gender: 'L',
+    className: 'VII-A (SMP)',
+    status: 'AKTIF'
+  },
+  {
+    id: 'STU-002',
+    nis: '2023002',
+    nisn: '0051234562',
+    name: 'Budi Santoso',
+    birthPlace: 'Bandung',
+    birthDate: '2010-08-20',
+    gender: 'L',
+    className: 'VII-A (SMP)',
+    status: 'AKTIF'
+  },
+  {
+    id: 'STU-003',
+    nis: '2023003',
+    nisn: '0051234563',
+    name: 'Citra Kirana',
+    birthPlace: 'Surabaya',
+    birthDate: '2010-11-05',
+    gender: 'P',
+    className: 'Tahfidz Putri Ula',
+    status: 'AKTIF'
+  },
+  {
+    id: 'STU-004',
+    nis: '2023004',
+    nisn: '0051234564',
+    name: 'Dewi Lestari',
+    birthPlace: 'Semarang',
+    birthDate: '2011-01-15',
+    gender: 'P',
+    className: 'Tahfidz Putri Ula',
+    status: 'AKTIF'
+  },
+  {
+    id: 'STU-005',
+    nis: '2023005',
+    nisn: '0051234565',
+    name: 'Eko Prasetyo',
+    birthPlace: 'Yogyakarta',
+    birthDate: '2008-04-10',
+    gender: 'L',
+    className: 'X-IPA (MA)',
+    status: 'AKTIF'
+  },
+  {
+    id: 'STU-006',
+    nis: '2023006',
+    nisn: '0051234566',
+    name: 'Fahri Hamzah',
+    birthPlace: 'Medan',
+    birthDate: '2008-09-22',
+    gender: 'L',
+    className: 'X-IPA (MA)',
+    status: 'AKTIF'
+  },
+  { id: 'STU-007', nis: '2023007', name: 'Gibran Rakabuming', gender: 'L', className: 'IX-A (SMP)', status: 'AKTIF' },
+  { id: 'STU-008', nis: '2023008', name: 'Hasan Basri', gender: 'L', className: 'IX-A (SMP)', status: 'AKTIF' },
+  { id: 'STU-009', nis: '2023009', name: 'Intan Nuraini', gender: 'P', className: 'IX-B (SMP)', status: 'AKTIF' },
+  { id: 'STU-010', nis: '2023010', name: 'Joko Anwar', gender: 'L', className: 'IX-B (SMP)', status: 'AKTIF' }
+];
 
 export const INITIAL_TEACHERS: Teacher[] = [
   {
@@ -368,6 +441,42 @@ export const INITIAL_TEACHERS: Teacher[] = [
     isActive: true,
     username: 'firly',
     password: 'guru123',
+  },
+  {
+    id: 'T-24',
+    nip: 'PBQ-STAFF-001',
+    name: 'Mang Ujang (Dapur)',
+    position: 'Staff Dapur',
+    unit: 'PESANTREN',
+    baseSalary: 850000,
+    hourlyRate: 0,
+    dailyTransport: 0,
+    monthlyTransport: 250000,
+    monthlyMealAllowance: 375000,
+    role: 'STAFF',
+    phone: '0812-3456-7824',
+    avatarColor: 'bg-amber-600',
+    isActive: true,
+    username: 'dapur',
+    password: 'staff123',
+  },
+  {
+    id: 'T-25',
+    nip: 'PBQ-STAFF-002',
+    name: 'Pak Kang Edi (Inventaris)',
+    position: 'Staff Inventaris',
+    unit: 'PESANTREN',
+    baseSalary: 800000,
+    hourlyRate: 0,
+    dailyTransport: 0,
+    monthlyTransport: 250000,
+    monthlyMealAllowance: 375000,
+    role: 'STAFF',
+    phone: '0812-3456-7825',
+    avatarColor: 'bg-indigo-600',
+    isActive: true,
+    username: 'inventaris',
+    password: 'staff123',
   },
 ];
 
@@ -2010,6 +2119,87 @@ export const INITIAL_LEARNING_NEEDS: LearningNeedRequest[] = [
     status: 'PENDING',
     createdAt: '2026-08-25T14:00:00.000Z',
     updatedAt: '2026-08-25T14:00:00.000Z',
+  }
+];
+
+export const INITIAL_EXPENSES: ExpenseRecord[] = [
+  {
+    id: 'EXP-101',
+    date: '2026-09-01',
+    category: 'DAPUR',
+    description: 'Beli Beras IR64 100kg & Minyak Goreng 20L untuk Dapur Santri',
+    amount: 1850000,
+    reporterId: 'T-24',
+    reporterName: 'Mang Ujang (Dapur)',
+    status: 'PENDING',
+    createdAt: '2026-09-01T08:30:00.000Z'
+  },
+  {
+    id: 'EXP-102',
+    date: '2026-08-28',
+    category: 'DAPUR',
+    description: 'Bumbu Dapur, Daging Ayam 15kg & Telur 10 Karpet',
+    amount: 1200000,
+    reporterId: 'T-24',
+    reporterName: 'Mang Ujang (Dapur)',
+    status: 'APPROVED',
+    createdAt: '2026-08-28T09:15:00.000Z'
+  },
+  {
+    id: 'EXP-103',
+    date: '2026-08-30',
+    category: 'SARPRAS',
+    description: 'Pembelian Lampu LED Philips 20W (10 Pcs) & Saklar Gedung Abu Bakar',
+    amount: 450000,
+    reporterId: 'T-25',
+    reporterName: 'Pak Kang Edi (Inventaris)',
+    status: 'APPROVED',
+    createdAt: '2026-08-30T11:00:00.000Z'
+  },
+  {
+    id: 'EXP-104',
+    date: '2026-09-02',
+    category: 'SARPRAS',
+    description: 'Cat Tembok Dulux White 25kg & Kuas Rol untuk Maintenance Asrama Putra',
+    amount: 980000,
+    reporterId: 'T-25',
+    reporterName: 'Pak Kang Edi (Inventaris)',
+    status: 'PENDING',
+    createdAt: '2026-09-02T14:20:00.000Z'
+  },
+  {
+    id: 'EXP-105',
+    date: '2026-08-25',
+    category: 'DAPUR',
+    description: 'Pembelian Gas Elpiji 3kg (5 Tabung) & Sabun Cuci Piring Dapur',
+    amount: 210000,
+    reporterId: 'T-24',
+    reporterName: 'Mang Ujang (Dapur)',
+    status: 'APPROVED',
+    createdAt: '2026-08-25T10:00:00.000Z'
+  }
+];
+
+export const INITIAL_STAFF_JOURNALS: StaffJournalRecord[] = [
+  {
+    id: 'JRN-STAFF-01',
+    date: '2026-09-02',
+    staffId: 'T-24',
+    staffName: 'Mang Ujang (Dapur)',
+    category: 'DAPUR',
+    taskToday: 'Memasak menu makan siang santri (Soto Ayam & Tempe Goreng), mencuci peralatan dapur utama, dan pembersihan ruang makan.',
+    taskTomorrow: 'Penyiapan sarapan pagi santri (Nasi Uduk & Telur Balado) dan penerimaan pasokan sayur segar dari pasar.',
+    createdAt: '2026-09-02T16:00:00.000Z'
+  },
+  {
+    id: 'JRN-STAFF-02',
+    date: '2026-09-02',
+    staffId: 'T-25',
+    staffName: 'Pak Kang Edi (Inventaris)',
+    category: 'SARPRAS',
+    taskToday: 'Perbaikan kunci pintu kelas 8B, penggantian lampu LED mati di koridor Gedung Ali, dan inventarisasi meja belajar.',
+    taskTomorrow: 'Pengecatan ulang pagar samping asrama putra dan perbaikan kran air wudhu masjid lt 1.',
+    createdAt: '2026-09-02T16:30:00.000Z'
   }
 ];
 

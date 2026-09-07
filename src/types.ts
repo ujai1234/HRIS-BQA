@@ -4,7 +4,8 @@ export type UserRole =
   | 'KEPALA_SMP' 
   | 'KEPALA_MA' 
   | 'KEPALA_PESANTREN' 
-  | 'SYSTEM';
+  | 'SYSTEM'
+  | 'STAFF';
 
 export const isKepsekRole = (role?: UserRole): boolean => {
   return role === 'KEPALA_SMP' || role === 'KEPALA_MA' || role === 'KEPALA_PESANTREN';
@@ -24,6 +25,7 @@ export const getRoleDisplayName = (role?: UserRole, position?: string): string =
   if (role === 'KEPALA_MA') return 'Kepala Madrasah Aliyah';
   if (role === 'KEPALA_PESANTREN') return 'Mudir / Kepala Pesantren';
   if (role === 'GURU') return 'Guru / Asatidz';
+  if (role === 'STAFF') return 'Staff Pesantren';
   return position || 'Pengguna';
 };
 
@@ -41,7 +43,9 @@ export type PositionCategory =
   | 'Guru SMP'
   | 'Guru MA'
   | 'Guru Pesantren'
-  | 'Guru Tahfidz';
+  | 'Guru Tahfidz'
+  | 'Staff Dapur'
+  | 'Staff Inventaris';
 
 export type UnitType = 'SMP' | 'MA' | 'PESANTREN' | 'UMUM';
 
@@ -54,6 +58,8 @@ export interface Teacher {
   baseSalary: number; // Gaji Pokok
   hourlyRate: number; // Tarif/Jam (Default Rp 40.000)
   dailyTransport: number; // Transport/Hari (Default Rp 10.000)
+  monthlyTransport?: number; // Transport Bulanan (Khusus Staff - misal Rp 250.000)
+  monthlyMealAllowance?: number; // Uang Makan Bulanan (Khusus Staff - misal Rp 375.000)
   role: UserRole;
   phone?: string;
   avatarColor?: string;
@@ -171,8 +177,9 @@ export interface TeacherPayrollItem {
   totalDeductions: number;
   
   // Total
-  grossSalary: number; // baseSalary + teachingHonorarium + totalTransport
+  grossSalary: number; // baseSalary + teachingHonorarium + totalTransport + (monthlyMealAllowance)
   netSalary: number; // grossSalary - totalDeductions
+  monthlyMealAllowance?: number; // Khusus Staff
 }
 
 export interface MonthlyPayrollSummary {
@@ -242,4 +249,77 @@ export const DEFAULT_GEOFENCE_SETTINGS: GeofenceSettings = {
   updatedAt: new Date().toISOString(),
   updatedBy: "Administrator"
 };
+
+// ====== TAHFIDZ PAYROLL INTEGRATION ======
+export type TahfidzSesi = 'Subuh' | 'Maghrib';
+
+export interface TahfidzAbsensiRecord {
+  id: number;
+  tanggal: string;
+  jam: string;
+  username: string;
+  nama: string;
+  sesi: TahfidzSesi;
+  halqah: string | null;
+  status: 'Hadir' | 'Izin' | 'Sakit';
+  jarakMeter: number | null;
+  lokasiValidasi: boolean;
+  keterangan: string | null;
+  isAdminOverride: boolean;
+}
+
+export interface TahfidzPayrollItem {
+  teacherName: string;
+  teacherUsername: string;
+  teacherId?: string; // Mapped HRIS teacher ID (if matched)
+  halqah: string;
+  period: string;
+  totalSubuhHadir: number;
+  totalMaghribHadir: number;
+  totalSubuhIzin: number;
+  totalMaghribIzin: number;
+  totalSubuhSakit: number;
+  totalMaghribSakit: number;
+  totalJP: number; // totalSubuhHadir + totalMaghribHadir
+  ratePerJP: number; // Rp 40.000
+  totalHonor: number; // totalJP × ratePerJP
+  presentDates: string[];
+}
+
+export interface TahfidzPayrollSummary {
+  period: string;
+  totalUstadz: number;
+  totalJP: number;
+  totalSubuhJP: number;
+  totalMaghribJP: number;
+  totalHonor: number;
+  generatedDate: string;
+  items: TahfidzPayrollItem[];
+  apiStatus: 'connected' | 'disconnected' | 'loading';
+}
+
+// ====== EXPENSE REPORT INTEGRATION ======
+export interface ExpenseRecord {
+  id: string;
+  date: string; // YYYY-MM-DD
+  category: 'SARPRAS' | 'DAPUR';
+  description: string; // e.g. "Beli Beras 50kg, Minyak 5L"
+  amount: number;
+  reporterId: string;
+  reporterName: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  createdAt: string;
+}
+
+// ====== STAFF JOURNAL INTEGRATION ======
+export interface StaffJournalRecord {
+  id: string;
+  date: string; // YYYY-MM-DD
+  staffId: string;
+  staffName: string;
+  category: 'SARPRAS' | 'DAPUR';
+  taskToday: string; // Pekerjaan hari ini / Menu saat ini
+  taskTomorrow: string; // Pekerjaan selanjutnya / Menu selanjutnya
+  createdAt: string;
+}
 

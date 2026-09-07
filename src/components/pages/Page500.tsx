@@ -3,13 +3,33 @@ import { Search, RefreshCw, Home, AlertTriangle, ShieldCheck } from 'lucide-reac
 import { useHRIS } from '../../context/HRISContext';
 
 export const Page500: React.FC = () => {
-  const { setCurrentPath, currentRole, handleRefresh, isRefreshing } = useHRIS();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  let currentRole: string | undefined;
+  let setCurrentPath: ((path: string) => void) | undefined;
+
+  try {
+    const hris = useHRIS();
+    currentRole = hris.currentRole;
+    setCurrentPath = hris.setCurrentPath;
+  } catch {
+    // Rendered outside HRISProvider (e.g. inside root ErrorBoundary)
+  }
 
   const handleReturn = () => {
-    if (currentRole === 'ADMIN') setCurrentPath('/dashboard/admin');
-    else if (currentRole === 'GURU') setCurrentPath('/dashboard/guru');
-    else setCurrentPath('/dashboard/kepsek');
+    if (setCurrentPath) {
+      if (currentRole === 'ADMIN') setCurrentPath('/dashboard/admin');
+      else if (currentRole === 'GURU') setCurrentPath('/dashboard/guru');
+      else setCurrentPath('/dashboard/kepsek');
+    } else {
+      window.location.href = '/';
+    }
+  };
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    window.location.reload();
   };
 
   return (

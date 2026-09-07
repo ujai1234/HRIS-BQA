@@ -1,96 +1,152 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-serif: 'Newsreader', Georgia, Cambria, serif;
-  --color-spruce: #1B4332;
-  --color-ochre: #B08968;
-  --color-chalk: #FBFBFA;
-  --color-pesantren-lime: #D4E157;
-  --color-pesantren-emerald: #1B4332;
-  --color-pesantren-dark: #141A17;
+  --font-sans: 'Plus Jakarta Sans', 'Poppins', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Amiri', 'Newsreader', Georgia, serif;
+  --font-arabic: 'Amiri', 'Noto Naskh Arabic', serif;
+
+  /* BQA Design System Color Tokens */
+  --color-bqa-emerald: #065f46;
+  --color-bqa-emerald-dark: #044e3a;
+  --color-bqa-emerald-light: #047857;
+  --color-bqa-emerald-soft: #e3f3ec;
+  --color-bqa-gold: #d97706;
+  --color-bqa-gold-dark: #b45309;
+  --color-bqa-gold-light: #fbbf24;
+  --color-bqa-gold-soft: #fef3c7;
+  --color-bqa-bg: #faf9f6;
+  --color-bqa-bg-dark: #0f1713;
+  --color-bqa-surface: #ffffff;
+  --color-bqa-surface-dark: #16201b;
+
+  --color-spruce: #065f46;
+  --color-ochre: #d97706;
+  --color-chalk: #faf9f6;
+  --color-pesantren-lime: #fbbf24;
+  --color-pesantren-emerald: #065f46;
+  --color-pesantren-dark: #0f1713;
 
   /* CoreUI Admin Palette Tokens */
-  --color-cui-primary: #321fdb;
-  --color-cui-secondary: #9da5b1;
-  --color-cui-success: #2eb85c;
-  --color-cui-info: #39f;
-  --color-cui-warning: #f9b115;
-  --color-cui-danger: #e55353;
-  --color-cui-dark: #2c384a;
-  --color-cui-sidebar: #212631;
-  --color-cui-bg: #ebedef;
-  --color-cui-bg-dark: #131924;
+  --color-cui-primary: #065f46;
+  --color-cui-secondary: #64748b;
+  --color-cui-success: #059669;
+  --color-cui-info: #0284c7;
+  --color-cui-warning: #d97706;
+  --color-cui-danger: #dc2626;
+  --color-cui-dark: #0f1713;
+  --color-cui-sidebar: #065f46;
+  --color-cui-bg: #faf9f6;
+  --color-cui-bg-dark: #0f1713;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 html, body, button, input, select, textarea {
-  font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 body {
-  background-color: #f3f6f4;
-  color: #0f172a;
+  background-color: #faf9f6;
+  color: #1e293b;
 }
 
 .dark body {
-  background-color: #09130f;
-  color: #f1f5f9;
+  background-color: #0f1713;
+  color: #f8fafc;
 }
 
 @layer utilities {
-  /* Print Optimization */
-  @media print {
-    @page {
-      size: A4 portrait;
-      margin: 1.2cm;
-    }
-
-    body {
-      background-color: #ffffff !important;
-      color: #000000 !important;
-      font-size: 11pt;
-    }
-
-    header, footer, aside, .no-print, button {
-      display: none !important;
-    }
-
-    .print-only {
-      display: block !important;
-    }
-
-    table {
-      page-break-inside: auto;
-    }
-
-    tr {
-      page-break-inside: avoid;
-      page-break-after: auto;
-    }
-
-    thead {
-      display: table-header-group;
-    }
-
-    tfoot {
-      display: table-footer-group;
-    }
+  /* BQA Geometric Islamic Background Pattern */
+  .bqa-bg-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.05'%3E%3Cpath d='M32 4l8 20 20 8-20 8-8 20-8-20-20-8 20-8z'/%3E%3Ccircle cx='32' cy='32' r='6'/%3E%3C/g%3E%3C/svg%3E");
   }
 
-  /* Islamic Modern Card & Widget Utilities */
+  .bqa-bg-pattern-dark {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23d97706' stroke-opacity='0.06'%3E%3Cpath d='M32 4l8 20 20 8-20 8-8 20-8-20-20-8 20-8z'/%3E%3Ccircle cx='32' cy='32' r='6'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* BQA Signature Islamic Card (Gold Border Left) */
+  .bqa-card {
+    background-color: #ffffff;
+    border-radius: 1rem;
+    border: 1px solid rgba(226, 232, 240, 0.85);
+    border-left: 4px solid #d97706;
+    box-shadow: 0 10px 25px -5px rgba(6, 95, 70, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease-out;
+  }
+
+  .bqa-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(6, 95, 70, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  }
+
+  .dark .bqa-card {
+    background-color: #16201b;
+    border-color: rgba(6, 95, 70, 0.3);
+    border-left-color: #d97706;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  }
+
+  .dark .bqa-card:hover {
+    box-shadow: 0 20px 30px -5px rgba(0, 0, 0, 0.45);
+  }
+
+  /* BQA Standard Card Alias */
   .cui-card {
     background-color: #ffffff;
-    border-radius: 0.875rem;
+    border-radius: 1rem;
     border: 1px solid rgba(226, 232, 240, 0.9);
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    border-left: 4px solid #d97706;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
   .dark .cui-card {
-    background-color: #121e19;
-    border-color: rgba(16, 185, 129, 0.15);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    background-color: #16201b;
+    border-color: rgba(6, 95, 70, 0.3);
+    border-left-color: #d97706;
+  }
+
+  /* BQA Button Styles */
+  .bqa-btn-gold {
+    background-color: #d97706;
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);
+    transition: all 0.15s ease;
+  }
+
+  .bqa-btn-gold:hover {
+    background-color: #b45309;
+    box-shadow: 0 4px 8px rgba(217, 119, 6, 0.3);
+  }
+
+  .bqa-btn-gold:active {
+    transform: scale(0.96);
+  }
+
+  .bqa-btn-emerald {
+    background-color: #065f46;
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 4px rgba(6, 95, 70, 0.2);
+    transition: all 0.15s ease;
+  }
+
+  .bqa-btn-emerald:hover {
+    background-color: #047857;
+    box-shadow: 0 4px 8px rgba(6, 95, 70, 0.3);
+  }
+
+  .bqa-btn-emerald:active {
+    transform: scale(0.96);
+  }
+
+  /* Font Arabic */
+  .font-arabic {
+    font-family: 'Amiri', 'Noto Naskh Arabic', serif;
   }
 
   /* Scrollbar custom styling */
@@ -104,20 +160,20 @@ body {
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(148, 163, 184, 0.4);
+    background: rgba(6, 95, 70, 0.3);
     border-radius: 9999px;
   }
 
   .dark ::-webkit-scrollbar-thumb {
-    background: rgba(16, 185, 129, 0.25);
+    background: rgba(217, 119, 6, 0.35);
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(148, 163, 184, 0.7);
+    background: rgba(6, 95, 70, 0.6);
   }
 
   .dark ::-webkit-scrollbar-thumb:hover {
-    background: rgba(16, 185, 129, 0.45);
+    background: rgba(217, 119, 6, 0.6);
   }
 
   @keyframes bounceSubtle {
@@ -135,6 +191,7 @@ body {
     animation: bounceSubtle 1.5s infinite;
   }
 }
+
 
 
 

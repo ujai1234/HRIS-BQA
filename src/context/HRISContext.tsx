@@ -27,7 +27,9 @@ import {
   INITIAL_SCHEDULES, 
   INITIAL_ATTENDANCES, 
   INITIAL_BADAL_ASSIGNMENTS,
-  INITIAL_AUDIT_LOGS
+  INITIAL_AUDIT_LOGS,
+  INITIAL_EXPENSES,
+  INITIAL_STAFF_JOURNALS
 } from '../data/initialData';
 import { calculateLatePenalty, validateScheduleTimeWindow } from '../utils/formatters';
 
@@ -97,9 +99,22 @@ interface HRISContextType {
   updateLearningNeedRequestStatus: (id: string, status: LearningNeedStatus, adminComment?: string) => void;
   deleteLearningNeedRequest: (id: string) => void;
 
+  expenses: import('../types').ExpenseRecord[];
+  addExpenseRecord: (record: Omit<import('../types').ExpenseRecord, 'id' | 'createdAt' | 'status'>) => void;
+  updateExpenseStatus: (id: string, status: import('../types').ExpenseRecord['status']) => void;
+
+  // Staff Journals
+  staffJournals: import('../types').StaffJournalRecord[];
+  addStaffJournal: (record: Omit<import('../types').StaffJournalRecord, 'id' | 'createdAt'>) => void;
+
   // Geofence & Location Settings
   geofenceSettings: GeofenceSettings;
   updateGeofenceSettings: (settings: Partial<GeofenceSettings>) => Promise<boolean>;
+
+  // ====== TAHFIDZ PAYROLL INTEGRATION ======
+  tahfidzPayroll: import('../types').TahfidzPayrollSummary | null;
+  fetchTahfidzPayroll: (bulan: number, tahun: number) => Promise<import('../types').TahfidzPayrollSummary>;
+  checkTahfidzConnection: () => Promise<boolean>;
 
   // Reset & Sync
   refreshData: () => Promise<void>;
@@ -125,6 +140,8 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [attendances, setAttendances] = useState<AttendanceRecord[]>([]);
   const [badalAssignments, setBadalAssignments] = useState<BadalAssignment[]>([]);
   const [learningNeedRequests, setLearningNeedRequests] = useState<LearningNeedRequest[]>([]);
+  const [expenses, setExpenses] = useState<import('../types').ExpenseRecord[]>([]);
+  const [staffJournals, setStaffJournals] = useState<import('../types').StaffJournalRecord[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
   const [geofenceSettings, setGeofenceSettings] = useState<GeofenceSettings>(DEFAULT_GEOFENCE_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
@@ -183,25 +200,32 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchAllData = async () => {
     setIsLoading(true);
     try {
-      const [tRes, sRes, aRes, bRes, lRes, lnRes, gRes] = await Promise.all([
+      const [tRes, sRes, aRes, bRes, lRes, lnRes, gRes, stRes, seRes] = await Promise.all([
         fetch('/api/teachers'),
         fetch('/api/schedules'),
         fetch('/api/attendances'),
         fetch('/api/badal'),
         fetch('/api/audit-logs'),
         fetch('/api/learning-needs'),
-        fetch('/api/settings/geofence')
+        fetch('/api/settings/geofence'),
+        fetch('/api/staff-tasks'),
+        fetch('/api/staff-expenses')
       ]);
 
-      const [t, s, a, b, l, ln, g] = await Promise.all([
+      const [t, s, a, b, l, ln, g, st, se] = await Promise.all([
         tRes.json(),
         sRes.json(),
         aRes.json(),
         bRes.json(),
         lRes.ok ? lRes.json() : [],
         lnRes.json(),
-        gRes.ok ? gRes.json() : null
+        gRes.ok ? gRes.json() : null,
+        stRes.ok ? stRes.json() : [],
+        seRes.ok ? seRes.json() : []
       ]);
+
+      setStaffJournals(Array.isArray(st) ? st : []);
+      setExpenses(Array.isArray(se) ? se : []);
 
       if (t.length === 0) {
         await fetch('/api/seed', { method: 'POST' });
@@ -235,6 +259,56 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // ====== EXPENSES ======
+  const addExpenseRecord = (record: Omit<import('../types').ExpenseRecord, 'id' | 'createdAt' | 'status'>) => {
+    const newRecord: import('../types').ExpenseRecord = {
+      ...record,
+      id: `EXP-${Date.now()}`,
+      status: 'PENDING',
+      createdAt: new Date().toISOString()
+    };
+    
+    setExpenses(prev => [newRecord, ...prev]);
+    
+    fetch('/api/staff-expenses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newRecord)
+    }).catch(err => console.error('Failed to save expense', err));
+    
+    logActivity('ADD_EXPENSE', 'SYSTEM', `Pengajuan belanja: ${record.description}`);
+  };
+
+  const updateExpenseStatus = (id: string, status: import('../types').ExpenseRecord['status']) => {
+    setExpenses(prev => prev.map(e => e.id === id ? { ...e, status } : e));
+    
+    fetch(`/api/staff-expenses/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    }).catch(err => console.error('Failed to update expense', err));
+    
+    logActivity('UPDATE_EXPENSE_STATUS', 'SYSTEM', `Status belanja ${id} diubah menjadi ${status}`);
+  };
+
+  const addStaffJournal = (record: Omit<import('../types').StaffJournalRecord, 'id' | 'createdAt'>) => {
+    const newRecord: import('../types').StaffJournalRecord = {
+      ...record,
+      id: `JRNL-${Date.now()}`,
+      createdAt: new Date().toISOString()
+    };
+    
+    setStaffJournals(prev => [newRecord, ...prev]);
+    
+    fetch('/api/staff-tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newRecord)
+    }).catch(err => console.error('Failed to save staff journal', err));
+    
+    logActivity('ADD_JOURNAL', 'SYSTEM', `Pengisian jurnal: ${record.staffName}`);
   };
 
   const refreshData = async () => {
@@ -481,7 +555,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Submit Jurnal Mengajar
   const submitJournal = async (
     attendanceId: string,
-    journalInput: Partial<TeachingJournal> & { topic: string; studentAttendance: StudentAttendance }
+    journalInput: Partial<TeachingJournal> & { topic: string; studentAttendance: StudentAttendance; studentAttendancesList?: { studentId: string, status: string, notes?: string }[] }
   ) => {
     const todayStr = new Date().toISOString().split('T')[0];
     const targetAtt = attendances.find(a => a.id === attendanceId || (journalInput.scheduleId && a.scheduleId === journalInput.scheduleId && a.date === todayStr));
@@ -497,8 +571,9 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const teacherId = journalInput.teacherId || targetAtt?.actualTeacherId || targetAtt?.teacherId || currentUser?.id || 'T-08';
 
     const journalId = journalInput.id || `JRN-${Date.now()}`;
+    const { studentAttendancesList, ...restInput } = journalInput;
     const newJournal: TeachingJournal = {
-      ...journalInput,
+      ...restInput,
       id: journalId,
       attendanceId,
       scheduleId,
@@ -549,6 +624,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...newJournal,
+          studentAttendancesList: journalInput.studentAttendancesList,
           totalStudents: journalInput.studentAttendance?.totalStudents ?? 28,
           presentCount: journalInput.studentAttendance?.presentCount ?? 27,
           sickCount: journalInput.studentAttendance?.sickCount ?? 1,
@@ -1018,12 +1094,21 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Distinct present days
     const presentDates = new Set(actualTeachingRecords.map((a) => a.date));
+    
+    // ====== TAHFIDZ INTEGRATION: Add Tahfidz present dates ======
+    if (tahfidzPayroll?.items) {
+      const tahfidzItem = tahfidzPayroll.items.find(t => t.teacherId === teacherId);
+      if (tahfidzItem && tahfidzItem.presentDates) {
+        tahfidzItem.presentDates.forEach(date => presentDates.add(date));
+      }
+    }
+
     const defaultMonthlyDays = Math.min(22, Math.max(16, weeklyHours > 0 ? weeklyHours * 2 : 18));
     const totalPresentDays = Math.max(presentDates.size, defaultMonthlyDays);
 
     // Hourly teaching honorarium
-    const teachingHonorarium = totalTaughtHours * teacher.hourlyRate;
-    const totalTransport = totalPresentDays * teacher.dailyTransport;
+    let teachingHonorarium = totalTaughtHours * teacher.hourlyRate;
+    let totalTransport = totalPresentDays * teacher.dailyTransport;
 
     // Deductions Calculation
     // 1. Late penalty
@@ -1066,9 +1151,24 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, 0);
 
     const otherDeductions = 0; // Kasbon/Infaq sukarela
-    const totalDeductions = latePenaltyTotal + emptyJournalPenalty + alphaPenalty + izinPenalty + otherDeductions;
-    const grossSalary = teacher.baseSalary + teachingHonorarium + totalTransport;
-    const netSalary = Math.max(0, grossSalary - totalDeductions);
+    
+    // STAFF Logic (Flat Rate)
+    let totalDeductions = latePenaltyTotal + emptyJournalPenalty + alphaPenalty + izinPenalty + otherDeductions;
+    let grossSalary = teacher.baseSalary + teachingHonorarium + totalTransport;
+    let netSalary = Math.max(0, grossSalary - totalDeductions);
+    let mealAllowance = 0;
+
+    if (teacher.role === 'STAFF') {
+      // Flat rate for Staff
+      const staffTransport = teacher.monthlyTransport || 250000;
+      mealAllowance = teacher.monthlyMealAllowance || 375000;
+      
+      grossSalary = teacher.baseSalary + staffTransport + mealAllowance;
+      totalDeductions = 0; // Flat gaji pokok penuh
+      netSalary = grossSalary;
+      totalTransport = staffTransport;
+      teachingHonorarium = 0;
+    }
 
     return {
       teacher,
@@ -1096,6 +1196,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       totalDeductions,
       grossSalary,
       netSalary,
+      monthlyMealAllowance: mealAllowance,
     };
   };
 
@@ -1255,6 +1356,46 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // ====== TAHFIDZ PAYROLL INTEGRATION ======
+  const [tahfidzPayroll, setTahfidzPayroll] = useState<import('../types').TahfidzPayrollSummary | null>(null);
+
+  const fetchTahfidzPayroll = async (bulan: number, tahun: number) => {
+    try {
+      const response = await fetch(`/api/tahfidz/payroll?bulan=${bulan}&tahun=${tahun}`);
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+      setTahfidzPayroll(data);
+      return data;
+    } catch (error) {
+      console.error('Failed to fetch Tahfidz payroll:', error);
+      toast.error('Gagal mengambil data dari server Tahfidz');
+      const fallback: import('../types').TahfidzPayrollSummary = {
+        period: `${bulan}/${tahun}`,
+        totalUstadz: 0,
+        totalJP: 0,
+        totalSubuhJP: 0,
+        totalMaghribJP: 0,
+        totalHonor: 0,
+        generatedDate: new Date().toISOString(),
+        items: [],
+        apiStatus: 'disconnected'
+      };
+      setTahfidzPayroll(fallback);
+      return fallback;
+    }
+  };
+
+  const checkTahfidzConnection = async () => {
+    try {
+      const response = await fetch('/api/tahfidz/status');
+      if (!response.ok) return false;
+      const data = await response.json();
+      return data.connected === true;
+    } catch (error) {
+      return false;
+    }
+  };
+
   const resetToDefault = () => {
     logActivity(
       'RESET_DATABASE',
@@ -1278,6 +1419,8 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         badalAssignments,
         auditLogs,
         learningNeedRequests,
+        expenses,
+        staffJournals,
         geofenceSettings,
         updateGeofenceSettings,
         currentUser,
@@ -1311,10 +1454,16 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deleteSchedule,
         calculateTeacherPayroll,
         calculateAllPayroll,
+        tahfidzPayroll,
+        fetchTahfidzPayroll,
+        checkTahfidzConnection,
         logActivity,
         addLearningNeedRequest,
         updateLearningNeedRequestStatus,
         deleteLearningNeedRequest,
+        addExpenseRecord,
+        updateExpenseStatus,
+        addStaffJournal,
         refreshData,
         isLoading,
         resetToDefault,

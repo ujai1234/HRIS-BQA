@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Sparkles,
@@ -67,7 +67,59 @@ export const JournalModal: React.FC<JournalModalProps> = ({
     }
   );
 
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [students, setStudents] = useState<any[]>([]);
+  const [studentAttendancesList, setStudentAttendancesList] = useState<{ studentId: string, status: string, notes?: string, name?: string }[]>([]);
+
+  useEffect(() => {
+    if (isReadOnly) return;
+    fetch('/api/students')
+      .then(res => res.json())
+      .then(data => {
+        const filtered = data.filter((s: any) => s.className === schedule.className);
+        // Fallback to all students if no match, just for demo robustness
+        const finalStudents = filtered.length > 0 ? filtered : data.slice(0, 15);
+        setStudents(finalStudents);
+        
+        if (!existingJournal) {
+          const initList = finalStudents.map((s: any) => ({
+            studentId: s.id,
+            name: s.name,
+            status: 'HADIR'
+          }));
+          setStudentAttendancesList(initList);
+          setStudentAttendance(prev => ({
+            ...prev,
+            totalStudents: finalStudents.length,
+            presentCount: finalStudents.length,
+            sickCount: 0, permittedCount: 0, absentCount: 0
+          }));
+        }
+      });
+  }, [schedule.className, schedule.id, existingJournal, isReadOnly]);
+
+  const handleDetailedStatusChange = (studentId: string, status: string) => {
+    if (isReadOnly) return;
+    setStudentAttendancesList(prev => {
+      const updated = prev.map(s => s.studentId === studentId ? { ...s, status } : s);
+      const counts = { total: updated.length, present: 0, sick: 0, permit: 0, absent: 0 };
+      updated.forEach(s => {
+        if (s.status === 'HADIR') counts.present++;
+        else if (s.status === 'SAKIT') counts.sick++;
+        else if (s.status === 'IZIN') counts.permit++;
+        else counts.absent++;
+      });
+      setStudentAttendance({
+        totalStudents: counts.total,
+        presentCount: counts.present,
+        sickCount: counts.sick,
+        permittedCount: counts.permit,
+        absentCount: counts.absent,
+      });
+      return updated;
+    });
+  };
 
   const handleStudentCountChange = (field: keyof StudentAttendance, value: number) => {
     if (isReadOnly) return;
@@ -136,6 +188,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({
         classNotes: classNotes.trim() || undefined,
         assignmentGiven: assignmentGiven.trim() || undefined,
         studentAttendance,
+        studentAttendancesList,
       });
 
       try {
@@ -233,8 +286,8 @@ export const JournalModal: React.FC<JournalModalProps> = ({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
-          {/* Quick Template Fill Button */}
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[70vh] overflow-y-auto text-xs">
+            {/* Quick Template Fill Button */}
           {!isReadOnly && (
             <div className="flex items-center justify-between bg-slate-50 dark:bg-[#0e1713] p-2.5 rounded-xl border border-slate-200/80 dark:border-emerald-900/40">
               <span className="text-slate-600 dark:text-emerald-300/80 text-[11px]">
@@ -359,17 +412,57 @@ export const JournalModal: React.FC<JournalModalProps> = ({
                 <span className="text-[10px] text-rose-700 dark:text-rose-400 font-bold block uppercase">Alpa</span>
                 <input
                   type="number"
-                  disabled={isReadOnly}
-                  readOnly={isReadOnly}
+                  disabled={true}
+                  readOnly={true}
                   value={studentAttendance.absentCount}
-                  onChange={(e) => handleStudentCountChange('absentCount', parseInt(e.target.value) || 0)}
-                  className={`w-full text-center font-bold text-xs bg-transparent border-none focus:outline-none text-rose-700 dark:text-rose-400 mt-0.5 ${
-                    isReadOnly ? 'cursor-not-allowed' : ''
-                  }`}
+                  className={`w-full text-center font-bold text-xs bg-transparent border-none focus:outline-none text-rose-700 dark:text-rose-400 mt-0.5 cursor-not-allowed`}
                 />
               </div>
             </div>
           </div>
+
+          {/* Detailed Student Checklist */}
+          {!isReadOnly && studentAttendancesList.length > 0 && (
+            <div className="space-y-2 pt-2">
+              <label className="font-semibold text-slate-800 dark:text-emerald-100 block">
+                Presensi Detail per Santri
+              </label>
+              <div className="border border-slate-200 dark:border-emerald-800/40 rounded-xl overflow-hidden max-h-60 overflow-y-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead className="bg-slate-50 dark:bg-[#0e1713] border-b border-slate-200 dark:border-emerald-900/50 sticky top-0 z-10">
+                    <tr>
+                      <th className="py-2 px-3 text-[10px] font-bold text-slate-500 dark:text-emerald-400 uppercase">Nama Santri</th>
+                      <th className="py-2 px-3 text-[10px] font-bold text-slate-500 dark:text-emerald-400 uppercase text-center w-20">Hadir</th>
+                      <th className="py-2 px-3 text-[10px] font-bold text-slate-500 dark:text-emerald-400 uppercase text-center w-20">Sakit</th>
+                      <th className="py-2 px-3 text-[10px] font-bold text-slate-500 dark:text-emerald-400 uppercase text-center w-20">Izin</th>
+                      <th className="py-2 px-3 text-[10px] font-bold text-slate-500 dark:text-emerald-400 uppercase text-center w-20">Alpa</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-emerald-900/30">
+                    {studentAttendancesList.map((sa) => (
+                      <tr key={sa.studentId} className="hover:bg-slate-50/50 dark:hover:bg-[#13221b] transition-colors">
+                        <td className="py-2 px-3 text-xs text-slate-800 dark:text-emerald-100 font-medium">
+                          {sa.name}
+                        </td>
+                        <td className="py-2 px-3 text-center">
+                          <input type="radio" name={`att_${sa.studentId}`} checked={sa.status === 'HADIR'} onChange={() => handleDetailedStatusChange(sa.studentId, 'HADIR')} className="w-3.5 h-3.5 text-emerald-600 focus:ring-emerald-500 accent-emerald-600 cursor-pointer" />
+                        </td>
+                        <td className="py-2 px-3 text-center">
+                          <input type="radio" name={`att_${sa.studentId}`} checked={sa.status === 'SAKIT'} onChange={() => handleDetailedStatusChange(sa.studentId, 'SAKIT')} className="w-3.5 h-3.5 text-amber-500 focus:ring-amber-400 accent-amber-500 cursor-pointer" />
+                        </td>
+                        <td className="py-2 px-3 text-center">
+                          <input type="radio" name={`att_${sa.studentId}`} checked={sa.status === 'IZIN'} onChange={() => handleDetailedStatusChange(sa.studentId, 'IZIN')} className="w-3.5 h-3.5 text-sky-500 focus:ring-sky-400 accent-sky-500 cursor-pointer" />
+                        </td>
+                        <td className="py-2 px-3 text-center">
+                          <input type="radio" name={`att_${sa.studentId}`} checked={sa.status === 'ALPA'} onChange={() => handleDetailedStatusChange(sa.studentId, 'ALPA')} className="w-3.5 h-3.5 text-rose-500 focus:ring-rose-400 accent-rose-500 cursor-pointer" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {/* Notes & Assignments */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">

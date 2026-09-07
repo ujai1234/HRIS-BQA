@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import { TeacherDashboard } from './TeacherDashboard';
 import { SlipGajiView } from './SlipGajiView';
 import { LearningNeedManagement } from './LearningNeedManagement';
+import { TeacherAcademics } from './TeacherAcademics';
+import { TeacherNotes } from './TeacherNotes';
 
-export type GuruTabType = 'clockin_journal' | 'slip_gaji' | 'kebutuhan';
+export type GuruTabType = 'clockin_journal' | 'slip_gaji' | 'kebutuhan' | 'akademik' | 'buku_penghubung';
 
 interface GuruViewProps {
   initialTab?: GuruTabType;
@@ -19,6 +21,10 @@ export const GuruView: React.FC<GuruViewProps> = ({ initialTab = 'clockin_journa
 
   const renderContent = () => {
     switch (activeSubTab) {
+      case 'buku_penghubung':
+        return <TeacherNotes />;
+      case 'akademik':
+        return <TeacherAcademics />;
       case 'slip_gaji':
         return <SlipGajiView />;
       case 'kebutuhan':

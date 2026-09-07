@@ -67,7 +67,7 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ payroll, onClo
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-stone-950/70 backdrop-blur-xs overflow-y-auto print:p-0 print:bg-white print:static"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/70 backdrop-blur-xs overflow-y-auto print:p-0 print:bg-white print:static"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
@@ -75,7 +75,7 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ payroll, onClo
       }}
     >
       <div
-        className="bg-white dark:bg-stone-900 rounded-xl shadow-2xl max-w-2xl w-full overflow-hidden border border-stone-200 dark:border-stone-800 my-auto print:border-none print:shadow-none print:m-0 print:max-w-none animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[95vh] print:max-h-none"
+        className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 dark:border-slate-800 my-auto print:border-none print:shadow-none print:m-0 print:max-w-none animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[95vh] print:max-h-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Printable CSS Hook */}
@@ -106,16 +106,16 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ payroll, onClo
         ` }} />
 
         {/* Modal Header & Actions Bar */}
-        <div className="px-4 py-3 sm:px-5 flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 dark:border-stone-800 bg-stone-900 text-white shrink-0 no-print">
+        <div className="px-4 py-3 sm:px-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 bg-slate-900 text-white shrink-0 no-print">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded bg-emerald-600 flex items-center justify-center font-bold text-xs text-white">
               BQA
             </div>
             <div>
-              <h3 className="font-semibold text-xs text-stone-100 leading-tight">
+              <h3 className="font-semibold text-xs text-slate-100 leading-tight">
                 Preview Dokumen Slip Gaji
               </h3>
-              <p className="text-[11px] text-stone-400">
+              <p className="text-[11px] text-slate-400">
                 Periode {payroll.period} • {teacher.name}
               </p>
             </div>
@@ -129,7 +129,7 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ payroll, onClo
               className={`inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border transition-colors cursor-pointer ${
                 isPrivacyMode
                   ? 'bg-amber-950/60 border-amber-500/50 text-amber-300'
-                  : 'bg-stone-800 border-stone-700 text-stone-300 hover:text-white'
+                  : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
               }`}
               title={isPrivacyMode ? 'Tampilkan Angka Gaji' : 'Sembunyikan Angka Gaji (Mode Privasi)'}
             >
@@ -140,7 +140,7 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ payroll, onClo
             <button
               type="button"
               onClick={onClose}
-              className="text-stone-400 hover:text-stone-200 p-1.5 rounded-lg hover:bg-stone-800 transition-colors cursor-pointer"
+              className="text-slate-400 hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -148,25 +148,25 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ payroll, onClo
         </div>
 
         {/* Paper Document Preview Container (Scrollable) */}
-        <div className="overflow-y-auto p-4 sm:p-6 md:p-8 bg-stone-100 dark:bg-stone-950/60 print:p-0 print:bg-white flex justify-center">
+        <div className="overflow-y-auto p-4 sm:p-6 md:p-8 bg-slate-100 dark:bg-slate-950/60 print:p-0 print:bg-white flex justify-center">
           <div
             id="printable-salary-slip"
-            className="w-full max-w-xl bg-white text-stone-900 rounded-lg p-5 sm:p-7 shadow-md border border-stone-200/90 print:border-none print:shadow-none print:p-0 text-xs space-y-4"
+            className="w-full max-w-xl bg-white text-slate-900 rounded-lg p-5 sm:p-7 shadow-md border border-slate-200/90 print:border-none print:shadow-none print:p-0 text-xs space-y-4"
           >
             {/* 1. Official Letterhead / Kop Surat (Clean spacing, strictly no overlap) */}
-            <div className="border-b-2 border-stone-900 pb-3">
+            <div className="border-b-2 border-slate-900 pb-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 text-center space-y-0.5 min-w-0">
                   <p className="text-[9px] font-bold text-[#B08968] uppercase tracking-wider">
                     YAYASAN BAITUL QUR'AN AL-IKHWAN
                   </p>
-                  <h1 className="text-sm sm:text-base font-extrabold tracking-tight text-stone-950 uppercase leading-snug">
+                  <h1 className="text-sm sm:text-base font-extrabold tracking-tight text-slate-950 uppercase leading-snug">
                     PONDOK PESANTREN BAITUL QUR'AN AL-IKHWAN
                   </h1>
-                  <p className="text-[10px] text-stone-600 font-medium leading-tight">
+                  <p className="text-[10px] text-slate-600 font-medium leading-tight">
                     Jl. Sungai Kendal No.21, RT.8/RW.5, Marunda, Cilincing, Jakarta Utara 14150
                   </p>
-                  <p className="text-[9px] text-stone-400 font-mono leading-tight">
+                  <p className="text-[9px] text-slate-400 font-mono leading-tight">
                     Hotline: 0858-8302-2643 • Email: sekretariat@bqa.sch.id • NSPP: 510032
                   </p>
                 </div>
@@ -177,86 +177,86 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ payroll, onClo
 
             {/* 2. Slip Title & Subtitle */}
             <div className="text-center pt-0.5">
-              <h2 className="text-xs sm:text-sm font-bold text-stone-900 tracking-wide uppercase">
+              <h2 className="text-xs sm:text-sm font-bold text-slate-900 tracking-wide uppercase">
                 TANDA BUKTI PENERIMAAN KAFA'AH ASATIDZ
               </h2>
-              <p className="text-[11px] text-stone-500 font-mono mt-0.5">
+              <p className="text-[11px] text-slate-500 font-mono mt-0.5">
                 Periode: <strong>{payroll.period}</strong> • Unit: <strong>{teacher.unit}</strong>
               </p>
             </div>
 
             {/* 3. Teacher Biodata Box (Clean Grid) */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-stone-50/80 p-3 rounded-lg border border-stone-200 text-stone-800 text-[11px]">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-slate-50/80 p-3 rounded-lg border border-slate-200 text-slate-800 text-[11px]">
               <div>
-                <span className="text-[10px] text-stone-400 block font-medium">Nama Asatidz</span>
-                <p className="font-semibold text-stone-950 mt-0.5">{teacher.name}</p>
-                <p className="text-[10px] text-stone-500 font-mono">NIP: {teacher.nip || 'BQA-008'}</p>
+                <span className="text-[10px] text-slate-400 block font-medium">Nama Asatidz</span>
+                <p className="font-semibold text-slate-950 mt-0.5">{teacher.name}</p>
+                <p className="text-[10px] text-slate-500 font-mono">NIP: {teacher.nip || 'BQA-008'}</p>
               </div>
 
               <div>
-                <span className="text-[10px] text-stone-400 block font-medium">Unit & Jabatan</span>
-                <p className="font-medium text-stone-800 mt-0.5">{teacher.unit}</p>
-                <p className="text-[10px] text-stone-500">{teacher.position}</p>
+                <span className="text-[10px] text-slate-400 block font-medium">Unit & Jabatan</span>
+                <p className="font-medium text-slate-800 mt-0.5">{teacher.unit}</p>
+                <p className="text-[10px] text-slate-500">{teacher.position}</p>
               </div>
 
               <div>
-                <span className="text-[10px] text-stone-400 block font-medium">Beban & Kehadiran</span>
-                <p className="font-semibold text-stone-900 mt-0.5 font-mono">{payroll.totalTaughtHours} JP</p>
-                <p className="text-[10px] text-stone-500 font-mono">{payroll.totalPresentDays} Hari Hadir</p>
+                <span className="text-[10px] text-slate-400 block font-medium">Beban & Kehadiran</span>
+                <p className="font-semibold text-slate-900 mt-0.5 font-mono">{payroll.totalTaughtHours} JP</p>
+                <p className="text-[10px] text-slate-500 font-mono">{payroll.totalPresentDays} Hari Hadir</p>
               </div>
 
               <div>
-                <span className="text-[10px] text-stone-400 block font-medium">Rekening Penyaluran</span>
-                <p className="font-medium text-stone-800 mt-0.5">{teacher.bankName || 'BSI'}</p>
-                <p className="text-[10px] text-stone-500 font-mono">{teacher.accountNumber || '7123-4567-89'}</p>
+                <span className="text-[10px] text-slate-400 block font-medium">Rekening Penyaluran</span>
+                <p className="font-medium text-slate-800 mt-0.5">{teacher.bankName || 'BSI'}</p>
+                <p className="text-[10px] text-slate-500 font-mono">{teacher.accountNumber || '7123-4567-89'}</p>
               </div>
             </div>
 
             {/* 4. Two-Column Ledger: Pendapatan vs Potongan */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
               {/* Left Column: Pendapatan */}
-              <div className="space-y-1.5 border border-stone-200 rounded-lg p-3 bg-white">
-                <div className="pb-1.5 border-b border-stone-200 font-semibold text-[#1B4332] flex justify-between text-xs">
+              <div className="space-y-1.5 border border-slate-200 rounded-lg p-3 bg-white">
+                <div className="pb-1.5 border-b border-slate-200 font-semibold text-[#1B4332] flex justify-between text-xs">
                   <span>A. Pendapatan (Hak)</span>
                   <span>Jumlah</span>
                 </div>
 
-                <div className="flex justify-between py-1 border-b border-stone-100 text-stone-700">
+                <div className="flex justify-between py-1 border-b border-slate-100 text-slate-700">
                   <span>1. Gaji Pokok</span>
-                  <span className="font-mono font-medium text-stone-900">{maskNumber(payroll.baseSalary)}</span>
+                  <span className="font-mono font-medium text-slate-900">{maskNumber(payroll.baseSalary)}</span>
                 </div>
 
-                <div className="flex justify-between py-1 border-b border-stone-100 text-stone-700">
+                <div className="flex justify-between py-1 border-b border-slate-100 text-slate-700">
                   <div>
                     <span>2. Honor Mengajar</span>
-                    <span className="text-[10px] text-stone-400 block font-mono">
+                    <span className="text-[10px] text-slate-400 block font-mono">
                       {payroll.totalTaughtHours} JP × {formatRupiah(teacher.hourlyRate || 40000)}
                     </span>
                   </div>
-                  <span className="font-mono font-medium text-stone-900">{maskNumber(payroll.teachingHonorarium)}</span>
+                  <span className="font-mono font-medium text-slate-900">{maskNumber(payroll.teachingHonorarium)}</span>
                 </div>
 
-                <div className="flex justify-between py-1 border-b border-stone-100 text-stone-700">
+                <div className="flex justify-between py-1 border-b border-slate-100 text-slate-700">
                   <div>
                     <span>3. Uang Transport</span>
-                    <span className="text-[10px] text-stone-400 block font-mono">
+                    <span className="text-[10px] text-slate-400 block font-mono">
                       {payroll.totalPresentDays} Hari × {formatRupiah(teacher.dailyTransportRate || 10000)}
                     </span>
                   </div>
-                  <span className="font-mono font-medium text-stone-900">{maskNumber(payroll.totalTransport)}</span>
+                  <span className="font-mono font-medium text-slate-900">{maskNumber(payroll.totalTransport)}</span>
                 </div>
 
                 {payroll.totalBadalHours > 0 && (
-                  <div className="flex justify-between py-1 border-b border-stone-100 text-stone-700">
+                  <div className="flex justify-between py-1 border-b border-slate-100 text-slate-700">
                     <div>
                       <span>4. Honor Badal (Pengganti)</span>
-                      <span className="text-[10px] text-stone-400 block font-mono">{payroll.totalBadalHours} JP Badal</span>
+                      <span className="text-[10px] text-slate-400 block font-mono">{payroll.totalBadalHours} JP Badal</span>
                     </div>
-                    <span className="font-mono font-medium text-stone-900">{maskNumber(payroll.badalHonorarium)}</span>
+                    <span className="font-mono font-medium text-slate-900">{maskNumber(payroll.badalHonorarium)}</span>
                   </div>
                 )}
 
-                <div className="flex justify-between pt-2 font-bold text-stone-950 text-xs border-t border-stone-200">
+                <div className="flex justify-between pt-2 font-bold text-slate-950 text-xs border-t border-slate-200">
                   <span>Total Pendapatan (Gross)</span>
                   <span className="font-mono text-[#1B4332]">
                     {maskNumber(
@@ -270,47 +270,47 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ payroll, onClo
               </div>
 
               {/* Right Column: Potongan */}
-              <div className="space-y-1.5 border border-stone-200 rounded-lg p-3 bg-white">
-                <div className="pb-1.5 border-b border-stone-200 font-semibold text-rose-700 flex justify-between text-xs">
+              <div className="space-y-1.5 border border-slate-200 rounded-lg p-3 bg-white">
+                <div className="pb-1.5 border-b border-slate-200 font-semibold text-rose-700 flex justify-between text-xs">
                   <span>B. Potongan SOP & Disiplin</span>
                   <span>Jumlah</span>
                 </div>
 
-                <div className="flex justify-between py-1 border-b border-stone-100 text-stone-700">
+                <div className="flex justify-between py-1 border-b border-slate-100 text-slate-700">
                   <div>
                     <span>1. Denda Keterlambatan</span>
-                    <span className="text-[10px] text-stone-400 block">Sesuai SOP keterlambatan</span>
+                    <span className="text-[10px] text-slate-400 block">Sesuai SOP keterlambatan</span>
                   </div>
                   <span className="font-mono text-rose-700 font-medium">
                     {payroll.latePenaltyTotal > 0 ? mask(`-${formatRupiah(payroll.latePenaltyTotal)}`) : mask('Rp 0')}
                   </span>
                 </div>
 
-                <div className="flex justify-between py-1 border-b border-stone-100 text-stone-700">
+                <div className="flex justify-between py-1 border-b border-slate-100 text-slate-700">
                   <div>
                     <span>2. Penalti Jurnal Belum Diisi</span>
-                    <span className="text-[10px] text-stone-400 block font-mono">{payroll.emptyJournalCount || 0} sesi pending</span>
+                    <span className="text-[10px] text-slate-400 block font-mono">{payroll.emptyJournalCount || 0} sesi pending</span>
                   </div>
                   <span className="font-mono text-rose-700 font-medium">
                     {payroll.emptyJournalPenalty > 0 ? mask(`-${formatRupiah(payroll.emptyJournalPenalty)}`) : mask('Rp 0')}
                   </span>
                 </div>
 
-                <div className="flex justify-between py-1 border-b border-stone-100 text-stone-700">
+                <div className="flex justify-between py-1 border-b border-slate-100 text-slate-700">
                   <span>3. Potongan Alpa / Izin</span>
-                  <span className="font-mono text-stone-500">
+                  <span className="font-mono text-slate-500">
                     {payroll.alphaPenalty > 0 ? mask(`-${formatRupiah(payroll.alphaPenalty)}`) : mask('Rp 0')}
                   </span>
                 </div>
 
-                <div className="flex justify-between py-1 border-b border-stone-100 text-stone-700">
+                <div className="flex justify-between py-1 border-b border-slate-100 text-slate-700">
                   <span>4. Potongan Lain-lain</span>
-                  <span className="font-mono text-stone-500">
+                  <span className="font-mono text-slate-500">
                     {payroll.otherDeductions > 0 ? mask(`-${formatRupiah(payroll.otherDeductions)}`) : mask('Rp 0')}
                   </span>
                 </div>
 
-                <div className="flex justify-between pt-2 font-bold text-rose-700 text-xs border-t border-stone-200">
+                <div className="flex justify-between pt-2 font-bold text-rose-700 text-xs border-t border-slate-200">
                   <span>Total Potongan</span>
                   <span className="font-mono">
                     {payroll.totalDeductions > 0 ? mask(`-${formatRupiah(payroll.totalDeductions)}`) : mask('Rp 0')}
@@ -325,7 +325,7 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ payroll, onClo
                 <span className="text-[10px] text-[#D4A373] uppercase font-bold tracking-wider block">
                   TOTAL KAFA'AH DITERIMA (TAKE HOME PAY)
                 </span>
-                <p className="text-[11px] text-stone-200 italic mt-0.5 font-serif">
+                <p className="text-[11px] text-slate-200 italic mt-0.5 font-serif">
                   {isPrivacyMode ? 'Nominal Dirahasiakan' : `Terbilang: "${terbilang(payroll.netSalary)}"`}
                 </p>
               </div>
@@ -338,10 +338,10 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ payroll, onClo
             </div>
 
             {/* 6. Signature & Digital Verification Block */}
-            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-stone-200 text-center text-xs">
+            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-200 text-center text-xs">
               <div className="space-y-1">
-                <span className="text-[10px] text-stone-400 block">Diverifikasi oleh,</span>
-                <p className="font-semibold text-stone-900 text-[11px]">Bendahara HRD Pesantren</p>
+                <span className="text-[10px] text-slate-400 block">Diverifikasi oleh,</span>
+                <p className="font-semibold text-slate-900 text-[11px]">Bendahara HRD Pesantren</p>
                 
                 <div className="py-2 flex items-center justify-center">
                   <div className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded text-[9px] font-bold">
@@ -350,28 +350,28 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ payroll, onClo
                   </div>
                 </div>
 
-                <p className="font-bold text-stone-900 text-[11px]">Ust. Ahmad Syahid, M.Pd.</p>
-                <p className="text-[10px] text-stone-400 font-mono">NIP: BQA-2021-003</p>
+                <p className="font-bold text-slate-900 text-[11px]">Ust. Ahmad Syahid, M.Pd.</p>
+                <p className="text-[10px] text-slate-400 font-mono">NIP: BQA-2021-003</p>
               </div>
 
               <div className="space-y-1">
-                <span className="text-[10px] text-stone-400 block">Penerima Kafa'ah,</span>
-                <p className="font-semibold text-stone-900 text-[11px]">Asatidz yang bersangkutan</p>
+                <span className="text-[10px] text-slate-400 block">Penerima Kafa'ah,</span>
+                <p className="font-semibold text-slate-900 text-[11px]">Asatidz yang bersangkutan</p>
                 
                 <div className="py-2 flex items-center justify-center">
-                  <div className="inline-flex items-center gap-1 px-2.5 py-1 bg-stone-50 text-stone-600 border border-stone-200 rounded text-[9px] italic">
-                    <CheckCircle2 className="w-3 h-3 text-stone-400" />
+                  <div className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-50 text-slate-600 border border-slate-200 rounded text-[9px] italic">
+                    <CheckCircle2 className="w-3 h-3 text-slate-400" />
                     <span>[ Ttd Digital ]</span>
                   </div>
                 </div>
 
-                <p className="font-bold text-stone-900 text-[11px]">{teacher.name}</p>
-                <p className="text-[10px] text-stone-400 font-mono">NIP: {teacher.nip || 'BQA-008'}</p>
+                <p className="font-bold text-slate-900 text-[11px]">{teacher.name}</p>
+                <p className="text-[10px] text-slate-400 font-mono">NIP: {teacher.nip || 'BQA-008'}</p>
               </div>
             </div>
 
             {/* 7. Footer Bottom Verification Footnote */}
-            <div className="pt-2 border-t border-stone-150 flex flex-col sm:flex-row items-center justify-between text-[9px] text-stone-400 gap-1">
+            <div className="pt-2 border-t border-stone-150 flex flex-col sm:flex-row items-center justify-between text-[9px] text-slate-400 gap-1">
               <span>✓ Dokumen Digital Sah HRIS Pesantren Baitul Qur'an Al-Ikhwan • Dicetak {currentDate}</span>
               <span className="font-mono">Sistem Terenkripsi • {docSlipId}</span>
             </div>
@@ -379,16 +379,16 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ payroll, onClo
         </div>
 
         {/* Modal Footer Controls */}
-        <div className="px-4 py-3 sm:px-5 border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900 flex items-center justify-between shrink-0 no-print">
-          <span className="text-xs text-stone-500 dark:text-stone-400">
-            Tekan <kbd className="px-1.5 py-0.5 bg-stone-200 dark:bg-stone-800 rounded font-mono text-[10px]">Esc</kbd> untuk menutup
+        <div className="px-4 py-3 sm:px-5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between shrink-0 no-print">
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            Tekan <kbd className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-800 rounded font-mono text-[10px]">Esc</kbd> untuk menutup
           </span>
 
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs font-medium border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors cursor-pointer"
+              className="px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
             >
               Tutup
             </button>

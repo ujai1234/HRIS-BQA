@@ -28,10 +28,16 @@ import {
   Check,
   RefreshCw,
   ChevronLeft,
+  Book,
+  DollarSign,
+  FileCheck,
+  MapPin,
+  Utensils,
+  Wrench,
+  Receipt,
+  CheckCircle2,
   Sliders,
   Home,
-  CheckCircle2,
-  MapPin,
   Camera,
   User,
   Database
@@ -98,6 +104,21 @@ export const Header: React.FC<HeaderProps> = ({
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showDbModal, setShowDbModal] = useState(false);
   const [filterType, setFilterType] = useState<'ALL' | 'BADAL' | 'KBM' | 'REQUEST'>('ALL');
+  
+  // State for collapsible sidebar sections
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    'CORE MONITORING': true,
+    'PORTAL SANTRI (SIS)': true,
+    'FINANSIAL & AUDIT': false,
+    'SISTEM & KONFIGURASI': false,
+  });
+
+  const toggleSection = (title: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [title]: !prev[title]
+    }));
+  };
   const notifRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -137,15 +158,19 @@ export const Header: React.FC<HeaderProps> = ({
       else if (currentPath === '/dashboard/guru/kebutuhan') crumbs.push({ label: 'Ajuan Fasilitas', path: currentPath });
       else crumbs.push({ label: 'Absen & Jurnal', path: currentPath });
     } else if (currentRole === 'ADMIN' || currentPath.startsWith('/dashboard/admin')) {
-      crumbs.push({ label: 'Admin', path: '/dashboard/admin' });
-      if (currentPath === '/dashboard/admin/guru') crumbs.push({ label: 'Data Asatidz & Kafa\'ah', path: currentPath });
-      else if (currentPath === '/dashboard/admin/jadwal') crumbs.push({ label: 'Jadwal Pelajaran', path: currentPath });
+      crumbs.push({ label: 'Panel Admin', path: '/dashboard/admin' });
+      if (currentPath === '/dashboard/admin/guru') crumbs.push({ label: 'Data Guru', path: currentPath });
+      else if (currentPath === '/dashboard/admin/jadwal') crumbs.push({ label: 'Jadwal Mengajar', path: currentPath });
       else if (currentPath === '/dashboard/admin/badal') crumbs.push({ label: 'Guru Pengganti', path: currentPath });
+      else if (currentPath === '/dashboard/admin/payroll') crumbs.push({ label: 'Generate Payroll', path: currentPath });
+      else if (currentPath === '/dashboard/admin/tahfidz-payroll') crumbs.push({ label: 'Payroll Tahfidz', path: currentPath });
+      else if (currentPath === '/dashboard/admin/laporan-staff') crumbs.push({ label: 'Laporan Staff', path: currentPath });
+      else if (currentPath === '/dashboard/admin/audit') crumbs.push({ label: 'Sistem Audit', path: currentPath });
       else if (currentPath === '/dashboard/admin/kebutuhan') crumbs.push({ label: 'Monitoring Kebutuhan', path: currentPath });
-      else if (currentPath === '/dashboard/admin/payroll') crumbs.push({ label: 'Rekapitulasi Gaji', path: currentPath });
-      else if (currentPath === '/dashboard/admin/audit') crumbs.push({ label: 'Log Audit Keamanan', path: currentPath });
-      else if (currentPath === '/dashboard/admin/settings' || currentPath === '/dashboard/admin/lokasi') crumbs.push({ label: 'Radius Presensi', path: currentPath });
-      else crumbs.push({ label: 'Monitoring Dashboard', path: currentPath });
+      else if (currentPath === '/dashboard/admin/settings') crumbs.push({ label: 'Radius Presensi', path: currentPath });
+      else if (currentPath === '/dashboard/admin/santri') crumbs.push({ label: 'Data Santri', path: currentPath });
+      else if (currentPath === '/dashboard/admin/wali') crumbs.push({ label: 'Data Wali Santri', path: currentPath });
+      else crumbs.push({ label: 'Dashboard Utama', path: currentPath });
     } else if (isKepsekRole(currentRole) || currentPath.startsWith('/dashboard/kepsek')) {
       const unit = currentRole === 'KEPALA_SMP' ? 'SMP' : currentRole === 'KEPALA_MA' ? 'MA' : 'Pesantren';
       crumbs.push({ label: `Kepala ${unit}`, path: '/dashboard/kepsek' });
@@ -153,6 +178,9 @@ export const Header: React.FC<HeaderProps> = ({
       else if (currentPath === '/dashboard/kepsek/badal') crumbs.push({ label: 'Pencarian Badal', path: currentPath });
       else if (currentPath === '/dashboard/kepsek/kebutuhan') crumbs.push({ label: 'Persetujuan Kebutuhan', path: currentPath });
       else crumbs.push({ label: 'Dashboard Kehadiran', path: currentPath });
+    } else if (currentRole === 'STAFF' || currentPath.startsWith('/dashboard/staff')) {
+      crumbs.push({ label: 'Portal Staff', path: '/dashboard/staff' });
+      crumbs.push({ label: 'Tugas Hari Ini', path: currentPath });
     }
 
     return crumbs;
@@ -177,6 +205,8 @@ export const Header: React.FC<HeaderProps> = ({
           title: 'PORTAL GURU',
           items: [
             { path: '/dashboard/guru', label: 'Absen & Jurnal', icon: CheckCircle2 },
+            { path: '/dashboard/guru/akademik', label: 'Akademik & Nilai', icon: BookOpen },
+            { path: '/dashboard/guru/catatan', label: 'Buku Penghubung', icon: Book },
             { path: '/dashboard/guru/slip', label: 'Slip Kafa\'ah', icon: CreditCard },
             { path: '/dashboard/guru/kebutuhan', label: 'Ajuan Fasilitas', icon: ClipboardList },
           ]
@@ -197,8 +227,17 @@ export const Header: React.FC<HeaderProps> = ({
           title: 'FINANSIAL & AUDIT',
           items: [
             { path: '/dashboard/admin/kebutuhan', label: 'Monitoring Kebutuhan', icon: ClipboardList },
-            { path: '/dashboard/admin/payroll', label: 'Rekapitulasi Gaji', icon: CreditCard },
-            { path: '/dashboard/admin/audit', label: 'Log Audit Keamanan', icon: ShieldCheck },
+            { path: '/dashboard/admin/keuangan', label: 'Verifikasi Keuangan', icon: DollarSign },
+            { path: '/dashboard/admin/payroll', label: 'Generate Payroll', icon: FileCheck },
+            { path: '/dashboard/admin/tahfidz-payroll', label: 'Payroll Tahfidz', icon: BookOpen },
+            { path: '/dashboard/admin/laporan-staff', label: 'Laporan Staff & Dapur', icon: Receipt },
+          ]
+        },
+        {
+          title: 'PORTAL SANTRI (SIS)',
+          items: [
+            { path: '/dashboard/admin/santri', label: 'Master Santri', icon: UserCheck },
+            { path: '/dashboard/admin/wali', label: 'Master Wali Santri', icon: Users },
           ]
         },
         {
@@ -210,14 +249,37 @@ export const Header: React.FC<HeaderProps> = ({
       ];
     } else if (isKepsekRole(currentRole)) {
       const unit = currentRole === 'KEPALA_SMP' ? 'SMP' : currentRole === 'KEPALA_MA' ? 'MA' : 'PESANTREN';
+      const items = [
+        { path: '/dashboard/kepsek', label: 'Ringkasan Unit', icon: LayoutDashboard },
+        { path: '/dashboard/kepsek/audit', label: 'Monitoring Jurnal', icon: GraduationCap },
+        { path: '/dashboard/kepsek/badal', label: 'Guru Pengganti', icon: UserCheck },
+        { path: '/dashboard/kepsek/kebutuhan', label: 'Persetujuan Kebutuhan', icon: ClipboardList },
+      ];
+
       sections = [
         {
           title: `MANAJEMEN ${unit}`,
+          items: items
+        }
+      ];
+    } else if (currentRole === 'STAFF') {
+      const isDapur = currentUser?.position === 'Staff Dapur';
+      const isSarpras = currentUser?.position === 'Staff Inventaris';
+
+      sections = [
+        {
+          title: 'PORTAL STAFF',
           items: [
-            { path: '/dashboard/kepsek', label: 'Ringkasan Unit', icon: LayoutDashboard },
-            { path: '/dashboard/kepsek/audit', label: 'Monitoring Jurnal', icon: GraduationCap },
-            { path: '/dashboard/kepsek/badal', label: 'Guru Pengganti', icon: UserCheck },
-            { path: '/dashboard/kepsek/kebutuhan', label: 'Persetujuan Kebutuhan', icon: ClipboardList },
+            { 
+              path: '/dashboard/staff', 
+              label: isDapur ? 'Presensi & Menu Dapur' : isSarpras ? 'Presensi & Perbaikan' : 'Presensi & Tugas Utama', 
+              icon: isDapur ? Utensils : isSarpras ? Wrench : CheckCircle2 
+            },
+            { 
+              path: '/dashboard/staff/laporan', 
+              label: isDapur ? 'Jurnal & Belanja Dapur' : isSarpras ? 'Jurnal & Belanja Sarpras' : 'Jurnal & Pengajuan Belanja', 
+              icon: Receipt 
+            },
           ]
         }
       ];
@@ -243,7 +305,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* BQA ISLAMIC THEMED SIDEBAR (CSidebar)                      */}
       {/* ========================================================= */}
       <aside 
-        className={`fixed top-0 bottom-0 left-0 z-50 bg-[#0d231a] dark:bg-[#081711] border-r border-[#16382a] dark:border-[#122e23] text-slate-200 flex flex-col justify-between transition-all duration-300 ease-in-out print:hidden shadow-xl lg:shadow-none ${
+        className={`fixed top-0 bottom-0 left-0 z-50 bg-[#065f46] dark:bg-[#081e16] border-r border-emerald-800/40 dark:border-emerald-900/60 text-slate-100 flex flex-col justify-between transition-all duration-300 ease-in-out print:hidden shadow-2xl lg:shadow-none bqa-bg-pattern ${
           sidebarFolded ? 'lg:w-20' : 'lg:w-64'
         } ${
           sidebarOpen ? 'w-64 translate-x-0' : '-translate-x-full lg:translate-x-0'
@@ -252,14 +314,14 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex flex-col flex-1 overflow-y-auto scrollbar-thin">
           
           {/* Sidebar Brand Header - High Contrast Sharp BQA Logo */}
-          <div className="h-16 px-4 border-b border-[#16382a] dark:border-[#122e23] flex items-center justify-between shrink-0 bg-[#091a13] dark:bg-[#05100c]">
+          <div className="h-16 px-4 border-b border-emerald-700/50 dark:border-emerald-900/60 flex items-center justify-between shrink-0 bg-[#044e3a]/90 dark:bg-[#05140e]/90 backdrop-blur-xs">
             <div className="flex items-center gap-3 overflow-hidden">
               <BrandLogo size="md" className="filter drop-shadow-md" />
               
               {!sidebarFolded && (
                 <div className="leading-tight overflow-hidden">
                   <h1 className="font-bold text-sm text-white tracking-tight truncate">Baitul Qur'an</h1>
-                  <p className="text-[10px] text-emerald-300 font-semibold tracking-wider uppercase truncate">Al-Ikhwan • HRIS</p>
+                  <p className="text-[10px] text-amber-300 font-bold tracking-wider uppercase truncate">Al-Ikhwan • HRIS</p>
                 </div>
               )}
             </div>
@@ -267,7 +329,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Mobile close button */}
             <button 
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-slate-400 hover:text-white p-1 rounded-md hover:bg-white/10 transition-colors cursor-pointer"
+              className="lg:hidden text-emerald-200 hover:text-white p-1 rounded-md hover:bg-white/10 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -275,86 +337,89 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Sidebar Navigation Links */}
           <div className="p-3 space-y-4 flex-1">
-            {navSections.map((section, sIdx) => (
-              <div key={sIdx} className="space-y-1">
-                {!sidebarFolded && (
-                  <p className="px-3 text-[10px] font-bold text-emerald-400/70 dark:text-emerald-400/60 uppercase tracking-widest mb-1.5">
-                    {section.title}
-                  </p>
-                )}
-                <div className="space-y-1">
-                  {section.items.map((item) => {
-                    const IconComponent = item.icon;
-                    const isActive = currentPath === item.path;
-                    return (
-                      <button
-                        key={item.path}
-                        onClick={() => {
-                          setCurrentPath(item.path);
-                          setSidebarOpen(false);
-                        }}
-                        title={sidebarFolded ? item.label : undefined}
-                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs transition-all text-left cursor-pointer group relative ${
-                          isActive
-                            ? 'bg-emerald-600 text-white font-semibold shadow-sm'
-                            : 'text-emerald-100/75 hover:text-white hover:bg-emerald-900/40 font-medium'
-                        }`}
-                      >
-                        {/* Active Left Indicator Bar */}
-                        {isActive && (
-                          <div className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-emerald-200 rounded-r" />
-                        )}
+            {navSections.map((section, sIdx) => {
+              const isExpanded = expandedSections[section.title] ?? true;
+              return (
+                <div key={sIdx} className="space-y-1">
+                  {!sidebarFolded && (
+                    <button 
+                      onClick={() => toggleSection(section.title)}
+                      className="w-full flex items-center justify-between px-3 py-1 text-[10px] font-bold text-amber-300/80 dark:text-amber-400/70 uppercase tracking-widest mb-1.5 hover:text-amber-200 transition-colors cursor-pointer"
+                    >
+                      <span>{section.title}</span>
+                      <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+                    </button>
+                  )}
+                  
+                  <div className={`space-y-1 overflow-hidden transition-all duration-300 ${(!sidebarFolded && !isExpanded) ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'}`}>
+                    {section.items.map((item) => {
+                      const IconComponent = item.icon;
+                      const isActive = currentPath === item.path;
+                      return (
+                        <button
+                          key={item.path}
+                          onClick={() => {
+                            setCurrentPath(item.path);
+                            setSidebarOpen(false);
+                          }}
+                          title={sidebarFolded ? item.label : undefined}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs transition-all text-left cursor-pointer group relative ${
+                            isActive
+                              ? 'bg-[#047857]/80 text-amber-300 font-bold shadow-md border-l-4 border-l-[#d97706]'
+                              : 'text-emerald-100/85 hover:text-white hover:bg-white/10 font-medium'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <IconComponent className={`w-4 h-4 shrink-0 transition-transform duration-150 ${
+                              isActive ? 'text-amber-300 scale-110' : 'text-emerald-200/75 group-hover:text-white'
+                            }`} strokeWidth={1.75} />
+                            
+                            {!sidebarFolded && (
+                              <span className="truncate leading-snug">{item.label}</span>
+                            )}
+                          </div>
 
-                        <div className="flex items-center gap-3 min-w-0">
-                          <IconComponent className={`w-4 h-4 shrink-0 transition-transform duration-150 ${
-                            isActive ? 'text-white' : 'text-emerald-300/70 group-hover:text-emerald-100'
-                          }`} strokeWidth={1.75} />
-                          
-                          {!sidebarFolded && (
-                            <span className="truncate leading-snug">{item.label}</span>
+                          {/* Badge if present */}
+                          {!sidebarFolded && item.badge && (
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${
+                              isActive ? 'bg-[#d97706] text-white' : item.badgeColor || 'bg-amber-500/20 text-amber-300 border border-amber-400/40'
+                            }`}>
+                              {item.badge}
+                            </span>
                           )}
-                        </div>
-
-                        {/* Badge if present */}
-                        {!sidebarFolded && item.badge && (
-                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                            isActive ? 'bg-white/20 text-white' : item.badgeColor || 'bg-emerald-950 text-emerald-300 border border-emerald-800/40'
-                          }`}>
-                            {item.badge}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         {/* Sidebar Footer & Fold Toggler */}
-        <div className="border-t border-[#16382a] dark:border-[#122e23] bg-[#091a13] dark:bg-[#05100c]">
+        <div className="border-t border-emerald-700/50 dark:border-emerald-900/60 bg-[#044e3a]/90 dark:bg-[#05140e]/90 backdrop-blur-xs">
           {/* User Profile Mini Bar */}
           {!sidebarFolded ? (
             <div className="p-3 flex items-center justify-between gap-2.5">
               <button
                 type="button"
                 onClick={() => setShowProfileModal(true)}
-                className="flex items-center gap-2.5 min-w-0 text-left hover:bg-emerald-950/40 p-1 rounded-lg transition-colors cursor-pointer group"
+                className="flex items-center gap-2.5 min-w-0 text-left hover:bg-white/10 p-1 rounded-lg transition-colors cursor-pointer group"
                 title="Klik untuk ubah foto & profil"
               >
                 <TeacherAvatar teacher={currentUser} size="md" />
                 <div className="overflow-hidden leading-tight">
-                  <p className="text-xs font-semibold text-white truncate group-hover:text-emerald-300 transition-colors">{currentUser?.name || 'Pengguna'}</p>
-                  <p className="text-[10px] text-emerald-300/75 truncate">{currentUser?.position || currentRole}</p>
+                  <p className="text-xs font-semibold text-white truncate group-hover:text-amber-300 transition-colors">{currentUser?.name || 'Pengguna'}</p>
+                  <p className="text-[10px] text-amber-300/80 truncate">{currentUser?.position || currentRole}</p>
                 </div>
               </button>
               <button
                 onClick={logout}
                 title="Keluar"
-                className="p-1.5 text-emerald-300/60 hover:text-rose-400 hover:bg-emerald-900/40 rounded-md transition-colors cursor-pointer"
+                className="p-1.5 text-emerald-200/70 hover:text-rose-300 hover:bg-rose-500/20 rounded-lg transition-colors cursor-pointer"
               >
-                <LogOut className="w-3.5 h-3.5" />
+                <LogOut className="w-4 h-4" />
               </button>
             </div>
           ) : (
@@ -374,7 +439,7 @@ export const Header: React.FC<HeaderProps> = ({
           {setSidebarFolded && (
             <button
               onClick={() => setSidebarFolded(!sidebarFolded)}
-              className="hidden lg:flex w-full items-center justify-center py-2 text-emerald-300/60 hover:text-white hover:bg-emerald-900/40 border-t border-[#16382a] transition-colors cursor-pointer text-xs"
+              className="hidden lg:flex w-full items-center justify-center py-2 text-emerald-200/70 hover:text-white hover:bg-white/10 border-t border-emerald-700/50 transition-colors cursor-pointer text-xs"
               title={sidebarFolded ? 'Perluas Sidebar' : 'Ciutkan Sidebar'}
             >
               {sidebarFolded ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}

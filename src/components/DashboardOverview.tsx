@@ -146,8 +146,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
   const CurrencyTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-stone-900 dark:bg-stone-950 text-white p-3 rounded-lg shadow-lg text-xs space-y-1 border border-stone-700 dark:border-stone-800">
-          <p className="font-semibold text-stone-200">{label}</p>
+        <div className="bg-slate-900 dark:bg-[#0a120f] text-white p-3 rounded-lg shadow-lg text-xs space-y-1 border border-slate-700 dark:border-emerald-900/40">
+          <p className="font-semibold text-slate-200">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={`tooltip-${index}`} style={{ color: entry.color || entry.fill }}>
               {entry.name}: <span className="font-mono font-bold text-white">{formatRupiah(entry.value)}</span>
@@ -163,8 +163,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
   const CountTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-stone-900 dark:bg-stone-950 text-white p-3 rounded-lg shadow-lg text-xs space-y-1 border border-stone-700 dark:border-stone-800">
-          <p className="font-semibold text-stone-200">{label || payload[0]?.name}</p>
+        <div className="bg-slate-900 dark:bg-[#0a120f] text-white p-3 rounded-lg shadow-lg text-xs space-y-1 border border-slate-700 dark:border-emerald-900/40">
+          <p className="font-semibold text-slate-200">{label || payload[0]?.name}</p>
           {payload.map((entry: any, index: number) => (
             <p key={`count-${index}`} style={{ color: entry.color || entry.fill }}>
               {entry.name}: <span className="font-mono font-bold text-white">{entry.value}</span>
@@ -188,26 +188,64 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
 
   return (
     <div className="space-y-6" id="dashboard-main-view">
-      {/* KPI Cards Row - Simplified Minimalist */}
+      
+      {/* SalamGreeting Header Banner */}
+      <div className="bg-gradient-to-r from-[#065f46] via-[#047857] to-[#065f46] text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border-b-2 border-b-[#d97706] bqa-bg-pattern">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <p className="font-arabic text-amber-300 text-xs font-bold tracking-widest mb-1 drop-shadow-xs">
+              بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+            </p>
+            <h1 className="text-xl md:text-2xl font-extrabold tracking-tight">
+              Assalamu'alaikum, {currentUser?.name || 'Pengguna'}
+            </h1>
+            <p className="text-xs text-emerald-100/90 font-medium mt-1">
+              Selamat datang di Sistem HRIS &amp; Kafa'ah Asatidz Baitul Qur'an Al-Ikhwan
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="bg-amber-500/20 text-amber-300 border border-amber-400/40 text-xs font-bold px-3 py-1.5 rounded-xl backdrop-blur-xs">
+              Role: {currentRole}
+            </span>
+            <span className="text-xs font-semibold text-emerald-100 bg-white/10 border border-white/20 px-3 py-1.5 rounded-xl">
+              Periode {selectedPeriod}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* KPI Cards Row - Signature BQA Card with Gold Accent Left Border */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div 
           onClick={() => {
             if (!isReadOnly && setActiveTab) setActiveTab('master_teachers');
           }}
-          className={`bg-white dark:bg-stone-900 p-5 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm transition-all ${!isReadOnly ? 'hover:shadow-md cursor-pointer' : ''}`}
+          className={`bqa-card p-5 rounded-2xl ${!isReadOnly ? 'cursor-pointer' : ''}`}
         >
-          <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Asatidz</p>
-          <p className="text-2xl font-bold text-stone-900 dark:text-stone-100 mt-1">{totalTeachers}</p>
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-bold text-slate-400 dark:text-emerald-400/60 uppercase tracking-widest">Total Asatidz</p>
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-[#065f46] dark:text-emerald-400 flex items-center justify-center">
+              <Users className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-2">{totalTeachers}</p>
+          <p className="text-[11px] text-slate-500 dark:text-emerald-400/70 mt-1 font-medium">Asatidz Aktif BQA</p>
         </div>
 
         <div 
           onClick={() => {
             if (!isReadOnly && setActiveTab) setActiveTab('master_schedules');
           }}
-          className={`bg-white dark:bg-stone-900 p-5 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm transition-all ${!isReadOnly ? 'hover:shadow-md cursor-pointer' : ''}`}
+          className={`bqa-card p-5 rounded-2xl ${!isReadOnly ? 'cursor-pointer' : ''}`}
         >
-          <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Beban KBM</p>
-          <p className="text-2xl font-bold text-stone-900 dark:text-stone-100 mt-1">{totalScheduledHours} JP</p>
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-bold text-slate-400 dark:text-emerald-400/60 uppercase tracking-widest">Beban KBM</p>
+            <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-[#d97706] dark:text-amber-400 flex items-center justify-center">
+              <Calendar className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-2">{totalScheduledHours} <span className="text-sm font-bold text-slate-500">JP</span></p>
+          <p className="text-[11px] text-slate-500 dark:text-emerald-400/70 mt-1 font-medium">{totalSchedules} Sesi Mengajar</p>
         </div>
 
         <div 
@@ -215,10 +253,16 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
             if (setActiveTab) setActiveTab('kepsek_audit');
             else if (currentRole === 'KEPALA_PESANTREN') setCurrentPath('/dashboard/kepsek/audit');
           }}
-          className="bg-white dark:bg-stone-900 p-5 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm hover:shadow-md transition-all cursor-pointer"
+          className="bqa-card p-5 rounded-2xl cursor-pointer"
         >
-          <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Ketaatan Jurnal</p>
-          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-500 mt-1">{complianceRate}%</p>
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-bold text-slate-400 dark:text-emerald-400/60 uppercase tracking-widest">Ketaatan Jurnal</p>
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">{complianceRate}%</p>
+          <p className="text-[11px] text-slate-500 dark:text-emerald-400/70 mt-1 font-medium">{completedJournals} Jurnal Terverifikasi</p>
         </div>
 
         {currentRole === 'KEPALA_PESANTREN' || isReadOnly ? (
@@ -227,22 +271,34 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
               if (setActiveTab) setActiveTab('badal');
               else if (currentRole === 'KEPALA_PESANTREN') setCurrentPath('/dashboard/kepsek/badal');
             }}
-            className="bg-white dark:bg-stone-900 p-5 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm hover:shadow-md transition-all cursor-pointer"
+            className="bqa-card p-5 rounded-2xl cursor-pointer"
           >
-            <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Guru Badal</p>
-            <p className="text-2xl font-bold text-purple-600 dark:text-purple-400 mt-1">{badalSessions} Sesi</p>
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] font-bold text-slate-400 dark:text-emerald-400/60 uppercase tracking-widest">Guru Badal</p>
+              <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                <Clock className="w-4 h-4" />
+              </div>
+            </div>
+            <p className="text-2xl sm:text-3xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-2">{badalSessions} <span className="text-sm font-bold text-slate-500">Sesi</span></p>
+            <p className="text-[11px] text-slate-500 dark:text-emerald-400/70 mt-1 font-medium">Tugas Badal Terlaksana</p>
           </div>
         ) : (
           <div 
             onClick={() => {
               if (setActiveTab) setActiveTab('payroll');
             }}
-            className="bg-white dark:bg-stone-900 p-5 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm hover:shadow-md transition-all cursor-pointer"
+            className="bqa-card p-5 rounded-2xl cursor-pointer"
           >
-            <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Total Payroll</p>
-            <p className="text-2xl font-bold text-stone-900 dark:text-stone-100 mt-1 truncate">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] font-bold text-slate-400 dark:text-emerald-400/60 uppercase tracking-widest">Total Payroll</p>
+              <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-[#d97706] dark:text-amber-400 flex items-center justify-center">
+                <CreditCard className="w-4 h-4" />
+              </div>
+            </div>
+            <p className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 truncate">
               {formatRupiah(payrollSummary.totalNet).replace(',00', '')}
             </p>
+            <p className="text-[11px] text-slate-500 dark:text-emerald-400/70 mt-1 font-medium">Estimasi Kafa'ah Bulan Ini</p>
           </div>
         )}
       </div>
@@ -257,13 +313,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
               setCurrentPath('/dashboard/kepsek/kebutuhan');
             }
           }}
-          className="bg-white dark:bg-stone-900 p-4 rounded-2xl border border-stone-200/80 dark:border-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-stone-300 dark:hover:border-stone-700 transition-all cursor-pointer group shadow-xs"
+          className="bg-white dark:bg-[#121f1a] p-4 rounded-2xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer group shadow-xs"
         >
           <div className="flex items-center gap-3">
             <div className={`w-2.5 h-2.5 rounded-full ${pendingNeeds > 0 ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-stone-800 dark:text-stone-200">
+                <span className="text-xs font-semibold text-slate-800 dark:text-emerald-100">
                   {currentRole === 'KEPALA_PESANTREN' 
                     ? `Persetujuan Kebutuhan KBM (Unit ${kepsekUnit})` 
                     : 'Monitoring Kebutuhan KBM (Seluruh Unit)'}
@@ -276,14 +332,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
                   {pendingNeeds > 0 ? `${pendingNeeds} Ajuan Menunggu Persetujuan` : 'Semua Ajuan Terverifikasi'}
                 </span>
               </div>
-              <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
+              <p className="text-[11px] text-slate-500 dark:text-emerald-400/70 mt-0.5">
                 {currentRole === 'KEPALA_PESANTREN'
                   ? `Total ${totalNeeds} ajuan kebutuhan sarana dari guru Unit ${kepsekUnit}.`
                   : `Total ${totalNeeds} ajuan dari guru seluruh unit pesantren.`}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1 text-xs font-semibold text-stone-600 dark:text-stone-300 group-hover:text-stone-900 dark:group-hover:text-white transition-colors self-end sm:self-auto">
+          <div className="flex items-center gap-1 text-xs font-semibold text-slate-600 dark:text-emerald-300/80 group-hover:text-slate-900 dark:group-hover:text-white transition-colors self-end sm:self-auto">
             <span>Buka Modul Kebutuhan</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:transtone-x-0.5 transition-transform" />
           </div>
@@ -291,17 +347,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
       )}
 
       {/* Monthly Trend Chart - New Visual Component */}
-      <div className="bg-white dark:bg-stone-900 p-6 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm">
+      <div className="bg-white dark:bg-[#121f1a] p-6 rounded-2xl border border-slate-100 dark:border-emerald-900/40 shadow-sm">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="font-bold text-sm text-stone-800 dark:text-stone-200 uppercase tracking-wide">Tren Performa Kehadiran & Jurnal</h3>
+          <h3 className="font-bold text-sm text-slate-800 dark:text-emerald-100 uppercase tracking-wide">Tren Performa Kehadiran & Jurnal</h3>
           <div className="flex gap-4">
             <div className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span className="text-[10px] font-bold text-stone-500">Kehadiran</span>
+              <span className="text-[10px] font-bold text-slate-500">Kehadiran</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full bg-blue-500" />
-              <span className="text-[10px] font-bold text-stone-500">Jurnal</span>
+              <span className="text-[10px] font-bold text-slate-500">Jurnal</span>
             </div>
           </div>
         </div>
@@ -334,10 +390,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
       {/* Primary Chart Row: Jam KBM per Unit & Status Ketaatan Jurnal */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Chart 1: Beban Jam Mengajar per Unit */}
-        <div className="bg-white dark:bg-stone-900 p-5 sm:p-6 rounded-xl border border-stone-200 dark:border-stone-800 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
+        <div className="bg-white dark:bg-[#121f1a] p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-emerald-900/40 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-emerald-900/40">
             <div>
-              <h3 className="font-bold text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest">
+              <h3 className="font-bold text-[10px] text-slate-400 dark:text-emerald-500/60 uppercase tracking-widest">
                 JP & Sesi per Unit
               </h3>
             </div>
@@ -368,10 +424,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
         </div>
 
         {/* Chart 2: Donut Status Pengisian Jurnal Mengajar */}
-        <div className="bg-white dark:bg-stone-900 p-5 sm:p-6 rounded-xl border border-stone-200 dark:border-stone-800 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
+        <div className="bg-white dark:bg-[#121f1a] p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-emerald-900/40 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-emerald-900/40">
             <div>
-              <h3 className="font-bold text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest">
+              <h3 className="font-bold text-[10px] text-slate-400 dark:text-emerald-500/60 uppercase tracking-widest">
                 Status Jurnal & Presensi
               </h3>
             </div>
@@ -406,10 +462,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Chart 3: Komposisi Guru per Unit (Kepsek) or Penggajian per Unit (Admin) */}
         {currentRole === 'KEPALA_PESANTREN' || isReadOnly ? (
-          <div className="bg-white dark:bg-stone-900 p-5 sm:p-6 rounded-xl border border-stone-200 dark:border-stone-800 shadow-xs flex flex-col justify-between">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
+          <div className="bg-white dark:bg-[#121f1a] p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-emerald-900/40 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-emerald-900/40">
               <div>
-                <h3 className="font-bold text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest">
+                <h3 className="font-bold text-[10px] text-slate-400 dark:text-emerald-500/60 uppercase tracking-widest">
                   Distribusi Guru & Jadwal per Unit
                 </h3>
               </div>
@@ -439,10 +495,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
             </div>
           </div>
         ) : (
-          <div className="bg-white dark:bg-stone-900 p-5 sm:p-6 rounded-xl border border-stone-200 dark:border-stone-800 shadow-xs flex flex-col justify-between">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
+          <div className="bg-white dark:bg-[#121f1a] p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-emerald-900/40 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-emerald-900/40">
               <div>
-                <h3 className="font-bold text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest">
+                <h3 className="font-bold text-[10px] text-slate-400 dark:text-emerald-500/60 uppercase tracking-widest">
                   Komposisi Penggajian per Unit
                 </h3>
               </div>
@@ -476,10 +532,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
         )}
 
         {/* Chart 4: Top 6 Guru dengan Beban Mengajar Terbanyak */}
-        <div className="bg-white dark:bg-stone-900 p-5 sm:p-6 rounded-xl border border-stone-200 dark:border-stone-800 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
+        <div className="bg-white dark:bg-[#121f1a] p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-emerald-900/40 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-emerald-900/40">
             <div>
-              <h3 className="font-bold text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest">
+              <h3 className="font-bold text-[10px] text-slate-400 dark:text-emerald-500/60 uppercase tracking-widest">
                 Top 6 Asatidz (JP)
               </h3>
             </div>
@@ -518,10 +574,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
       </div>
 
       {/* Tertiary Chart Row: Kedisiplinan Waktu Clock-In */}
-      <div className="bg-white dark:bg-stone-900 p-5 sm:p-6 rounded-xl border border-stone-200 dark:border-stone-800 shadow-xs">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800 gap-2">
+      <div className="bg-white dark:bg-[#121f1a] p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-emerald-900/40 shadow-xs">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 border-b border-slate-100 dark:border-emerald-900/40 gap-2">
           <div>
-            <h3 className="font-bold text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-widest">
+            <h3 className="font-bold text-[10px] text-slate-400 dark:text-emerald-500/60 uppercase tracking-widest">
               Kedisiplinan Waktu (Punctuality)
             </h3>
           </div>

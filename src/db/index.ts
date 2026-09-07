@@ -15,6 +15,9 @@ if (!fs.existsSync(dbDir)) {
 console.log(`Connecting to SQLite database at: ${dbPath}`);
 export const sqliteDb = new Database(dbPath);
 sqliteDb.pragma('journal_mode = WAL');
+sqliteDb.pragma('cache_size = -64000'); // 64MB cache
+sqliteDb.pragma('synchronous = NORMAL');
+sqliteDb.pragma('temp_store = MEMORY');
 
 // Ensure tables exist on startup
 sqliteDb.exec(`
@@ -130,6 +133,29 @@ sqliteDb.exec(`
     address_notes TEXT DEFAULT "Jl. KH. Al-Ikhwan No. 09, Gerbang Utama Pesantren",
     updated_at INTEGER NOT NULL,
     updated_by TEXT DEFAULT "Administrator"
+  );
+
+  CREATE TABLE IF NOT EXISTS staff_tasks (
+    id TEXT PRIMARY KEY,
+    staff_id TEXT NOT NULL REFERENCES teachers(id),
+    staff_name TEXT NOT NULL,
+    date TEXT NOT NULL,
+    category TEXT NOT NULL,
+    task_today TEXT NOT NULL,
+    task_tomorrow TEXT NOT NULL,
+    created_at INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS staff_expenses (
+    id TEXT PRIMARY KEY,
+    reporter_id TEXT NOT NULL REFERENCES teachers(id),
+    reporter_name TEXT NOT NULL,
+    date TEXT NOT NULL,
+    category TEXT NOT NULL,
+    description TEXT NOT NULL,
+    amount INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'PENDING',
+    created_at INTEGER NOT NULL
   );
 `);
 

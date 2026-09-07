@@ -274,16 +274,16 @@ export const LearningNeedManagement: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* 1. Clean Minimalist Header */}
-      <div className="bg-white dark:bg-stone-900 rounded-lg border border-stone-200/80 dark:border-stone-800 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white dark:bg-[#121f1a] rounded-lg border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100">
+          <h1 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-emerald-50">
             {isKepsek 
               ? `Persetujuan Kebutuhan (${kepsekUnit})` 
               : currentRole === 'GURU' 
                 ? 'Pengajuan Kebutuhan' 
                 : 'Persetujuan Kebutuhan Sarana'}
           </h1>
-          <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-emerald-400/70 mt-0.5">
             {isKepsek 
               ? `Verifikasi dan persetujuan pengadaan kebutuhan guru unit ${kepsekUnit}.`
               : currentRole === 'GURU'
@@ -304,9 +304,9 @@ export const LearningNeedManagement: React.FC = () => {
           ) : (
             <button
               onClick={handleExportPDF}
-              className="inline-flex items-center gap-1.5 bg-stone-50 hover:bg-stone-100 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-700 dark:text-stone-200 text-xs font-medium px-3 py-1.5 rounded-md border border-stone-200 dark:border-stone-700 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-[#0f1a15] hover:bg-slate-100 dark:bg-[#0f1a15] dark:hover:bg-stone-750 text-slate-700 dark:text-emerald-100 text-xs font-medium px-3 py-1.5 rounded-md border border-slate-200 dark:border-emerald-800/40 transition-colors cursor-pointer"
             >
-              <FileText className="w-3.5 h-3.5 text-stone-400" />
+              <FileText className="w-3.5 h-3.5 text-slate-400" />
               <span>Ekspor PDF</span>
             </button>
           )}
@@ -315,20 +315,20 @@ export const LearningNeedManagement: React.FC = () => {
 
       {/* 2. Proportional Compact Metric Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 p-4 sm:p-5 shadow-xs">
-          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">
+        <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 p-4 sm:p-5 shadow-xs">
+          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">
             Total Pengajuan
           </span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-stone-900 dark:text-stone-100 mt-1">
+          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-slate-900 dark:text-emerald-50 mt-1">
             {metrics.total}
           </p>
-          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
+          <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-1.5 block">
             Seluruh usulan sarana
           </span>
         </div>
 
-        <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 p-4 sm:p-5 shadow-xs">
-          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">
+        <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 p-4 sm:p-5 shadow-xs">
+          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">
             Menunggu Persetujuan
           </span>
           <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-amber-600 dark:text-amber-400 mt-1">
@@ -339,8 +339,8 @@ export const LearningNeedManagement: React.FC = () => {
           </span>
         </div>
 
-        <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 p-4 sm:p-5 shadow-xs">
-          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">
+        <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 p-4 sm:p-5 shadow-xs">
+          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">
             Disetujui
           </span>
           <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-emerald-700 dark:text-emerald-400 mt-1">
@@ -351,29 +351,29 @@ export const LearningNeedManagement: React.FC = () => {
           </span>
         </div>
 
-        <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200/80 dark:border-stone-800 p-4 sm:p-5 shadow-xs">
-          <span className="text-xs font-medium text-stone-500 dark:text-stone-400 block">
+        <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 p-4 sm:p-5 shadow-xs">
+          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">
             Ditolak
           </span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-stone-600 dark:text-stone-300 mt-1">
+          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-slate-600 dark:text-emerald-300/80 mt-1">
             {metrics.rejected}
           </p>
-          <span className="text-[11px] text-stone-400 dark:text-stone-500 mt-1.5 block">
+          <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-1.5 block">
             Belum dapat disetujui
           </span>
         </div>
       </div>
 
       {/* 3. Search & Filter Bar */}
-      <div className="bg-white dark:bg-stone-900 rounded-lg border border-stone-200/80 dark:border-stone-800 p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+      <div className="bg-white dark:bg-[#121f1a] rounded-lg border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
         <div className="relative flex-1">
-          <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Cari kebutuhan atau nama guru..."
-            className="w-full text-xs pl-8 pr-3 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-md text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-[#1B4332]"
+            className="w-full text-xs pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-md text-slate-900 dark:text-emerald-50 placeholder-slate-400 focus:outline-none focus:border-[#1B4332]"
           />
         </div>
 
@@ -382,7 +382,7 @@ export const LearningNeedManagement: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="text-xs px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-md text-stone-700 dark:text-stone-200 focus:outline-none focus:border-[#1B4332] cursor-pointer"
+            className="text-xs px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-md text-slate-700 dark:text-emerald-100 focus:outline-none focus:border-[#1B4332] cursor-pointer"
           >
             <option value="ALL">Semua Status</option>
             <option value="PENDING">Menunggu</option>
@@ -395,7 +395,7 @@ export const LearningNeedManagement: React.FC = () => {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value as any)}
-            className="text-xs px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-md text-stone-700 dark:text-stone-200 focus:outline-none focus:border-[#1B4332] cursor-pointer"
+            className="text-xs px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-md text-slate-700 dark:text-emerald-100 focus:outline-none focus:border-[#1B4332] cursor-pointer"
           >
             <option value="ALL">Semua Kategori</option>
             <option value="Buku">Buku & Kitab</option>
@@ -407,16 +407,16 @@ export const LearningNeedManagement: React.FC = () => {
       </div>
 
       {/* 4. Table / List of Requests */}
-      <div className="bg-white dark:bg-stone-900 rounded-lg border border-stone-200/80 dark:border-stone-800 overflow-hidden">
+      <div className="bg-white dark:bg-[#121f1a] rounded-lg border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 overflow-hidden">
         {filteredRequests.length === 0 ? (
-          <div className="p-8 text-center text-xs text-stone-400">
+          <div className="p-8 text-center text-xs text-slate-400">
             Tidak ada data pengajuan yang sesuai.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-stone-200 dark:border-stone-800 bg-stone-50/70 dark:bg-stone-850/70 text-stone-500 dark:text-stone-400 font-medium">
+                <tr className="border-b border-slate-200 dark:border-emerald-900/40 bg-slate-50 dark:bg-[#0f1a15]/70 dark:bg-[#0f1a15]/70 text-slate-500 dark:text-emerald-400/70 font-medium">
                   <th className="py-2.5 px-3.5">Tanggal</th>
                   <th className="py-2.5 px-3.5">Kebutuhan</th>
                   <th className="py-2.5 px-3.5">Kategori</th>
@@ -425,7 +425,7 @@ export const LearningNeedManagement: React.FC = () => {
                   <th className="py-2.5 px-3.5 text-right">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-150 dark:divide-stone-800">
+              <tbody className="divide-y divide-stone-150 dark:divide-slate-800">
                 {filteredRequests.map((req) => {
                   const teacher = teacherMap.get(req.teacherId);
                   const isOwner = req.teacherId === currentUser?.id;
@@ -433,34 +433,34 @@ export const LearningNeedManagement: React.FC = () => {
                   return (
                     <tr 
                       key={req.id}
-                      className="hover:bg-stone-50/60 dark:hover:bg-stone-800/40 transition-colors"
+                      className="hover:bg-slate-50 dark:bg-[#0f1a15]/60 dark:hover:bg-[#162720]/50/40 transition-colors"
                     >
                       {/* Tanggal */}
-                      <td className="py-3 px-3.5 text-stone-500 dark:text-stone-400 font-mono whitespace-nowrap">
+                      <td className="py-3 px-3.5 text-slate-500 dark:text-emerald-400/70 font-mono whitespace-nowrap">
                         {formatIndonesianDate(req.createdAt)}
                       </td>
 
                       {/* Kebutuhan (Judul & Ringkasan) */}
                       <td className="py-3 px-3.5 max-w-xs">
-                        <p className="font-medium text-stone-900 dark:text-stone-100">
+                        <p className="font-medium text-slate-900 dark:text-emerald-50">
                           {req.title}
                         </p>
-                        <p className="text-[11px] text-stone-400 line-clamp-1 mt-0.5">
+                        <p className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">
                           {req.description}
                         </p>
                       </td>
 
                       {/* Kategori */}
-                      <td className="py-3 px-3.5 text-stone-600 dark:text-stone-300 whitespace-nowrap">
+                      <td className="py-3 px-3.5 text-slate-600 dark:text-emerald-300/80 whitespace-nowrap">
                         {req.category}
                       </td>
 
                       {/* Pengaju */}
                       <td className="py-3 px-3.5 whitespace-nowrap">
-                        <p className="text-stone-800 dark:text-stone-200 font-medium">
+                        <p className="text-slate-800 dark:text-emerald-100 font-medium">
                           {teacher?.name || 'Asatidz'}
                         </p>
-                        <p className="text-[11px] text-stone-400">
+                        <p className="text-[11px] text-slate-400">
                           Unit {teacher?.unit || 'SMP'}
                         </p>
                       </td>
@@ -469,7 +469,7 @@ export const LearningNeedManagement: React.FC = () => {
                       <td className="py-3 px-3.5 whitespace-nowrap">
                         {getStatusBadge(req.status)}
                         {req.decisionNote && (
-                          <p className="text-[10px] text-stone-400 mt-1 max-w-[180px] truncate" title={req.decisionNote}>
+                          <p className="text-[10px] text-slate-400 mt-1 max-w-[180px] truncate" title={req.decisionNote}>
                             {req.decisionNote}
                           </p>
                         )}
@@ -480,7 +480,7 @@ export const LearningNeedManagement: React.FC = () => {
                         <div className="inline-flex items-center gap-1.5 justify-end">
                           <button
                             onClick={() => setSelectedDetailRequest(req)}
-                            className="px-2.5 py-1 text-xs font-medium text-stone-600 dark:text-stone-300 bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 rounded border border-stone-200 dark:border-stone-700 transition-colors cursor-pointer"
+                            className="px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-emerald-300/80 bg-slate-50 dark:bg-[#0f1a15] hover:bg-slate-100 dark:hover:bg-slate-700 rounded border border-slate-200 dark:border-emerald-800/40 transition-colors cursor-pointer"
                           >
                             Detail
                           </button>
@@ -507,7 +507,7 @@ export const LearningNeedManagement: React.FC = () => {
                           {(isOwner || currentRole === 'ADMIN') && req.status === 'PENDING' && (
                             <button
                               onClick={() => setDeleteModal({ isOpen: true, requestId: req.id })}
-                              className="p-1 text-stone-400 hover:text-rose-600 rounded transition-colors cursor-pointer"
+                              className="p-1 text-slate-400 hover:text-rose-600 rounded transition-colors cursor-pointer"
                               title="Hapus"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -526,15 +526,15 @@ export const LearningNeedManagement: React.FC = () => {
 
       {/* MODAL: ADD NEW LEARNING NEED (GURU) */}
       {showAddForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-xs">
-          <div className="bg-white dark:bg-stone-900 rounded-lg shadow-lg max-w-md w-full overflow-hidden border border-stone-200 dark:border-stone-800">
-            <div className="px-4 py-3 flex items-center justify-between border-b border-stone-150 dark:border-stone-800">
-              <h3 className="font-semibold text-xs text-stone-900 dark:text-stone-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white dark:bg-[#121f1a] rounded-lg shadow-lg max-w-md w-full overflow-hidden border border-slate-200 dark:border-emerald-900/40">
+            <div className="px-4 py-3 flex items-center justify-between border-b border-stone-150 dark:border-emerald-900/40">
+              <h3 className="font-semibold text-xs text-slate-900 dark:text-emerald-50">
                 Pengajuan Kebutuhan Baru
               </h3>
               <button
                 onClick={() => setShowAddForm(false)}
-                className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-1 rounded cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -542,13 +542,13 @@ export const LearningNeedManagement: React.FC = () => {
 
             <form onSubmit={handleSubmit} className="p-4 space-y-3 text-xs">
               <div className="space-y-1">
-                <label className="font-medium text-stone-600 dark:text-stone-300 block">
+                <label className="font-medium text-slate-600 dark:text-emerald-300/80 block">
                   Kategori
                 </label>
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
-                  className="w-full text-xs px-2.5 py-1.5 rounded border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:border-[#1B4332]"
+                  className="w-full text-xs px-2.5 py-1.5 rounded border border-slate-200 dark:border-emerald-800/40 bg-slate-50 dark:bg-[#0f1a15] text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-[#1B4332]"
                 >
                   <option value="Buku">Buku & Kitab</option>
                   <option value="Alat Tulis">Alat Tulis (ATK)</option>
@@ -558,7 +558,7 @@ export const LearningNeedManagement: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="font-medium text-stone-600 dark:text-stone-300 block">
+                <label className="font-medium text-slate-600 dark:text-emerald-300/80 block">
                   Judul Kebutuhan
                 </label>
                 <input
@@ -567,12 +567,12 @@ export const LearningNeedManagement: React.FC = () => {
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Contoh: Pengadaan Kitab Jurumiyyah (30 Eks)"
-                  className="w-full text-xs px-2.5 py-1.5 rounded border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-[#1B4332]"
+                  className="w-full text-xs px-2.5 py-1.5 rounded border border-slate-200 dark:border-emerald-800/40 bg-slate-50 dark:bg-[#0f1a15] text-slate-900 dark:text-emerald-50 placeholder-slate-400 focus:outline-none focus:border-[#1B4332]"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="font-medium text-stone-600 dark:text-stone-300 block">
+                <label className="font-medium text-slate-600 dark:text-emerald-300/80 block">
                   Deskripsi & Jumlah
                 </label>
                 <textarea
@@ -581,15 +581,15 @@ export const LearningNeedManagement: React.FC = () => {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Jelaskan kebutuhan, jumlah, dan kelas..."
-                  className="w-full text-xs px-2.5 py-1.5 rounded border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-[#1B4332]"
+                  className="w-full text-xs px-2.5 py-1.5 rounded border border-slate-200 dark:border-emerald-800/40 bg-slate-50 dark:bg-[#0f1a15] text-slate-900 dark:text-emerald-50 placeholder-slate-400 focus:outline-none focus:border-[#1B4332]"
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2 border-t border-stone-150 dark:border-stone-800">
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-stone-150 dark:border-emerald-900/40">
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="px-3 py-1.5 rounded text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 text-xs font-medium cursor-pointer"
+                  className="px-3 py-1.5 rounded text-slate-600 dark:text-emerald-300/80 hover:bg-slate-50 dark:bg-[#0f1a15] dark:hover:bg-[#162720]/50 text-xs font-medium cursor-pointer"
                 >
                   Batal
                 </button>
@@ -607,15 +607,15 @@ export const LearningNeedManagement: React.FC = () => {
 
       {/* MODAL: DETAIL PERMOHONAN */}
       {selectedDetailRequest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-xs">
-          <div className="bg-white dark:bg-stone-900 rounded-lg shadow-lg max-w-sm w-full overflow-hidden border border-stone-200 dark:border-stone-800">
-            <div className="px-4 py-3 flex items-center justify-between border-b border-stone-150 dark:border-stone-800">
-              <h3 className="font-semibold text-xs text-stone-900 dark:text-stone-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white dark:bg-[#121f1a] rounded-lg shadow-lg max-w-sm w-full overflow-hidden border border-slate-200 dark:border-emerald-900/40">
+            <div className="px-4 py-3 flex items-center justify-between border-b border-stone-150 dark:border-emerald-900/40">
+              <h3 className="font-semibold text-xs text-slate-900 dark:text-emerald-50">
                 Detail Kebutuhan
               </h3>
               <button
                 onClick={() => setSelectedDetailRequest(null)}
-                className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-1 rounded cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -623,37 +623,37 @@ export const LearningNeedManagement: React.FC = () => {
 
             <div className="p-4 space-y-3 text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] text-stone-400 font-mono">
+                <span className="text-[11px] text-slate-400 font-mono">
                   {formatIndonesianDate(selectedDetailRequest.createdAt)}
                 </span>
                 <div>{getStatusBadge(selectedDetailRequest.status)}</div>
               </div>
 
               <div>
-                <span className="text-[10px] text-stone-400 block">Kebutuhan</span>
-                <p className="font-medium text-stone-900 dark:text-stone-100 text-xs mt-0.5">
+                <span className="text-[10px] text-slate-400 block">Kebutuhan</span>
+                <p className="font-medium text-slate-900 dark:text-emerald-50 text-xs mt-0.5">
                   {selectedDetailRequest.title}
                 </p>
               </div>
 
               <div>
-                <span className="text-[10px] text-stone-400 block">Kategori</span>
-                <p className="text-stone-700 dark:text-stone-300 text-xs mt-0.5">
+                <span className="text-[10px] text-slate-400 block">Kategori</span>
+                <p className="text-slate-700 dark:text-emerald-300/80 text-xs mt-0.5">
                   {selectedDetailRequest.category}
                 </p>
               </div>
 
               <div>
-                <span className="text-[10px] text-stone-400 block">Deskripsi / Keterangan</span>
-                <p className="text-stone-700 dark:text-stone-300 text-xs mt-0.5 leading-relaxed bg-stone-50 dark:bg-stone-800 p-2.5 rounded border border-stone-150 dark:border-stone-750">
+                <span className="text-[10px] text-slate-400 block">Deskripsi / Keterangan</span>
+                <p className="text-slate-700 dark:text-emerald-300/80 text-xs mt-0.5 leading-relaxed bg-slate-50 dark:bg-[#0f1a15] p-2.5 rounded border border-stone-150 dark:border-stone-750">
                   {selectedDetailRequest.description}
                 </p>
               </div>
 
               {selectedDetailRequest.decisionNote && (
                 <div>
-                  <span className="text-[10px] text-stone-400 block">Catatan Disposisi</span>
-                  <p className="text-stone-800 dark:text-stone-200 text-xs mt-0.5 bg-stone-50 dark:bg-stone-800 p-2.5 rounded border border-stone-150 dark:border-stone-750">
+                  <span className="text-[10px] text-slate-400 block">Catatan Disposisi</span>
+                  <p className="text-slate-800 dark:text-emerald-100 text-xs mt-0.5 bg-slate-50 dark:bg-[#0f1a15] p-2.5 rounded border border-stone-150 dark:border-stone-750">
                     {selectedDetailRequest.decisionNote}
                   </p>
                 </div>
@@ -662,7 +662,7 @@ export const LearningNeedManagement: React.FC = () => {
               <div className="pt-2 flex justify-end">
                 <button
                   onClick={() => setSelectedDetailRequest(null)}
-                  className="px-3 py-1.5 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded text-xs font-medium hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 bg-slate-100 dark:bg-[#0f1a15] text-slate-700 dark:text-emerald-300/80 rounded text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                 >
                   Tutup
                 </button>
@@ -674,15 +674,15 @@ export const LearningNeedManagement: React.FC = () => {
 
       {/* MODAL: KEPSEK DECISION */}
       {decisionModal.isOpen && decisionModal.request && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-xs">
-          <div className="bg-white dark:bg-stone-900 rounded-lg shadow-lg max-w-sm w-full overflow-hidden border border-stone-200 dark:border-stone-800">
-            <div className="px-4 py-3 flex items-center justify-between border-b border-stone-150 dark:border-stone-800">
-              <h3 className="font-semibold text-xs text-stone-900 dark:text-stone-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white dark:bg-[#121f1a] rounded-lg shadow-lg max-w-sm w-full overflow-hidden border border-slate-200 dark:border-emerald-900/40">
+            <div className="px-4 py-3 flex items-center justify-between border-b border-stone-150 dark:border-emerald-900/40">
+              <h3 className="font-semibold text-xs text-slate-900 dark:text-emerald-50">
                 {decisionModal.action === 'APPROVED' ? 'Setujui Pengajuan' : decisionModal.action === 'REJECTED' ? 'Tolak Pengajuan' : 'Tandai Selesai'}
               </h3>
               <button
                 onClick={() => setDecisionModal({ ...decisionModal, isOpen: false })}
-                className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-1 rounded cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -690,14 +690,14 @@ export const LearningNeedManagement: React.FC = () => {
 
             <div className="p-4 space-y-3 text-xs">
               <div>
-                <span className="text-[10px] text-stone-400 block">Kebutuhan:</span>
-                <p className="font-medium text-stone-900 dark:text-stone-100 text-xs mt-0.5">
+                <span className="text-[10px] text-slate-400 block">Kebutuhan:</span>
+                <p className="font-medium text-slate-900 dark:text-emerald-50 text-xs mt-0.5">
                   {decisionModal.request.title}
                 </p>
               </div>
 
               <div className="space-y-1">
-                <label className="font-medium text-stone-600 dark:text-stone-300 block">
+                <label className="font-medium text-slate-600 dark:text-emerald-300/80 block">
                   Catatan Disposisi (Opsional)
                 </label>
                 <textarea
@@ -705,15 +705,15 @@ export const LearningNeedManagement: React.FC = () => {
                   value={decisionModal.note}
                   onChange={(e) => setDecisionModal({ ...decisionModal, note: e.target.value })}
                   placeholder="Tambahkan catatan singkat..."
-                  className="w-full text-xs px-2.5 py-1.5 rounded border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-[#1B4332]"
+                  className="w-full text-xs px-2.5 py-1.5 rounded border border-slate-200 dark:border-emerald-800/40 bg-slate-50 dark:bg-[#0f1a15] text-slate-900 dark:text-emerald-50 placeholder-slate-400 focus:outline-none focus:border-[#1B4332]"
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2 border-t border-stone-150 dark:border-stone-800">
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-stone-150 dark:border-emerald-900/40">
                 <button
                   type="button"
                   onClick={() => setDecisionModal({ ...decisionModal, isOpen: false })}
-                  className="px-3 py-1.5 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 rounded text-xs font-medium cursor-pointer"
+                  className="px-3 py-1.5 text-slate-600 dark:text-emerald-300/80 hover:bg-slate-50 dark:bg-[#0f1a15] dark:hover:bg-[#162720]/50 rounded text-xs font-medium cursor-pointer"
                 >
                   Batal
                 </button>
@@ -736,18 +736,18 @@ export const LearningNeedManagement: React.FC = () => {
 
       {/* MODAL: DELETE CONFIRMATION */}
       {deleteModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-xs">
-          <div className="bg-white dark:bg-stone-900 rounded-lg shadow-lg max-w-xs w-full p-4 space-y-3 text-xs border border-stone-200 dark:border-stone-800">
-            <h3 className="font-semibold text-xs text-stone-900 dark:text-stone-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white dark:bg-[#121f1a] rounded-lg shadow-lg max-w-xs w-full p-4 space-y-3 text-xs border border-slate-200 dark:border-emerald-900/40">
+            <h3 className="font-semibold text-xs text-slate-900 dark:text-emerald-50">
               Hapus Pengajuan?
             </h3>
-            <p className="text-stone-500 dark:text-stone-400 text-xs">
+            <p className="text-slate-500 dark:text-emerald-400/70 text-xs">
               Data pengajuan ini akan dihapus.
             </p>
-            <div className="pt-2 flex justify-end gap-2 border-t border-stone-150 dark:border-stone-800">
+            <div className="pt-2 flex justify-end gap-2 border-t border-stone-150 dark:border-emerald-900/40">
               <button
                 onClick={() => setDeleteModal({ isOpen: false, requestId: null })}
-                className="px-3 py-1.5 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 rounded text-xs font-medium cursor-pointer"
+                className="px-3 py-1.5 text-slate-600 dark:text-emerald-300/80 hover:bg-slate-50 dark:bg-[#0f1a15] dark:hover:bg-[#162720]/50 rounded text-xs font-medium cursor-pointer"
               >
                 Batal
               </button>
