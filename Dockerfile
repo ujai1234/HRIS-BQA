@@ -4,7 +4,7 @@ FROM node:20-slim AS builder
 WORKDIR /app
 
 # Install build dependencies for better-sqlite3 native compilation
-RUN apt-get update && apt-get install -y python3 make g++ sqlite3 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
 COPY package.json ./
@@ -21,8 +21,7 @@ FROM node:20-slim AS runner
 
 WORKDIR /app
 
-# Install sqlite3 runtime library
-RUN apt-get update && apt-get install -y sqlite3 && rm -rf /var/lib/apt/lists/*
+# (Removed system sqlite3 installation to prevent better-sqlite3 symbol conflicts)
 
 # Set environment to production
 ENV NODE_ENV=production
