@@ -2871,6 +2871,77 @@ async function startServer() {
       appType: "spa",
     });
     app.use(vite.middlewares);
+
+  // --- FASE 5 API ENDPOINTS ---
+  app.get('/api/payments', async (req, res) => {
+    try {
+      const allPayments = await db.query.payments.findMany();
+      res.json({ data: allPayments });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch payments' });
+    }
+  });
+
+  app.put('/api/payments/:id', async (req, res) => {
+    try {
+      const { status } = req.body;
+      const result = await db.update(schema.payments)
+        .set({ status })
+        .where(eq(schema.payments.id, req.params.id))
+        .returning();
+      res.json({ data: result[0] });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to update payment status' });
+    }
+  });
+
+  app.post('/api/students/:studentId/payments/:paymentId/upload', async (req, res) => {
+    try {
+      const { receiptUrl } = req.body;
+      const result = await db.update(schema.payments)
+        .set({ receiptUrl, status: 'MENUNGGU VERIFIKASI' })
+        .where(eq(schema.payments.id, req.params.paymentId))
+        .returning();
+      res.json({ data: result[0] });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to upload receipt' });
+    }
+  });
+
+  app.get('/api/students/:studentId/notes', async (req, res) => {
+    try {
+      const notes = await db.query.studentNotes.findMany({
+        where: eq(schema.studentNotes.studentId, req.params.studentId)
+      });
+      res.json({ data: notes });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch student notes' });
+    }
+  });
+
+  app.post('/api/notes', async (req, res) => {
+    try {
+      const { studentId, teacherId, type, note } = req.body;
+      const result = await db.insert(schema.studentNotes).values({
+        id: `NOTE-${Date.now()}`,
+        studentId,
+        teacherId,
+        type,
+        note
+      }).returning();
+      res.json({ data: result[0] });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to add student note' });
+    }
+  });
+
+  // Vite middleware for development
+  if (process.env.NODE_ENV !== "production") {
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: "spa",
+    });
+    app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
@@ -2878,6 +2949,10 @@ async function startServer() {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
+
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on http://0.0.0.0:${PORT}`);
+  });
 
   // Auto-verify and seed database if the new demo accounts or staff data are missing on start
   try {
@@ -3001,10 +3076,6 @@ async function startServer() {
   } catch (error) {
     console.error('Database connection or verification failed on startup:', error);
   }
-
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
 }
 
 startServer();
