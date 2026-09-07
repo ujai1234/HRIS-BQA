@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y python3 make g++ sqlite3 && rm -rf /var
 
 # Copy package files
 COPY package.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
