@@ -1,5 +1,6 @@
 # Stage 1: Build
-FROM node:20 AS builder
+# Note: better-sqlite3 v13+ requires Node.js >= 22
+FROM node:22 AS builder
 
 WORKDIR /app
 
@@ -17,8 +18,8 @@ COPY . .
 # Build frontend and backend server bundle
 RUN npm run build
 
-# Stage 2: Runtime
-FROM node:20 AS runner
+# Stage 2: Runtime - must match builder exactly so native binaries are compatible
+FROM node:22 AS runner
 
 WORKDIR /app
 
@@ -27,11 +28,9 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV DATABASE_URL=/app/data/sqlite.db
 
-# Copy built frontend/backend from builder
+# Copy built frontend/backend and node_modules from builder
+# Same base image (node:22) ensures better-sqlite3 native binary is ABI-compatible
 COPY --from=builder /app/dist ./dist
-
-# Copy package files and node_modules from builder
-# We use node:20 for both stages, so native binaries (like better-sqlite3) are 100% compatible.
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
 
