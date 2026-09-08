@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt
 
 # Copy package files
 COPY package.json package-lock.json ./
+# Force install devDependencies even if NODE_ENV=production is set by deployment environment
 RUN npm install --legacy-peer-deps --include=dev
 
 # Copy source code
@@ -17,15 +18,9 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Runtime
-FROM node:20-slim AS runner
+FROM node:20 AS runner
 
 WORKDIR /app
-
-# Install build tools needed to recompile better-sqlite3 native addon
-# (native .node binaries cannot be copied across Docker stages)
-RUN apt-get update && apt-get install -y \
-    python3 make g++ \
-    && rm -rf /var/lib/apt/lists/*
 
 # Set environment to production
 ENV NODE_ENV=production
@@ -35,10 +30,10 @@ ENV DATABASE_URL=/app/data/sqlite.db
 # Copy built frontend/backend from builder
 COPY --from=builder /app/dist ./dist
 
-# Copy package files and reinstall in runtime stage so better-sqlite3 is recompiled natively
+# Copy package files and node_modules from builder
+# We use node:20 for both stages, so native binaries (like better-sqlite3) are 100% compatible.
 COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/package-lock.json ./package-lock.json
-RUN npm install --legacy-peer-deps --omit=dev
+COPY --from=builder /app/node_modules ./node_modules
 
 # Ensure data directory exists for persistent SQLite database
 RUN mkdir -p /app/data
