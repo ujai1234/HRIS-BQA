@@ -12,14 +12,18 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - DATABASE_URL=/app/data/sqlite.db
+      - APP_URL=${APP_URL:-https://hris.baitulquranalikhwan.cloud}
+      - BETTER_AUTH_URL=${BETTER_AUTH_URL:-https://hris.baitulquranalikhwan.cloud}
     volumes:
       - hris_sqlite_data:/app/data
     restart: unless-stopped
+    # Healthcheck: start_period gives server 60s to boot before first check
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
 volumes:
   hris_sqlite_data:

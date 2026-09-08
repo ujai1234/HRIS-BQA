@@ -24,8 +24,23 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175',
+    process.env.APP_URL,
+    'https://hris.baitulquranalikhwan.cloud',
+  ].filter(Boolean) as string[];
+
   app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, Postman)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS: origin ${origin} not allowed`));
+      }
+    },
     credentials: true
   }));
   app.use(express.json());
