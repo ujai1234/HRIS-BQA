@@ -83,6 +83,7 @@ interface HRISContextType {
   resetSchedules: () => Promise<void>;
   
   // Payroll Engine
+  payrollSummary: MonthlyPayrollSummary | null;
   calculateTeacherPayroll: (teacherId: string, period?: string) => TeacherPayrollItem;
   calculateAllPayroll: (period?: string, unitFilter?: UnitType | 'ALL') => MonthlyPayrollSummary;
   
@@ -145,6 +146,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [staffJournals, setStaffJournals] = useState<import('../types').StaffJournalRecord[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
   const [geofenceSettings, setGeofenceSettings] = useState<GeofenceSettings>(DEFAULT_GEOFENCE_SETTINGS);
+  const [payrollSummary, setPayrollSummary] = useState<MonthlyPayrollSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Derived current user object - with array check safety
@@ -201,7 +203,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchAllData = async () => {
     setIsLoading(true);
     try {
-      const [tRes, sRes, aRes, bRes, lRes, lnRes, gRes, stRes, seRes] = await Promise.all([
+      const [tRes, sRes, aRes, bRes, lRes, lnRes, gRes, stRes, seRes, pRes] = await Promise.all([
         fetch('/api/teachers'),
         fetch('/api/schedules'),
         fetch('/api/attendances'),
@@ -210,10 +212,11 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         fetch('/api/learning-needs'),
         fetch('/api/settings/geofence'),
         fetch('/api/staff-tasks'),
-        fetch('/api/staff-expenses')
+        fetch('/api/staff-expenses'),
+        fetch(`/api/payroll?period=${selectedPeriod}`)
       ]);
 
-      const [t, s, a, b, l, ln, g, st, se] = await Promise.all([
+      const [t, s, a, b, l, ln, g, st, se, p] = await Promise.all([
         tRes.json(),
         sRes.json(),
         aRes.json(),
@@ -222,11 +225,13 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         lnRes.json(),
         gRes.ok ? gRes.json() : null,
         stRes.ok ? stRes.json() : [],
-        seRes.ok ? seRes.json() : []
+        seRes.ok ? seRes.json() : [],
+        pRes.ok ? pRes.json() : null
       ]);
 
       setStaffJournals(Array.isArray(st) ? st : []);
       setExpenses(Array.isArray(se) ? se : []);
+      if (p) setPayrollSummary(p);
 
       if (t.length === 0) {
         await fetch('/api/seed', { method: 'POST' });
@@ -327,7 +332,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     fetchAllData();
-  }, [currentUserId, currentRole]);
+  }, [currentUserId, currentRole, selectedPeriod]);
 
   // Sync to local storage for auth/path only
   useEffect(() => {
@@ -1071,161 +1076,72 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Payroll Calculation Engine for a specific teacher
   const calculateTeacherPayroll = (teacherId: string, _period = selectedPeriod): TeacherPayrollItem => {
+    if (payrollSummary && payrollSummary.period === _period) {
+      const item = payrollSummary.items.find((i) => i.teacher.id === teacherId);
+      if (item) return item;
+    }
+    
+    // Fallback zeroed state while loading
     const teacher = teachers.find((t) => t.id === teacherId) || teachers[0] || INITIAL_TEACHERS[0];
-
-    const teacherSchedules = schedules.filter((s) => s.teacherId === teacherId);
-    const weeklyHours = teacherSchedules.reduce((sum, s) => sum + s.hours, 0);
-    // Standard monthly scheduled load estimate (4 weeks in a month)
-    const baseMonthlyScheduledHours = weeklyHours * 4 || 16; 
-
-    // Find all attendance records where this teacher actually taught (including as badal)
-    const actualTeachingRecords = attendances.filter(
-      (a) => a.actualTeacherId === teacherId && (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG')
-    );
-
-    // Badal sessions conducted by this teacher
-    const badalSessions = actualTeachingRecords.filter((a) => a.isBadal);
-
-    // Calculate actual taught hours based on records + estimated base monthly weight for simulation
-    const actualTaughtHoursCount = actualTeachingRecords.reduce((sum, a) => {
-      const sched = schedules.find((s) => s.id === a.scheduleId);
-      return sum + (sched ? sched.hours : 2);
-    }, 0);
-
-    const badalHoursCount = badalSessions.reduce((sum, a) => {
-      const sched = schedules.find((s) => s.id === a.scheduleId);
-      return sum + (sched ? sched.hours : 2);
-    }, 0);
-
-    // Ensure baseline simulation is realistic based on weekly hours
-    const totalTaughtHours = Math.max(actualTaughtHoursCount, baseMonthlyScheduledHours);
-
-    // Distinct present days
-    const presentDates = new Set(actualTeachingRecords.map((a) => a.date));
-    
-    // ====== TAHFIDZ INTEGRATION: Add Tahfidz present dates ======
-    if (tahfidzPayroll?.items) {
-      const tahfidzItem = tahfidzPayroll.items.find(t => t.teacherId === teacherId);
-      if (tahfidzItem && tahfidzItem.presentDates) {
-        tahfidzItem.presentDates.forEach(date => presentDates.add(date));
-      }
-    }
-
-    const defaultMonthlyDays = Math.min(22, Math.max(16, weeklyHours > 0 ? weeklyHours * 2 : 18));
-    const totalPresentDays = Math.max(presentDates.size, defaultMonthlyDays);
-
-    // Hourly teaching honorarium
-    let teachingHonorarium = totalTaughtHours * teacher.hourlyRate;
-    let totalTransport = totalPresentDays * teacher.dailyTransport;
-
-    // Deductions Calculation
-    // 1. Late penalty
-    const lateRecords = attendances.filter((a) => a.actualTeacherId === teacherId && a.latePenalty > 0);
-    const recordedLatePenalty = lateRecords.reduce((sum, a) => sum + a.latePenalty, 0);
-    const latePenaltyTotal = recordedLatePenalty;
-    const lateCountLight = lateRecords.filter(a => a.lateCategory === 'TERLAMBAT_RINGAN').length;
-    const lateCountMedium = lateRecords.filter(a => a.lateCategory === 'TERLAMBAT_SEDANG').length;
-    const lateCountHeavy = lateRecords.filter(a => a.lateCategory === 'TERLAMBAT_BERAT').length;
-
-    // 2. Empty Journal Penalty: 50% x (Jam Mengajar x Rp 40.000)
-    const emptyJournalRecords = attendances.filter(
-      (a) => a.actualTeacherId === teacherId && a.status === 'HADIR_JURNAL_KOSONG'
-    );
-    const emptyJournalCount = emptyJournalRecords.length;
-    const emptyJournalPenalty = emptyJournalRecords.reduce((sum, a) => {
-      const sched = schedules.find((s) => s.id === a.scheduleId);
-      const hours = sched ? sched.hours : 2;
-      return sum + 0.5 * (hours * teacher.hourlyRate);
-    }, 0);
-
-    // 3. Alpha Penalty: Transport + (Jam Mengajar x Tarif) + (5% Gaji Pokok)
-    const alphaRecords = attendances.filter((a) => a.teacherId === teacherId && a.status === 'ALPA');
-    const alphaDays = alphaRecords.length;
-    const alphaPenalty = alphaRecords.reduce((sum, a) => {
-      const sched = schedules.find((s) => s.id === a.scheduleId);
-      const hours = sched ? sched.hours : 2;
-      const alphaPerDay = teacher.dailyTransport + (hours * teacher.hourlyRate) + (0.05 * teacher.baseSalary);
-      return sum + alphaPerDay;
-    }, 0);
-
-    // 4. Izin Penalty: Transport + (Jam Mengajar x Tarif)
-    const izinRecords = attendances.filter((a) => a.teacherId === teacherId && a.status === 'IZIN');
-    const izinDays = izinRecords.length;
-    const izinPenalty = izinRecords.reduce((sum, a) => {
-      const sched = schedules.find((s) => s.id === a.scheduleId);
-      const hours = sched ? sched.hours : 2;
-      const izinPerDay = teacher.dailyTransport + (hours * teacher.hourlyRate);
-      return sum + izinPerDay;
-    }, 0);
-
-    const otherDeductions = 0; // Kasbon/Infaq sukarela
-    
-    // STAFF Logic (Flat Rate)
-    let totalDeductions = latePenaltyTotal + emptyJournalPenalty + alphaPenalty + izinPenalty + otherDeductions;
-    let grossSalary = teacher.baseSalary + teachingHonorarium + totalTransport;
-    let netSalary = Math.max(0, grossSalary - totalDeductions);
-    let mealAllowance = 0;
-
-    if (teacher.role === 'STAFF') {
-      // Flat rate for Staff
-      const staffTransport = teacher.monthlyTransport || 250000;
-      mealAllowance = teacher.monthlyMealAllowance || 375000;
-      
-      grossSalary = teacher.baseSalary + staffTransport + mealAllowance;
-      totalDeductions = 0; // Flat gaji pokok penuh
-      netSalary = grossSalary;
-      totalTransport = staffTransport;
-      teachingHonorarium = 0;
-    }
-
     return {
       teacher,
       period: _period,
       baseSalary: teacher.baseSalary,
-      totalScheduledHours: baseMonthlyScheduledHours,
-      totalTaughtHours,
-      totalBadalHours: badalHoursCount,
+      totalScheduledHours: 0,
+      totalTaughtHours: 0,
+      totalBadalHours: 0,
       hourlyRate: teacher.hourlyRate,
-      teachingHonorarium,
-      totalPresentDays,
+      teachingHonorarium: 0,
+      totalPresentDays: 0,
       dailyTransport: teacher.dailyTransport,
-      totalTransport,
-      lateCountLight,
-      lateCountMedium,
-      lateCountHeavy,
-      latePenaltyTotal,
-      emptyJournalCount,
-      emptyJournalPenalty,
-      izinDays,
-      izinPenalty,
-      alphaDays,
-      alphaPenalty,
-      otherDeductions,
-      totalDeductions,
-      grossSalary,
-      netSalary,
-      monthlyMealAllowance: mealAllowance,
+      totalTransport: 0,
+      lateCountLight: 0,
+      lateCountMedium: 0,
+      lateCountHeavy: 0,
+      latePenaltyTotal: 0,
+      emptyJournalCount: 0,
+      emptyJournalPenalty: 0,
+      izinDays: 0,
+      izinPenalty: 0,
+      alphaDays: 0,
+      alphaPenalty: 0,
+      otherDeductions: 0,
+      totalDeductions: 0,
+      grossSalary: teacher.role === 'STAFF' ? (teacher.baseSalary + (teacher.monthlyTransport || 250000) + (teacher.monthlyMealAllowance || 375000)) : teacher.baseSalary,
+      netSalary: teacher.role === 'STAFF' ? (teacher.baseSalary + (teacher.monthlyTransport || 250000) + (teacher.monthlyMealAllowance || 375000)) : teacher.baseSalary,
+      monthlyMealAllowance: teacher.role === 'STAFF' ? (teacher.monthlyMealAllowance || 375000) : 0,
     };
   };
 
   // Calculate full payroll table for all teachers or filtered by unit
   const calculateAllPayroll = (period = selectedPeriod, unitFilter?: UnitType | 'ALL'): MonthlyPayrollSummary => {
+    if (payrollSummary && payrollSummary.period === period) {
+      if (!unitFilter || unitFilter === 'ALL') return payrollSummary;
+      
+      const filteredItems = payrollSummary.items.filter((i) => i.teacher.unit === unitFilter);
+      return {
+        ...payrollSummary,
+        totalGross: filteredItems.reduce((sum, i) => sum + i.grossSalary, 0),
+        totalDeductions: filteredItems.reduce((sum, i) => sum + i.totalDeductions, 0),
+        totalNet: filteredItems.reduce((sum, i) => sum + i.netSalary, 0),
+        totalTeachingHours: filteredItems.reduce((sum, i) => sum + i.totalTaughtHours, 0),
+        totalTeachers: filteredItems.length,
+        items: filteredItems,
+      };
+    }
+
+    // Fallback zeroed state while loading
     const targetTeachers = (unitFilter && unitFilter !== 'ALL') 
       ? teachers.filter(t => t.unit === unitFilter) 
       : teachers;
 
-    const items = targetTeachers.map((t) => calculateTeacherPayroll(t.id, period));
-    const totalGross = items.reduce((sum, item) => sum + item.grossSalary, 0);
-    const totalDeductions = items.reduce((sum, item) => sum + item.totalDeductions, 0);
-    const totalNet = items.reduce((sum, item) => sum + item.netSalary, 0);
-    const totalTeachingHours = items.reduce((sum, item) => sum + item.totalTaughtHours, 0);
-
+    const items = targetTeachers.map(t => calculateTeacherPayroll(t.id, period));
     return {
       period,
-      totalGross,
-      totalDeductions,
-      totalNet,
-      totalTeachingHours,
+      totalGross: items.reduce((sum, i) => sum + i.grossSalary, 0),
+      totalDeductions: items.reduce((sum, i) => sum + i.totalDeductions, 0),
+      totalNet: items.reduce((sum, i) => sum + i.netSalary, 0),
+      totalTeachingHours: 0,
       totalTeachers: targetTeachers.length,
       generatedDate: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
       items,
@@ -1462,6 +1378,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deleteSchedule,
         calculateTeacherPayroll,
         calculateAllPayroll,
+        payrollSummary,
         tahfidzPayroll,
         fetchTahfidzPayroll,
         checkTahfidzConnection,

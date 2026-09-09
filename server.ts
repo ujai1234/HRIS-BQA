@@ -5,6 +5,7 @@ import cors from 'cors';
 import { db, sqliteDb } from './src/db';
 import * as schema from './src/db/schema';
 import { eq, and, or, inArray } from 'drizzle-orm';
+import { calculateLatePenalty } from './src/utils/formatters';
 import {
   INITIAL_TEACHERS, 
   INITIAL_SCHEDULES, 
@@ -326,6 +327,32 @@ async function startServer() {
   app.post('/api/attendances', async (req, res) => {
     try {
       const { scheduleId, date, ...rest } = req.body;
+
+      // Server-side Late Penalty Calculation
+      let calculatedPenaltyData = {};
+      const targetTeacherId = req.body.actualTeacherId || req.body.teacherId;
+      const sched = scheduleId ? await db.query.schedules.findFirst({ where: eq(schema.schedules.id, scheduleId) }) : null;
+      
+      if (req.body.clockInTime && sched && targetTeacherId) {
+        const teacherForLate = await db.query.teachers.findFirst({ where: eq(schema.teachers.id, targetTeacherId) });
+        if (teacherForLate) {
+          calculatedPenaltyData = calculateLatePenalty(
+            req.body.clockInTime, 
+            sched.startTime,
+            teacherForLate.dailyTransport,
+            sched.hours,
+            teacherForLate.hourlyRate
+          );
+        }
+      }
+
+      const dataToSave = {
+        scheduleId,
+        date,
+        ...rest,
+        ...calculatedPenaltyData
+      };
+
       if (scheduleId && date) {
         const existing = await db.query.attendances.findFirst({
           where: and(
@@ -335,15 +362,13 @@ async function startServer() {
         });
         if (existing) {
           const updated = await db.update(schema.attendances)
-            .set(rest)
+            .set(dataToSave)
             .where(eq(schema.attendances.id, existing.id))
             .returning();
           return res.json(updated[0]);
         }
 
         // 1x per day limit logic for non-Tahfidz schedules
-        const targetTeacherId = req.body.actualTeacherId || req.body.teacherId;
-        const sched = await db.query.schedules.findFirst({ where: eq(schema.schedules.id, scheduleId) });
         const isTahfidz = sched && sched.subject.toLowerCase().includes('tahfidz');
 
         if (!isTahfidz && targetTeacherId) {
@@ -358,7 +383,7 @@ async function startServer() {
           }
         }
       }
-      const result = await db.insert(schema.attendances).values(req.body).returning();
+      const result = await db.insert(schema.attendances).values(dataToSave).returning();
       res.json(result[0]);
     } catch (error) {
       console.error('Failed to create attendance:', error);
@@ -2350,13 +2375,12 @@ async function startServer() {
     try {
       const assignmentId = req.params.id;
       const { grades } = req.body; // Array of { studentId, score, feedback }
-      if (!Array.isArray(grades)) return res.status(400).json({ error: 'Invalid data' });
-      
-      // Clear existing grades for this assignment to overwrite
+
+      // Clear existing
       await db.delete(schema.studentGrades).where(eq(schema.studentGrades.assignmentId, assignmentId));
       
-      if (grades.length > 0) {
-        const toInsert = grades.map(g => ({
+      if (grades && grades.length > 0) {
+        const toInsert = grades.map((g: any) => ({
           id: `GRD-${Date.now()}-${Math.floor(Math.random()*1000)}`,
           assignmentId,
           studentId: g.studentId,
@@ -2390,120 +2414,6 @@ async function startServer() {
     }
   });
 
-  // ==========================================
-  app.get('/api/db-explorer/tables', (req, res) => {
-    try {
-      const tablesInfo = sqliteDb.prepare(`
-        SELECT name FROM sqlite_master 
-        WHERE type='table' AND name NOT LIKE 'sqlite_%'
-        ORDER BY name ASC
-      `).all() as { name: string }[];
-
-      const tables = tablesInfo.map(t => {
-        const countRes = sqliteDb.prepare(`SELECT COUNT(*) as count FROM "${t.name}"`).get() as { count: number };
-        const columnsInfo = sqliteDb.prepare(`PRAGMA table_info("${t.name}")`).all() as { cid: number; name: string; type: string; notnull: number; dflt_value: any; pk: number }[];
-        return {
-          name: t.name,
-          rowCount: countRes ? countRes.count : 0,
-          columns: columnsInfo.map(c => ({
-            name: c.name,
-            type: c.type,
-            notNull: Boolean(c.notnull),
-            isPk: Boolean(c.pk),
-            defaultValue: c.dflt_value
-          }))
-        };
-      });
-
-      res.json({
-        engine: 'SQLite (better-sqlite3)',
-        orm: 'Drizzle ORM',
-        databaseFile: process.env.DATABASE_URL || 'sqlite.db',
-        tables
-      });
-    } catch (error) {
-      console.error('DB Explorer tables error:', error);
-      res.status(500).json({ error: 'Failed to fetch database metadata' });
-    }
-  });
-
-  app.get('/api/db-explorer/data/:tableName', (req, res) => {
-    try {
-      const tableName = req.params.tableName;
-      // Sanitize table name against SQL injection
-      const validTables = sqliteDb.prepare(`
-        SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'
-      `).all().map((t: any) => t.name);
-
-      if (!validTables.includes(tableName)) {
-        return res.status(404).json({ error: 'Table not found' });
-      }
-
-      const limit = parseInt(req.query.limit as string) || 100;
-      const offset = parseInt(req.query.offset as string) || 0;
-      const search = (req.query.search as string || '').trim();
-
-      const columnsInfo = sqliteDb.prepare(`PRAGMA table_info("${tableName}")`).all() as { name: string }[];
-      const colNames = columnsInfo.map(c => c.name);
-
-      let whereClause = '';
-      const params: any[] = [];
-      if (search && colNames.length > 0) {
-        const searchConditions = colNames.map(col => `"${col}" LIKE ?`).join(' OR ');
-        whereClause = `WHERE ${searchConditions}`;
-        colNames.forEach(() => params.push(`%${search}%`));
-      }
-
-      const countStmt = sqliteDb.prepare(`SELECT COUNT(*) as count FROM "${tableName}" ${whereClause}`);
-      const totalRows = (countStmt.get(...params) as { count: number }).count;
-
-      const dataStmt = sqliteDb.prepare(`SELECT * FROM "${tableName}" ${whereClause} LIMIT ? OFFSET ?`);
-      const rows = dataStmt.all(...params, limit, offset);
-
-      res.json({
-        tableName,
-        totalRows,
-        limit,
-        offset,
-        columns: colNames,
-        rows
-      });
-    } catch (error) {
-      console.error('DB Explorer data error:', error);
-      res.status(500).json({ error: 'Failed to fetch table data' });
-    }
-  });
-
-  app.post('/api/db-explorer/query', (req, res) => {
-    try {
-      const { query } = req.body;
-      if (!query || typeof query !== 'string') {
-        return res.status(400).json({ error: 'Query parameter is required' });
-      }
-
-      const trimmed = query.trim();
-      if (!trimmed.toUpperCase().startsWith('SELECT') && !trimmed.toUpperCase().startsWith('PRAGMA') && !trimmed.toUpperCase().startsWith('EXPLAIN')) {
-        return res.status(400).json({ error: 'Hanya query SELECT/PRAGMA/EXPLAIN yang diizinkan melalui API explorer' });
-      }
-
-      const rows = sqliteDb.prepare(trimmed).all();
-      const columns = rows.length > 0 ? Object.keys(rows[0] as object) : [];
-
-      res.json({
-        query: trimmed,
-        rowCount: rows.length,
-        columns,
-        rows
-      });
-    } catch (error) {
-      console.error('DB Explorer custom query error:', error);
-      res.status(400).json({ error: 'Query execution failed', details: String(error) });
-    }
-  });
-
-
-  // --- FASE 4 API ENDPOINTS ---
-  
   app.get('/api/students', async (req, res) => {
     try {
       const allStudents = await db.query.students.findMany();
@@ -2819,6 +2729,152 @@ async function startServer() {
       res.json({ success: true, message: 'Relasi berhasil dihapus.' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to remove link' });
+    }
+  });
+
+  // --- PAYROLL API (Migrated from Frontend) ---
+  app.get('/api/payroll', async (req, res) => {
+    try {
+      const period = (req.query.period as string) || 'Agustus 2026';
+      const unitFilter = (req.query.unitFilter as string) || 'ALL';
+      const singleTeacherId = req.query.teacherId as string | undefined;
+
+      const [teachers, schedules, attendances] = await Promise.all([
+        db.query.teachers.findMany(),
+        db.query.schedules.findMany(),
+        db.query.attendances.findMany()
+      ]);
+
+      const targetTeachers = singleTeacherId 
+        ? teachers.filter(t => t.id === singleTeacherId)
+        : (unitFilter !== 'ALL' ? teachers.filter(t => t.unit === unitFilter) : teachers);
+
+      const items = targetTeachers.map((teacher: any) => {
+        const teacherSchedules = schedules.filter((s: any) => s.teacherId === teacher.id);
+        const weeklyHours = teacherSchedules.reduce((sum, s) => sum + Number(s.hours || 0), 0);
+        const baseMonthlyScheduledHours = (weeklyHours * 4) || 16; 
+
+        const actualTeachingRecords = attendances.filter(
+          (a: any) => a.actualTeacherId === teacher.id && (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG')
+        );
+
+        const badalSessions = actualTeachingRecords.filter((a: any) => a.isBadal);
+
+        const actualTaughtHoursCount = actualTeachingRecords.reduce((sum, a: any) => {
+          const sched = schedules.find((s: any) => s.id === a.scheduleId);
+          return sum + Number(sched ? sched.hours : 2);
+        }, 0);
+
+        const badalHoursCount = badalSessions.reduce((sum, a: any) => {
+          const sched = schedules.find((s: any) => s.id === a.scheduleId);
+          return sum + Number(sched ? sched.hours : 2);
+        }, 0);
+
+        const totalTaughtHours = Math.max(actualTaughtHoursCount, baseMonthlyScheduledHours);
+
+        const presentDates = new Set(actualTeachingRecords.map((a: any) => a.date));
+        
+        // Tahfidz fallback (frontend merges this later if needed, or we keep it 0 here)
+        const defaultMonthlyDays = Math.min(22, Math.max(16, weeklyHours > 0 ? weeklyHours * 2 : 18));
+        const totalPresentDays = Math.max(presentDates.size, defaultMonthlyDays);
+
+        let teachingHonorarium = totalTaughtHours * Number(teacher.hourlyRate || 0);
+        let totalTransport = totalPresentDays * Number(teacher.dailyTransport || 0);
+
+        const lateRecords = attendances.filter((a: any) => a.actualTeacherId === teacher.id && Number(a.latePenalty || 0) > 0);
+        const latePenaltyTotal = lateRecords.reduce((sum, a: any) => sum + Number(a.latePenalty || 0), 0);
+        const lateCountLight = lateRecords.filter((a: any) => a.lateCategory === 'TERLAMBAT_RINGAN').length;
+        const lateCountMedium = lateRecords.filter((a: any) => a.lateCategory === 'TERLAMBAT_SEDANG').length;
+        const lateCountHeavy = lateRecords.filter((a: any) => a.lateCategory === 'TERLAMBAT_BERAT').length;
+
+        const emptyJournalRecords = attendances.filter((a: any) => a.actualTeacherId === teacher.id && a.status === 'HADIR_JURNAL_KOSONG');
+        const emptyJournalCount = emptyJournalRecords.length;
+        const emptyJournalPenalty = emptyJournalRecords.reduce((sum, a: any) => {
+          const sched = schedules.find((s: any) => s.id === a.scheduleId);
+          const hours = sched ? Number(sched.hours) : 2;
+          return sum + (0.5 * hours * Number(teacher.hourlyRate || 0));
+        }, 0);
+
+        const alphaRecords = attendances.filter((a: any) => a.teacherId === teacher.id && a.status === 'ALPA');
+        const alphaDays = alphaRecords.length;
+        const alphaPenalty = alphaRecords.reduce((sum, a: any) => {
+          const sched = schedules.find((s: any) => s.id === a.scheduleId);
+          const hours = sched ? Number(sched.hours) : 2;
+          return sum + Number(teacher.dailyTransport || 0) + (hours * Number(teacher.hourlyRate || 0)) + (0.05 * Number(teacher.baseSalary || 0));
+        }, 0);
+
+        const izinRecords = attendances.filter((a: any) => a.teacherId === teacher.id && a.status === 'IZIN');
+        const izinDays = izinRecords.length;
+        const izinPenalty = izinRecords.reduce((sum, a: any) => {
+          const sched = schedules.find((s: any) => s.id === a.scheduleId);
+          const hours = sched ? Number(sched.hours) : 2;
+          return sum + Number(teacher.dailyTransport || 0) + (hours * Number(teacher.hourlyRate || 0));
+        }, 0);
+
+        let totalDeductions = latePenaltyTotal + emptyJournalPenalty + alphaPenalty + izinPenalty;
+        let grossSalary = Number(teacher.baseSalary || 0) + teachingHonorarium + totalTransport;
+        let netSalary = Math.max(0, grossSalary - totalDeductions);
+        let mealAllowance = 0;
+
+        if (teacher.role === 'STAFF') {
+          const staffTransport = Number(teacher.monthlyTransport || 250000);
+          mealAllowance = Number(teacher.monthlyMealAllowance || 375000);
+          
+          grossSalary = Number(teacher.baseSalary || 0) + staffTransport + mealAllowance;
+          totalDeductions = 0; 
+          netSalary = grossSalary;
+          totalTransport = staffTransport;
+          teachingHonorarium = 0;
+        }
+
+        return {
+          teacher,
+          period,
+          baseSalary: teacher.baseSalary,
+          totalScheduledHours: baseMonthlyScheduledHours,
+          totalTaughtHours,
+          totalBadalHours: badalHoursCount,
+          hourlyRate: teacher.hourlyRate,
+          teachingHonorarium,
+          totalPresentDays,
+          dailyTransport: teacher.dailyTransport,
+          totalTransport,
+          lateCountLight,
+          lateCountMedium,
+          lateCountHeavy,
+          latePenaltyTotal,
+          emptyJournalCount,
+          emptyJournalPenalty,
+          izinDays,
+          izinPenalty,
+          alphaDays,
+          alphaPenalty,
+          otherDeductions: 0,
+          totalDeductions,
+          grossSalary,
+          netSalary,
+          monthlyMealAllowance: mealAllowance,
+        };
+      });
+
+      const totalGross = items.reduce((sum, item) => sum + item.grossSalary, 0);
+      const totalDeductions = items.reduce((sum, item) => sum + item.totalDeductions, 0);
+      const totalNet = items.reduce((sum, item) => sum + item.netSalary, 0);
+      const totalTeachingHours = items.reduce((sum, item) => sum + item.totalTaughtHours, 0);
+
+      res.json({
+        period,
+        totalGross,
+        totalDeductions,
+        totalNet,
+        totalTeachingHours,
+        totalTeachers: targetTeachers.length,
+        generatedDate: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+        items
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Failed to calculate payroll' });
     }
   });
 
