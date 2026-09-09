@@ -105,6 +105,23 @@ export const LoginPage: React.FC = () => {
 
   // Quick Persona Instant Login Helper (REMOVED)
 
+  // Prevent Flash of Unauthenticated Content (FOUC) while checking Better Auth session
+  if (sessionPending) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#065f46] via-[#044e3a] to-[#0f1713] dark:from-[#092e22] dark:via-[#09221a] dark:to-[#09110d] flex flex-col items-center justify-center p-4 font-sans antialiased">
+        <div className="flex flex-col items-center gap-5 relative z-10">
+          <div className="relative">
+            <div className="w-12 h-12 border-2 border-emerald-900/50 rounded-full"></div>
+            <div className="w-12 h-12 border-t-2 border-amber-400 rounded-full animate-spin absolute top-0 left-0"></div>
+          </div>
+          <div className="text-center space-y-1">
+            <p className="text-emerald-100 font-bold text-sm tracking-tight">Memverifikasi Sesi...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Switch to Register or Forgot Password Views
   if (authView === 'REGISTER') {
     return <RegisterPage onBackToLogin={() => setAuthView('LOGIN')} />;
