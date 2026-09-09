@@ -36,7 +36,7 @@ export const LoginPage: React.FC = () => {
     setError(null);
     
     try {
-      const email = `${username}@bqa.local`;
+      const email = username.includes('@') ? username : `${username}@bqa.local`;
       const { data, error: authError } = await authClient.signIn.email({
         email,
         password
