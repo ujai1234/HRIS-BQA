@@ -832,7 +832,7 @@ async function startServer() {
              try {
                 await auth.api.signUpEmail({
                    body: {
-                       email: `${teacher.username}@bqa.local`,
+                       email: teacher.username.includes('@') ? teacher.username : `${teacher.username}@bqa.local`,
                        password: mockPassword,
                        name: teacher.name,
                        teacherId: teacher.id
