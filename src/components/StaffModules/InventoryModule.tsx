@@ -48,20 +48,6 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({ showJournalAnd
 
   useEffect(() => {
     detectLocation();
-    
-    const savedState = localStorage.getItem(`hris_inventory_state_${currentUser?.id}`);
-    if (savedState) {
-      const parsed = JSON.parse(savedState);
-      if (parsed.date === new Date().toDateString()) {
-        setIsPresent(parsed.isPresent);
-        setTaskToday(parsed.taskToday);
-        setTaskTomorrow(parsed.taskTomorrow);
-        setIsSaved(parsed.isSaved);
-        if (parsed.isPresent || parsed.hasClockedInToday) {
-            setHasClockedInToday(true);
-        }
-      }
-    }
   }, [currentUser?.id]);
 
   const hasGps = userLat !== null && userLng !== null;
@@ -92,30 +78,16 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({ showJournalAnd
     setIsPresent(true);
     setHasClockedInToday(true);
     toast.success('Bismillah, Absen Masuk Berhasil (Staff Sarpras)');
-    saveToStorage(true, taskToday, taskTomorrow, isSaved);
   };
 
   const handleAbsenPulang = () => {
     setIsPresent(false);
     toast.info('Alhamdulillah, Absen Pulang Berhasil Tercatat');
-    saveToStorage(false, taskToday, taskTomorrow, isSaved);
   };
 
   const handleSaveTasks = () => {
     setIsSaved(true);
-    toast.success('Rencana & Laporan Kerja berhasil disimpan');
-    saveToStorage(isPresent, taskToday, taskTomorrow, true);
-  };
-
-  const saveToStorage = (present: boolean, today: string, tomorrow: string, saved: boolean) => {
-    localStorage.setItem(`hris_inventory_state_${currentUser?.id}`, JSON.stringify({
-      date: new Date().toDateString(),
-      isPresent: present,
-      taskToday: today,
-      taskTomorrow: tomorrow,
-      isSaved: saved,
-      hasClockedInToday: true
-    }));
+    toast.success('Rencana & Laporan Kerja berhasil disimpan sementara untuk sesi ini.');
   };
 
   return (

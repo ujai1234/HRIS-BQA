@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Search, Plus, Book, Send, AlertCircle, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
+import { useHRIS } from '../context/HRISContext';
 
 export const TeacherNotes: React.FC<{ readOnly?: boolean }> = ({ readOnly = false }) => {
   const [notesHistory, setNotesHistory] = useState<any[]>([]);
@@ -16,8 +17,8 @@ export const TeacherNotes: React.FC<{ readOnly?: boolean }> = ({ readOnly = fals
     note: ''
   });
 
-  const currentUser = JSON.parse(localStorage.getItem('hris_user') || '{}');
-  const teacherId = currentUser.teacherId || 'TCH-001';
+  const { currentUserId } = useHRIS();
+  const teacherId = currentUserId || 'TCH-001';
 
   const fetchData = async () => {
     try {

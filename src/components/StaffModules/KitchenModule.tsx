@@ -48,20 +48,6 @@ export const KitchenModule: React.FC<KitchenModuleProps> = ({ showJournalAndExpe
 
   useEffect(() => {
     detectLocation();
-    
-    const savedState = localStorage.getItem(`hris_kitchen_state_${currentUser?.id}`);
-    if (savedState) {
-      const parsed = JSON.parse(savedState);
-      if (parsed.date === new Date().toDateString()) {
-        setIsPresent(parsed.isPresent);
-        setMenuToday(parsed.menuToday);
-        setMenuTomorrow(parsed.menuTomorrow);
-        setIsSaved(parsed.isSaved);
-        if (parsed.isPresent || parsed.hasClockedInToday) {
-            setHasClockedInToday(true);
-        }
-      }
-    }
   }, [currentUser?.id]);
 
   const hasGps = userLat !== null && userLng !== null;
@@ -92,30 +78,16 @@ export const KitchenModule: React.FC<KitchenModuleProps> = ({ showJournalAndExpe
     setIsPresent(true);
     setHasClockedInToday(true);
     toast.success('Bismillah, Absen Masuk Berhasil (Staff Dapur)');
-    saveToStorage(true, menuToday, menuTomorrow, isSaved);
   };
 
   const handleAbsenPulang = () => {
     setIsPresent(false);
     toast.info('Alhamdulillah, Absen Pulang Berhasil Tercatat');
-    saveToStorage(false, menuToday, menuTomorrow, isSaved);
   };
 
   const handleSaveMenu = () => {
     setIsSaved(true);
-    toast.success('Laporan Menu harian berhasil disimpan');
-    saveToStorage(isPresent, menuToday, menuTomorrow, true);
-  };
-
-  const saveToStorage = (present: boolean, today: string, tomorrow: string, saved: boolean) => {
-    localStorage.setItem(`hris_kitchen_state_${currentUser?.id}`, JSON.stringify({
-      date: new Date().toDateString(),
-      isPresent: present,
-      menuToday: today,
-      menuTomorrow: tomorrow,
-      isSaved: saved,
-      hasClockedInToday: true
-    }));
+    toast.success('Laporan Menu harian berhasil disimpan sementara untuk sesi ini.');
   };
 
   return (
