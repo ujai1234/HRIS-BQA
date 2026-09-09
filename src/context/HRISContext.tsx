@@ -32,6 +32,7 @@ import {
   INITIAL_STAFF_JOURNALS
 } from '../data/initialData';
 import { calculateLatePenalty, validateScheduleTimeWindow } from '../utils/formatters';
+import { authClient } from '../lib/auth-client';
 
 interface HRISContextType {
   teachers: Teacher[];
@@ -424,13 +425,18 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     toast.success(`Selamat datang, ${targetUser.name}!`);
   };
 
-  const logout = () => {
+  const logout = async () => {
     logActivity(
       'LOGOUT',
       'AUTH',
-      `Pengguna ${currentUser.name} (${currentRole}) telah keluar dari sistem`,
+      `Pengguna ${currentUser?.name} (${currentRole}) telah keluar dari sistem`,
       'INFO'
     );
+    try {
+      await authClient.signOut({ fetchOptions: {} });
+    } catch (e) {
+      console.error('Failed to sign out from better-auth', e);
+    }
     setIsAuthenticated(false);
     setCurrentUserId('');
     setCurrentRoleState('GURU');

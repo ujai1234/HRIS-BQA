@@ -45,7 +45,8 @@ export type PositionCategory =
   | 'Guru Pesantren'
   | 'Guru Tahfidz'
   | 'Staff Dapur'
-  | 'Staff Inventaris';
+  | 'Staff Inventaris'
+  | 'Super Administrator';
 
 export type UnitType = 'SMP' | 'MA' | 'PESANTREN' | 'UMUM';
 

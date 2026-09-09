@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  User, 
-  Lock, 
-  LogIn, 
+import {
+  User,
+  Lock,
+  LogIn,
   Loader2,
   Sun,
   Moon,
@@ -24,7 +24,7 @@ import { BrandLogo } from './BrandLogo';
 export const LoginPage: React.FC = () => {
   const { login, isDarkMode, toggleDarkMode, teachers } = useHRIS();
   const { data: session, isPending: sessionPending } = authClient.useSession();
-  
+
   const [authView, setAuthView] = useState<'LOGIN' | 'REGISTER' | 'FORGOT' | 'PREVIEW_404' | 'PREVIEW_500'>('LOGIN');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -47,20 +47,24 @@ export const LoginPage: React.FC = () => {
       } else {
         // Coba cari dari email jika teacherId belum ada (untuk Google Login)
         const email = session.user.email;
-        const targetByEmail = teachers.find((t: any) => 
+        const targetByEmail = teachers.find((t: any) =>
           t.id.toLowerCase() === email.split('@')[0].toLowerCase() || // misal NIP sama dengan prefix email
-          t.name.toLowerCase() === session.user.name.toLowerCase() // fallback pencocokan nama
+          t.name.toLowerCase() === session.user.name.toLowerCase() || // fallback pencocokan nama
+          t.username?.toLowerCase() === email.toLowerCase() // matching exact email username
         );
-        
+
         if (targetByEmail) {
           role = targetByEmail.role;
           finalTeacherId = targetByEmail.id;
         } else {
-          // Jika belum terdaftar di master data, bisa fallback ke ID random untuk sekadar bisa masuk
-          finalTeacherId = 'T-08'; // Default fallback (Ust. Ziyad) untuk simulasi
+          // Tolak login jika tidak terdaftar di master data
+          authClient.signOut({ fetchOptions: {} }).then(() => {
+            setError(`Akun Google dengan email ${email} belum terdaftar di Master Data HRIS.`);
+          });
+          return; // Hentikan eksekusi
         }
       }
-      
+
       login(role, finalTeacherId);
     }
   }, [session, teachers, login]);
@@ -69,14 +73,14 @@ export const LoginPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
+
     try {
       const email = username.includes('@') ? username : `${username}@bqa.local`;
       const { data, error: authError } = await authClient.signIn.email({
         email,
         password
       });
-      
+
       if (authError) {
         setError(authError.message || 'Identitas asatidz atau kata sandi salah');
       } else if (data?.user) {
@@ -143,7 +147,7 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#065f46] via-[#044e3a] to-[#0f1713] dark:from-[#092e22] dark:via-[#09221a] dark:to-[#09110d] flex flex-col items-center justify-center p-4 sm:p-6 font-sans antialiased transition-colors duration-200 relative overflow-hidden bqa-bg-pattern">
-      
+
       {/* Decorative Glow Elements */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-72 h-72 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
