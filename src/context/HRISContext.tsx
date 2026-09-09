@@ -437,22 +437,21 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       `Pengguna ${currentUser?.name} (${currentRole}) telah keluar dari sistem`,
       'INFO'
     );
+    
+    // 1. Await signout FIRST so the backend cookie is cleared
+    // before any React state changes trigger LoginPage to remount.
     try {
-      await authClient.signOut({ fetchOptions: {} });
+      await authClient.signOut();
     } catch (e) {
       console.error('Failed to sign out from better-auth', e);
     }
-    setIsAuthenticated(false);
-    setCurrentUserId('');
-    setCurrentRoleState('GURU');
-    setCurrentPath('/');
-    localStorage.removeItem(STORAGE_KEYS.CURRENT_USER_ID);
-    localStorage.removeItem(STORAGE_KEYS.CURRENT_ROLE);
-    localStorage.removeItem('hris_pbq_session_last_activity');
-    localStorage.setItem('hris_pbq_auth_v1', 'false');
     
-    // Force a full page reload to clear any stale session cache from better-auth
-    window.location.href = '/';
+    // 2. Clear all browser storages
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // 3. Force a full page reload to reset all React states cleanly
+    window.location.replace('/');
   };
 
   const toggleDarkMode = () => {
