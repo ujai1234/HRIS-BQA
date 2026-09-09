@@ -445,7 +445,9 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem(STORAGE_KEYS.CURRENT_ROLE);
     localStorage.removeItem('hris_pbq_session_last_activity');
     localStorage.setItem('hris_pbq_auth_v1', 'false');
-    toast.info('Anda telah keluar dari sistem');
+    
+    // Force a full page reload to clear any stale session cache from better-auth
+    window.location.href = '/';
   };
 
   const toggleDarkMode = () => {
