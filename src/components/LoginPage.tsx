@@ -23,12 +23,47 @@ import { BrandLogo } from './BrandLogo';
 
 export const LoginPage: React.FC = () => {
   const { login, isDarkMode, toggleDarkMode, teachers } = useHRIS();
+  const { data: session, isPending: sessionPending } = authClient.useSession();
   
   const [authView, setAuthView] = useState<'LOGIN' | 'REGISTER' | 'FORGOT' | 'PREVIEW_404' | 'PREVIEW_500'>('LOGIN');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Auto-login jika session Better-Auth terdeteksi (seperti setelah Google Login)
+  React.useEffect(() => {
+    if (session?.user) {
+      // @ts-ignore - check if user has a teacherId linked
+      const teacherId = session.user.teacherId as string | undefined;
+      let role: any = 'GURU'; // Default role jika belum di-link
+      let finalTeacherId = teacherId;
+
+      if (teacherId) {
+        const targetTeacher = teachers.find((t: any) => t.id === teacherId);
+        if (targetTeacher) {
+          role = targetTeacher.role;
+        }
+      } else {
+        // Coba cari dari email jika teacherId belum ada (untuk Google Login)
+        const email = session.user.email;
+        const targetByEmail = teachers.find((t: any) => 
+          t.id.toLowerCase() === email.split('@')[0].toLowerCase() || // misal NIP sama dengan prefix email
+          t.name.toLowerCase() === session.user.name.toLowerCase() // fallback pencocokan nama
+        );
+        
+        if (targetByEmail) {
+          role = targetByEmail.role;
+          finalTeacherId = targetByEmail.id;
+        } else {
+          // Jika belum terdaftar di master data, bisa fallback ke ID random untuk sekadar bisa masuk
+          finalTeacherId = 'T-08'; // Default fallback (Ust. Ziyad) untuk simulasi
+        }
+      }
+      
+      login(role, finalTeacherId);
+    }
+  }, [session, teachers, login]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
