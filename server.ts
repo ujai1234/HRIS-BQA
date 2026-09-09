@@ -830,6 +830,8 @@ async function startServer() {
           if (teacher.username) {
              const mockPassword = teacher.password && teacher.password.length >= 8 ? teacher.password : (teacher.password + '12345').substring(0, 8);
              try {
+                const appUrl = process.env.BETTER_AUTH_URL || 'http://localhost:3000';
+                const urlObj = new URL(appUrl);
                 await auth.api.signUpEmail({
                    body: {
                        email: teacher.username.includes('@') ? teacher.username : `${teacher.username}@bqa.local`,
@@ -837,7 +839,11 @@ async function startServer() {
                        name: teacher.name,
                        teacherId: teacher.id
                    },
-                   headers: new Headers()
+                   headers: new Headers({
+                       'host': urlObj.host,
+                       'origin': appUrl,
+                       'x-forwarded-host': urlObj.host
+                   })
                 });
              } catch (err) {
                 console.error(`Failed to create better-auth user for ${teacher.username}`, err);
@@ -3033,6 +3039,8 @@ async function startServer() {
           }
 
           // 2. Create the better-auth user
+          const appUrl = process.env.BETTER_AUTH_URL || 'http://localhost:3000';
+          const urlObj = new URL(appUrl);
           await auth.api.signUpEmail({
              body: {
                  email: adminEmail,
@@ -3040,7 +3048,11 @@ async function startServer() {
                  name: 'Super Admin Ujai',
                  teacherId: adminTeacherId
              },
-             headers: new Headers()
+             headers: new Headers({
+                 'host': urlObj.host,
+                 'origin': appUrl,
+                 'x-forwarded-host': urlObj.host
+             })
           });
           console.log(`Successfully created Super Admin auth account for ${adminEmail}`);
         }

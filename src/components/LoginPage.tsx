@@ -33,6 +33,7 @@ export const LoginPage: React.FC = () => {
 
   // Auto-login jika session Better-Auth terdeteksi (seperti setelah Google Login)
   React.useEffect(() => {
+    // @ts-ignore
     if (session?.user) {
       // @ts-ignore - check if user has a teacherId linked
       const teacherId = session.user.teacherId as string | undefined;
@@ -46,9 +47,11 @@ export const LoginPage: React.FC = () => {
         }
       } else {
         // Coba cari dari email jika teacherId belum ada (untuk Google Login)
+        // @ts-ignore
         const email = session.user.email;
         const targetByEmail = teachers.find((t: any) =>
           t.id.toLowerCase() === email.split('@')[0].toLowerCase() || // misal NIP sama dengan prefix email
+          // @ts-ignore
           t.name.toLowerCase() === session.user.name.toLowerCase() || // fallback pencocokan nama
           t.username?.toLowerCase() === email.toLowerCase() // matching exact email username
         );
@@ -314,6 +317,19 @@ export const LoginPage: React.FC = () => {
             </svg>
             Masuk dengan Google
           </button>
+        </div>
+
+        {/* Register CTA */}
+        <div className="mt-6 text-center">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Belum punya akun?{' '}
+            <button
+              onClick={() => setAuthView('REGISTER')}
+              className="text-[#d97706] dark:text-amber-400 font-bold hover:underline cursor-pointer"
+            >
+              Daftar Sekarang
+            </button>
+          </p>
         </div>
       </div>
 

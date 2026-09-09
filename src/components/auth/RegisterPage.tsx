@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, Mail, Lock, CheckCircle2, ArrowLeft, Loader2, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
+import { authClient } from '../../lib/auth-client';
 
 interface RegisterPageProps {
   onBackToLogin: () => void;
@@ -15,7 +16,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onBackToLogin, onReg
   const [unit, setUnit] = useState<'SMP' | 'MA' | 'PESANTREN'>('SMP');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== repeatPassword) {
       toast.error('Konfirmasi kata sandi tidak cocok!');
@@ -27,15 +28,30 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onBackToLogin, onReg
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast.success('Pendaftaran akun Asatidz berhasil diajukan untuk verifikasi!');
-      if (onRegistered) {
-        onRegistered(username);
+    try {
+      const { data, error } = await authClient.signUp.email({
+        email,
+        password,
+        name: username,
+        // @ts-ignore - custom field
+        teacherId: username // Usually NIP or T-ID is placed here
+      });
+
+      if (error) {
+        toast.error(error.message || 'Gagal mendaftarkan akun.');
       } else {
-        onBackToLogin();
+        toast.success('Pendaftaran akun Asatidz berhasil!');
+        if (onRegistered) {
+          onRegistered(username);
+        } else {
+          onBackToLogin();
+        }
       }
-    }, 800);
+    } catch (err) {
+      toast.error('Terjadi kesalahan jaringan saat mendaftar.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
