@@ -2998,6 +2998,56 @@ async function startServer() {
       }
       console.log('Database successfully re-seeded with all required demo accounts!');
     } else {
+      // Create admin user 'ujai757@gmail.com' dynamically if they don't exist
+      try {
+        const adminEmail = 'ujai757@gmail.com';
+        const existingAdminAuth = await db.query.user.findFirst({
+          where: eq(schema.user.email, adminEmail)
+        });
+        
+        if (!existingAdminAuth) {
+          const adminTeacherId = 'T-ADMIN-SUPER';
+          // 1. Ensure the teacher record exists
+          const existingTeacher = await db.query.teachers.findFirst({
+            where: eq(schema.teachers.id, adminTeacherId)
+          });
+          
+          if (!existingTeacher) {
+            await db.insert(schema.teachers).values({
+              id: adminTeacherId,
+              nip: 'ADMIN-SUPER-01',
+              name: 'Super Admin Ujai',
+              position: 'Super Administrator',
+              unit: 'UMUM',
+              baseSalary: 1000000,
+              hourlyRate: 50000,
+              dailyTransport: 20000,
+              role: 'ADMIN',
+              phone: '08123456789',
+              avatarColor: 'bg-emerald-800',
+              isActive: true,
+              username: adminEmail,
+              password: 'PasswordKuat!2026',
+            });
+            console.log('Inserted Super Admin teacher profile');
+          }
+
+          // 2. Create the better-auth user
+          await auth.api.signUpEmail({
+             body: {
+                 email: adminEmail,
+                 password: 'PasswordKuat!2026',
+                 name: 'Super Admin Ujai',
+                 teacherId: adminTeacherId
+             },
+             headers: new Headers()
+          });
+          console.log(`Successfully created Super Admin auth account for ${adminEmail}`);
+        }
+      } catch (err) {
+        console.error('Failed to create Super Admin user automatically:', err);
+      }
+
       // Ensure staff tasks & expenses are populated if empty
       if (existingStaffTasks.length === 0) {
         for (const j of INITIAL_STAFF_JOURNALS) {
