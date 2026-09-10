@@ -24,15 +24,18 @@ const MainContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex items-center justify-center font-sans">
-        <div className="flex flex-col items-center gap-5">
+      <div className="min-h-screen bg-gradient-to-br from-[#065f46] via-[#044e3a] to-[#0f1713] flex items-center justify-center font-sans antialiased bqa-bg-pattern">
+        <div className="flex flex-col items-center gap-5 relative z-10 animate-fade-up">
           <div className="relative">
-            <div className="w-12 h-12 border-2 border-slate-200 dark:border-slate-800 rounded-full"></div>
-            <div className="w-12 h-12 border-t-2 border-indigo-600 dark:border-indigo-400 rounded-full animate-spin absolute top-0 left-0"></div>
+            <div className="w-14 h-14 border-2 border-emerald-800/50 rounded-full"></div>
+            <div className="w-14 h-14 border-t-2 border-amber-400 rounded-full animate-spin absolute top-0 left-0"></div>
           </div>
-          <div className="text-center space-y-1">
-            <p className="text-slate-900 dark:text-slate-100 font-bold text-sm tracking-tight">Baitul Qur'an Al-Ikhwan</p>
-            <p className="text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest font-bold">HRIS & Kafa'ah System</p>
+          <div className="text-center space-y-1.5">
+            <p className="font-arabic text-amber-300 text-sm tracking-widest drop-shadow-xs">
+              بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+            </p>
+            <p className="text-emerald-100 font-display font-bold text-sm tracking-tight">Baitul Qur'an Al-Ikhwan</p>
+            <p className="text-amber-300/80 text-[10px] uppercase tracking-widest font-bold">HRIS & Kafa'ah Asatidz</p>
           </div>
         </div>
       </div>
@@ -149,7 +152,7 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f6f4] dark:bg-[#09130f] text-slate-900 dark:text-slate-100 flex font-sans antialiased transition-colors duration-200">
+    <div className="min-h-screen bg-[#faf9f6] dark:bg-[#0f1713] text-[#1e293b] dark:text-[#f8fafc] flex font-sans antialiased transition-colors duration-200">
       {/* Sidebar & Topbar Shell */}
       <Header 
         sidebarOpen={sidebarOpen}
@@ -170,27 +173,27 @@ const MainContent: React.FC = () => {
         <main id="main-content" className="flex-1 p-4 sm:p-6 lg:p-6 max-w-7xl w-full mx-auto space-y-5">
           <motion.div
             key={currentPath}
-            initial={{ opacity: 0, y: 4 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
             {renderDashboardByRole()}
           </motion.div>
         </main>
 
         {/* Institutional Footer */}
-        <footer className="bg-white dark:bg-[#0d1a15] border-t border-slate-200/80 dark:border-emerald-950/60 py-3.5 text-xs text-slate-500 dark:text-slate-400 mt-auto print:hidden">
+        <footer className="bg-white dark:bg-[#0d1a15] border-t border-[#e2e8f0] dark:border-emerald-950/60 py-3.5 mt-auto print:hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700 dark:text-emerald-100">Baitul Qur'an Al-Ikhwan</span>
-              <span className="text-slate-300 dark:text-emerald-800">•</span>
-              <span className="text-slate-500 dark:text-emerald-400/80 hidden md:inline">HRIS & Kafa'ah Asatidz</span>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="font-display font-semibold text-[#1e293b] dark:text-emerald-100">Baitul Qur'an Al-Ikhwan</span>
+              <span className="text-[#e2e8f0] dark:text-emerald-800">•</span>
+              <span className="text-[#64748b] dark:text-emerald-400/80 hidden md:inline">HRIS & Kafa'ah Asatidz</span>
             </div>
 
-            <div className="flex items-center gap-2 text-slate-400 dark:text-emerald-400/60 text-[11px]">
+            <div className="flex items-center gap-2 text-[#94a3b8] dark:text-emerald-400/60 text-[11px]">
               <span>Tahun Ajaran 2026/2027</span>
               <span>•</span>
-              <span className="text-emerald-700 dark:text-emerald-400 font-semibold">Sistem Aktif</span>
+              <span className="text-[#059669] dark:text-emerald-400 font-semibold">Sistem Aktif</span>
             </div>
           </div>
         </footer>

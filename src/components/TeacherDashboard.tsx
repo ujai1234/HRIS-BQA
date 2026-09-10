@@ -182,7 +182,7 @@ export const TeacherDashboard: React.FC = () => {
 
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold text-slate-900 dark:text-emerald-50">
+                <h1 className="text-lg font-display font-bold text-slate-900 dark:text-emerald-50">
                   {currentUser?.name || 'Asatidz'}
                 </h1>
                 <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40">
@@ -254,7 +254,7 @@ export const TeacherDashboard: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-emerald-900/30">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-slate-900 dark:text-emerald-50">
+              <h2 className="text-sm font-display font-bold text-slate-900 dark:text-emerald-50">
                 Jadwal & Presensi KBM
               </h2>
               <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#1a2d24] text-slate-600 dark:text-emerald-300">
@@ -537,7 +537,7 @@ export const TeacherDashboard: React.FC = () => {
       {/* Teaching History & Journals Table */}
       <div className="bqa-card overflow-hidden transition-colors">
         <div className="p-4 border-b border-slate-100 dark:border-emerald-900/30">
-          <h2 className="text-sm font-bold text-slate-900 dark:text-emerald-50">
+          <h2 className="text-sm font-display font-bold text-slate-900 dark:text-emerald-50">
             Riwayat Presensi & Jurnal Terkini
           </h2>
           <p className="text-xs text-slate-500 dark:text-emerald-400/60 mt-0.5">

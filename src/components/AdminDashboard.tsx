@@ -551,7 +551,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
       {/* 1. Premium & Minimalist Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bqa-card p-4 sm:p-5">
         <div>
-          <h1 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-emerald-50 tracking-tight">
+          <h1 className="text-base sm:text-lg font-display font-semibold text-slate-900 dark:text-emerald-50 tracking-tight">
             Dashboard Administrasi
           </h1>
           <p className="text-xs text-slate-500 dark:text-emerald-400/70 mt-0.5">

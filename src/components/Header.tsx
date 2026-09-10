@@ -319,7 +319,7 @@ export const Header: React.FC<HeaderProps> = ({
               
               {!sidebarFolded && (
                 <div className="leading-tight overflow-hidden">
-                  <h1 className="font-bold text-sm text-white tracking-tight truncate">Baitul Qur'an</h1>
+                  <h1 className="font-display font-bold text-sm text-white tracking-tight truncate">Baitul Qur'an</h1>
                   <p className="text-[10px] text-amber-300 font-bold tracking-wider uppercase truncate">Al-Ikhwan • HRIS</p>
                 </div>
               )}
@@ -473,7 +473,7 @@ export const Header: React.FC<HeaderProps> = ({
 
               <div className="leading-tight">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-xs text-slate-900 dark:text-emerald-50">Baitul Qur'an Al-Ikhwan</span>
+                  <span className="font-display font-bold text-xs text-slate-900 dark:text-emerald-50">Baitul Qur'an Al-Ikhwan</span>
                   <span className="hidden md:inline-flex items-center px-1.5 py-0.2 text-[9px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 rounded border border-emerald-200/60 dark:border-emerald-800/40">
                     HRIS Asatidz
                   </span>

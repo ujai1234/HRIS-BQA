@@ -1,48 +1,147 @@
+/* ============================================================
+   BQA HRIS — Design System (Selaras dengan Aplikasi Tahfidz BQA)
+   Font: Inter (body) · Sora (display/heading) · Amiri (arabic)
+   ============================================================ */
+
+/* Google Fonts — identik dengan Aplikasi Tahfidz */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap');
+
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Plus Jakarta Sans', 'Poppins', system-ui, -apple-system, sans-serif;
-  --font-serif: 'Amiri', 'Newsreader', Georgia, serif;
-  --font-arabic: 'Amiri', 'Noto Naskh Arabic', serif;
+  /* === FONT FAMILIES === */
+  --font-sans:    'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Sora', 'Inter', ui-sans-serif, sans-serif;
+  --font-serif:   'Amiri', 'Newsreader', Georgia, serif;
+  --font-arabic:  'Amiri', 'Noto Naskh Arabic', serif;
 
-  /* BQA Design System Color Tokens */
-  --color-bqa-emerald: #065f46;
+  /* === COLOR TOKENS (identik dengan globals.css Tahfidz) === */
+  --color-canvas:       #faf9f6;
+  --color-surface:      #ffffff;
+  --color-line:         #e2e8f0;
+  --color-ink:          #1e293b;
+  --color-gold:         #d97706;
+  --color-gold-soft:    #fef3c7;
+  --color-gold-ink:     #92400e;
+  --color-primary-dark: #044e3a;
+  --color-primary-deep: #022c22;
+  --color-primary-soft: #e3f3ec;
+  --color-success:      #059669;
+  --color-success-soft: #d1fae5;
+  --color-warning:      #d97706;
+  --color-warning-soft: #fef3c7;
+  --color-danger:       #dc2626;
+  --color-danger-soft:  #fee2e2;
+  --color-info:         #0284c7;
+  --color-info-soft:    #e0f2fe;
+  --color-purple:       #7c3aed;
+  --color-purple-soft:  #ede9fe;
+
+  /* BQA Aliases (backward compat) */
+  --color-bqa-emerald:      #065f46;
   --color-bqa-emerald-dark: #044e3a;
-  --color-bqa-emerald-light: #047857;
+  --color-bqa-emerald-light:#047857;
   --color-bqa-emerald-soft: #e3f3ec;
-  --color-bqa-gold: #d97706;
-  --color-bqa-gold-dark: #b45309;
-  --color-bqa-gold-light: #fbbf24;
-  --color-bqa-gold-soft: #fef3c7;
-  --color-bqa-bg: #faf9f6;
-  --color-bqa-bg-dark: #0f1713;
-  --color-bqa-surface: #ffffff;
+  --color-bqa-gold:         #d97706;
+  --color-bqa-gold-dark:    #b45309;
+  --color-bqa-gold-light:   #fbbf24;
+  --color-bqa-gold-soft:    #fef3c7;
+  --color-bqa-bg:           #faf9f6;
+  --color-bqa-bg-dark:      #0f1713;
+  --color-bqa-surface:      #ffffff;
   --color-bqa-surface-dark: #16201b;
 
-  --color-spruce: #065f46;
-  --color-ochre: #d97706;
-  --color-chalk: #faf9f6;
-  --color-pesantren-lime: #fbbf24;
+  --color-spruce:            #065f46;
+  --color-ochre:             #d97706;
+  --color-chalk:             #faf9f6;
   --color-pesantren-emerald: #065f46;
-  --color-pesantren-dark: #0f1713;
+  --color-pesantren-dark:    #0f1713;
 
-  /* CoreUI Admin Palette Tokens */
-  --color-cui-primary: #065f46;
+  /* CoreUI Admin Palette (backward compat) */
+  --color-cui-primary:   #065f46;
   --color-cui-secondary: #64748b;
-  --color-cui-success: #059669;
-  --color-cui-info: #0284c7;
-  --color-cui-warning: #d97706;
-  --color-cui-danger: #dc2626;
-  --color-cui-dark: #0f1713;
-  --color-cui-sidebar: #065f46;
-  --color-cui-bg: #faf9f6;
-  --color-cui-bg-dark: #0f1713;
+  --color-cui-success:   #059669;
+  --color-cui-info:      #0284c7;
+  --color-cui-warning:   #d97706;
+  --color-cui-danger:    #dc2626;
+  --color-cui-dark:      #0f1713;
+  --color-cui-sidebar:   #065f46;
+  --color-cui-bg:        #faf9f6;
+  --color-cui-bg-dark:   #0f1713;
+
+  /* === SHADOWS (identik dengan Tahfidz) === */
+  --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 10px 25px -5px rgba(6, 95, 70, 0.05);
+  --shadow-pop:  0 20px 25px -5px rgba(6, 95, 70, 0.1);
+
+  /* === ANIMATIONS (identik dengan Tahfidz globals.css) === */
+  --animate-fade-up:   fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-ping-ring: ping-ring 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  --animate-btn-pulse: btn-pulse 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-grow-bar:  grow-bar 0.8s cubic-bezier(0.25, 1, 0.4, 1) both;
+  --animate-spin-in:   spin-in 0.9s ease both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+
+  @keyframes ping-ring {
+    70% {
+      box-shadow: 0 0 0 7px rgba(6, 95, 70, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(6, 95, 70, 0);
+    }
+  }
+
+  @keyframes btn-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.35);
+    }
+    70% {
+      box-shadow: 0 0 0 12px rgba(217, 119, 6, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(217, 119, 6, 0);
+    }
+  }
+
+  @keyframes grow-bar {
+    from {
+      transform: scaleY(0);
+    }
+  }
+
+  @keyframes spin-in {
+    from {
+      rotate: -80deg;
+      opacity: 0;
+    }
+  }
+
+  @keyframes bounceSubtle {
+    0%, 100% {
+      transform: translateY(-2%);
+      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+    50% {
+      transform: translateY(0);
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+  }
 }
 
+/* === DARK MODE VARIANT === */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* === BASE STYLES === */
 html, body, button, input, select, textarea {
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -55,8 +154,51 @@ body {
   color: #f8fafc;
 }
 
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+
 @layer utilities {
-  /* BQA Geometric Islamic Background Pattern */
+
+  /* === FONT UTILITIES === */
+  .font-display {
+    font-family: 'Sora', 'Inter', ui-sans-serif, sans-serif;
+  }
+
+  .font-arabic {
+    font-family: 'Amiri', 'Noto Naskh Arabic', serif;
+  }
+
+  .font-sans {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* === ANIMATIONS === */
+  .animate-fade-up {
+    animation: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .animate-ping-ring {
+    animation: ping-ring 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  .animate-btn-pulse {
+    animation: btn-pulse 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-grow-bar {
+    animation: grow-bar 0.8s cubic-bezier(0.25, 1, 0.4, 1) both;
+  }
+
+  .animate-spin-in {
+    animation: spin-in 0.9s ease both;
+  }
+
+  .animate-bounce-subtle {
+    animation: bounceSubtle 1.5s infinite;
+  }
+
+  /* === BQA ISLAMIC BACKGROUND PATTERN === */
   .bqa-bg-pattern {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.05'%3E%3Cpath d='M32 4l8 20 20 8-20 8-8 20-8-20-20-8 20-8z'/%3E%3Ccircle cx='32' cy='32' r='6'/%3E%3C/g%3E%3C/svg%3E");
   }
@@ -65,7 +207,8 @@ body {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23d97706' stroke-opacity='0.06'%3E%3Cpath d='M32 4l8 20 20 8-20 8-8 20-8-20-20-8 20-8z'/%3E%3Ccircle cx='32' cy='32' r='6'/%3E%3C/g%3E%3C/svg%3E");
   }
 
-  /* BQA Signature Islamic Card (Gold Border Left) */
+  /* === BQA SIGNATURE CARD (Gold Border Left) ===
+     Identik dengan Tahfidz: rounded-xl, gold left border, emerald shadow */
   .bqa-card {
     background-color: #ffffff;
     border-radius: 1rem;
@@ -107,19 +250,29 @@ body {
     border-left-color: #d97706;
   }
 
-  /* BQA Button Styles */
+  /* === BQA BUTTON STYLES ===
+     Identik dengan Tahfidz: rounded-xl, shadow, scale active */
   .bqa-btn-gold {
-    background-color: #d97706;
+    background: linear-gradient(135deg, #d97706, #b45309);
     color: #ffffff;
-    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
     border-radius: 0.75rem;
-    box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);
-    transition: all 0.15s ease;
+    padding: 0.5rem 1rem;
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25);
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
   }
 
   .bqa-btn-gold:hover {
-    background-color: #b45309;
-    box-shadow: 0 4px 8px rgba(217, 119, 6, 0.3);
+    background: linear-gradient(135deg, #b45309, #92400e);
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35);
+    transform: translateY(-1px);
   }
 
   .bqa-btn-gold:active {
@@ -127,29 +280,33 @@ body {
   }
 
   .bqa-btn-emerald {
-    background-color: #065f46;
+    background: linear-gradient(135deg, #065f46, #047857);
     color: #ffffff;
-    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
     border-radius: 0.75rem;
-    box-shadow: 0 2px 4px rgba(6, 95, 70, 0.2);
-    transition: all 0.15s ease;
+    padding: 0.5rem 1rem;
+    box-shadow: 0 2px 8px rgba(6, 95, 70, 0.25);
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
   }
 
   .bqa-btn-emerald:hover {
-    background-color: #047857;
-    box-shadow: 0 4px 8px rgba(6, 95, 70, 0.3);
+    background: linear-gradient(135deg, #044e3a, #065f46);
+    box-shadow: 0 4px 12px rgba(6, 95, 70, 0.35);
+    transform: translateY(-1px);
   }
 
   .bqa-btn-emerald:active {
     transform: scale(0.96);
   }
 
-  /* Font Arabic */
-  .font-arabic {
-    font-family: 'Amiri', 'Noto Naskh Arabic', serif;
-  }
-
-  /* Scrollbar custom styling */
+  /* === CUSTOM SCROLLBAR (identik Tahfidz) === */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -176,22 +333,22 @@ body {
     background: rgba(217, 119, 6, 0.6);
   }
 
-  @keyframes bounceSubtle {
-    0%, 100% {
-      transform: translateY(-2%);
-      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-    }
-    50% {
-      transform: translateY(0);
-      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-    }
+  /* === TEXT SELECTION (identik Tahfidz) === */
+  ::selection {
+    background-color: #065f46;
+    color: #ffffff;
   }
 
-  .animate-bounce-subtle {
-    animation: bounceSubtle 1.5s infinite;
+  /* === SHADOW UTILITIES === */
+  .shadow-soft {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+
+  .shadow-card {
+    box-shadow: 0 10px 25px -5px rgba(6, 95, 70, 0.05);
+  }
+
+  .shadow-pop {
+    box-shadow: 0 20px 25px -5px rgba(6, 95, 70, 0.1);
   }
 }
-
-
-
-

@@ -391,7 +391,7 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
                 Pembaruan: {lastUpdated}
               </div>
             </div>
-            <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-emerald-50 tracking-tight mt-1">
+            <h1 className="text-lg sm:text-xl font-display font-bold text-slate-900 dark:text-emerald-50 tracking-tight mt-1">
               Monitoring KBM & Tenaga Pendidik
             </h1>
           </div>
@@ -717,7 +717,7 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
           <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 p-5 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-sm font-bold text-slate-900 dark:text-emerald-50">
+                <h2 className="text-sm font-display font-bold text-slate-900 dark:text-emerald-50">
                   Monitoring Penugasan Guru Badal Hari Ini
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
