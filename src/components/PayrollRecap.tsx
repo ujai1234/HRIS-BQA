@@ -43,6 +43,7 @@ export const PayrollRecap: React.FC = () => {
       'Gaji Pokok',
       'Jam Mengajar (JP)',
       'Honor Mengajar',
+      'Honor Tahfidz',
       'Hari Hadir',
       'Uang Transport',
       'Potongan Terlambat',
@@ -62,6 +63,7 @@ export const PayrollRecap: React.FC = () => {
       item.baseSalary,
       item.totalTaughtHours,
       item.teachingHonorarium,
+      item.tahfidzHonorarium || 0,
       item.totalPresentDays,
       item.totalTransport,
       item.latePenaltyTotal,
@@ -81,6 +83,7 @@ export const PayrollRecap: React.FC = () => {
       payrollSummary.items.reduce((s, i) => s + i.baseSalary, 0),
       payrollSummary.totalTeachingHours,
       payrollSummary.items.reduce((s, i) => s + i.teachingHonorarium, 0),
+      payrollSummary.items.reduce((s, i) => s + (i.tahfidzHonorarium || 0), 0),
       payrollSummary.items.reduce((s, i) => s + i.totalPresentDays, 0),
       payrollSummary.items.reduce((s, i) => s + i.totalTransport, 0),
       payrollSummary.items.reduce((s, i) => s + i.latePenaltyTotal, 0),
@@ -201,6 +204,7 @@ export const PayrollRecap: React.FC = () => {
                 <th className="py-2.5 px-3 text-right">Gaji Pokok</th>
                 <th className="py-2.5 px-3 text-center">JP</th>
                 <th className="py-2.5 px-3 text-right">Honor JP</th>
+                <th className="py-2.5 px-3 text-right">Honor Tahfidz</th>
                 <th className="py-2.5 px-3 text-center">Hadir</th>
                 <th className="py-2.5 px-3 text-right">Transport</th>
                 <th className="py-2.5 px-3 text-right">Potongan</th>
@@ -230,6 +234,9 @@ export const PayrollRecap: React.FC = () => {
                   </td>
                   <td className="py-2.5 px-3 text-right font-mono text-emerald-800 dark:text-emerald-400 font-medium">
                     {formatRupiah(item.teachingHonorarium)}
+                  </td>
+                  <td className="py-2.5 px-3 text-right font-mono text-emerald-800 dark:text-emerald-400 font-medium">
+                    {formatRupiah(item.tahfidzHonorarium || 0)}
                   </td>
                   <td className="py-2.5 px-3 text-center font-mono text-slate-900 dark:text-emerald-50">
                     {item.totalPresentDays}

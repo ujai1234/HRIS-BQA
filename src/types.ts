@@ -159,6 +159,7 @@ export interface TeacherPayrollItem {
   totalBadalHours: number; // Hours taught as substitute
   hourlyRate: number;
   teachingHonorarium: number; // totalTaughtHours * hourlyRate
+  tahfidzHonorarium?: number; // total honor dari API Tahfidz
   totalPresentDays: number;
   dailyTransport: number;
   totalTransport: number; // totalPresentDays * dailyTransport

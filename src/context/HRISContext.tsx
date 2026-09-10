@@ -441,7 +441,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // 1. Await signout FIRST so the backend cookie is cleared
     // before any React state changes trigger LoginPage to remount.
     try {
-      await authClient.signOut();
+      await authClient.signOut({ fetchOptions: {} });
     } catch (e) {
       console.error('Failed to sign out from better-auth', e);
     }
@@ -1115,9 +1115,31 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Calculate full payroll table for all teachers or filtered by unit
   const calculateAllPayroll = (period = selectedPeriod, unitFilter?: UnitType | 'ALL'): MonthlyPayrollSummary => {
     if (payrollSummary && payrollSummary.period === period) {
-      if (!unitFilter || unitFilter === 'ALL') return payrollSummary;
+      // Merge tahfidz honorarium dynamically
+      const mergedItems = payrollSummary.items.map(item => {
+        let tahfidzHonor = 0;
+        if (tahfidzPayroll && tahfidzPayroll.period === period) {
+          const tItem = tahfidzPayroll.items.find(ti => ti.teacherId === item.teacher.id);
+          if (tItem) tahfidzHonor = tItem.totalHonor;
+        }
+        return {
+          ...item,
+          tahfidzHonorarium: tahfidzHonor,
+          grossSalary: item.grossSalary + tahfidzHonor,
+          netSalary: item.netSalary + tahfidzHonor,
+        };
+      });
+
+      if (!unitFilter || unitFilter === 'ALL') {
+        return {
+          ...payrollSummary,
+          items: mergedItems,
+          totalGross: mergedItems.reduce((sum, i) => sum + i.grossSalary, 0),
+          totalNet: mergedItems.reduce((sum, i) => sum + i.netSalary, 0),
+        };
+      }
       
-      const filteredItems = payrollSummary.items.filter((i) => i.teacher.unit === unitFilter);
+      const filteredItems = mergedItems.filter((i) => i.teacher.unit === unitFilter);
       return {
         ...payrollSummary,
         totalGross: filteredItems.reduce((sum, i) => sum + i.grossSalary, 0),
