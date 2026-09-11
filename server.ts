@@ -92,6 +92,126 @@ async function startServer() {
     }
   });
 
+  // ========================================================
+  // INTEGRASI PAYROLL TAHFIDZ
+  // Proxy ke server Aplikasi Tahfidz BQA
+  // URL dikonfigurasi via env TAHFIDZ_API_URL (default: http://127.0.0.1:4000)
+  // ========================================================
+  const TAHFIDZ_BASE_URL = (process.env.TAHFIDZ_API_URL || 'http://127.0.0.1:4000').replace(/\/$/, '');
+
+  /**
+   * GET /api/tahfidz/status
+   * Health-check: Cek apakah server Tahfidz aktif & bisa dijangkau.
+   */
+  app.get('/api/tahfidz/status', async (_req, res) => {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000);
+      const response = await fetch(`${TAHFIDZ_BASE_URL}/api/payroll/status`, { signal: controller.signal });
+      clearTimeout(timeout);
+      if (response.ok) {
+        const data = await response.json() as Record<string, unknown>;
+        res.json({ connected: true, ...data });
+      } else {
+        res.status(502).json({ connected: false, error: 'Server Tahfidz merespons dengan error' });
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      res.status(503).json({ connected: false, error: `Tidak dapat menghubungi server Tahfidz: ${message}` });
+    }
+  });
+
+  /**
+   * GET /api/tahfidz/payroll?bulan=8&tahun=2026
+   * Proxy yang mengambil rekap honor Ustadz Tahfidz, lalu mencocokkan
+   * teacherId berdasarkan username/nama ke data guru HRIS.
+   */
+  app.get('/api/tahfidz/payroll', async (req, res) => {
+    try {
+      const { bulan, tahun } = req.query;
+      if (!bulan || !tahun) {
+        return res.status(400).json({ error: 'Parameter bulan dan tahun diperlukan' });
+      }
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      const tahfidzRes = await fetch(
+        `${TAHFIDZ_BASE_URL}/api/payroll?bulan=${bulan}&tahun=${tahun}`,
+        { signal: controller.signal }
+      );
+      clearTimeout(timeout);
+
+      if (!tahfidzRes.ok) {
+        const text = await tahfidzRes.text();
+        return res.status(502).json({ error: `Server Tahfidz error: ${text}` });
+      }
+
+      interface TahfidzPayrollItem {
+        teacherName: string;
+        teacherUsername: string;
+        teacherId?: string;
+        halqah: string;
+        period: string;
+        totalSubuhHadir: number;
+        totalMaghribHadir: number;
+        totalSubuhIzin: number;
+        totalMaghribIzin: number;
+        totalSubuhSakit: number;
+        totalMaghribSakit: number;
+        totalJP: number;
+        ratePerJP: number;
+        totalHonor: number;
+        presentDates: string[];
+      }
+
+      interface TahfidzPayrollSummary {
+        period: string;
+        totalUstadz: number;
+        totalJP: number;
+        totalSubuhJP: number;
+        totalMaghribJP: number;
+        totalHonor: number;
+        generatedDate: string;
+        items: TahfidzPayrollItem[];
+        apiStatus: string;
+      }
+
+      const payrollData = await tahfidzRes.json() as TahfidzPayrollSummary;
+      const allTeachers = await db.query.teachers.findMany();
+
+      // Cocokkan username / nama ke teacherId HRIS
+      const mappedItems = payrollData.items.map((item) => {
+        let matchedTeacher = allTeachers.find(
+          (t) => String(t.username ?? '').toLowerCase() === item.teacherUsername.toLowerCase()
+        );
+        if (!matchedTeacher) {
+          const normItemName = item.teacherName.toLowerCase().replace(/\s+/g, ' ').trim();
+          matchedTeacher = allTeachers.find(
+            (t) => String(t.name).toLowerCase().replace(/\s+/g, ' ').trim() === normItemName
+          );
+        }
+        return { ...item, teacherId: matchedTeacher?.id ?? undefined };
+      });
+
+      res.json({ ...payrollData, items: mappedItems, apiStatus: 'connected' });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('[tahfidz/payroll] Proxy error:', message);
+      res.status(503).json({
+        error: `Gagal menghubungi server Tahfidz: ${message}`,
+        period: `${req.query.bulan}/${req.query.tahun}`,
+        totalUstadz: 0,
+        totalJP: 0,
+        totalSubuhJP: 0,
+        totalMaghribJP: 0,
+        totalHonor: 0,
+        generatedDate: new Date().toISOString(),
+        items: [],
+        apiStatus: 'disconnected',
+      });
+    }
+  });
+
   // Teachers
   app.get('/api/teachers', async (req, res) => {
     try {
