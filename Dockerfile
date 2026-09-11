@@ -1,6 +1,5 @@
 # Stage 1: Build
-# Note: better-sqlite3 v13+ requires Node.js >= 22
-FROM node:22 AS builder
+FROM node:22-bookworm-slim AS builder
 
 WORKDIR /app
 
@@ -9,7 +8,7 @@ RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt
 
 # Copy package files
 COPY package.json package-lock.json ./
-# Force install devDependencies even if NODE_ENV=production is set by deployment environment
+# Force install devDependencies for building frontend/backend
 RUN npm install --legacy-peer-deps --include=dev
 
 # Copy source code
@@ -18,8 +17,8 @@ COPY . .
 # Build frontend and backend server bundle
 RUN npm run build
 
-# Stage 2: Runtime - must match builder exactly so native binaries are compatible
-FROM node:22 AS runner
+# Stage 2: Runtime - must match builder OS for native binary compatibility
+FROM node:22-bookworm-slim AS runner
 
 WORKDIR /app
 
@@ -28,11 +27,18 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV DATABASE_URL=/app/data/sqlite.db
 
-# Copy built frontend/backend and node_modules from builder
-# Same base image (node:22) ensures better-sqlite3 native binary is ABI-compatible
+# Install prod dependencies and better-sqlite3 native compilation tools
+RUN apt-get update && apt-get install -y python3 make g++ curl && rm -rf /var/lib/apt/lists/*
+
+COPY package.json package-lock.json ./
+# Only install production dependencies!
+RUN npm ci --omit=dev --legacy-peer-deps
+
+# Remove the compilation tools to save hundreds of megabytes of space
+RUN apt-get purge -y python3 make g++ && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Copy built frontend/backend from builder
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src/db ./src/db
 COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 
@@ -44,7 +50,7 @@ EXPOSE 3000
 
 # Healthcheck: wait 60s before first check (server needs time to start + seed DB)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=5 \
-  CMD node -e "fetch('http://localhost:3000/api/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"
+  CMD curl -f http://localhost:3000/api/health || exit 1
 
 # Start HRIS application
 CMD ["npm", "run", "start"]
