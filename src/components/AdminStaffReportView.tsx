@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useHRIS } from '../context/HRISContext';
 import { formatRupiah } from '../utils/formatters';
-import { Receipt, CheckCircle, XCircle, Clock, Search, Filter } from 'lucide-react';
+import { Receipt, CheckCircle, XCircle, Clock, Search, Filter, Image as ImageIcon, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const AdminStaffReportView: React.FC = () => {
@@ -9,6 +9,7 @@ export const AdminStaffReportView: React.FC = () => {
   
   const [activeTab, setActiveTab] = useState<'BELANJA' | 'JURNAL'>('BELANJA');
   const [filterCategory, setFilterCategory] = useState<'ALL' | 'DAPUR' | 'SARPRAS'>('ALL');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const todayStr = new Date().toISOString().split('T')[0];
   const staffMembers = teachers.filter(t => t.role === 'STAFF');
@@ -85,6 +86,7 @@ export const AdminStaffReportView: React.FC = () => {
                   <th className="py-3 px-4 font-medium">Kategori</th>
                   <th className="py-3 px-4 font-medium text-right">Nominal</th>
                   <th className="py-3 px-4 font-medium text-center">Status</th>
+                  <th className="py-3 px-4 font-medium text-center">Bukti Nota</th>
                   <th className="py-3 px-4 font-medium text-center">Aksi</th>
                 </tr>
               </thead>
@@ -125,6 +127,18 @@ export const AdminStaffReportView: React.FC = () => {
                           {expense.status === 'PENDING' ? <Clock className="w-3 h-3" /> : expense.status === 'APPROVED' ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
                           {expense.status}
                         </span>
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        {expense.receiptUrl ? (
+                          <button
+                            onClick={() => setSelectedImage(expense.receiptUrl!)}
+                            className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1.5 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                          >
+                            <ImageIcon className="w-3.5 h-3.5" /> Lihat Bukti
+                          </button>
+                        ) : (
+                          <span className="text-xs text-slate-400 italic">- Tidak ada -</span>
+                        )}
                       </td>
                       <td className="py-3 px-4 text-center">
                         {expense.status === 'PENDING' && (
@@ -241,10 +255,40 @@ export const AdminStaffReportView: React.FC = () => {
                           {journal.taskTomorrow}
                         </p>
                       </div>
+                      {journal.photoUrl && (
+                        <div>
+                          <p className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-1">
+                            <ImageIcon className="w-3.5 h-3.5 text-blue-500" /> Lampiran Foto
+                          </p>
+                          <div 
+                            className="relative rounded-lg overflow-hidden border border-slate-200 dark:border-emerald-900/40 cursor-pointer hover:opacity-90 transition-opacity"
+                            onClick={() => setSelectedImage(journal.photoUrl!)}
+                          >
+                            <img src={journal.photoUrl} alt="Foto Jurnal" className="w-full h-32 object-cover" />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm" onClick={() => setSelectedImage(null)}>
+          <div className="relative max-w-4xl max-h-[90vh] w-full" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute -top-12 right-0 p-2 text-white hover:text-slate-200 transition-colors"
+            >
+              <X className="w-8 h-8" />
+            </button>
+            <div className="bg-white dark:bg-[#111a16] p-2 rounded-2xl overflow-hidden shadow-2xl">
+              <img src={selectedImage} alt="Bukti Lampiran" className="w-full h-auto max-h-[85vh] object-contain rounded-xl" />
+            </div>
           </div>
         </div>
       )}

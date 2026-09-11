@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useHRIS } from '../../context/HRISContext';
-import { Receipt, Plus, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Receipt, Plus, CheckCircle, Clock, XCircle, Image as ImageIcon, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatRupiah, parseCurrencyInput, formatCurrencyInput } from '../../utils/formatters';
+import { compressImage } from '../../utils/imageUtils';
 
 interface StaffExpenseFormProps {
   category: 'SARPRAS' | 'DAPUR';
@@ -13,16 +14,48 @@ export const StaffExpenseForm: React.FC<StaffExpenseFormProps> = ({ category }) 
   
   const [description, setDescription] = useState('');
   const [amountInput, setAmountInput] = useState('');
+  const [receiptUrl, setReceiptUrl] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Filter expenses for today and current user
   const todayExpenses = expenses.filter(
     e => e.reporterId === currentUser?.id && e.date === new Date().toISOString().split('T')[0] && e.category === category
   );
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Ukuran file maksimal 5MB');
+      return;
+    }
+
+    try {
+      const compressedBase64 = await compressImage(file, 800, 800, 0.7);
+      setReceiptUrl(compressedBase64);
+    } catch (error) {
+      console.error('Failed to compress image:', error);
+      toast.error('Gagal memproses gambar');
+    }
+  };
+
+  const removeImage = () => {
+    setReceiptUrl('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!description.trim() || !amountInput.trim() || parseCurrencyInput(amountInput) <= 0) {
       toast.error('Mohon isi deskripsi dan nominal yang valid');
+      return;
+    }
+
+    if (!receiptUrl) {
+      toast.error('Mohon lampirkan foto bukti nota belanja');
       return;
     }
 
@@ -34,11 +67,13 @@ export const StaffExpenseForm: React.FC<StaffExpenseFormProps> = ({ category }) 
         amount: parseCurrencyInput(amountInput),
         reporterId: currentUser.id,
         reporterName: currentUser.name,
+        receiptUrl,
       });
       
       toast.success('Pengajuan belanja berhasil dikirim');
       setDescription('');
       setAmountInput('');
+      removeImage();
     }
   };
 
@@ -82,6 +117,39 @@ export const StaffExpenseForm: React.FC<StaffExpenseFormProps> = ({ category }) 
               />
             </div>
             
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                Unggah Bukti Nota Belanja
+              </label>
+              {!receiptUrl ? (
+                <div 
+                  className="border-2 border-dashed border-slate-300 dark:border-emerald-900/50 rounded-xl p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-[#111a16] hover:bg-slate-100 dark:hover:bg-[#16201b] transition-colors cursor-pointer"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <ImageIcon className="w-6 h-6 text-slate-400 mb-2" />
+                  <span className="text-xs text-slate-500 dark:text-slate-400">Klik untuk memilih foto nota (Max: 5MB)</span>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    className="hidden" 
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                  />
+                </div>
+              ) : (
+                <div className="relative rounded-xl border border-slate-200 dark:border-emerald-900/50 overflow-hidden bg-slate-100 dark:bg-[#111a16] aspect-video flex items-center justify-center">
+                  <img src={receiptUrl} alt="Preview Nota" className="max-h-full max-w-full object-contain" />
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="absolute top-2 right-2 p-1.5 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors shadow-sm"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+            
             <button
               type="submit"
               className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-all shadow-sm flex items-center justify-center gap-2"
@@ -97,7 +165,7 @@ export const StaffExpenseForm: React.FC<StaffExpenseFormProps> = ({ category }) 
             Riwayat Pengajuan Hari Ini
           </h4>
           
-          <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
+          <div className="space-y-3 max-h-[22rem] overflow-y-auto pr-2">
             {todayExpenses.length === 0 ? (
               <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-4 italic">Belum ada pengajuan belanja hari ini</p>
             ) : (

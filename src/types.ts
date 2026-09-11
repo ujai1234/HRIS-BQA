@@ -310,6 +310,7 @@ export interface ExpenseRecord {
   reporterId: string;
   reporterName: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  receiptUrl?: string; // base64 or URL
   createdAt: string;
 }
 
@@ -322,6 +323,6 @@ export interface StaffJournalRecord {
   category: 'SARPRAS' | 'DAPUR';
   taskToday: string; // Pekerjaan hari ini / Menu saat ini
   taskTomorrow: string; // Pekerjaan selanjutnya / Menu selanjutnya
+  photoUrl?: string; // base64 or URL
   createdAt: string;
 }
-

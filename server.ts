@@ -44,7 +44,7 @@ async function startServer() {
     },
     credentials: true
   }));
-  app.use(express.json());
+  app.use(express.json({ limit: '10mb' }));
 
   // Health check for Cloud Run and monitoring
   app.get('/api/health', (req, res) => {

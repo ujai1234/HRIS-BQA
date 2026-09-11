@@ -122,6 +122,7 @@ export const staffTasks = sqliteTable('staff_tasks', {
   category: text('category').notNull(), // 'DAPUR' | 'SARPRAS'
   taskToday: text('task_today').notNull(),
   taskTomorrow: text('task_tomorrow').notNull(),
+  photoUrl: text('photo_url'), // base64 or URL
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
 
@@ -134,6 +135,7 @@ export const staffExpenses = sqliteTable('staff_expenses', {
   description: text('description').notNull(),
   amount: integer('amount').notNull(),
   status: text('status').notNull().default('PENDING'), // 'PENDING' | 'APPROVED' | 'REJECTED'
+  receiptUrl: text('receipt_url'), // base64 or URL
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
 
