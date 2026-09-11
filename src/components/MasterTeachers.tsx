@@ -30,6 +30,8 @@ export const MasterTeachers: React.FC = () => {
     phone: '',
     avatarColor: 'bg-emerald-700',
     isActive: true,
+    username: '',
+    password: '',
   });
 
   // Currency input strings for modal validation
@@ -71,6 +73,8 @@ export const MasterTeachers: React.FC = () => {
       phone: teacher.phone || '',
       avatarColor: teacher.avatarColor || 'bg-emerald-700',
       isActive: teacher.isActive,
+      username: teacher.username || '',
+      password: teacher.password || '',
     });
     setBaseSalaryInput(formatCurrencyInput(teacher.baseSalary));
     setHourlyRateInput(formatCurrencyInput(teacher.hourlyRate));
@@ -94,6 +98,8 @@ export const MasterTeachers: React.FC = () => {
       phone: '',
       avatarColor: 'bg-teal-700',
       isActive: true,
+      username: '',
+      password: '',
     });
     setBaseSalaryInput('800.000');
     setHourlyRateInput('40.000');
@@ -370,6 +376,29 @@ export const MasterTeachers: React.FC = () => {
                   className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 font-medium text-slate-900 dark:text-emerald-50"
                   required
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-slate-600 dark:text-emerald-400/70 font-medium block">Email / Username</label>
+                  <input
+                    type="email"
+                    value={formData.username || ''}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    placeholder="Email Gmail untuk Google Login"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 font-medium text-slate-900 dark:text-emerald-50"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-slate-600 dark:text-emerald-400/70 font-medium block">Password (Opsional)</label>
+                  <input
+                    type="text"
+                    value={formData.password || ''}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    placeholder="Biarkan kosong jika SSO"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-emerald-50"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
