@@ -713,19 +713,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
           <div className="h-56 w-full pt-1">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={weeklyAttendanceData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" strokeOpacity={0.6} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" strokeOpacity={1} />
                 <XAxis 
                   dataKey="periodLabel" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fill: '#78716c' }} 
+                  tick={{ fontSize: 10, fill: 'var(--chart-axis-text)' }} 
                   dy={6}
                 />
                 <YAxis 
                   yAxisId="left" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fill: '#78716c' }} 
+                  tick={{ fontSize: 10, fill: 'var(--chart-axis-text)' }} 
                 />
                 <YAxis 
                   yAxisId="right" 
@@ -733,7 +733,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
                   domain={[0, 100]} 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fill: '#78716c' }} 
+                  tick={{ fontSize: 10, fill: 'var(--chart-axis-text)' }} 
                   unit="%" 
                   dx={6}
                 />
@@ -784,19 +784,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
           <div className="h-56 w-full pt-1">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={monthlyPerformanceData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" strokeOpacity={0.6} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" strokeOpacity={1} />
                 <XAxis 
                   dataKey="bulan" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fill: '#78716c' }} 
+                  tick={{ fontSize: 10, fill: 'var(--chart-axis-text)' }} 
                   dy={6}
                 />
                 <YAxis 
                   yAxisId="left" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fill: '#78716c' }} 
+                  tick={{ fontSize: 10, fill: 'var(--chart-axis-text)' }} 
                 />
                 <YAxis 
                   yAxisId="right" 
@@ -804,7 +804,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
                   domain={[50, 100]} 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fill: '#78716c' }} 
+                  tick={{ fontSize: 10, fill: 'var(--chart-axis-text)' }} 
                   unit="%" 
                   dx={6}
                 />
@@ -961,18 +961,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
           <div className="h-44 w-full pt-1">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={unitStats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" strokeOpacity={0.6} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" strokeOpacity={1} />
                 <XAxis 
                   dataKey="unit" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fill: '#78716c' }} 
+                  tick={{ fontSize: 10, fill: 'var(--chart-axis-text)' }} 
                   dy={4}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 9, fill: '#78716c' }} 
+                  tick={{ fontSize: 9, fill: 'var(--chart-axis-text)' }} 
                   tickFormatter={(val) => `${(val / 1000000).toFixed(1)}jt`}
                 />
                 <Tooltip content={<CurrencyTooltip />} />

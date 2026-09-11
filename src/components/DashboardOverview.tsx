@@ -374,9 +374,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
                   <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" className="dark:opacity-10" />
-              <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} />
-              <YAxis domain={[60, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" strokeOpacity={1} />
+              <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: 'var(--chart-axis-text)' }} />
+              <YAxis domain={[60, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: 'var(--chart-axis-text)' }} />
               <Tooltip 
                 contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontSize: '10px', fontWeight: 'bold' }}
               />
@@ -402,17 +402,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
           <div className="h-72 w-full pt-4">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={unitStats} margin={{ top: 20, right: 0, left: -25, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#f1f5f9" className="dark:opacity-10" />
+                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="var(--chart-grid)" strokeOpacity={1} />
                 <XAxis 
                   dataKey="unit" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                  tick={{ fontSize: 10, fontWeight: 600, fill: 'var(--chart-axis-text)' }} 
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                  tick={{ fontSize: 10, fontWeight: 600, fill: 'var(--chart-axis-text)' }} 
                 />
                 <Tooltip content={<CountTooltip />} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 10, fontWeight: 600, paddingTop: 20, color: '#64748b' }} />
@@ -474,17 +474,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
             <div className="h-72 w-full pt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={unitStats} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#f1f5f9" className="dark:opacity-10" />
+                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="var(--chart-grid)" strokeOpacity={1} />
                   <XAxis 
                     dataKey="unit" 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                    tick={{ fontSize: 10, fontWeight: 600, fill: 'var(--chart-axis-text)' }} 
                   />
                   <YAxis 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                    tick={{ fontSize: 10, fontWeight: 600, fill: 'var(--chart-axis-text)' }} 
                   />
                   <Tooltip content={<CountTooltip />} />
                   <Legend iconType="circle" wrapperStyle={{ fontSize: 10, fontWeight: 600, paddingTop: 20 }} />
@@ -507,17 +507,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
             <div className="h-72 w-full pt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={unitStats} margin={{ top: 20, right: 0, left: 10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#f1f5f9" className="dark:opacity-10" />
+                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="var(--chart-grid)" strokeOpacity={1} />
                   <XAxis 
                     dataKey="unit" 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                    tick={{ fontSize: 10, fontWeight: 600, fill: 'var(--chart-axis-text)' }} 
                   />
                   <YAxis 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fontSize: 9, fontWeight: 600, fill: '#94a3b8' }} 
+                    tick={{ fontSize: 9, fontWeight: 600, fill: 'var(--chart-axis-text)' }} 
                     tickFormatter={(val) => `Rp${(val / 1000000).toFixed(1)}jt`}
                   />
                   <Tooltip content={<CurrencyTooltip />} />
@@ -548,12 +548,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
                 data={topTeachersData}
                 margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="4 4" horizontal={false} stroke="#f1f5f9" className="dark:opacity-10" />
+                <CartesianGrid strokeDasharray="4 4" horizontal={false} stroke="var(--chart-grid)" strokeOpacity={1} />
                 <XAxis 
                   type="number" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                  tick={{ fontSize: 10, fontWeight: 600, fill: 'var(--chart-axis-text)' }} 
                 />
                 <YAxis 
                   dataKey="name" 
@@ -586,17 +586,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
         <div className="h-56 w-full pt-4">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={punctualityData} margin={{ top: 20, right: 0, left: -25, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#f1f5f9" className="dark:opacity-10" />
+              <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="var(--chart-grid)" strokeOpacity={1} />
               <XAxis 
                 dataKey="bracket" 
                 axisLine={false} 
                 tickLine={false} 
-                tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                tick={{ fontSize: 10, fontWeight: 600, fill: 'var(--chart-axis-text)' }} 
               />
               <YAxis 
                 axisLine={false} 
                 tickLine={false} 
-                tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                tick={{ fontSize: 10, fontWeight: 600, fill: 'var(--chart-axis-text)' }} 
               />
               <Tooltip content={<CountTooltip />} />
               <Bar dataKey="count" name="Sesi" radius={[4, 4, 0, 0]} barSize={40}>

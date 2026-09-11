@@ -304,7 +304,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* BQA ISLAMIC THEMED SIDEBAR (CSidebar)                      */}
       {/* ========================================================= */}
       <aside 
-        className={`fixed top-0 bottom-0 left-0 z-50 bg-[#065f46] dark:bg-[#081e16] border-r border-emerald-800/40 dark:border-emerald-900/60 text-slate-100 flex flex-col justify-between transition-all duration-300 ease-in-out print:hidden shadow-2xl lg:shadow-none bqa-bg-pattern ${
+        className={`fixed top-0 bottom-0 left-0 z-50 bg-[#065f46] dark:bg-[#081e16] border-r border-emerald-800/40 dark:border-emerald-900/60 text-slate-100 flex flex-col justify-between transition-all duration-300 ease-in-out print:hidden shadow-2xl lg:shadow-none ${
           sidebarFolded ? 'lg:w-20' : 'lg:w-64'
         } ${
           sidebarOpen ? 'w-64 translate-x-0' : '-translate-x-full lg:translate-x-0'

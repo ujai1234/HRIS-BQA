@@ -147,11 +147,15 @@ html, body, button, input, select, textarea {
 body {
   background-color: #faf9f6;
   color: #1e293b;
+  --chart-grid: rgba(226, 232, 240, 0.6);
+  --chart-axis-text: #64748b;
 }
 
 .dark body {
   background-color: #0f1713;
   color: #f8fafc;
+  --chart-grid: rgba(6, 95, 70, 0.3);
+  --chart-axis-text: rgba(167, 243, 208, 0.7);
 }
 
 /* ============================================================

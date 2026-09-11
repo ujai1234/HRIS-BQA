@@ -152,7 +152,7 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#faf9f6] dark:bg-[#0f1713] text-[#1e293b] dark:text-[#f8fafc] flex font-sans antialiased transition-colors duration-200">
+    <div className="min-h-screen bg-gradient-to-br from-[#065f46] via-[#044e3a] to-[#0f1713] dark:from-[#092e22] dark:via-[#09221a] dark:to-[#09110d] bqa-bg-pattern text-slate-100 flex font-sans antialiased transition-colors duration-200">
       {/* Sidebar & Topbar Shell */}
       <Header 
         sidebarOpen={sidebarOpen}
