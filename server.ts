@@ -95,9 +95,9 @@ async function startServer() {
   // ========================================================
   // INTEGRASI PAYROLL TAHFIDZ
   // Proxy ke server Aplikasi Tahfidz BQA
-  // URL dikonfigurasi via env TAHFIDZ_API_URL (default: http://127.0.0.1:4000)
+  // URL dikonfigurasi via env TAHFIDZ_API_URL (default: https://tahfidz.baitulquranalikhwan.cloud)
   // ========================================================
-  const TAHFIDZ_BASE_URL = (process.env.TAHFIDZ_API_URL || 'http://127.0.0.1:4000').replace(/\/$/, '');
+  const TAHFIDZ_BASE_URL = (process.env.TAHFIDZ_API_URL || 'https://tahfidz.baitulquranalikhwan.cloud').replace(/\/$/, '');
 
   /**
    * GET /api/tahfidz/status
