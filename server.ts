@@ -1619,23 +1619,231 @@ async function startServer() {
         studentName: studentName
       });
     } catch (err) {
+if (INITIAL_STAFF_JOURNALS && INITIAL_STAFF_JOURNALS.length > 0) {
+          await db.insert(schema.staffTasks).values(INITIAL_STAFF_JOURNALS.map(j => ({
+            ...j,
+            createdAt: new Date(j.createdAt || Date.now())
+          })));
+        }
+        if (INITIAL_EXPENSES && INITIAL_EXPENSES.length > 0) {
+          await db.insert(schema.staffExpenses).values(INITIAL_EXPENSES.map(e => ({
+            ...e,
+            createdAt: new Date(e.createdAt || Date.now())
+          })));
+        }
+        res.json({ success: true, message: 'Database seeded with complete multi-role initial data' });
+      } else {
+        // Ensure learning needs, audit logs, staff tasks, and staff expenses are present
+        const existingLn = await db.query.learningNeedRequests.findMany();
+        if (existingLn.length === 0) {
+          await db.insert(schema.learningNeedRequests).values(INITIAL_LEARNING_NEEDS.map(r => ({
+            ...r,
+            createdAt: new Date(r.createdAt),
+            updatedAt: new Date(r.updatedAt)
+          })));
+        }
+        const existingLogs = await db.query.auditLogs.findMany();
+        if (existingLogs.length === 0) {
+          await db.insert(schema.auditLogs).values(INITIAL_AUDIT_LOGS);
+        }
+        const existingStaffTasks = await db.query.staffTasks.findMany();
+        if (existingStaffTasks.length === 0 && INITIAL_STAFF_JOURNALS && INITIAL_STAFF_JOURNALS.length > 0) {
+          await db.insert(schema.staffTasks).values(INITIAL_STAFF_JOURNALS.map(j => ({
+            ...j,
+            createdAt: new Date(j.createdAt || Date.now())
+          })));
+        }
+        const existingStaffExpenses = await db.query.staffExpenses.findMany();
+        if (existingStaffExpenses.length === 0 && INITIAL_EXPENSES && INITIAL_EXPENSES.length > 0) {
+          await db.insert(schema.staffExpenses).values(INITIAL_EXPENSES.map(e => ({
+            ...e,
+            createdAt: new Date(e.createdAt || Date.now())
+          })));
+        }
+        res.json({ success: true, message: 'Database updated with staff initial data' });
+      }
+    } catch (error) {
+      console.error('Seeding error:', error);
+      res.status(500).json({ error: 'Failed to seed data', details: error.message || String(error) });
+    }
+  });
+
+  app.post('/api/reset', async (req, res) => {
+    try {
+      await db.delete(schema.learningNeedRequests);
+      await db.delete(schema.auditLogs);
+      await db.delete(schema.staffTasks);
+      await db.delete(schema.staffExpenses);
+      await db.delete(schema.journals);
+      await db.delete(schema.attendances);
+      await db.delete(schema.badalAssignments);
+      await db.delete(schema.schedules);
+      await db.delete(schema.teachers);
+      
+      await db.insert(schema.teachers).values(INITIAL_TEACHERS);
+      await db.insert(schema.schedules).values(INITIAL_SCHEDULES);
+      await db.insert(schema.attendances).values(INITIAL_ATTENDANCES.map(a => {
+        const { journal, ...rest } = a;
+        return rest;
+      }));
+      for (const a of INITIAL_ATTENDANCES) {
+        if (a.journal) {
+          const { studentAttendance, ...jRest } = a.journal;
+          await db.insert(schema.journals).values({
+            ...jRest,
+            ...studentAttendance,
+            filledAt: new Date(jRest.filledAt)
+          });
+        }
+      }
+      await db.insert(schema.badalAssignments).values(INITIAL_BADAL_ASSIGNMENTS.map(ba => ({
+        ...ba,
+        createdAt: new Date(ba.createdAt)
+      })));
+      await db.insert(schema.learningNeedRequests).values(INITIAL_LEARNING_NEEDS.map(r => ({
+        ...r,
+        createdAt: new Date(r.createdAt),
+        updatedAt: new Date(r.updatedAt)
+      })));
+      await db.insert(schema.auditLogs).values(INITIAL_AUDIT_LOGS);
+      console.log('Seeding staff tasks count:', INITIAL_STAFF_JOURNALS ? INITIAL_STAFF_JOURNALS.length : 0);
+      console.log('Seeding staff expenses count:', INITIAL_EXPENSES ? INITIAL_EXPENSES.length : 0);
+      // Direct SQLite seeding for staff tasks & expenses
+      for (const j of INITIAL_STAFF_JOURNALS) {
+        sqliteDb.prepare(`
+          INSERT OR REPLACE INTO staff_tasks (id, staff_id, staff_name, date, category, task_today, task_tomorrow, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          j.id,
+          j.staffId,
+          j.staffName,
+          j.date,
+          j.category,
+          j.taskToday,
+          j.taskTomorrow,
+          new Date(j.createdAt || Date.now()).getTime()
+        );
+      }
+
+      for (const e of INITIAL_EXPENSES) {
+        sqliteDb.prepare(`
+          INSERT OR REPLACE INTO staff_expenses (id, reporter_id, reporter_name, date, category, description, amount, status, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          e.id,
+          e.reporterId,
+          e.reporterName,
+          e.date,
+          e.category,
+          e.description,
+          e.amount,
+          e.status || 'PENDING',
+          new Date(e.createdAt || Date.now()).getTime()
+        );
+      }
+      
+      res.json({ success: true, message: 'Database reset successfully' });
+    } catch (error) {
+      console.error('Reset error:', error);
+      res.status(500).json({ error: 'Failed to reset data' });
+    }
+  });
+
+  // ====== PORTAL SANTRI (SIS) APIS ======
+  app.get('/api/students', async (req, res) => {
+    try {
+      const allStudents = await db.query.students.findMany();
+      res.json(allStudents);
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to fetch students' });
+    }
+  });
+
+  app.get('/api/parents', async (req, res) => {
+    try {
+      const allParents = await db.query.parents.findMany();
+      res.json(allParents);
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to fetch parents' });
+    }
+  });
+
+  app.post('/api/parents/auth', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      const lowerEmail = email.toLowerCase();
+      // Simple case-insensitive auth logic
+      const authUser = await db.query.user.findFirst({
+        where: eq(schema.user.email, lowerEmail)
+      });
+      
+      if (!authUser) return res.status(401).json({ error: 'Email tidak terdaftar' });
+      
+      // Check demo password - in production use bcrypt/Better Auth properly
+      if (password !== 'password123' && password !== 'admin') {
+         return res.status(401).json({ error: 'Password salah' });
+      }
+
+      // Find parent record
+      const parent = await db.query.parents.findFirst({
+        where: eq(schema.parents.userId, authUser.id)
+      });
+      
+      if (!parent) return res.status(404).json({ error: 'Data wali tidak ditemukan' });
+
+      // Find linked students
+      const relations = await db.query.studentParents.findMany({
+        where: eq(schema.studentParents.parentId, parent.id)
+      });
+      
+      let studentId = null;
+      let studentName = null;
+      if (relations.length > 0) {
+        studentId = relations[0].studentId;
+        const student = await db.query.students.findFirst({
+          where: eq(schema.students.id, studentId)
+        });
+        if (student) studentName = student.name;
+      }
+
+      res.json({
+        id: parent.id,
+        name: authUser.name,
+        role: 'WALI_SANTRI',
+        studentId: studentId,
+        studentName: studentName
+      });
+    } catch (err) {
       console.error(err);
       res.status(500).json({ error: 'Login failed' });
     }
   });
 
-  app.get('/api/payments', async (req, res) => {
+  // [PROTECTED] GET /api/payments — hanya data santri milik wali yang login
+  app.get('/api/payments', requireParentAuth, async (req, res) => {
     try {
-      const allPayments = await db.query.payments.findMany();
-      res.json({ data: allPayments });
+      const parent = (req as any).authenticatedParent;
+      const relations = await db.query.studentParents.findMany({
+        where: eq(schema.studentParents.parentId, parent.id)
+      });
+      const studentIds = relations.map((r: any) => r.studentId);
+      if (studentIds.length === 0) return res.json({ data: [] });
+      const payments = await db.query.payments.findMany({
+        where: inArray(schema.payments.studentId, studentIds)
+      });
+      res.json({ data: payments });
     } catch (err) {
       res.status(500).json({ error: 'Failed to fetch payments' });
     }
   });
 
-  app.post('/api/students/:studentId/payments/:payId/upload', async (req, res) => {
+  // [PROTECTED] POST /api/students/:studentId/payments/:payId/upload
+  app.post('/api/students/:studentId/payments/:payId/upload', requireParentAuth, async (req, res) => {
     try {
-      const { payId } = req.params;
+      const { payId, studentId } = req.params;
+      const parent = (req as any).authenticatedParent;
+      const isOwner = await verifyStudentOwnership(parent.id, studentId);
+      if (!isOwner) return res.status(403).json({ error: 'Akses ditolak: bukan santri Anda.' });
       const { receiptUrl } = req.body;
       const updated = await db.update(schema.payments)
         .set({ status: 'MENUNGGU VERIFIKASI', receiptUrl })
@@ -1647,15 +1855,19 @@ async function startServer() {
     }
   });
 
-  app.get('/api/students/:studentId/attendances', async (req, res) => {
+  // [PROTECTED] GET /api/students/:studentId/attendances
+  app.get('/api/students/:studentId/attendances', requireParentAuth, async (req, res) => {
     try {
       const { studentId } = req.params;
+      const parent = (req as any).authenticatedParent;
+      const isOwner = await verifyStudentOwnership(parent.id, studentId);
+      if (!isOwner) return res.status(403).json({ error: 'Akses ditolak: bukan santri Anda.' });
       const atts = await db.query.studentAttendances.findMany({
         where: eq(schema.studentAttendances.studentId, studentId)
       });
       const allJournals = await db.query.journals.findMany();
-      const enriched = atts.map(a => {
-        const j = allJournals.find(jx => jx.id === a.journalId);
+      const enriched = atts.map((a: any) => {
+        const j = allJournals.find((jx: any) => jx.id === a.journalId);
         return {
           ...a,
           journal: j ? { topic: j.topic, scheduleId: j.scheduleId, date: j.date } : null
@@ -1667,15 +1879,19 @@ async function startServer() {
     }
   });
 
-  app.get('/api/students/:studentId/academics', async (req, res) => {
+  // [PROTECTED] GET /api/students/:studentId/academics
+  app.get('/api/students/:studentId/academics', requireParentAuth, async (req, res) => {
     try {
       const { studentId } = req.params;
+      const parent = (req as any).authenticatedParent;
+      const isOwner = await verifyStudentOwnership(parent.id, studentId);
+      if (!isOwner) return res.status(403).json({ error: 'Akses ditolak: bukan santri Anda.' });
       const grades = await db.query.studentGrades.findMany({
         where: eq(schema.studentGrades.studentId, studentId)
       });
       const allAssignments = await db.query.assignments.findMany();
-      const enriched = grades.map(g => {
-        const asg = allAssignments.find(ax => ax.id === g.assignmentId);
+      const enriched = grades.map((g: any) => {
+        const asg = allAssignments.find((ax: any) => ax.id === g.assignmentId);
         return {
           ...g,
           assignment: asg ? { title: asg.title, deadline: asg.deadline } : null
@@ -1687,9 +1903,13 @@ async function startServer() {
     }
   });
 
-  app.get('/api/students/:studentId/notes', async (req, res) => {
+  // [PROTECTED] GET /api/students/:studentId/notes
+  app.get('/api/students/:studentId/notes', requireParentAuth, async (req, res) => {
     try {
       const { studentId } = req.params;
+      const parent = (req as any).authenticatedParent;
+      const isOwner = await verifyStudentOwnership(parent.id, studentId);
+      if (!isOwner) return res.status(403).json({ error: 'Akses ditolak: bukan santri Anda.' });
       const notes = await db.query.studentNotes.findMany({
         where: eq(schema.studentNotes.studentId, studentId)
       });
@@ -2534,6 +2754,52 @@ async function startServer() {
     }
   });
 
+  // ====== MIDDLEWARE: PORTAL SANTRI PARENT AUTH ======
+  /**
+   * requireParentAuth — verifikasi sesi Better-Auth dan temukan parent record.
+   * Menambahkan req.authenticatedParent dan req.authenticatedUserId ke request.
+   */
+  const requireParentAuth = async (req: any, res: any, next: any): Promise<void> => {
+    try {
+      const headersObj = new Headers();
+      for (const [key, value] of Object.entries(req.headers as Record<string, string | string[] | undefined>)) {
+        if (value !== undefined) {
+          headersObj.set(key, Array.isArray(value) ? value.join(', ') : value);
+        }
+      }
+      const session = await auth.api.getSession({ headers: headersObj });
+      if (!session?.user) {
+        res.status(401).json({ error: 'Sesi tidak valid. Silakan login kembali ke Portal Santri.' });
+        return;
+      }
+      const parent = await db.query.parents.findFirst({
+        where: eq(schema.parents.userId, session.user.id)
+      });
+      if (!parent) {
+        res.status(403).json({ error: 'Akun ini bukan wali santri terdaftar.' });
+        return;
+      }
+      req.authenticatedParent = parent;
+      req.authenticatedUserId = session.user.id;
+      next();
+    } catch (error) {
+      console.error('[requireParentAuth] error:', error);
+      res.status(401).json({ error: 'Gagal memverifikasi sesi.' });
+    }
+  };
+
+  /** verifyStudentOwnership — pastikan studentId benar-benar milik wali ini */
+  const verifyStudentOwnership = async (parentId: string, studentId: string): Promise<boolean> => {
+    const relation = await db.query.studentParents.findFirst({
+      where: and(
+        eq(schema.studentParents.parentId, parentId),
+        eq(schema.studentParents.studentId, studentId)
+      )
+    });
+    return !!relation;
+  };
+
+  // ====== PORTAL SANTRI (SIS) APIS ======
   app.get('/api/students', async (req, res) => {
     try {
       const allStudents = await db.query.students.findMany();
@@ -2566,54 +2832,59 @@ async function startServer() {
     }
   });
 
-  app.get('/api/parents/:userId', async (req, res) => {
+  // [PROTECTED] GET /api/parents/:userId — hanya data milik wali sendiri
+  app.get('/api/parents/:userId', requireParentAuth, async (req, res) => {
     try {
-      const parent = await db.query.parents.findFirst({
-        where: eq(schema.parents.userId, req.params.userId)
-      });
-      res.json({ data: parent });
+      const authenticatedUserId = (req as any).authenticatedUserId as string;
+      if (req.params.userId !== authenticatedUserId) {
+        return res.status(403).json({ error: 'Akses ditolak: bukan akun Anda.' });
+      }
+      res.json({ data: (req as any).authenticatedParent });
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch parent' });
     }
   });
 
-  app.get('/api/parents/:userId/student', async (req, res) => {
+  // [PROTECTED] GET /api/parents/:userId/student — hanya santri milik wali sendiri
+  app.get('/api/parents/:userId/student', requireParentAuth, async (req, res) => {
     try {
-      const parent = await db.query.parents.findFirst({
-        where: eq(schema.parents.userId, req.params.userId)
-      });
-      if (!parent) return res.status(404).json({ error: 'Parent not found' });
-      
+      const authenticatedUserId = (req as any).authenticatedUserId as string;
+      if (req.params.userId !== authenticatedUserId) {
+        return res.status(403).json({ error: 'Akses ditolak: bukan akun Anda.' });
+      }
+      const parent = (req as any).authenticatedParent;
       const relations = await db.query.studentParents.findMany({
         where: eq(schema.studentParents.parentId, parent.id)
       });
-      
       if (relations.length === 0) return res.json({ data: null });
-      
       const student = await db.query.students.findFirst({
         where: eq(schema.students.id, relations[0].studentId)
       });
-      
       res.json({ data: student });
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch student' });
     }
   });
 
-  app.put('/api/parents/:id', async (req, res) => {
+  // [PROTECTED] PUT /api/parents/:id — hanya bisa edit profil sendiri
+  app.put('/api/parents/:id', requireParentAuth, async (req, res) => {
     try {
+      const parent = (req as any).authenticatedParent;
+      if (req.params.id !== parent.id) {
+        return res.status(403).json({ error: 'Akses ditolak: bukan profil Anda.' });
+      }
       const result = await db.update(schema.parents)
         .set({
-           nik: req.body.nik,
-           kkNumber: req.body.kkNumber,
-           phone: req.body.phone,
-           address: req.body.address,
-           job: req.body.job,
-           income: req.body.income,
-           vehicle: req.body.vehicle,
-           homeOwnership: req.body.homeOwnership
+          nik: req.body.nik,
+          kkNumber: req.body.kkNumber,
+          phone: req.body.phone,
+          address: req.body.address,
+          job: req.body.job,
+          income: req.body.income,
+          vehicle: req.body.vehicle,
+          homeOwnership: req.body.homeOwnership
         })
-        .where(eq(schema.parents.id, req.params.id))
+        .where(eq(schema.parents.id, parent.id))
         .returning();
       res.json({ data: result[0] });
     } catch (error) {
@@ -2621,7 +2892,7 @@ async function startServer() {
       res.status(500).json({ error: 'Failed to update parent' });
     }
   });
-  // --- FASE 6 API ENDPOINTS (Master Data Edit & Relations) ---
+  // --- FASE 6 API ENDPOINTS (Master Data Edit & Relations) ---
   app.put('/api/students/:id', async (req, res) => {
     try {
       const result = await db.update(schema.students)
