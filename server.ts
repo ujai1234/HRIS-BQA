@@ -31,6 +31,7 @@ async function startServer() {
     'http://localhost:5175',
     process.env.APP_URL,
     'https://hris.baitulquranalikhwan.cloud',
+    'https://portal.baitulquranalikhwan.cloud',
   ].filter(Boolean) as string[];
 
   app.use(cors({
