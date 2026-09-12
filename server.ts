@@ -57,8 +57,8 @@ async function startServer() {
 
   // Portal Santri Integration Endpoints
   
-  // 1. Get Linked Student for a Parent
-  app.get('/api/parents/:userId/student', async (req, res) => {
+  // 1. Get Linked Students for a Parent
+  app.get('/api/parents/:userId/students', async (req, res) => {
     try {
       const { userId } = req.params;
       
@@ -67,48 +67,59 @@ async function startServer() {
       });
 
       if (!parentRecord) {
-        return res.json({ success: true, data: null, message: "Belum ada santri yang dihubungkan." });
+        return res.json({ success: true, data: [], message: "Belum ada santri yang dihubungkan." });
       }
 
-      const linkRecord = await db.query.studentParents.findFirst({
+      const linkRecords = await db.query.studentParents.findMany({
         where: eq(schema.studentParents.parentId, parentRecord.id)
       });
 
-      if (!linkRecord) {
-        return res.json({ success: true, data: null, message: "Belum ada santri yang dihubungkan." });
+      if (linkRecords.length === 0) {
+        return res.json({ success: true, data: [], message: "Belum ada santri yang dihubungkan." });
       }
 
-      const studentData = await db.query.students.findFirst({
-        where: eq(schema.students.id, linkRecord.studentId)
-      });
+      const studentsData = [];
+      for (const link of linkRecords) {
+        const studentData = await db.query.students.findFirst({
+          where: eq(schema.students.id, link.studentId)
+        });
+        if (studentData) {
+          studentsData.push(studentData);
+        }
+      }
 
-      res.json({ success: true, data: studentData });
+      res.json({ success: true, data: studentsData });
     } catch (error) {
       console.error('Error fetching parent student:', error);
       res.status(500).json({ error: 'Terjadi kesalahan pada server.' });
     }
   });
 
-  // 2. Link Student via NIS and NIK
+  // 2. Link Student via NIS and No KK
   app.post('/api/portal/link-student', async (req, res) => {
     try {
-      const { userId, nis, nik } = req.body;
+      const { userId, nis, kkNumber } = req.body;
       
-      if (!userId || !nis || !nik) {
-        return res.status(400).json({ error: 'Data tidak lengkap. Mohon isi NIS dan NIK.' });
+      if (!userId || !nis || !kkNumber) {
+        return res.status(400).json({ error: 'Data tidak lengkap. Mohon isi NIS dan Nomor Kartu Keluarga.' });
       }
 
-      // Find student
-      const studentData = await db.query.students.findFirst({
+      // Find student by NIS and No KK to validate
+      const validatingStudent = await db.query.students.findFirst({
         where: and(
           eq(schema.students.nis, nis),
-          eq(schema.students.nik, nik)
+          eq(schema.students.kkNumber, kkNumber)
         )
       });
 
-      if (!studentData) {
-        return res.status(404).json({ error: 'Santri dengan NIS dan NIK tersebut tidak ditemukan. Mohon periksa kembali data Anda.' });
+      if (!validatingStudent) {
+        return res.status(404).json({ error: 'Data santri dengan NIS dan No KK tersebut tidak ditemukan. Mohon periksa kembali data Anda.' });
       }
+
+      // Find all students in the same family (same kkNumber)
+      const siblings = await db.query.students.findMany({
+        where: eq(schema.students.kkNumber, kkNumber)
+      });
 
       // Find or create parent
       let parentRecord = await db.query.parents.findFirst({
@@ -119,29 +130,31 @@ async function startServer() {
         const newParent = await db.insert(schema.parents).values({
           id: `PRT-${Date.now()}`,
           userId: userId,
-          nik: nik, // Set default using provided NIK
+          kkNumber: kkNumber,
         }).returning();
         parentRecord = newParent[0];
       }
 
-      // Check if already linked
-      const existingLink = await db.query.studentParents.findFirst({
-        where: and(
-          eq(schema.studentParents.studentId, studentData.id),
-          eq(schema.studentParents.parentId, parentRecord.id)
-        )
-      });
-
-      if (!existingLink) {
-        await db.insert(schema.studentParents).values({
-          id: `SP-${Date.now()}`,
-          studentId: studentData.id,
-          parentId: parentRecord.id,
-          relation: 'ORANG_TUA'
+      // Link ALL siblings to this parent
+      for (const sibling of siblings) {
+        const existingLink = await db.query.studentParents.findFirst({
+          where: and(
+            eq(schema.studentParents.studentId, sibling.id),
+            eq(schema.studentParents.parentId, parentRecord.id)
+          )
         });
+
+        if (!existingLink) {
+          await db.insert(schema.studentParents).values({
+            id: `SP-${Date.now()}-${sibling.id.substring(0,4)}`,
+            studentId: sibling.id,
+            parentId: parentRecord.id,
+            relation: 'ORANG_TUA'
+          });
+        }
       }
 
-      res.json({ success: true, data: studentData, message: 'Berhasil menghubungkan akun dengan data santri.' });
+      res.json({ success: true, data: validatingStudent, message: `Berhasil menghubungkan akun dengan data santri. Ditemukan ${siblings.length} data keluarga.` });
     } catch (error) {
       console.error('Error linking student:', error);
       res.status(500).json({ error: 'Terjadi kesalahan pada server.' });
