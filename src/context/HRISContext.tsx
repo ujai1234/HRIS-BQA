@@ -169,6 +169,8 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!lastActivity || Date.now() - lastActivity > 5 * 60 * 1000) {
       localStorage.removeItem('hris_pbq_session_last_activity');
       localStorage.setItem('hris_pbq_auth_v1', 'false');
+      // Flag to clear better-auth session as well
+      localStorage.setItem('hris_pbq_force_signout', 'true');
       return false;
     }
     return true;
@@ -338,6 +340,15 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem('hris_pbq_auth_v1', JSON.stringify(isAuthenticated));
   }, [isAuthenticated]);
+
+  // Check if we need to force sign out from better-auth due to overnight expiry
+  useEffect(() => {
+    if (localStorage.getItem('hris_pbq_force_signout') === 'true') {
+      authClient.signOut().finally(() => {
+        localStorage.removeItem('hris_pbq_force_signout');
+      });
+    }
+  }, []);
 
   useEffect(() => {
     try {
