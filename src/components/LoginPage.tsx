@@ -43,7 +43,7 @@ export const LoginPage: React.FC = () => {
         }
       } else {
         // @ts-ignore
-        const email = session.user.email;
+        const email = session.user.email as string;
         const targetByEmail = teachers.find((t: any) =>
           t.id.toLowerCase() === email.split('@')[0].toLowerCase() ||
           // @ts-ignore
@@ -55,8 +55,14 @@ export const LoginPage: React.FC = () => {
           role = targetByEmail.role;
           finalTeacherId = targetByEmail.id;
         } else {
+          // Akun ini tidak terdaftar sebagai asatidz/staf HRIS.
+          // Bisa jadi akun Wali Santri yang sesi-nya masih aktif.
+          const isWaliAccount = email.startsWith('ortu') || email.startsWith('wali') || email === 'walidemo@bqa.local';
+          const errorMsg = isWaliAccount
+            ? `Akun ${email} adalah akun Wali Santri (Portal Santri), bukan akun HRIS Asatidz. Gunakan username/NIP Asatidz untuk login ke HRIS.`
+            : `Akun dengan email ${email} tidak terdaftar sebagai Asatidz di Master Data HRIS. Hubungi Administrator.`;
           authClient.signOut({ fetchOptions: {} }).then(() => {
-            setError(`Akun Google dengan email ${email} belum terdaftar di Master Data HRIS.`);
+            setError(errorMsg);
           });
           return;
         }
@@ -79,9 +85,30 @@ export const LoginPage: React.FC = () => {
         setError(authError.message || 'Identitas asatidz atau kata sandi salah');
       } else if (data?.user) {
         // @ts-ignore - teacherId is an additional field
-        const teacherId = data.user.teacherId as string;
+        const teacherId = data.user.teacherId as string | undefined;
+        
+        // Validasi: pastikan akun ini terdaftar di Master Data HRIS sebagai asatidz/staf
+        if (!teacherId) {
+          // Akun Better Auth tidak memiliki teacherId — kemungkinan akun Wali Santri
+          const userEmail = data.user.email || '';
+          const isWaliAccount = userEmail.startsWith('ortu') || userEmail.startsWith('wali') || userEmail === 'walidemo@bqa.local';
+          const errorMsg = isWaliAccount
+            ? `Akun ${userEmail} adalah akun Wali Santri (Portal Santri), bukan akun HRIS Asatidz. Gunakan username/NIP Asatidz untuk login ke HRIS.`
+            : `Akun ${userEmail} tidak memiliki data asatidz yang terhubung. Hubungi Administrator HRIS.`;
+          await authClient.signOut({ fetchOptions: {} });
+          setError(errorMsg);
+          return;
+        }
+
         const targetTeacher = teachers.find((t: any) => t.id === teacherId);
-        const role = targetTeacher?.role || 'GURU';
+        if (!targetTeacher) {
+          // teacherId ada tapi tidak ditemukan di Master Data HRIS
+          await authClient.signOut({ fetchOptions: {} });
+          setError(`Akun ini (ID: ${teacherId}) tidak ditemukan di Master Data HRIS. Data mungkin telah dihapus. Hubungi Administrator.`);
+          return;
+        }
+
+        const role = targetTeacher.role || 'GURU';
         login(role, teacherId);
       } else {
         setError('Login gagal. Terjadi kesalahan internal.');
