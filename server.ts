@@ -55,6 +55,99 @@ async function startServer() {
   // Better Auth
   app.all(/^\/api\/auth(\/.*)?$/, toNodeHandler(auth));
 
+  // Portal Santri Integration Endpoints
+  
+  // 1. Get Linked Student for a Parent
+  app.get('/api/parents/:userId/student', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      
+      const parentRecord = await db.query.parents.findFirst({
+        where: eq(schema.parents.userId, userId)
+      });
+
+      if (!parentRecord) {
+        return res.json({ success: true, data: null, message: "Belum ada santri yang dihubungkan." });
+      }
+
+      const linkRecord = await db.query.studentParents.findFirst({
+        where: eq(schema.studentParents.parentId, parentRecord.id)
+      });
+
+      if (!linkRecord) {
+        return res.json({ success: true, data: null, message: "Belum ada santri yang dihubungkan." });
+      }
+
+      const studentData = await db.query.students.findFirst({
+        where: eq(schema.students.id, linkRecord.studentId)
+      });
+
+      res.json({ success: true, data: studentData });
+    } catch (error) {
+      console.error('Error fetching parent student:', error);
+      res.status(500).json({ error: 'Terjadi kesalahan pada server.' });
+    }
+  });
+
+  // 2. Link Student via NIS and NIK
+  app.post('/api/portal/link-student', async (req, res) => {
+    try {
+      const { userId, nis, nik } = req.body;
+      
+      if (!userId || !nis || !nik) {
+        return res.status(400).json({ error: 'Data tidak lengkap. Mohon isi NIS dan NIK.' });
+      }
+
+      // Find student
+      const studentData = await db.query.students.findFirst({
+        where: and(
+          eq(schema.students.nis, nis),
+          eq(schema.students.nik, nik)
+        )
+      });
+
+      if (!studentData) {
+        return res.status(404).json({ error: 'Santri dengan NIS dan NIK tersebut tidak ditemukan. Mohon periksa kembali data Anda.' });
+      }
+
+      // Find or create parent
+      let parentRecord = await db.query.parents.findFirst({
+        where: eq(schema.parents.userId, userId)
+      });
+
+      if (!parentRecord) {
+        const newParent = await db.insert(schema.parents).values({
+          id: `PRT-${Date.now()}`,
+          userId: userId,
+          nik: nik, // Set default using provided NIK
+        }).returning();
+        parentRecord = newParent[0];
+      }
+
+      // Check if already linked
+      const existingLink = await db.query.studentParents.findFirst({
+        where: and(
+          eq(schema.studentParents.studentId, studentData.id),
+          eq(schema.studentParents.parentId, parentRecord.id)
+        )
+      });
+
+      if (!existingLink) {
+        await db.insert(schema.studentParents).values({
+          id: `SP-${Date.now()}`,
+          studentId: studentData.id,
+          parentId: parentRecord.id,
+          relation: 'ORANG_TUA'
+        });
+      }
+
+      res.json({ success: true, data: studentData, message: 'Berhasil menghubungkan akun dengan data santri.' });
+    } catch (error) {
+      console.error('Error linking student:', error);
+      res.status(500).json({ error: 'Terjadi kesalahan pada server.' });
+    }
+  });
+
   // Tahfidz App Integration
   app.get('/api/tahfidz/student-progress/:studentId', async (req, res) => {
     try {
