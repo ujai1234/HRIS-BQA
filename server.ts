@@ -3297,18 +3297,10 @@ async function startServer() {
     const existingSchedules = await db.query.schedules.findMany();
     const existingStaffTasks = await db.query.staffTasks.findMany();
     const existingStaffExpenses = await db.query.staffExpenses.findMany();
-
-    const hasSmp = existingTeachers.some(t => t.username === 'kepseksmp');
-    const hasMa = existingTeachers.some(t => t.username === 'kepsekma');
-    const hasPesantren = existingTeachers.some(t => t.username === 'kepsekpesantren');
-    const hasAisyahNmg = existingTeachers.some(t => t.username === 'aisyahnmg');
-    const hasDapur = existingTeachers.some(t => t.username === 'dapur');
-    const hasInventaris = existingTeachers.some(t => t.username === 'inventaris');
-
-    const needsReseed = existingTeachers.length === 0 || !hasSmp || !hasMa || !hasPesantren || !hasAisyahNmg || !hasDapur || !hasInventaris || existingSchedules.length < 40;
+    const needsReseed = existingTeachers.length === 0;
 
     if (needsReseed) {
-      console.log('Database missing comprehensive demo data. Re-seeding database...');
+      console.log('Database is empty. Seeding database with initial data...');
       await db.delete(schema.learningNeedRequests);
       await db.delete(schema.auditLogs);
       await db.delete(schema.staffTasks);
@@ -3335,7 +3327,7 @@ async function startServer() {
            try {
               await auth.api.signUpEmail({
                  body: {
-                     email: `${teacher.username}@bqa.local`,
+                     email: teacher.username.includes('@') ? teacher.username : `${teacher.username}@bqa.local`,
                      password: mockPassword,
                      name: teacher.name,
                      teacherId: teacher.id
@@ -3348,45 +3340,59 @@ async function startServer() {
         }
       }
 
-      await db.insert(schema.schedules).values(INITIAL_SCHEDULES);
-      await db.insert(schema.attendances).values(INITIAL_ATTENDANCES.map(a => {
-        const { journal, ...rest } = a;
-        return rest;
-      }));
-      for (const a of INITIAL_ATTENDANCES) {
-        if (a.journal) {
-          const { studentAttendance, ...jRest } = a.journal;
-          await db.insert(schema.journals).values({
-            ...jRest,
-            ...studentAttendance,
-            filledAt: new Date(jRest.filledAt)
-          });
+      if (INITIAL_SCHEDULES.length > 0) {
+        await db.insert(schema.schedules).values(INITIAL_SCHEDULES);
+      }
+      if (INITIAL_ATTENDANCES.length > 0) {
+        await db.insert(schema.attendances).values(INITIAL_ATTENDANCES.map(a => {
+          const { journal, ...rest } = a;
+          return rest;
+        }));
+        for (const a of INITIAL_ATTENDANCES) {
+          if (a.journal) {
+            const { studentAttendance, ...jRest } = a.journal;
+            await db.insert(schema.journals).values({
+              ...jRest,
+              ...studentAttendance,
+              filledAt: new Date(jRest.filledAt)
+            });
+          }
         }
       }
-      await db.insert(schema.badalAssignments).values(INITIAL_BADAL_ASSIGNMENTS.map(ba => ({
-        ...ba,
-        createdAt: new Date(ba.createdAt)
-      })));
-      await db.insert(schema.learningNeedRequests).values(INITIAL_LEARNING_NEEDS.map(r => ({
-        ...r,
-        createdAt: new Date(r.createdAt),
-        updatedAt: new Date(r.updatedAt)
-      })));
-      await db.insert(schema.auditLogs).values(INITIAL_AUDIT_LOGS);
-
-      for (const j of INITIAL_STAFF_JOURNALS) {
-        sqliteDb.prepare(`
-          INSERT OR REPLACE INTO staff_tasks (id, staff_id, staff_name, date, category, task_today, task_tomorrow, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(j.id, j.staffId, j.staffName, j.date, j.category, j.taskToday, j.taskTomorrow, new Date(j.createdAt || Date.now()).getTime());
+      if (INITIAL_BADAL_ASSIGNMENTS.length > 0) {
+        await db.insert(schema.badalAssignments).values(INITIAL_BADAL_ASSIGNMENTS.map(ba => ({
+          ...ba,
+          createdAt: new Date(ba.createdAt)
+        })));
       }
-      for (const e of INITIAL_EXPENSES) {
-        sqliteDb.prepare(`
-          INSERT OR REPLACE INTO staff_expenses (id, reporter_id, reporter_name, date, category, description, amount, status, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(e.id, e.reporterId, e.reporterName, e.date, e.category, e.description, e.amount, e.status || 'PENDING', new Date(e.createdAt || Date.now()).getTime());
+      if (INITIAL_LEARNING_NEEDS.length > 0) {
+        await db.insert(schema.learningNeedRequests).values(INITIAL_LEARNING_NEEDS.map(r => ({
+          ...r,
+          createdAt: new Date(r.createdAt),
+          updatedAt: new Date(r.updatedAt)
+        })));
       }
-      console.log('Database successfully re-seeded with all required demo accounts!');
+      if (INITIAL_AUDIT_LOGS.length > 0) {
+        await db.insert(schema.auditLogs).values(INITIAL_AUDIT_LOGS);
+      }
+      
+      if (INITIAL_STAFF_JOURNALS.length > 0) {
+        for (const j of INITIAL_STAFF_JOURNALS) {
+          sqliteDb.prepare(`
+            INSERT OR REPLACE INTO staff_tasks (id, staff_id, staff_name, date, category, task_today, task_tomorrow, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          `).run(j.id, j.staffId, j.staffName, j.date, j.category, j.taskToday, j.taskTomorrow, new Date(j.createdAt || Date.now()).getTime());
+        }
+      }
+      if (INITIAL_EXPENSES.length > 0) {
+        for (const e of INITIAL_EXPENSES) {
+          sqliteDb.prepare(`
+            INSERT OR REPLACE INTO staff_expenses (id, reporter_id, reporter_name, date, category, description, amount, status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).run(e.id, e.reporterId, e.reporterName, e.date, e.category, e.description, e.amount, e.status || 'PENDING', new Date(e.createdAt || Date.now()).getTime());
+        }
+      }
+      console.log('Database successfully seeded with initial data.');
     } else {
       // Create admin user 'ujai757@gmail.com' dynamically if they don't exist
       try {
