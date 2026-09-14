@@ -304,7 +304,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* BQA ISLAMIC THEMED SIDEBAR (CSidebar)                      */}
       {/* ========================================================= */}
       <aside 
-        className={`fixed top-0 bottom-0 left-0 z-50 bg-[#065f46] dark:bg-[#081e16] border-r border-emerald-800/40 dark:border-emerald-900/60 text-slate-100 flex flex-col justify-between transition-all duration-300 ease-in-out print:hidden shadow-2xl lg:shadow-none ${
+        className={`fixed top-0 bottom-0 left-0 z-50 bg-[#051F20] text-slate-100 flex flex-col justify-between transition-all duration-300 ease-in-out print:hidden shadow-2xl lg:shadow-none border-r border-[#163832]/30 ${
           sidebarFolded ? 'lg:w-20' : 'lg:w-64'
         } ${
           sidebarOpen ? 'w-64 translate-x-0' : '-translate-x-full lg:translate-x-0'
@@ -313,14 +313,14 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex flex-col flex-1 overflow-y-auto scrollbar-thin">
           
           {/* Sidebar Brand Header - High Contrast Sharp BQA Logo */}
-          <div className="h-16 px-4 border-b border-emerald-700/50 dark:border-emerald-900/60 flex items-center justify-between shrink-0 bg-[#044e3a]/90 dark:bg-[#05140e]/90 backdrop-blur-xs">
+          <div className="h-16 px-4 border-b border-[#163832]/50 flex items-center justify-between shrink-0 bg-[#051F20] backdrop-blur-xs">
             <div className="flex items-center gap-3 overflow-hidden">
               <BrandLogo size="md" className="filter drop-shadow-md" />
               
               {!sidebarFolded && (
                 <div className="leading-tight overflow-hidden">
                   <h1 className="font-display font-bold text-sm text-white tracking-tight truncate">Baitul Qur'an</h1>
-                  <p className="text-[10px] text-amber-300 font-bold tracking-wider uppercase truncate">Al-Ikhwan • HRIS</p>
+                  <p className="text-[10px] text-[#8EB69B] font-bold tracking-wider uppercase truncate">Al-Ikhwan • HRIS</p>
                 </div>
               )}
             </div>
@@ -328,7 +328,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Mobile close button */}
             <button 
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-emerald-200 hover:text-white p-1 rounded-md hover:bg-white/10 transition-colors cursor-pointer"
+              className="lg:hidden text-[#8EB69B] hover:text-white p-1 rounded-md hover:bg-white/10 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -343,7 +343,7 @@ export const Header: React.FC<HeaderProps> = ({
                   {!sidebarFolded && (
                     <button 
                       onClick={() => toggleSection(section.title)}
-                      className="w-full flex items-center justify-between px-3 py-1 text-[10px] font-bold text-amber-300/80 dark:text-amber-400/70 uppercase tracking-widest mb-1.5 hover:text-amber-200 transition-colors cursor-pointer"
+                      className="w-full flex items-center justify-between px-3 py-1 text-[10px] font-bold text-[#8EB69B] uppercase tracking-widest mb-1.5 hover:text-[#DAF1DE] transition-colors cursor-pointer"
                     >
                       <span>{section.title}</span>
                       <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
@@ -364,13 +364,13 @@ export const Header: React.FC<HeaderProps> = ({
                           title={sidebarFolded ? item.label : undefined}
                           className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs transition-all text-left cursor-pointer group relative ${
                             isActive
-                              ? 'bg-[#047857]/80 text-amber-300 font-bold shadow-md border-l-4 border-l-[#d97706]'
-                              : 'text-emerald-100/85 hover:text-white hover:bg-white/10 font-medium'
+                              ? 'bg-[#163832] text-[#DAF1DE] font-bold shadow-md'
+                              : 'text-white/70 hover:text-white hover:bg-white/5 font-medium'
                           }`}
                         >
                           <div className="flex items-center gap-3 min-w-0">
                             <IconComponent className={`w-4 h-4 shrink-0 transition-transform duration-150 ${
-                              isActive ? 'text-amber-300 scale-110' : 'text-emerald-200/75 group-hover:text-white'
+                              isActive ? 'text-[#DAF1DE] scale-110' : 'text-[#8EB69B] group-hover:text-white'
                             }`} strokeWidth={1.75} />
                             
                             {!sidebarFolded && (
@@ -381,7 +381,7 @@ export const Header: React.FC<HeaderProps> = ({
                           {/* Badge if present */}
                           {!sidebarFolded && item.badge && (
                             <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${
-                              isActive ? 'bg-[#d97706] text-white' : item.badgeColor || 'bg-amber-500/20 text-amber-300 border border-amber-400/40'
+                              isActive ? 'bg-[#DAF1DE] text-[#051F20]' : item.badgeColor || 'bg-[#163832] text-[#DAF1DE] border border-[#8EB69B]/40'
                             }`}>
                               {item.badge}
                             </span>
@@ -397,26 +397,26 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Sidebar Footer & Fold Toggler */}
-        <div className="border-t border-emerald-700/50 dark:border-emerald-900/60 bg-[#044e3a]/90 dark:bg-[#05140e]/90 backdrop-blur-xs">
+        <div className="border-t border-[#163832]/50 bg-[#051F20] backdrop-blur-xs">
           {/* User Profile Mini Bar */}
           {!sidebarFolded ? (
             <div className="p-3 flex items-center justify-between gap-2.5">
               <button
                 type="button"
                 onClick={() => setShowProfileModal(true)}
-                className="flex items-center gap-2.5 min-w-0 text-left hover:bg-white/10 p-1 rounded-lg transition-colors cursor-pointer group"
+                className="flex items-center gap-2.5 min-w-0 text-left hover:bg-white/10 p-1.5 rounded-xl transition-colors cursor-pointer group"
                 title="Klik untuk ubah foto & profil"
               >
                 <TeacherAvatar teacher={currentUser} size="md" />
                 <div className="overflow-hidden leading-tight">
-                  <p className="text-xs font-semibold text-white truncate group-hover:text-amber-300 transition-colors">{currentUser?.name || 'Pengguna'}</p>
-                  <p className="text-[10px] text-amber-300/80 truncate">{currentUser?.position || currentRole}</p>
+                  <p className="text-xs font-semibold text-white truncate group-hover:text-[#DAF1DE] transition-colors">{currentUser?.name || 'Pengguna'}</p>
+                  <p className="text-[10px] text-[#8EB69B] truncate">{currentUser?.position || currentRole}</p>
                 </div>
               </button>
               <button
                 onClick={logout}
                 title="Keluar"
-                className="p-1.5 text-emerald-200/70 hover:text-rose-300 hover:bg-rose-500/20 rounded-lg transition-colors cursor-pointer"
+                className="p-1.5 text-[#8EB69B] hover:text-white hover:bg-rose-500/20 rounded-lg transition-colors cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -438,7 +438,7 @@ export const Header: React.FC<HeaderProps> = ({
           {setSidebarFolded && (
             <button
               onClick={() => setSidebarFolded(!sidebarFolded)}
-              className="hidden lg:flex w-full items-center justify-center py-2 text-emerald-200/70 hover:text-white hover:bg-white/10 border-t border-emerald-700/50 transition-colors cursor-pointer text-xs"
+              className="hidden lg:flex w-full items-center justify-center py-2 text-[#8EB69B] hover:text-white hover:bg-white/10 border-t border-[#163832]/50 transition-colors cursor-pointer text-xs"
               title={sidebarFolded ? 'Perluas Sidebar' : 'Ciutkan Sidebar'}
             >
               {sidebarFolded ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
@@ -450,7 +450,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* ========================================================= */}
       {/* TOP HEADER (CHeader)                                      */}
       {/* ========================================================= */}
-      <header className={`fixed top-0 right-0 left-0 z-30 bg-white dark:bg-[#0c1813] border-b border-slate-200/90 dark:border-emerald-950/80 transition-all duration-300 print:hidden ${
+      <header className={`fixed top-0 right-0 left-0 z-30 bg-white border-b border-slate-200 transition-all duration-300 print:hidden ${
         sidebarFolded ? 'lg:left-20' : 'lg:left-64'
       }`}>
         
@@ -461,7 +461,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-2 text-slate-600 dark:text-emerald-200 hover:bg-slate-100 dark:hover:bg-emerald-950/50 rounded-lg transition-colors cursor-pointer"
+              className="lg:hidden p-2 text-[#051F20] hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
               aria-label="Toggle Menu"
             >
               <Menu className="w-5 h-5" />
@@ -473,12 +473,12 @@ export const Header: React.FC<HeaderProps> = ({
 
               <div className="leading-tight">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-display font-bold text-xs text-slate-900 dark:text-emerald-50">Baitul Qur'an Al-Ikhwan</span>
-                  <span className="hidden md:inline-flex items-center px-1.5 py-0.2 text-[9px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 rounded border border-emerald-200/60 dark:border-emerald-800/40">
+                  <span className="font-display font-bold text-sm text-[#051F20]">Baitul Qur'an Al-Ikhwan</span>
+                  <span className="hidden md:inline-flex items-center px-2 py-0.5 text-[9px] font-bold bg-[#DAF1DE] text-[#163832] rounded border border-[#8EB69B]/30">
                     HRIS Asatidz
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-400 dark:text-emerald-400/60 hidden sm:block">Pondok Pesantren Tahfidz Qur'an</p>
+                <p className="text-[10px] text-[#8EB69B] font-medium hidden sm:block">Pondok Pesantren Tahfidz Qur'an</p>
               </div>
             </div>
           </div>
@@ -491,10 +491,10 @@ export const Header: React.FC<HeaderProps> = ({
               id="btn-refresh-data"
               onClick={handleRefresh}
               disabled={isRefreshing || isLoading}
-              className="flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-[#13221b] dark:hover:bg-[#192b23] border border-slate-200 dark:border-emerald-800/40 text-slate-700 dark:text-emerald-100 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer disabled:opacity-50 active:scale-95 shadow-xs"
+              className="flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[#051F20] py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer disabled:opacity-50 active:scale-95 shadow-xs"
               title="Segarkan Data dari Server"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 ${isRefreshing || isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 text-[#163832] ${isRefreshing || isLoading ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">Segarkan</span>
             </button>
 
@@ -503,13 +503,13 @@ export const Header: React.FC<HeaderProps> = ({
               <select
                 value={selectedPeriod}
                 onChange={(e) => setSelectedPeriod(e.target.value)}
-                className="bg-slate-50 dark:bg-[#13221b] border border-slate-200 dark:border-emerald-800/40 text-xs font-semibold text-slate-800 dark:text-emerald-100 py-1.5 pl-3 pr-8 rounded-lg appearance-none cursor-pointer focus:outline-none focus:border-emerald-500 shadow-xs"
+                className="bg-slate-50 border border-slate-200 text-xs font-semibold text-[#051F20] py-1.5 pl-3 pr-8 rounded-lg appearance-none cursor-pointer focus:outline-none focus:border-[#163832] shadow-xs"
               >
                 <option value="Agustus 2026">Agustus 2026</option>
                 <option value="Juli 2026">Juli 2026</option>
                 <option value="Juni 2026">Juni 2026</option>
               </select>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 dark:text-emerald-400/60 absolute right-2.5 top-2.5 pointer-events-none" />
+              <ChevronDown className="w-3.5 h-3.5 text-[#8EB69B] absolute right-2.5 top-2.5 pointer-events-none" />
             </div>
 
             {/* Reset Database Button (Admin only) */}
@@ -520,10 +520,10 @@ export const Header: React.FC<HeaderProps> = ({
                     resetToDefault();
                   }
                 }}
-                className="hidden sm:flex items-center gap-1 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 py-1.5 px-2.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+                className="hidden sm:flex items-center gap-1 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 py-1.5 px-2.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-xs"
                 title="Reset Database ke Sample"
               >
-                <RotateCcw className="w-3 h-3 text-rose-600 dark:text-rose-400" />
+                <RotateCcw className="w-3 h-3 text-rose-600" />
                 <span className="text-[11px]">Reset Data</span>
               </button>
             )}
@@ -535,8 +535,8 @@ export const Header: React.FC<HeaderProps> = ({
                   onClick={() => setShowNotifPopover(!showNotifPopover)}
                   className={`p-2 rounded-lg transition-all cursor-pointer relative ${
                     showNotifPopover 
-                      ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-300' 
-                      : 'text-slate-500 hover:text-emerald-600 hover:bg-slate-100 dark:text-emerald-300/70 dark:hover:bg-[#13221b] dark:hover:text-emerald-200'
+                      ? 'text-[#163832] bg-[#DAF1DE]' 
+                      : 'text-[#8EB69B] hover:text-[#163832] hover:bg-slate-100'
                   }`}
                   title="Notifikasi Aktivitas"
                 >
@@ -551,20 +551,20 @@ export const Header: React.FC<HeaderProps> = ({
 
                 {/* Islamic Styled Notification Dropdown */}
                 {showNotifPopover && (
-                  <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white dark:bg-[#121f1a] rounded-2xl border border-slate-200 dark:border-emerald-800/40 shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
-                    <div className="p-3.5 border-b border-slate-100 dark:border-emerald-900/30 flex items-center justify-between bg-slate-50/50 dark:bg-[#0f1a15]">
+                  <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-[24px] border border-slate-100 shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+                    <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                       <div>
-                        <h3 className="text-xs font-bold text-slate-900 dark:text-emerald-100">
+                        <h3 className="text-sm font-bold text-[#051F20]">
                           Pemberitahuan Guru
                         </h3>
-                        <p className="text-[10px] text-slate-400 dark:text-emerald-400/60">
+                        <p className="text-[10px] text-[#8EB69B]">
                           Info badal, jadwal KBM & verifikasi
                         </p>
                       </div>
                       {unreadCount > 0 && (
                         <button
                           onClick={markAllAsRead}
-                          className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer flex items-center gap-1"
+                          className="text-[10px] font-semibold text-[#163832] hover:underline cursor-pointer flex items-center gap-1"
                         >
                           <Check className="w-3 h-3" />
                           <span>Tandai Dibaca</span>
@@ -572,18 +572,18 @@ export const Header: React.FC<HeaderProps> = ({
                       )}
                     </div>
 
-                    <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-emerald-900/30 p-1">
+                    <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 p-2">
                       {filteredNotifications.length === 0 ? (
-                        <div className="p-6 text-center text-xs text-slate-400 dark:text-emerald-400/60">
+                        <div className="p-6 text-center text-xs font-medium text-[#8EB69B]">
                           Tidak ada notifikasi baru
                         </div>
                       ) : (
                         filteredNotifications.map((notif) => (
                           <div 
                             key={notif.id}
-                            className={`p-2.5 rounded-xl transition-all cursor-pointer ${
-                              notif.isRead ? 'opacity-70 hover:opacity-100' : 'bg-slate-50/80 dark:bg-[#162720]'
-                            } hover:bg-slate-100/70 dark:hover:bg-[#1a2e26]`}
+                            className={`p-3 rounded-xl transition-all cursor-pointer ${
+                              notif.isRead ? 'opacity-70 hover:opacity-100' : 'bg-slate-50/80'
+                            } hover:bg-slate-100/70`}
                             onClick={() => {
                               markAsRead(notif.id);
                               setCurrentPath(notif.actionPath);
@@ -591,14 +591,14 @@ export const Header: React.FC<HeaderProps> = ({
                             }}
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <p className="text-xs font-semibold text-slate-900 dark:text-emerald-100 truncate">
+                              <p className="text-sm font-bold text-[#051F20] truncate">
                                 {notif.title}
                               </p>
-                              <span className="text-[9px] text-slate-400 dark:text-emerald-400/60 font-mono">
+                              <span className="text-[9px] text-[#8EB69B] font-mono">
                                 {notif.timeLabel}
                               </span>
                             </div>
-                            <p className="text-[11px] text-slate-500 dark:text-emerald-300/70 mt-0.5 line-clamp-1">
+                            <p className="text-[11px] text-[#163832]/80 font-medium mt-1 line-clamp-1">
                               {notif.subtitle}
                             </p>
                           </div>
@@ -614,45 +614,45 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={toggleDarkMode}
               title={isDarkMode ? 'Mode Terang' : 'Mode Gelap'}
-              className="p-2 text-slate-500 hover:text-emerald-600 dark:text-emerald-300/70 dark:hover:text-emerald-200 hover:bg-slate-100 dark:hover:bg-[#13221b] rounded-lg transition-all cursor-pointer"
+              className="p-2 text-[#8EB69B] hover:text-[#163832] hover:bg-slate-100 rounded-lg transition-all cursor-pointer"
             >
-              {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+              {isDarkMode ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-[#051F20]" />}
             </button>
 
             {/* User Dropdown Menu */}
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setShowUserDropdown(!showUserDropdown)}
-                className="flex items-center gap-2 p-1.5 hover:bg-slate-100 dark:hover:bg-[#13221b] rounded-lg transition-colors cursor-pointer"
+                className="flex items-center gap-2 p-1.5 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
               >
                 <TeacherAvatar teacher={currentUser} size="sm" />
                 <div className="hidden lg:block text-left leading-tight">
-                  <p className="text-xs font-semibold text-slate-800 dark:text-emerald-100 max-w-[110px] truncate">{currentUser?.name}</p>
-                  <p className="text-[10px] text-slate-400 dark:text-emerald-400/60 capitalize">{currentRole.toLowerCase()}</p>
+                  <p className="text-xs font-bold text-[#051F20] max-w-[110px] truncate">{currentUser?.name}</p>
+                  <p className="text-[10px] font-medium text-[#8EB69B] capitalize">{currentRole.toLowerCase()}</p>
                 </div>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 dark:text-emerald-400/60 hidden lg:block" />
+                <ChevronDown className="w-3.5 h-3.5 text-[#8EB69B] hidden lg:block" />
               </button>
 
               {/* User Menu Popover */}
               {showUserDropdown && (
-                <div className="absolute right-0 top-full mt-2 w-60 bg-white dark:bg-[#121f1a] rounded-2xl border border-slate-200 dark:border-emerald-800/40 shadow-2xl z-50 py-1 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
-                  <div className="px-3.5 py-2.5 border-b border-slate-100 dark:border-emerald-900/30 bg-slate-50/50 dark:bg-[#0f1a15] flex items-center gap-2.5">
+                <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-[24px] border border-slate-100 shadow-2xl z-50 py-1 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+                  <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
                     <TeacherAvatar teacher={currentUser} size="md" />
                     <div className="overflow-hidden">
-                      <p className="text-xs font-bold text-slate-900 dark:text-emerald-100 truncate">{currentUser?.name}</p>
-                      <p className="text-[10px] text-slate-400 dark:text-emerald-400/60 truncate">{currentUser?.position} • {currentUser?.unit}</p>
+                      <p className="text-sm font-bold text-[#051F20] truncate">{currentUser?.name}</p>
+                      <p className="text-[10px] font-medium text-[#8EB69B] truncate">{currentUser?.position} • {currentUser?.unit}</p>
                     </div>
                   </div>
 
-                  <div className="p-1 space-y-0.5">
+                  <div className="p-2 space-y-1">
                     <button
                       onClick={() => {
                         setShowUserDropdown(false);
                         setShowProfileModal(true);
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 dark:text-emerald-200 hover:bg-slate-100 dark:hover:bg-[#182922] rounded-lg transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-3 px-3 py-2 text-xs font-bold text-[#163832] hover:bg-[#DAF1DE]/50 rounded-xl transition-colors text-left cursor-pointer"
                     >
-                      <Camera className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      <Camera className="w-4 h-4 text-[#163832]" />
                       <span>Pengaturan Foto & Profil</span>
                     </button>
 
@@ -663,17 +663,19 @@ export const Header: React.FC<HeaderProps> = ({
                         else if (currentRole === 'ADMIN') setCurrentPath('/dashboard/admin');
                         else setCurrentPath('/dashboard/kepsek');
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 dark:text-emerald-200 hover:bg-slate-100 dark:hover:bg-[#182922] rounded-lg transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-3 px-3 py-2 text-xs font-bold text-[#163832] hover:bg-[#DAF1DE]/50 rounded-xl transition-colors text-left cursor-pointer"
                     >
-                      <LayoutDashboard className="w-3.5 h-3.5 text-slate-400 dark:text-emerald-400/60" />
+                      <LayoutDashboard className="w-4 h-4 text-[#163832]" />
                       <span>Dashboard Utama</span>
                     </button>
 
+                    <div className="border-t border-slate-100 my-1"></div>
+
                     <button
                       onClick={logout}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-3 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors text-left cursor-pointer"
                     >
-                      <LogOut className="w-3.5 h-3.5" />
+                      <LogOut className="w-4 h-4" />
                       <span>Keluar (Logout)</span>
                     </button>
                   </div>

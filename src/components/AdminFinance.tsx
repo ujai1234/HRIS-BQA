@@ -54,10 +54,10 @@ export const AdminFinance: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-[#121f1a] p-5 rounded-2xl border border-slate-200 dark:border-emerald-900/40 shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bqa-card p-6">
         <div>
-          <h2 className="text-xl font-bold text-slate-800 dark:text-emerald-50">Verifikasi Keuangan</h2>
-          <p className="text-sm text-slate-500 dark:text-emerald-400/70 mt-1">Tinjau bukti transfer dan verifikasi pembayaran SPP santri.</p>
+          <h2 className="text-xl font-bold text-[#051F20]">Verifikasi Keuangan</h2>
+          <p className="text-sm text-[#8EB69B] mt-1 font-medium">Tinjau bukti transfer dan verifikasi pembayaran SPP santri.</p>
         </div>
       </div>
 
@@ -69,15 +69,15 @@ export const AdminFinance: React.FC = () => {
             placeholder="Cari ID Santri atau Bulan..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-[#121f1a] border border-slate-200 dark:border-emerald-900/40 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 dark:text-emerald-100 outline-none"
+            className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-[12px] text-sm focus:ring-2 focus:ring-[#163832] outline-none"
           />
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#121f1a] rounded-2xl border border-slate-200 dark:border-emerald-900/40 overflow-hidden shadow-sm">
+      <div className="bqa-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 dark:bg-[#0f1a15] text-slate-500 dark:text-emerald-400/80 border-b border-slate-200 dark:border-emerald-900/40">
+            <thead className="bg-slate-50 text-[#8EB69B] border-b border-slate-200 uppercase text-[10px] tracking-wider">
               <tr>
                 <th className="px-6 py-4 font-semibold">Bulan Tagihan</th>
                 <th className="px-6 py-4 font-semibold">ID Santri</th>
@@ -87,33 +87,33 @@ export const AdminFinance: React.FC = () => {
                 <th className="px-6 py-4 font-semibold text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-emerald-900/40">
+            <tbody className="divide-y divide-slate-200">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500">Memuat data...</td>
+                  <td colSpan={6} className="px-6 py-8 text-center text-[#8EB69B] font-medium">Memuat data...</td>
                 </tr>
               ) : filteredPayments.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500">Tidak ada data tagihan.</td>
+                  <td colSpan={6} className="px-6 py-8 text-center text-[#8EB69B] font-medium">Tidak ada data tagihan.</td>
                 </tr>
               ) : (
                 filteredPayments.map((pay) => (
-                  <tr key={pay.id} className="hover:bg-slate-50 dark:hover:bg-[#162720]/50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-emerald-50">{pay.billingMonth}</td>
-                    <td className="px-6 py-4 font-mono text-xs text-slate-600 dark:text-emerald-300/80">{pay.studentId}</td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-emerald-100">Rp {pay.amount.toLocaleString('id-ID')}</td>
+                  <tr key={pay.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4 font-bold text-[#051F20]">{pay.billingMonth}</td>
+                    <td className="px-6 py-4 font-mono text-xs font-semibold text-[#8EB69B]">{pay.studentId}</td>
+                    <td className="px-6 py-4 font-semibold text-[#051F20]">Rp {pay.amount.toLocaleString('id-ID')}</td>
                     <td className="px-6 py-4">
                       {pay.status === 'LUNAS' ? (
-                        <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded-full w-max">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> LUNAS
+                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-[#163832] bg-[#DAF1DE] px-2.5 py-1 rounded-[8px] w-max uppercase tracking-wider">
+                          <CheckCircle2 className="w-3 h-3" /> LUNAS
                         </span>
                       ) : pay.status === 'MENUNGGU VERIFIKASI' || pay.status === 'MENUNGGU_VERIFIKASI' ? (
-                        <span className="flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded-full w-max">
-                          <Clock className="w-3.5 h-3.5" /> MENUNGGU VERIFIKASI
+                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-[8px] w-max uppercase tracking-wider">
+                          <Clock className="w-3 h-3" /> VERIFIKASI
                         </span>
                       ) : (
-                        <span className="flex items-center gap-1.5 text-xs font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-2 py-1 rounded-full w-max">
-                          <AlertCircle className="w-3.5 h-3.5" /> BELUM LUNAS
+                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-rose-700 bg-rose-100 px-2.5 py-1 rounded-[8px] w-max uppercase tracking-wider">
+                          <AlertCircle className="w-3 h-3" /> BELUM LUNAS
                         </span>
                       )}
                     </td>
@@ -136,7 +136,7 @@ export const AdminFinance: React.FC = () => {
                       {(pay.status === 'MENUNGGU VERIFIKASI' || pay.status === 'MENUNGGU_VERIFIKASI') && (
                         <button 
                           onClick={() => handleVerify(pay.id)}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                          className="bg-[#163832] hover:bg-[#0B2B26] text-[#DAF1DE] text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-[8px] transition-colors"
                         >
                           Verifikasi Lunas
                         </button>

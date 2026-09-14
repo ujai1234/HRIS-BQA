@@ -38,41 +38,41 @@
   --color-purple-soft:  #ede9fe;
 
   /* BQA Aliases (backward compat) */
-  --color-bqa-emerald:      #065f46;
-  --color-bqa-emerald-dark: #044e3a;
-  --color-bqa-emerald-light:#047857;
-  --color-bqa-emerald-soft: #e3f3ec;
-  --color-bqa-gold:         #d97706;
-  --color-bqa-gold-dark:    #b45309;
-  --color-bqa-gold-light:   #fbbf24;
-  --color-bqa-gold-soft:    #fef3c7;
-  --color-bqa-bg:           #faf9f6;
+  --color-bqa-emerald:      #051F20;
+  --color-bqa-emerald-dark: #0B2B26;
+  --color-bqa-emerald-light:#163832;
+  --color-bqa-emerald-soft: #DAF1DE;
+  --color-bqa-gold:         #8EB69B;
+  --color-bqa-gold-dark:    #163832;
+  --color-bqa-gold-light:   #DAF1DE;
+  --color-bqa-gold-soft:    #f8fafc;
+  --color-bqa-bg:           #f8fafc;
   --color-bqa-bg-dark:      #0f1713;
   --color-bqa-surface:      #ffffff;
   --color-bqa-surface-dark: #16201b;
 
-  --color-spruce:            #065f46;
-  --color-ochre:             #d97706;
-  --color-chalk:             #faf9f6;
-  --color-pesantren-emerald: #065f46;
+  --color-spruce:            #051F20;
+  --color-ochre:             #8EB69B;
+  --color-chalk:             #f8fafc;
+  --color-pesantren-emerald: #051F20;
   --color-pesantren-dark:    #0f1713;
 
   /* CoreUI Admin Palette (backward compat) */
-  --color-cui-primary:   #065f46;
+  --color-cui-primary:   #051F20;
   --color-cui-secondary: #64748b;
-  --color-cui-success:   #059669;
+  --color-cui-success:   #163832;
   --color-cui-info:      #0284c7;
-  --color-cui-warning:   #d97706;
+  --color-cui-warning:   #8EB69B;
   --color-cui-danger:    #dc2626;
-  --color-cui-dark:      #0f1713;
-  --color-cui-sidebar:   #065f46;
-  --color-cui-bg:        #faf9f6;
+  --color-cui-dark:      #051F20;
+  --color-cui-sidebar:   #051F20;
+  --color-cui-bg:        #f8fafc;
   --color-cui-bg-dark:   #0f1713;
 
   /* === SHADOWS (identik dengan Tahfidz) === */
   --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  --shadow-card: 0 10px 25px -5px rgba(6, 95, 70, 0.05);
-  --shadow-pop:  0 20px 25px -5px rgba(6, 95, 70, 0.1);
+  --shadow-card: 0 10px 25px -5px rgba(5, 31, 32, 0.05);
+  --shadow-pop:  0 20px 25px -5px rgba(5, 31, 32, 0.1);
 
   /* === ANIMATIONS (identik dengan Tahfidz globals.css) === */
   --animate-fade-up:   fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -90,22 +90,22 @@
 
   @keyframes ping-ring {
     70% {
-      box-shadow: 0 0 0 7px rgba(6, 95, 70, 0);
+      box-shadow: 0 0 0 7px rgba(22, 56, 50, 0);
     }
     100% {
-      box-shadow: 0 0 0 0 rgba(6, 95, 70, 0);
+      box-shadow: 0 0 0 0 rgba(22, 56, 50, 0);
     }
   }
 
   @keyframes btn-pulse {
     0% {
-      box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.35);
+      box-shadow: 0 0 0 0 rgba(142, 182, 155, 0.35);
     }
     70% {
-      box-shadow: 0 0 0 12px rgba(217, 119, 6, 0);
+      box-shadow: 0 0 0 12px rgba(142, 182, 155, 0);
     }
     100% {
-      box-shadow: 0 0 0 0 rgba(217, 119, 6, 0);
+      box-shadow: 0 0 0 0 rgba(142, 182, 155, 0);
     }
   }
 
@@ -145,17 +145,17 @@ html, body, button, input, select, textarea {
 }
 
 body {
-  background-color: #faf9f6;
-  color: #1e293b;
+  background-color: #f8fafc;
+  color: #051F20;
   --chart-grid: rgba(226, 232, 240, 0.6);
-  --chart-axis-text: #64748b;
+  --chart-axis-text: #8EB69B;
 }
 
 .dark body {
-  background-color: #0f1713;
-  color: #f8fafc;
-  --chart-grid: rgba(6, 95, 70, 0.3);
-  --chart-axis-text: rgba(167, 243, 208, 0.7);
+  background-color: #f8fafc;
+  color: #051F20;
+  --chart-grid: rgba(226, 232, 240, 0.6);
+  --chart-axis-text: #8EB69B;
 }
 
 /* ============================================================
@@ -211,60 +211,53 @@ body {
     background-image: none;
   }
 
-  /* === BQA SIGNATURE CARD (Gold Border Left) ===
-     Identik dengan Tahfidz: rounded-xl, gold left border, emerald shadow */
+  /* === BQA SIGNATURE CARD === */
   .bqa-card {
     background-color: #ffffff;
-    border-radius: 1rem;
+    border-radius: 24px;
     border: 1px solid rgba(226, 232, 240, 0.85);
-    border-left: 4px solid #d97706;
-    box-shadow: 0 10px 25px -5px rgba(6, 95, 70, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 10px 25px -5px rgba(5, 31, 32, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
     transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease-out;
   }
 
   .bqa-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 20px 25px -5px rgba(6, 95, 70, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 20px 25px -5px rgba(5, 31, 32, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
   }
 
   .dark .bqa-card {
-    background-color: #16201b;
-    border-color: rgba(6, 95, 70, 0.3);
-    border-left-color: #d97706;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    background-color: #ffffff;
+    border-color: rgba(226, 232, 240, 0.85);
   }
 
   .dark .bqa-card:hover {
-    box-shadow: 0 20px 30px -5px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 20px 30px -5px rgba(0, 0, 0, 0.1);
   }
 
   /* BQA Standard Card Alias */
   .cui-card {
     background-color: #ffffff;
-    border-radius: 1rem;
+    border-radius: 24px;
     border: 1px solid rgba(226, 232, 240, 0.9);
-    border-left: 4px solid #d97706;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
   .dark .cui-card {
-    background-color: #16201b;
-    border-color: rgba(6, 95, 70, 0.3);
-    border-left-color: #d97706;
+    background-color: #ffffff;
+    border-color: rgba(226, 232, 240, 0.9);
   }
 
-  /* === BQA BUTTON STYLES ===
-     Identik dengan Tahfidz: rounded-xl, shadow, scale active */
+  /* === BQA BUTTON STYLES === */
   .bqa-btn-gold {
-    background: linear-gradient(135deg, #d97706, #b45309);
+    background: #0B2B26;
     color: #ffffff;
     font-family: 'Inter', sans-serif;
     font-weight: 700;
     font-size: 0.75rem;
     border-radius: 0.75rem;
     padding: 0.5rem 1rem;
-    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25);
+    box-shadow: 0 2px 8px rgba(11, 43, 38, 0.25);
     transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
     border: none;
@@ -274,8 +267,8 @@ body {
   }
 
   .bqa-btn-gold:hover {
-    background: linear-gradient(135deg, #b45309, #92400e);
-    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35);
+    background: #163832;
+    box-shadow: 0 4px 12px rgba(22, 56, 50, 0.35);
     transform: translateY(-1px);
   }
 
@@ -284,14 +277,14 @@ body {
   }
 
   .bqa-btn-emerald {
-    background: linear-gradient(135deg, #065f46, #047857);
+    background: #051F20;
     color: #ffffff;
     font-family: 'Inter', sans-serif;
     font-weight: 700;
     font-size: 0.75rem;
     border-radius: 0.75rem;
     padding: 0.5rem 1rem;
-    box-shadow: 0 2px 8px rgba(6, 95, 70, 0.25);
+    box-shadow: 0 2px 8px rgba(5, 31, 32, 0.25);
     transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
     border: none;
@@ -301,8 +294,8 @@ body {
   }
 
   .bqa-btn-emerald:hover {
-    background: linear-gradient(135deg, #044e3a, #065f46);
-    box-shadow: 0 4px 12px rgba(6, 95, 70, 0.35);
+    background: #163832;
+    box-shadow: 0 4px 12px rgba(22, 56, 50, 0.35);
     transform: translateY(-1px);
   }
 
@@ -321,25 +314,25 @@ body {
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(6, 95, 70, 0.3);
+    background: rgba(142, 182, 155, 0.4);
     border-radius: 9999px;
   }
 
   .dark ::-webkit-scrollbar-thumb {
-    background: rgba(217, 119, 6, 0.35);
+    background: rgba(142, 182, 155, 0.4);
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(6, 95, 70, 0.6);
+    background: rgba(22, 56, 50, 0.6);
   }
 
   .dark ::-webkit-scrollbar-thumb:hover {
-    background: rgba(217, 119, 6, 0.6);
+    background: rgba(22, 56, 50, 0.6);
   }
 
-  /* === TEXT SELECTION (identik Tahfidz) === */
+  /* === TEXT SELECTION === */
   ::selection {
-    background-color: #065f46;
+    background-color: #163832;
     color: #ffffff;
   }
 
@@ -349,10 +342,10 @@ body {
   }
 
   .shadow-card {
-    box-shadow: 0 10px 25px -5px rgba(6, 95, 70, 0.05);
+    box-shadow: 0 10px 25px -5px rgba(5, 31, 32, 0.05);
   }
 
   .shadow-pop {
-    box-shadow: 0 20px 25px -5px rgba(6, 95, 70, 0.1);
+    box-shadow: 0 20px 25px -5px rgba(5, 31, 32, 0.1);
   }
 }

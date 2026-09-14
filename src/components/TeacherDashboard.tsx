@@ -164,9 +164,9 @@ export const TeacherDashboard: React.FC = () => {
   return (
     <div className="space-y-5">
       {/* Clean Teacher Header (Minimalist & Modern, No Money Figures) */}
-      <div className="bqa-card p-5 transition-colors">
+      <div className="bqa-card p-6 transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-4">
             {/* Interactive Profile Avatar with Camera Badge */}
             <button
               type="button"
@@ -175,21 +175,21 @@ export const TeacherDashboard: React.FC = () => {
               title="Klik untuk ubah foto profil via kamera"
             >
               <TeacherAvatar teacher={currentUser} size="xl" />
-              <div className="absolute -bottom-1 -right-1 p-1 bg-emerald-700 group-hover:bg-emerald-800 text-white rounded-full shadow-xs border-2 border-white dark:border-[#121f1a] transition-transform group-hover:scale-110">
+              <div className="absolute -bottom-1 -right-1 p-1 bg-[#163832] group-hover:bg-[#0B2B26] text-white rounded-full shadow-xs border-2 border-white transition-transform group-hover:scale-110">
                 <Camera className="w-3 h-3" />
               </div>
             </button>
 
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-display font-bold text-slate-900 dark:text-emerald-50">
+                <h1 className="text-xl font-display font-bold text-[#051F20]">
                   {currentUser?.name || 'Asatidz'}
                 </h1>
-                <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40">
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-[8px] bg-[#DAF1DE] text-[#163832] border border-[#8EB69B]/30 uppercase tracking-wider">
                   Unit {currentUser?.unit || 'Pesantren'}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-emerald-300/70 mt-0.5">
+              <p className="text-xs text-[#8EB69B] font-medium mt-0.5">
                 {currentUser?.position || 'Pengajar'} • NIP: {currentUser?.nip || '-'}
               </p>
             </div>
@@ -199,9 +199,9 @@ export const TeacherDashboard: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowProfileModal(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200/80 dark:bg-[#182922] dark:hover:bg-[#1f352c] text-slate-700 dark:text-emerald-200 transition-colors border border-slate-200/70 dark:border-emerald-800/40 cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-xs font-bold bg-slate-50 hover:bg-slate-100 text-[#051F20] transition-colors border border-slate-200 cursor-pointer shadow-xs uppercase tracking-wider"
             >
-              <Camera className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <Camera className="w-3.5 h-3.5 text-[#163832]" />
               <span>Foto Profil</span>
             </button>
 
@@ -210,78 +210,77 @@ export const TeacherDashboard: React.FC = () => {
                 setLeaveTargetSchedule(null);
                 setShowLeaveModal(true);
               }}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-950/60 text-amber-800 dark:text-amber-300 transition-colors border border-amber-200/80 dark:border-amber-800/40 cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[10px] text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 transition-colors border border-amber-200 cursor-pointer shadow-xs uppercase tracking-wider"
             >
-              <CalendarOff className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-              <span>Ajukan Izin / Sakit</span>
+              <CalendarOff className="w-3.5 h-3.5 text-amber-600" />
+              <span>Ajukan Izin</span>
             </button>
           </div>
         </div>
 
         {/* Minimalist Summary Badges (Non-monetary) */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-emerald-900/30">
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#0f1a15] border border-slate-100 dark:border-emerald-900/30">
-            <span className="text-[11px] text-slate-500 dark:text-emerald-400/70 font-medium">Jam Mengajar Bulan Ini</span>
-            <div className="text-sm font-bold text-slate-900 dark:text-emerald-50 mt-0.5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-100">
+          <div className="p-4 rounded-[16px] bg-slate-50 border border-slate-100">
+            <span className="text-[11px] text-[#8EB69B] font-bold uppercase tracking-wider">Jam Mengajar Bulan Ini</span>
+            <div className="text-lg font-bold text-[#051F20] mt-1">
               {teacherPayroll.totalTaughtHours} JP
               {teacherPayroll.totalBadalHours > 0 && (
-                <span className="text-xs font-normal text-emerald-600 dark:text-emerald-400 ml-1">
+                <span className="text-xs font-bold text-[#163832] ml-1">
                   (+{teacherPayroll.totalBadalHours} Badal)
                 </span>
               )}
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#0f1a15] border border-slate-100 dark:border-emerald-900/30">
-            <span className="text-[11px] text-slate-500 dark:text-emerald-400/70 font-medium">Total Hari Hadir</span>
-            <div className="text-sm font-bold text-slate-900 dark:text-emerald-50 mt-0.5">
+          <div className="p-4 rounded-[16px] bg-slate-50 border border-slate-100">
+            <span className="text-[11px] text-[#8EB69B] font-bold uppercase tracking-wider">Total Hari Hadir</span>
+            <div className="text-lg font-bold text-[#051F20] mt-1">
               {teacherPayroll.totalPresentDays} Hari
             </div>
           </div>
 
-          <div className="col-span-2 sm:col-span-1 p-3 rounded-xl bg-slate-50 dark:bg-[#0f1a15] border border-slate-100 dark:border-emerald-900/30">
-            <span className="text-[11px] text-slate-500 dark:text-emerald-400/70 font-medium">Status Periode</span>
-            <div className="text-sm font-bold text-emerald-800 dark:text-emerald-400 mt-0.5">
+          <div className="col-span-2 sm:col-span-1 p-4 rounded-[16px] bg-[#051F20] border border-[#163832]">
+            <span className="text-[11px] text-[#8EB69B] font-bold uppercase tracking-wider">Status Periode</span>
+            <div className="text-lg font-bold text-[#DAF1DE] mt-1">
               {selectedPeriod} (Aktif)
             </div>
           </div>
         </div>
       </div>
-
       {/* Sesi KBM Hari Ini & Jadwal */}
-      <div className="bqa-card p-5 space-y-4 transition-colors">
+      <div className="bqa-card p-6 space-y-4 transition-colors">
         {/* Day Selector Bar */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-emerald-900/30">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-display font-bold text-slate-900 dark:text-emerald-50">
+              <h2 className="text-lg font-display font-bold text-[#051F20]">
                 Jadwal & Presensi KBM
               </h2>
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#1a2d24] text-slate-600 dark:text-emerald-300">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-[8px] bg-slate-100 text-[#051F20] uppercase tracking-wider">
                 {selectedDay === realTodayName ? 'Hari Ini' : `Hari ${selectedDay}`}
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-emerald-400/60 mt-0.5">
+            <p className="text-xs text-[#8EB69B] font-medium mt-1">
               Jadwal menyesuaikan hari aktif secara otomatis.
             </p>
           </div>
 
-          <div className="inline-flex bg-slate-100 dark:bg-[#0f1a15] p-1 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 overflow-x-auto max-w-full gap-0.5">
+          <div className="inline-flex bg-slate-50 p-1.5 rounded-[12px] border border-slate-200 overflow-x-auto max-w-full gap-1">
             {daysOfWeek.map((day) => {
               const isToday = day === realTodayName;
               return (
                 <button
                   key={day}
                   onClick={() => setSelectedDay(day)}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-[8px] text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 uppercase tracking-wider ${
                     selectedDay === day
-                      ? 'bg-white dark:bg-[#1c3027] text-emerald-800 dark:text-emerald-300 shadow-xs border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-700/50'
-                      : 'text-slate-600 dark:text-emerald-400/60 hover:text-slate-900 dark:hover:text-emerald-200'
+                      ? 'bg-[#163832] text-[#DAF1DE] shadow-xs'
+                      : 'text-[#8EB69B] hover:text-[#051F20]'
                   }`}
                 >
                   <span>{day}</span>
                   {isToday && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="Hari Ini" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#DAF1DE] shrink-0" title="Hari Ini" />
                   )}
                 </button>
               );
@@ -536,11 +535,11 @@ export const TeacherDashboard: React.FC = () => {
 
       {/* Teaching History & Journals Table */}
       <div className="bqa-card overflow-hidden transition-colors">
-        <div className="p-4 border-b border-slate-100 dark:border-emerald-900/30">
-          <h2 className="text-sm font-display font-bold text-slate-900 dark:text-emerald-50">
+        <div className="p-5 border-b border-slate-100">
+          <h2 className="text-lg font-display font-bold text-[#051F20]">
             Riwayat Presensi & Jurnal Terkini
           </h2>
-          <p className="text-xs text-slate-500 dark:text-emerald-400/60 mt-0.5">
+          <p className="text-xs text-[#8EB69B] font-medium mt-1">
             Daftar sesi KBM yang telah tercatat di sistem.
           </p>
         </div>
@@ -548,16 +547,16 @@ export const TeacherDashboard: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-slate-50 dark:bg-[#0f1a15]/75 dark:bg-[#0e1713] border-b border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 text-slate-500 dark:text-emerald-400/70 text-[11px] font-semibold">
-                <th className="py-2.5 px-4">Tanggal</th>
-                <th className="py-2.5 px-4">Mata Pelajaran & Kelas</th>
-                <th className="py-2.5 px-4">Jam Masuk</th>
-                <th className="py-2.5 px-4">Status Jurnal</th>
-                <th className="py-2.5 px-4">Materi Pembelajaran</th>
-                <th className="py-2.5 px-4 text-right">Aksi</th>
+              <tr className="bg-slate-50 border-b border-slate-200 text-[#8EB69B] text-[10px] font-bold uppercase tracking-wider">
+                <th className="py-3 px-5">Tanggal</th>
+                <th className="py-3 px-5">Mata Pelajaran & Kelas</th>
+                <th className="py-3 px-5">Jam Masuk</th>
+                <th className="py-3 px-5">Status Jurnal</th>
+                <th className="py-3 px-5">Materi Pembelajaran</th>
+                <th className="py-3 px-5 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-emerald-900/30">
+            <tbody className="divide-y divide-slate-100">
               {attendances
                 .filter((a) => a.actualTeacherId === currentUser.id)
                 .map((att) => {
@@ -565,30 +564,30 @@ export const TeacherDashboard: React.FC = () => {
                   const isDone = att.status === 'SELESAI';
 
                   return (
-                    <tr key={att.id} className="hover:bg-slate-50 dark:bg-[#0f1a15]/60 dark:hover:bg-[#162720] transition-colors">
-                      <td className="py-2.5 px-4 font-medium text-slate-800 dark:text-emerald-100 whitespace-nowrap">
+                    <tr key={att.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-3 px-5 font-bold text-[#051F20] whitespace-nowrap">
                         {att.date}
                       </td>
-                      <td className="py-2.5 px-4">
-                        <p className="font-semibold text-slate-900 dark:text-emerald-50">{sched?.subject || 'KBM Pesantren'}</p>
-                        <p className="text-[11px] text-slate-500 dark:text-emerald-400/60">{sched?.className} • {sched?.hours} JP</p>
+                      <td className="py-3 px-5">
+                        <p className="font-bold text-[#051F20]">{sched?.subject || 'KBM Pesantren'}</p>
+                        <p className="text-[11px] font-semibold text-[#8EB69B]">{sched?.className} • {sched?.hours} JP</p>
                       </td>
-                      <td className="py-2.5 px-4 font-mono text-slate-700 dark:text-emerald-200">
+                      <td className="py-3 px-5 font-mono font-bold text-[#163832]">
                         {att.clockInTime || '-'}
                       </td>
-                      <td className="py-2.5 px-4">
+                      <td className="py-3 px-5">
                         {isDone ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-medium text-[11px]">
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Jurnal Terisi
+                          <span className="inline-flex items-center gap-1.5 text-[#163832] bg-[#DAF1DE] px-2.5 py-1 rounded-[8px] font-bold text-[10px] uppercase tracking-wider">
+                            <CheckCircle2 className="w-3 h-3" /> Jurnal Terisi
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-400 font-medium text-[11px]">
-                            <AlertCircle className="w-3.5 h-3.5" /> Jurnal Kosong
+                          <span className="inline-flex items-center gap-1.5 text-amber-700 bg-amber-100 px-2.5 py-1 rounded-[8px] font-bold text-[10px] uppercase tracking-wider">
+                            <AlertCircle className="w-3 h-3" /> Jurnal Kosong
                           </span>
                         )}
                       </td>
-                      <td className="py-2.5 px-4 max-w-xs truncate text-slate-600 dark:text-emerald-300/80">
-                        {att.journal?.topic || <span className="italic text-slate-400 dark:text-emerald-500/50">Belum diisi</span>}
+                      <td className="py-3 px-5 max-w-xs truncate text-[#8EB69B] font-medium">
+                        {att.journal?.topic || <span className="italic text-slate-300">Belum diisi</span>}
                       </td>
                       <td className="py-2.5 px-4 text-right">
                         {sched && (
