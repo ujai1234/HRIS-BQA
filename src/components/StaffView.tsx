@@ -14,7 +14,7 @@ interface StaffViewProps {
 export const StaffView: React.FC<StaffViewProps> = ({ initialTab = 'presensi' }) => {
   const { currentUser, currentPath } = useHRIS();
   const isDapur = currentUser?.position === 'Staff Dapur';
-  const isSarpras = currentUser?.position === 'Staff Inventaris';
+  const isSarpras = currentUser?.position === 'Staff Inventaris' || currentUser?.position === 'Staff Sarpras' || currentUser?.position?.toLowerCase().includes('sarpras') || currentUser?.position?.toLowerCase().includes('inventaris');
   const category = isDapur ? 'DAPUR' : 'SARPRAS';
 
   const activeTab = initialTab || (currentPath === '/dashboard/staff/laporan' ? 'laporan' : 'presensi');
