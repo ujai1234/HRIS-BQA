@@ -330,15 +330,17 @@ export const BadalManagement: React.FC = () => {
               <h1 className="text-xl sm:text-2xl font-bold text-[#051F20] tracking-tight font-sans">
                 Penugasan Guru Pengganti
               </h1>
-              <span className="text-[10px] font-bold px-2.5 py-1 rounded-[8px] bg-[#DAF1DE] text-[#163832] uppercase tracking-wider">
-                {isKepsek ? `Otoritas Kepala ${userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}` : 'Monitoring Admin (View-Only)'}
-              </span>
+              {isKepsek && (
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-[8px] bg-[#DAF1DE] text-[#163832] uppercase tracking-wider">
+                  Otoritas Kepala {userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}
+                </span>
+              )}
             </div>
-            <p className="text-xs text-[#8EB69B] font-semibold">
-              {isKepsek 
-                ? `Persetujuan izin guru dan penunjukan Asatidz Badal pengganti KBM Unit ${userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}` 
-                : 'Monitoring & rekapitulasi data penugasan Guru Badal (Hak persetujuan & penunjukan dipegang Kepala Sekolah unit masing-masing)'}
-            </p>
+            {isKepsek && (
+              <p className="text-xs text-[#8EB69B] font-semibold">
+                Persetujuan izin guru dan penunjukan Asatidz Badal pengganti KBM Unit {userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}
+              </p>
+            )}
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -371,70 +373,59 @@ export const BadalManagement: React.FC = () => {
       {/* 2. Stat Metric Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
-          <span className="text-[10px] font-bold text-[#8EB69B] uppercase tracking-wider block">Total Sesi Pengganti</span>
-          <p className="text-3xl font-bold font-mono tracking-tight text-[#051F20] mt-1.5">
-            {stats.totalSessions} <span className="text-xs font-bold text-[#8EB69B] font-sans uppercase">Sesi</span>
+          <span className="text-xs font-semibold text-[#163832]/60 block">Total Sesi Pengganti</span>
+          <p className="text-4xl font-bold text-[#051F20] tracking-tight mt-1 mb-2">
+            {stats.totalSessions}
           </p>
-          <span className="text-[10px] font-semibold text-slate-400 mt-2 block uppercase tracking-wider">
+          <span className="text-[10px] font-medium text-[#8EB69B] block">
             Penggantian KBM aktif
           </span>
         </div>
 
         <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
-          <span className="text-[10px] font-bold text-[#8EB69B] uppercase tracking-wider block">Total Jam Mengajar</span>
-          <p className="text-3xl font-bold font-mono tracking-tight text-[#051F20] mt-1.5">
-            {stats.totalJP} <span className="text-xs font-bold text-[#8EB69B] font-sans uppercase">JP</span>
+          <span className="text-xs font-semibold text-[#163832]/60 block">Total Jam Mengajar</span>
+          <p className="text-4xl font-bold text-[#051F20] tracking-tight mt-1 mb-2">
+            {stats.totalJP}
           </p>
-          <span className="text-[10px] font-semibold text-slate-400 mt-2 block uppercase tracking-wider">
+          <span className="text-[10px] font-medium text-[#8EB69B] block">
             Beban JP teralihkan
           </span>
         </div>
 
         <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
-          <span className="text-[10px] font-bold text-[#8EB69B] uppercase tracking-wider block">Izin & Pengganti</span>
-          <p className="text-3xl font-bold font-mono tracking-tight text-amber-500 mt-1.5">
-            {stats.pendingCount} <span className="text-xs font-bold text-[#8EB69B] font-sans uppercase">Pengajuan</span>
+          <span className="text-xs font-semibold text-[#163832]/60 block">Izin & Pengganti</span>
+          <p className="text-4xl font-bold text-[#051F20] tracking-tight mt-1 mb-2">
+            {stats.pendingCount}
           </p>
-          <span className="text-[10px] font-semibold text-slate-400 mt-2 block uppercase tracking-wider">
+          <span className="text-[10px] font-medium text-[#8EB69B] block">
             {isKepsek ? `Unit ${userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}` : 'Seluruh Unit'}
           </span>
         </div>
 
         {isKepsek ? (
-          <div className="bg-[#163832] p-5 rounded-[16px] border border-[#163832] shadow-xs">
-            <span className="text-[10px] font-bold text-[#8EB69B] uppercase tracking-wider block">Sesi Pengganti Disetujui</span>
-            <p className="text-3xl font-bold font-mono tracking-tight text-[#DAF1DE] mt-1.5">
-              {stats.approvedCount} <span className="text-xs font-bold text-[#8EB69B] font-sans uppercase">Sesi</span>
+          <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+            <span className="text-xs font-semibold text-[#163832]/60 block">Sesi Pengganti Disetujui</span>
+            <p className="text-4xl font-bold text-[#051F20] tracking-tight mt-1 mb-2">
+              {stats.approvedCount}
             </p>
-            <span className="text-[10px] font-semibold text-[#8EB69B] mt-2 block uppercase tracking-wider">
+            <span className="text-[10px] font-medium text-[#8EB69B] block">
               Telah disahkan Kepala Unit
             </span>
           </div>
         ) : (
-          <div className="bg-[#163832] p-5 rounded-[16px] border border-[#163832] shadow-xs">
-            <span className="text-[10px] font-bold text-[#8EB69B] uppercase tracking-wider block">Alokasi Kafa'ah Pengganti</span>
-            <p className="text-2xl font-bold font-mono tracking-tight text-[#DAF1DE] mt-1.5 truncate">
+          <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+            <span className="text-xs font-semibold text-[#163832]/60 block">Alokasi Kafa'ah Pengganti</span>
+            <p className="text-2xl font-bold text-[#051F20] tracking-tight mt-1 mb-2 truncate pt-2">
               {formatRupiah(stats.totalHonor)}
             </p>
-            <span className="text-[10px] font-semibold text-[#8EB69B] mt-2 block uppercase tracking-wider font-mono">
+            <span className="text-[10px] font-medium text-[#8EB69B] block">
               Honor pengganti KBM
             </span>
           </div>
         )}
       </div>
 
-      {/* Admin Monitoring Banner */}
-      {isAdmin && (
-        <div className="bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/50 rounded-xl p-4 flex items-center gap-3 text-xs text-blue-900 dark:text-blue-200 shadow-xs">
-          <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />
-          <div>
-            <p className="font-bold">Mode Monitoring Administrator (Read-Only)</p>
-            <p className="text-[11px] text-blue-700 dark:text-blue-300 mt-0.5">
-              Fitur persetujuan pengajuan izin guru dan penunjukan guru pengganti (badal) secara penuh dipegang oleh Kepala Sekolah masing-masing unit (SMP, MA, Pesantren). Admin hanya dapat melihat rekapitulasi data Kafa'ah.
-            </p>
-          </div>
-        </div>
-      )}
+
 
       {/* 3. DEDICATED SECTION: PENGAJUAN IZIN GURU MENUNGGU PERSETUJUAN KEPALA SEKOLAH */}
       {isKepsek && pendingLeaveRequests.length > 0 && (

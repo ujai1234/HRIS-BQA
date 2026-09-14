@@ -242,28 +242,28 @@ export const LearningNeedManagement: React.FC = () => {
     switch (status) {
       case 'PENDING':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/40">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[8px] text-[9px] font-bold bg-amber-50 text-amber-600 border border-amber-200 uppercase tracking-wider">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
             Menunggu
           </span>
         );
       case 'APPROVED':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[8px] text-[9px] font-bold bg-[#DAF1DE] text-[#163832] uppercase tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#163832]" />
             Disetujui
           </span>
         );
       case 'REJECTED':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200/60 dark:border-rose-800/40">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[8px] text-[9px] font-bold bg-rose-50 text-rose-700 border border-rose-200 uppercase tracking-wider">
             <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
             Ditolak
           </span>
         );
       case 'COMPLETED':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/40">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[8px] text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-200 uppercase tracking-wider">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
             Selesai
           </span>
@@ -274,16 +274,16 @@ export const LearningNeedManagement: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* 1. Clean Minimalist Header */}
-      <div className="bg-white dark:bg-[#121f1a] rounded-lg border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-emerald-50">
+      <div className="bg-white rounded-[16px] border border-slate-200 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-[#051F20] tracking-tight font-sans">
             {isKepsek 
               ? `Persetujuan Kebutuhan (${kepsekUnit})` 
               : currentRole === 'GURU' 
                 ? 'Pengajuan Kebutuhan' 
                 : 'Persetujuan Kebutuhan Sarana'}
           </h1>
-          <p className="text-xs text-slate-500 dark:text-emerald-400/70 mt-0.5">
+          <p className="text-xs text-[#8EB69B] font-semibold">
             {isKepsek 
               ? `Verifikasi dan persetujuan pengadaan kebutuhan guru unit ${kepsekUnit}.`
               : currentRole === 'GURU'
@@ -292,21 +292,21 @@ export const LearningNeedManagement: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {currentRole === 'GURU' ? (
             <button
               onClick={() => setShowAddForm(true)}
-              className="inline-flex items-center gap-1.5 bg-[#1B4332] hover:bg-[#143326] text-white text-xs font-medium px-3.5 py-1.5 rounded-md transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center gap-1.5 bg-[#163832] hover:bg-[#0B2B26] text-[#DAF1DE] px-4 py-2.5 rounded-[12px] text-xs font-bold shadow-xs transition-all cursor-pointer uppercase tracking-wider"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3.5 h-3.5" strokeWidth={2} />
               <span>Ajukan Kebutuhan</span>
             </button>
           ) : (
             <button
               onClick={handleExportPDF}
-              className="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-[#0f1a15] hover:bg-slate-100 dark:bg-[#0f1a15] dark:hover:bg-stone-750 text-slate-700 dark:text-emerald-100 text-xs font-medium px-3 py-1.5 rounded-md border border-slate-200 dark:border-emerald-800/40 transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center gap-1.5 bg-slate-50 hover:bg-slate-100 text-[#051F20] px-4 py-2.5 rounded-[12px] text-xs font-bold border border-slate-200 transition-all cursor-pointer shadow-xs uppercase tracking-wider"
             >
-              <FileText className="w-3.5 h-3.5 text-slate-400" />
+              <FileText className="w-3.5 h-3.5 text-[#051F20]" strokeWidth={2} />
               <span>Ekspor PDF</span>
             </button>
           )}
@@ -315,74 +315,74 @@ export const LearningNeedManagement: React.FC = () => {
 
       {/* 2. Proportional Compact Metric Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 p-4 sm:p-5 shadow-xs">
-          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">
+        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+          <span className="text-xs font-semibold text-[#163832]/60 block">
             Total Pengajuan
           </span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-slate-900 dark:text-emerald-50 mt-1">
+          <p className="text-4xl font-bold text-[#051F20] tracking-tight mt-1 mb-2">
             {metrics.total}
           </p>
-          <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-1.5 block">
+          <span className="text-[10px] font-medium text-[#8EB69B] block">
             Seluruh usulan sarana
           </span>
         </div>
 
-        <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 p-4 sm:p-5 shadow-xs">
-          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">
+        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+          <span className="text-xs font-semibold text-[#163832]/60 block">
             Menunggu Persetujuan
           </span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-amber-600 dark:text-amber-400 mt-1">
+          <p className="text-4xl font-bold text-[#051F20] tracking-tight mt-1 mb-2">
             {metrics.pending}
           </p>
-          <span className="text-[11px] text-amber-600 dark:text-amber-400 mt-1.5 block">
+          <span className="text-[10px] font-medium text-[#8EB69B] block">
             Perlu telaah Kepala Unit
           </span>
         </div>
 
-        <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 p-4 sm:p-5 shadow-xs">
-          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">
+        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+          <span className="text-xs font-semibold text-[#163832]/60 block">
             Disetujui
           </span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-emerald-700 dark:text-emerald-400 mt-1">
+          <p className="text-4xl font-bold text-[#051F20] tracking-tight mt-1 mb-2">
             {metrics.approved}
           </p>
-          <span className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-1.5 block">
+          <span className="text-[10px] font-medium text-[#8EB69B] block">
             Siap direalisasikan
           </span>
         </div>
 
-        <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 p-4 sm:p-5 shadow-xs">
-          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">
+        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+          <span className="text-xs font-semibold text-[#163832]/60 block">
             Ditolak
           </span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-slate-600 dark:text-emerald-300/80 mt-1">
+          <p className="text-4xl font-bold text-[#051F20] tracking-tight mt-1 mb-2">
             {metrics.rejected}
           </p>
-          <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-1.5 block">
+          <span className="text-[10px] font-medium text-[#8EB69B] block">
             Belum dapat disetujui
           </span>
         </div>
       </div>
 
       {/* 3. Search & Filter Bar */}
-      <div className="bg-white dark:bg-[#121f1a] rounded-lg border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
-        <div className="relative flex-1">
-          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+      <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="relative flex-1 sm:w-64 w-full">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8EB69B]" strokeWidth={2} />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Cari kebutuhan atau nama guru..."
-            className="w-full text-xs pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-md text-slate-900 dark:text-emerald-50 placeholder-slate-400 focus:outline-none focus:border-[#1B4332]"
+            className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-[12px] text-xs font-bold text-[#051F20] focus:outline-none focus:ring-2 focus:ring-[#163832]"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           {/* Status Filter */}
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="text-xs px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-md text-slate-700 dark:text-emerald-100 focus:outline-none focus:border-[#1B4332] cursor-pointer"
+            className="px-3 py-2 bg-white border border-slate-200 rounded-[12px] text-xs font-bold uppercase tracking-wider text-[#051F20] focus:outline-none focus:ring-2 focus:ring-[#163832] cursor-pointer"
           >
             <option value="ALL">Semua Status</option>
             <option value="PENDING">Menunggu</option>
@@ -395,7 +395,7 @@ export const LearningNeedManagement: React.FC = () => {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value as any)}
-            className="text-xs px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-md text-slate-700 dark:text-emerald-100 focus:outline-none focus:border-[#1B4332] cursor-pointer"
+            className="px-3 py-2 bg-white border border-slate-200 rounded-[12px] text-xs font-bold uppercase tracking-wider text-[#051F20] focus:outline-none focus:ring-2 focus:ring-[#163832] cursor-pointer"
           >
             <option value="ALL">Semua Kategori</option>
             <option value="Buku">Buku & Kitab</option>
@@ -407,25 +407,25 @@ export const LearningNeedManagement: React.FC = () => {
       </div>
 
       {/* 4. Table / List of Requests */}
-      <div className="bg-white dark:bg-[#121f1a] rounded-lg border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 overflow-hidden">
+      <div className="bg-white rounded-[16px] border border-slate-200 overflow-hidden shadow-xs">
         {filteredRequests.length === 0 ? (
-          <div className="p-8 text-center text-xs text-slate-400">
+          <div className="p-12 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
             Tidak ada data pengajuan yang sesuai.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-emerald-900/40 bg-slate-50 dark:bg-[#0f1a15]/70 dark:bg-[#0f1a15]/70 text-slate-500 dark:text-emerald-400/70 font-medium">
-                  <th className="py-2.5 px-3.5">Tanggal</th>
-                  <th className="py-2.5 px-3.5">Kebutuhan</th>
-                  <th className="py-2.5 px-3.5">Kategori</th>
-                  <th className="py-2.5 px-3.5">Pengaju</th>
-                  <th className="py-2.5 px-3.5">Status</th>
-                  <th className="py-2.5 px-3.5 text-right">Aksi</th>
+                <tr className="bg-slate-50 text-[#8EB69B] font-bold border-b border-slate-200 text-[10px] uppercase tracking-wider">
+                  <th className="py-3 px-4">Tanggal</th>
+                  <th className="py-3 px-4">Kebutuhan</th>
+                  <th className="py-3 px-4">Kategori</th>
+                  <th className="py-3 px-4">Pengaju</th>
+                  <th className="py-3 px-4 text-center">Status</th>
+                  <th className="py-3 px-4 text-center">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-150 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-100 text-[#051F20]">
                 {filteredRequests.map((req) => {
                   const teacher = teacherMap.get(req.teacherId);
                   const isOwner = req.teacherId === currentUser?.id;
@@ -433,54 +433,54 @@ export const LearningNeedManagement: React.FC = () => {
                   return (
                     <tr 
                       key={req.id}
-                      className="hover:bg-slate-50 dark:bg-[#0f1a15]/60 dark:hover:bg-[#162720]/50/40 transition-colors"
+                      className="hover:bg-slate-50 transition-colors"
                     >
                       {/* Tanggal */}
-                      <td className="py-3 px-3.5 text-slate-500 dark:text-emerald-400/70 font-mono whitespace-nowrap">
+                      <td className="py-3.5 px-4 font-mono font-bold whitespace-nowrap text-[#051F20]">
                         {formatIndonesianDate(req.createdAt)}
                       </td>
 
                       {/* Kebutuhan (Judul & Ringkasan) */}
-                      <td className="py-3 px-3.5 max-w-xs">
-                        <p className="font-medium text-slate-900 dark:text-emerald-50">
+                      <td className="py-3.5 px-4 max-w-xs">
+                        <p className="font-bold text-[#051F20]">
                           {req.title}
                         </p>
-                        <p className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">
+                        <p className="text-[10px] text-[#8EB69B] font-semibold line-clamp-1 mt-0.5">
                           {req.description}
                         </p>
                       </td>
 
                       {/* Kategori */}
-                      <td className="py-3 px-3.5 text-slate-600 dark:text-emerald-300/80 whitespace-nowrap">
+                      <td className="py-3.5 px-4 font-semibold text-[#163832] whitespace-nowrap">
                         {req.category}
                       </td>
 
                       {/* Pengaju */}
-                      <td className="py-3 px-3.5 whitespace-nowrap">
-                        <p className="text-slate-800 dark:text-emerald-100 font-medium">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <p className="font-bold text-[#051F20]">
                           {teacher?.name || 'Asatidz'}
                         </p>
-                        <p className="text-[11px] text-slate-400">
+                        <p className="text-[10px] text-[#8EB69B] font-semibold mt-0.5">
                           Unit {teacher?.unit || 'SMP'}
                         </p>
                       </td>
 
                       {/* Status */}
-                      <td className="py-3 px-3.5 whitespace-nowrap">
+                      <td className="py-3.5 px-4 whitespace-nowrap text-center">
                         {getStatusBadge(req.status)}
                         {req.decisionNote && (
-                          <p className="text-[10px] text-slate-400 mt-1 max-w-[180px] truncate" title={req.decisionNote}>
+                          <p className="text-[9px] text-[#8EB69B] font-semibold mt-1.5 max-w-[180px] truncate mx-auto" title={req.decisionNote}>
                             {req.decisionNote}
                           </p>
                         )}
                       </td>
 
                       {/* Aksi */}
-                      <td className="py-3 px-3.5 text-right whitespace-nowrap">
-                        <div className="inline-flex items-center gap-1.5 justify-end">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1.5 justify-center">
                           <button
                             onClick={() => setSelectedDetailRequest(req)}
-                            className="px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-emerald-300/80 bg-slate-50 dark:bg-[#0f1a15] hover:bg-slate-100 dark:hover:bg-slate-700 rounded border border-slate-200 dark:border-emerald-800/40 transition-colors cursor-pointer"
+                            className="px-3 py-1.5 text-[10px] font-bold text-[#051F20] bg-slate-50 hover:bg-slate-100 rounded-[8px] border border-slate-200 transition-colors cursor-pointer uppercase tracking-wider"
                           >
                             Detail
                           </button>
@@ -490,13 +490,13 @@ export const LearningNeedManagement: React.FC = () => {
                             <>
                               <button
                                 onClick={() => handleOpenDecision(req, 'APPROVED')}
-                                className="px-2.5 py-1 text-xs font-medium text-white bg-[#1B4332] hover:bg-[#143326] rounded transition-colors cursor-pointer"
+                                className="px-3 py-1.5 text-[10px] font-bold text-[#DAF1DE] bg-[#163832] hover:bg-[#0B2B26] rounded-[8px] transition-colors cursor-pointer uppercase tracking-wider"
                               >
                                 Setujui
                               </button>
                               <button
                                 onClick={() => handleOpenDecision(req, 'REJECTED')}
-                                className="px-2.5 py-1 text-xs font-medium text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 rounded border border-rose-200/60 dark:border-rose-800/40 transition-colors cursor-pointer"
+                                className="px-3 py-1.5 text-[10px] font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-[8px] border border-rose-200 transition-colors cursor-pointer uppercase tracking-wider"
                               >
                                 Tolak
                               </button>
@@ -507,10 +507,10 @@ export const LearningNeedManagement: React.FC = () => {
                           {(isOwner || currentRole === 'ADMIN') && req.status === 'PENDING' && (
                             <button
                               onClick={() => setDeleteModal({ isOpen: true, requestId: req.id })}
-                              className="p-1 text-slate-400 hover:text-rose-600 rounded transition-colors cursor-pointer"
+                              className="p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-[8px] transition-colors cursor-pointer"
                               title="Hapus"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-4 h-4" strokeWidth={2} />
                             </button>
                           )}
                         </div>
