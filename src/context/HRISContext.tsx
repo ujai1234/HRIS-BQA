@@ -437,6 +437,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (role === 'GURU') setCurrentPath('/dashboard/guru');
     else if (role === 'ADMIN') setCurrentPath('/dashboard/admin');
     else if (isKepsekRole(role)) setCurrentPath('/dashboard/kepsek/audit');
+    else if (role === 'STAFF') setCurrentPath('/dashboard/staff');
 
     toast.success(`Selamat datang, ${targetUser.name}!`);
   };
@@ -482,6 +483,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (role === 'GURU') setCurrentPath('/dashboard/guru');
     else if (role === 'ADMIN') setCurrentPath('/dashboard/admin');
     else if (isKepsekRole(role)) setCurrentPath('/dashboard/kepsek');
+    else if (role === 'STAFF') setCurrentPath('/dashboard/staff');
   };
 
   // Clock In Action
