@@ -15,7 +15,7 @@ export const INITIAL_TEACHERS: Teacher[] = [{
   phone: '08123456789',
   avatarColor: 'bg-emerald-800',
   isActive: true,
-  username: 'admin@bqa.local',
+  username: 'ujai757@gmail.com',
   password: 'PasswordKuat!2026',
 },
 {
