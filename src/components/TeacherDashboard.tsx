@@ -217,29 +217,28 @@ export const TeacherDashboard: React.FC = () => {
             </button>
           </div>
         </div>
-
         {/* Minimalist Summary Badges (Non-monetary) */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-100">
-          <div className="p-4 rounded-[16px] bg-slate-50 border border-slate-100">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-[#163832]">
+          <div className="p-4 rounded-[16px] bg-slate-50 dark:bg-[#0B2B26] border border-slate-100 dark:border-[#163832]">
             <span className="text-[11px] text-[#8EB69B] font-bold uppercase tracking-wider">Jam Mengajar Bulan Ini</span>
-            <div className="text-lg font-bold text-[#051F20] mt-1">
+            <div className="text-lg font-bold text-[#051F20] dark:text-[#DAF1DE] mt-1">
               {teacherPayroll.totalTaughtHours} JP
               {teacherPayroll.totalBadalHours > 0 && (
-                <span className="text-xs font-bold text-[#163832] ml-1">
+                <span className="text-xs font-bold text-[#163832] dark:text-[#8EB69B] ml-1">
                   (+{teacherPayroll.totalBadalHours} Badal)
                 </span>
               )}
             </div>
           </div>
 
-          <div className="p-4 rounded-[16px] bg-slate-50 border border-slate-100">
+          <div className="p-4 rounded-[16px] bg-slate-50 dark:bg-[#0B2B26] border border-slate-100 dark:border-[#163832]">
             <span className="text-[11px] text-[#8EB69B] font-bold uppercase tracking-wider">Total Hari Hadir</span>
-            <div className="text-lg font-bold text-[#051F20] mt-1">
+            <div className="text-lg font-bold text-[#051F20] dark:text-[#DAF1DE] mt-1">
               {teacherPayroll.totalPresentDays} Hari
             </div>
           </div>
 
-          <div className="col-span-2 sm:col-span-1 p-4 rounded-[16px] bg-[#051F20] border border-[#163832]">
+          <div className="col-span-2 sm:col-span-1 p-4 rounded-[16px] bg-[#051F20] dark:bg-[#163832] border border-[#163832] dark:border-[#0B2B26]">
             <span className="text-[11px] text-[#8EB69B] font-bold uppercase tracking-wider">Status Periode</span>
             <div className="text-lg font-bold text-[#DAF1DE] mt-1">
               {selectedPeriod} (Aktif)
@@ -247,16 +246,17 @@ export const TeacherDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
       {/* Sesi KBM Hari Ini & Jadwal */}
       <div className="bqa-card p-6 space-y-4 transition-colors">
         {/* Day Selector Bar */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-[#163832]">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-display font-bold text-[#051F20]">
+              <h2 className="text-lg font-display font-bold text-[#051F20] dark:text-[#DAF1DE]">
                 Jadwal & Presensi KBM
               </h2>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-[8px] bg-slate-100 text-[#051F20] uppercase tracking-wider">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-[8px] bg-slate-100 dark:bg-[#163832] text-[#051F20] dark:text-[#DAF1DE] uppercase tracking-wider">
                 {selectedDay === realTodayName ? 'Hari Ini' : `Hari ${selectedDay}`}
               </span>
             </div>
@@ -265,7 +265,7 @@ export const TeacherDashboard: React.FC = () => {
             </p>
           </div>
 
-          <div className="inline-flex bg-slate-50 p-1.5 rounded-[12px] border border-slate-200 overflow-x-auto max-w-full gap-1">
+          <div className="inline-flex bg-slate-50 dark:bg-[#0B2B26] p-1.5 rounded-[12px] border border-slate-200 dark:border-[#163832] overflow-x-auto max-w-full gap-1">
             {daysOfWeek.map((day) => {
               const isToday = day === realTodayName;
               return (
@@ -274,13 +274,13 @@ export const TeacherDashboard: React.FC = () => {
                   onClick={() => setSelectedDay(day)}
                   className={`px-3 py-1.5 rounded-[8px] text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 uppercase tracking-wider ${
                     selectedDay === day
-                      ? 'bg-[#163832] text-[#DAF1DE] shadow-xs'
-                      : 'text-[#8EB69B] hover:text-[#051F20]'
+                      ? 'bg-[#163832] dark:bg-[#8EB69B] text-[#DAF1DE] dark:text-[#051F20] shadow-xs'
+                      : 'text-[#8EB69B] hover:text-[#051F20] dark:hover:text-[#DAF1DE]'
                   }`}
                 >
                   <span>{day}</span>
                   {isToday && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#DAF1DE] shrink-0" title="Hari Ini" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#DAF1DE] dark:bg-[#051F20] shrink-0" title="Hari Ini" />
                   )}
                 </button>
               );
@@ -324,10 +324,10 @@ export const TeacherDashboard: React.FC = () => {
                       : isIzin
                       ? 'bg-sky-50/50 dark:bg-sky-950/25 border-sky-300 dark:border-sky-800/50'
                       : isSubstituted
-                      ? 'bg-slate-50 dark:bg-[#0e1713] border-slate-200 dark:border-emerald-950/50 opacity-75'
+                      ? 'bg-slate-50 dark:bg-[#0B2B26] border-slate-200 dark:border-[#163832] opacity-75'
                       : timeValidation.canClockIn
-                      ? 'bg-white dark:bg-[#14231d] border-emerald-300 dark:border-emerald-700/60 shadow-xs'
-                      : 'bg-white dark:bg-[#14231d] border-slate-200/90 dark:border-emerald-900/40'
+                      ? 'bg-white dark:bg-[#163832] border-emerald-300 dark:border-[#8EB69B] shadow-xs'
+                      : 'bg-white dark:bg-[#0B2B26] border-slate-200/90 dark:border-[#163832]'
                   }`}
                 >
                   <div className="space-y-3">
@@ -389,10 +389,10 @@ export const TeacherDashboard: React.FC = () => {
 
                     {/* Subject title */}
                     <div>
-                      <h3 className="text-sm font-bold text-slate-900 dark:text-emerald-50">
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-[#DAF1DE]">
                         {schedule.subject}
                       </h3>
-                      <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-emerald-400/70 mt-1">
+                      <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-[#8EB69B] mt-1">
                         <span className="flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5" /> {schedule.startTime} - {schedule.endTime} WIB
                         </span>
@@ -404,19 +404,19 @@ export const TeacherDashboard: React.FC = () => {
 
                     {/* Clock-in / Leave info if exists */}
                     {att && (
-                      <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0e1713] text-xs text-slate-600 dark:text-emerald-200/80 flex flex-col gap-1 border border-slate-100 dark:border-emerald-900/30">
+                      <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0B2B26] text-xs text-slate-600 dark:text-[#DAF1DE] flex flex-col gap-1 border border-slate-100 dark:border-[#163832]">
                         {att.clockInTime && (
                           <div className="flex items-center justify-between">
                             <span>Waktu Absen: <strong>{att.clockInTime} WIB</strong></span>
                             {att.journal?.topic && (
-                              <span className="truncate max-w-[140px] text-slate-500 dark:text-emerald-400/60">
+                              <span className="truncate max-w-[140px] text-slate-500 dark:text-[#8EB69B]">
                                 {att.journal.topic}
                               </span>
                             )}
                           </div>
                         )}
                         {att.notes && (
-                          <p className="text-[11px] text-slate-600 dark:text-emerald-300/80 italic">
+                          <p className="text-[11px] text-slate-600 dark:text-[#8EB69B] italic">
                             Catatan: {att.notes}
                           </p>
                         )}
@@ -425,17 +425,17 @@ export const TeacherDashboard: React.FC = () => {
                   </div>
 
                   {/* Actions */}
-                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-emerald-900/30">
+                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-[#163832]">
                     {schedule.subject.toLowerCase().includes('tahfidz') ? (
                       <div>
                         <button
                           disabled
-                          className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-[#15231c] text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/40 flex items-center justify-center gap-1.5 cursor-not-allowed opacity-90"
+                          className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-[#163832] text-emerald-600 dark:text-[#8EB69B] border border-emerald-200 dark:border-[#0B2B26] flex items-center justify-center gap-1.5 cursor-not-allowed opacity-90"
                         >
                           <Clock className="w-3.5 h-3.5" />
                           <span>Terintegrasi Aplikasi Tahfidz</span>
                         </button>
-                        <p className="text-[10px] text-center text-slate-400 dark:text-emerald-400/60 mt-1">
+                        <p className="text-[10px] text-center text-slate-400 dark:text-[#8EB69B] mt-1">
                           Data absensi langsung ditampilkan dari sistem Tahfidz
                         </p>
                       </div>
@@ -447,7 +447,7 @@ export const TeacherDashboard: React.FC = () => {
                               <button
                                 onClick={() => handleInitiateClockIn(schedule)}
                                 disabled={isPreCheckingGps}
-                                className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-75"
+                                className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-[#163832] hover:bg-[#0B2B26] dark:bg-[#8EB69B] dark:hover:bg-[#DAF1DE] text-white dark:text-[#051F20] transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-75"
                               >
                                 <Clock className="w-3.5 h-3.5" />
                                 <span>{isPreCheckingGps ? 'Memeriksa GPS...' : 'Absen Sekarang'}</span>
@@ -456,12 +456,12 @@ export const TeacherDashboard: React.FC = () => {
                               <div>
                                 <button
                                   disabled
-                                  className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#15231c] text-slate-500 dark:text-emerald-400/70 border border-slate-200 dark:border-emerald-900/40 flex items-center justify-center gap-1.5 cursor-not-allowed opacity-80"
+                                  className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#163832] text-slate-500 dark:text-[#8EB69B] border border-slate-200 dark:border-[#0B2B26] flex items-center justify-center gap-1.5 cursor-not-allowed opacity-80"
                                 >
                                   <Lock className="w-3.5 h-3.5" />
                                   <span>Belum Waktunya (Buka {timeValidation.allowedStartTime})</span>
                                 </button>
-                                <p className="text-[10px] text-center text-slate-400 dark:text-emerald-400/60 mt-1">
+                                <p className="text-[10px] text-center text-slate-400 dark:text-[#8EB69B] mt-1">
                                   Dibuka 15 mnt sebelum sesi ({timeValidation.allowedStartTime} - {schedule.endTime} WIB)
                                 </p>
                               </div>
@@ -469,19 +469,19 @@ export const TeacherDashboard: React.FC = () => {
                               <div>
                                 <button
                                   disabled
-                                  className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-rose-50/70 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/30 flex items-center justify-center gap-1.5 cursor-not-allowed opacity-85"
+                                  className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-rose-50/70 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/40 flex items-center justify-center gap-1.5 cursor-not-allowed opacity-85"
                                 >
                                   <AlertCircle className="w-3.5 h-3.5" />
                                   <span>Waktu Absen Telah Berakhir</span>
                                 </button>
-                                <p className="text-[10px] text-center text-rose-500/80 dark:text-rose-400/70 mt-1">
+                                <p className="text-[10px] text-center text-rose-500/80 dark:text-rose-400/80 mt-1">
                                   Sesi KBM telah selesai (Pukul {schedule.endTime} WIB)
                                 </p>
                               </div>
                             ) : (
                               <button
                                 disabled
-                                className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#15231c] text-slate-400 border border-slate-200 dark:border-emerald-900/40 flex items-center justify-center gap-1.5 cursor-not-allowed"
+                                className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#163832] text-slate-400 dark:text-[#8EB69B] border border-slate-200 dark:border-[#0B2B26] flex items-center justify-center gap-1.5 cursor-not-allowed"
                               >
                                 <Clock className="w-3.5 h-3.5" />
                                 <span>Hanya Aktif di Hari {schedule.dayOfWeek}</span>
@@ -503,9 +503,9 @@ export const TeacherDashboard: React.FC = () => {
                         {isCompleted && att && (
                           <button
                             onClick={() => setActiveJournalData({ attendance: att, schedule })}
-                            className="w-full py-1.5 px-3 rounded-xl text-xs font-medium bg-slate-100 dark:bg-[#182a23] hover:bg-slate-200 dark:hover:bg-[#1f362c] text-slate-700 dark:text-emerald-200 transition-colors flex items-center justify-center gap-1.5 border border-slate-200 dark:border-emerald-800/40 cursor-pointer shadow-xs"
+                            className="w-full py-1.5 px-3 rounded-xl text-xs font-medium bg-slate-100 dark:bg-[#163832] hover:bg-slate-200 dark:hover:bg-[#0B2B26] text-slate-700 dark:text-[#DAF1DE] transition-colors flex items-center justify-center gap-1.5 border border-slate-200 dark:border-[#0B2B26] cursor-pointer shadow-xs"
                           >
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-[#8EB69B]" />
                             <span>Presensi Selesai - Lihat Jurnal</span>
                           </button>
                         )}
@@ -513,15 +513,15 @@ export const TeacherDashboard: React.FC = () => {
                     )}
 
                     {(isIzin || isSakit) && (
-                      <div className="text-center py-1 bg-slate-50 dark:bg-[#0e1713] rounded-xl border border-slate-100 dark:border-emerald-900/30">
-                        <span className="text-[11px] text-amber-700 dark:text-amber-300/90 font-medium">
+                      <div className="text-center py-1 bg-slate-50 dark:bg-[#0B2B26] rounded-xl border border-slate-100 dark:border-[#163832]">
+                        <span className="text-[11px] text-amber-700 dark:text-amber-400 font-medium">
                           Status {isSakit ? 'Sakit' : 'Izin'} Terkunci • Tugas Badal
                         </span>
                       </div>
                     )}
 
                     {isSubstituted && (
-                      <p className="text-xs text-slate-400 dark:text-emerald-400/50 italic text-center py-1">
+                      <p className="text-xs text-slate-400 dark:text-[#8EB69B] italic text-center py-1">
                         Sesi dialihkan ke Guru Badal ({badalInfo?.reason})
                       </p>
                     )}
@@ -535,8 +535,8 @@ export const TeacherDashboard: React.FC = () => {
 
       {/* Teaching History & Journals Table */}
       <div className="bqa-card overflow-hidden transition-colors">
-        <div className="p-5 border-b border-slate-100">
-          <h2 className="text-lg font-display font-bold text-[#051F20]">
+        <div className="p-5 border-b border-slate-100 dark:border-[#163832]">
+          <h2 className="text-lg font-display font-bold text-[#051F20] dark:text-[#DAF1DE]">
             Riwayat Presensi & Jurnal Terkini
           </h2>
           <p className="text-xs text-[#8EB69B] font-medium mt-1">
@@ -547,7 +547,7 @@ export const TeacherDashboard: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-[#8EB69B] text-[10px] font-bold uppercase tracking-wider">
+              <tr className="bg-slate-50 dark:bg-[#0B2B26] border-b border-slate-200 dark:border-[#163832] text-[#8EB69B] text-[10px] font-bold uppercase tracking-wider">
                 <th className="py-3 px-5">Tanggal</th>
                 <th className="py-3 px-5">Mata Pelajaran & Kelas</th>
                 <th className="py-3 px-5">Jam Masuk</th>
@@ -556,7 +556,7 @@ export const TeacherDashboard: React.FC = () => {
                 <th className="py-3 px-5 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-[#163832]">
               {attendances
                 .filter((a) => a.actualTeacherId === currentUser.id)
                 .map((att) => {
@@ -564,36 +564,36 @@ export const TeacherDashboard: React.FC = () => {
                   const isDone = att.status === 'SELESAI';
 
                   return (
-                    <tr key={att.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-3 px-5 font-bold text-[#051F20] whitespace-nowrap">
+                    <tr key={att.id} className="hover:bg-slate-50 dark:hover:bg-[#0f2c25] transition-colors">
+                      <td className="py-3 px-5 font-bold text-[#051F20] dark:text-[#DAF1DE] whitespace-nowrap">
                         {att.date}
                       </td>
                       <td className="py-3 px-5">
-                        <p className="font-bold text-[#051F20]">{sched?.subject || 'KBM Pesantren'}</p>
+                        <p className="font-bold text-[#051F20] dark:text-[#DAF1DE]">{sched?.subject || 'KBM Pesantren'}</p>
                         <p className="text-[11px] font-semibold text-[#8EB69B]">{sched?.className} • {sched?.hours} JP</p>
                       </td>
-                      <td className="py-3 px-5 font-mono font-bold text-[#163832]">
+                      <td className="py-3 px-5 font-mono font-bold text-[#163832] dark:text-[#8EB69B]">
                         {att.clockInTime || '-'}
                       </td>
                       <td className="py-3 px-5">
                         {isDone ? (
-                          <span className="inline-flex items-center gap-1.5 text-[#163832] bg-[#DAF1DE] px-2.5 py-1 rounded-[8px] font-bold text-[10px] uppercase tracking-wider">
+                          <span className="inline-flex items-center gap-1.5 text-[#163832] bg-[#DAF1DE] dark:bg-[#163832] dark:text-[#DAF1DE] px-2.5 py-1 rounded-[8px] font-bold text-[10px] uppercase tracking-wider">
                             <CheckCircle2 className="w-3 h-3" /> Jurnal Terisi
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 text-amber-700 bg-amber-100 px-2.5 py-1 rounded-[8px] font-bold text-[10px] uppercase tracking-wider">
+                          <span className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/40 px-2.5 py-1 rounded-[8px] font-bold text-[10px] uppercase tracking-wider">
                             <AlertCircle className="w-3 h-3" /> Jurnal Kosong
                           </span>
                         )}
                       </td>
                       <td className="py-3 px-5 max-w-xs truncate text-[#8EB69B] font-medium">
-                        {att.journal?.topic || <span className="italic text-slate-300">Belum diisi</span>}
+                        {att.journal?.topic || <span className="italic text-slate-300 dark:text-slate-500">Belum diisi</span>}
                       </td>
                       <td className="py-2.5 px-4 text-right">
                         {sched && (
                           <button
                             onClick={() => setActiveJournalData({ attendance: att, schedule: sched })}
-                            className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer"
+                            className="text-xs font-semibold text-[#163832] hover:text-[#0B2B26] dark:text-[#8EB69B] dark:hover:text-[#DAF1DE] hover:underline cursor-pointer transition-colors"
                           >
                             {isDone ? 'Lihat' : 'Isi Jurnal'}
                           </button>

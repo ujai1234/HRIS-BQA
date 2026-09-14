@@ -78,13 +78,13 @@ export const StaffExpenseForm: React.FC<StaffExpenseFormProps> = ({ category }) 
   };
 
   return (
-    <div className="bg-white dark:bg-[#121f1a] rounded-2xl border border-slate-200/80 dark:border-emerald-900/40 shadow-xs p-5">
+    <div className="bg-white dark:bg-[#0B2B26] rounded-[16px] border border-slate-200/80 dark:border-[#163832] shadow-xs p-5">
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-200/60 dark:border-rose-800/40 shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-[#163832] text-rose-600 dark:text-[#8EB69B] flex items-center justify-center border border-rose-200/60 dark:border-[#0B2B26] shrink-0">
           <Receipt className="w-4 h-4" />
         </div>
         <div>
-          <h3 className="font-bold text-slate-900 dark:text-emerald-50 text-sm">Laporan Belanja &amp; Pengeluaran</h3>
+          <h3 className="font-bold text-slate-900 dark:text-[#DAF1DE] text-sm">Laporan Belanja &amp; Pengeluaran</h3>
         </div>
       </div>
 
@@ -93,7 +93,7 @@ export const StaffExpenseForm: React.FC<StaffExpenseFormProps> = ({ category }) 
         <div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-sm font-medium text-slate-700 dark:text-[#8EB69B] mb-1">
                 Deskripsi Belanja
               </label>
               <input
@@ -101,11 +101,11 @@ export const StaffExpenseForm: React.FC<StaffExpenseFormProps> = ({ category }) 
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Contoh: Beli Beras 50kg, Minyak Goreng 5L"
-                className="w-full bg-slate-50 dark:bg-[#111a16] border border-slate-200 dark:border-emerald-900/50 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent dark:text-slate-200"
+                className="w-full bg-slate-50 dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded-[12px] p-2.5 text-sm focus:ring-2 focus:ring-[#8EB69B] focus:border-transparent dark:text-[#DAF1DE]"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-sm font-medium text-slate-700 dark:text-[#8EB69B] mb-1">
                 Total Biaya (Rp)
               </label>
               <input
@@ -113,21 +113,21 @@ export const StaffExpenseForm: React.FC<StaffExpenseFormProps> = ({ category }) 
                 value={amountInput}
                 onChange={(e) => setAmountInput(formatCurrencyInput(e.target.value))}
                 placeholder="0"
-                className="w-full bg-slate-50 dark:bg-[#111a16] border border-slate-200 dark:border-emerald-900/50 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent dark:text-slate-200 font-mono"
+                className="w-full bg-slate-50 dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded-[12px] p-2.5 text-sm focus:ring-2 focus:ring-[#8EB69B] focus:border-transparent dark:text-[#DAF1DE] font-mono"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-sm font-medium text-slate-700 dark:text-[#8EB69B] mb-1">
                 Unggah Bukti Nota Belanja
               </label>
               {!receiptUrl ? (
                 <div 
-                  className="border-2 border-dashed border-slate-300 dark:border-emerald-900/50 rounded-xl p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-[#111a16] hover:bg-slate-100 dark:hover:bg-[#16201b] transition-colors cursor-pointer"
+                  className="border-2 border-dashed border-slate-300 dark:border-[#0B2B26] rounded-[12px] p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-[#163832] hover:bg-slate-100 dark:hover:bg-[#0B2B26] transition-colors cursor-pointer"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <ImageIcon className="w-6 h-6 text-slate-400 mb-2" />
-                  <span className="text-xs text-slate-500 dark:text-slate-400">Klik untuk memilih foto nota (Max: 5MB)</span>
+                  <ImageIcon className="w-6 h-6 text-slate-400 dark:text-[#8EB69B] mb-2" />
+                  <span className="text-xs text-slate-500 dark:text-[#8EB69B]">Klik untuk memilih foto nota (Max: 5MB)</span>
                   <input 
                     type="file" 
                     accept="image/*" 
@@ -137,7 +137,7 @@ export const StaffExpenseForm: React.FC<StaffExpenseFormProps> = ({ category }) 
                   />
                 </div>
               ) : (
-                <div className="relative rounded-xl border border-slate-200 dark:border-emerald-900/50 overflow-hidden bg-slate-100 dark:bg-[#111a16] aspect-video flex items-center justify-center">
+                <div className="relative rounded-[12px] border border-slate-200 dark:border-[#0B2B26] overflow-hidden bg-slate-100 dark:bg-[#163832] aspect-video flex items-center justify-center">
                   <img src={receiptUrl} alt="Preview Nota" className="max-h-full max-w-full object-contain" />
                   <button
                     type="button"
@@ -152,7 +152,7 @@ export const StaffExpenseForm: React.FC<StaffExpenseFormProps> = ({ category }) 
             
             <button
               type="submit"
-              className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-all shadow-sm flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-[#163832] hover:bg-[#0B2B26] dark:bg-[#8EB69B] dark:hover:bg-[#DAF1DE] text-white dark:text-[#051F20] font-medium rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
             >
               <Plus className="w-4 h-4" /> Ajukan Belanja
             </button>
@@ -161,21 +161,21 @@ export const StaffExpenseForm: React.FC<StaffExpenseFormProps> = ({ category }) 
 
         {/* Riwayat Hari Ini */}
         <div>
-          <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3 border-b border-slate-100 dark:border-emerald-900/30 pb-2">
+          <h4 className="text-sm font-medium text-slate-700 dark:text-[#8EB69B] mb-3 border-b border-slate-100 dark:border-[#163832] pb-2">
             Riwayat Pengajuan Hari Ini
           </h4>
           
           <div className="space-y-3 max-h-[22rem] overflow-y-auto pr-2">
             {todayExpenses.length === 0 ? (
-              <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-4 italic">Belum ada pengajuan belanja hari ini</p>
+              <p className="text-xs text-slate-400 dark:text-[#8EB69B] text-center py-4 italic">Belum ada pengajuan belanja hari ini</p>
             ) : (
               todayExpenses.map(expense => (
-                <div key={expense.id} className="bg-slate-50 dark:bg-[#111a16] p-3 rounded-xl border border-slate-100 dark:border-emerald-900/30">
+                <div key={expense.id} className="bg-slate-50 dark:bg-[#163832] p-3 rounded-[12px] border border-slate-100 dark:border-[#0B2B26]">
                   <div className="flex justify-between items-start mb-1">
-                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200 line-clamp-2">
+                    <p className="text-sm font-medium text-slate-800 dark:text-[#DAF1DE] line-clamp-2">
                       {expense.description}
                     </p>
-                    <span className="text-xs font-mono font-medium text-emerald-700 dark:text-emerald-400 whitespace-nowrap ml-2">
+                    <span className="text-xs font-mono font-medium text-emerald-700 dark:text-[#8EB69B] whitespace-nowrap ml-2">
                       {formatRupiah(expense.amount)}
                     </span>
                   </div>
@@ -185,7 +185,7 @@ export const StaffExpenseForm: React.FC<StaffExpenseFormProps> = ({ category }) 
                         <Clock className="w-3 h-3" /> Menunggu Validasi
                       </span>
                     ) : expense.status === 'APPROVED' ? (
-                      <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full">
+                      <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-[#8EB69B] bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full">
                         <CheckCircle className="w-3 h-3" /> Disetujui
                       </span>
                     ) : (

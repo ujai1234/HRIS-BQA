@@ -74,15 +74,15 @@ export const TeacherNotes: React.FC<{ readOnly?: boolean }> = ({ readOnly = fals
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-[#121f1a] p-5 rounded-2xl border border-slate-200 dark:border-emerald-900/40 shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-[#0B2B26] p-5 rounded-[16px] border border-slate-200 dark:border-[#163832] shadow-sm">
         <div>
-          <h2 className="text-xl font-bold text-slate-800 dark:text-emerald-50">Catatan dan Keterangan (Buku Penghubung)</h2>
-          <p className="text-sm text-slate-500 dark:text-emerald-400/70 mt-1">Pantau catatan kedisiplinan atau prestasi ke wali santri.</p>
+          <h2 className="text-xl font-bold text-slate-800 dark:text-[#DAF1DE]">Catatan dan Keterangan (Buku Penghubung)</h2>
+          <p className="text-sm text-slate-500 dark:text-[#8EB69B] mt-1">Pantau catatan kedisiplinan atau prestasi ke wali santri.</p>
         </div>
         {!readOnly && (
         <button 
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-medium transition-colors shadow-sm text-sm"
+          className="flex items-center gap-2 bg-[#163832] dark:bg-[#8EB69B] hover:bg-[#0B2B26] dark:hover:bg-[#DAF1DE] text-white dark:text-[#051F20] px-4 py-2.5 rounded-[12px] font-medium transition-colors shadow-sm text-sm"
         >
           <Plus className="w-4 h-4" />
           Tulis Catatan Baru
@@ -91,19 +91,19 @@ export const TeacherNotes: React.FC<{ readOnly?: boolean }> = ({ readOnly = fals
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1 bg-white dark:bg-[#121f1a] rounded-2xl border border-slate-200 dark:border-emerald-900/40 p-5 shadow-sm">
-           <h3 className="font-bold text-slate-800 dark:text-emerald-50 mb-4 flex items-center gap-2">
-             <Book className="w-5 h-5 text-emerald-600" />
+        <div className="md:col-span-1 bg-white dark:bg-[#0B2B26] rounded-[16px] border border-slate-200 dark:border-[#163832] p-5 shadow-sm">
+           <h3 className="font-bold text-slate-800 dark:text-[#DAF1DE] mb-4 flex items-center gap-2">
+             <Book className="w-5 h-5 text-emerald-600 dark:text-[#8EB69B]" />
              Pilih Santri
            </h3>
            <div className="relative mb-4">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8EB69B]" />
             <input 
               type="text" 
               placeholder="Cari santri..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-900/40 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 dark:text-emerald-100 outline-none"
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-[#163832] border border-slate-200 dark:border-[#163832] rounded-[12px] text-sm focus:ring-2 focus:ring-[#8EB69B] dark:text-[#DAF1DE] outline-none"
             />
           </div>
           <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
@@ -115,29 +115,29 @@ export const TeacherNotes: React.FC<{ readOnly?: boolean }> = ({ readOnly = fals
                   setFormData({...formData, studentId: s.id});
                   setShowModal(true);
                 }}
-                className={`p-3 rounded-xl border border-slate-200 dark:border-emerald-900/40 transition-all bg-slate-50 dark:bg-[#162720]/50 ${!readOnly ? 'hover:border-emerald-500 dark:hover:border-emerald-500 cursor-pointer' : ''}`}
+                className={`p-3 rounded-[12px] border border-slate-200 dark:border-[#163832] transition-all bg-slate-50 dark:bg-[#163832]/50 ${!readOnly ? 'hover:border-emerald-500 dark:hover:border-[#8EB69B] cursor-pointer' : ''}`}
               >
-                <p className="font-medium text-slate-800 dark:text-emerald-50 text-sm">{s.name}</p>
-                <p className="text-xs text-slate-500 dark:text-emerald-400/60 mt-1">NIS: {s.nis} • {s.className}</p>
+                <p className="font-medium text-slate-800 dark:text-[#DAF1DE] text-sm">{s.name}</p>
+                <p className="text-xs text-slate-500 dark:text-[#8EB69B] mt-1">NIS: {s.nis} • {s.className}</p>
               </div>
             ))}
           </div>
         </div>
         
         <div className="md:col-span-2 flex flex-col h-[500px]">
-          <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-900/40 p-5 mb-4 shrink-0 flex items-center gap-4">
-            <ShieldCheck className="w-10 h-10 text-emerald-600 hidden sm:block" />
+          <div className="bg-emerald-50 dark:bg-[#163832] rounded-[16px] border border-emerald-100 dark:border-[#0B2B26] p-5 mb-4 shrink-0 flex items-center gap-4">
+            <ShieldCheck className="w-10 h-10 text-emerald-600 dark:text-[#8EB69B] hidden sm:block" />
             <div>
-              <h3 className="text-sm font-bold text-emerald-800 dark:text-emerald-400">Komunikasi Transparan</h3>
-              <p className="text-xs text-emerald-600 dark:text-emerald-500/80 mt-1">
+              <h3 className="text-sm font-bold text-emerald-800 dark:text-[#DAF1DE]">Komunikasi Transparan</h3>
+              <p className="text-xs text-emerald-600 dark:text-[#8EB69B] mt-1">
                 Laporan kedisiplinan, prestasi, atau info akademik terkirim otomatis ke WA wali santri.
               </p>
             </div>
           </div>
           
-          <div className="bg-white dark:bg-[#121f1a] rounded-2xl border border-slate-200 dark:border-emerald-900/40 shadow-sm flex-1 overflow-hidden flex flex-col">
-             <div className="p-4 border-b border-slate-200 dark:border-emerald-900/40 shrink-0">
-               <h3 className="font-bold text-slate-800 dark:text-emerald-50 text-sm">Riwayat Catatan</h3>
+          <div className="bg-white dark:bg-[#0B2B26] rounded-[16px] border border-slate-200 dark:border-[#163832] shadow-sm flex-1 overflow-hidden flex flex-col">
+             <div className="p-4 border-b border-slate-200 dark:border-[#163832] shrink-0">
+               <h3 className="font-bold text-slate-800 dark:text-[#DAF1DE] text-sm">Riwayat Catatan</h3>
              </div>
              <div className="p-4 overflow-y-auto flex-1 space-y-3">
                {notesHistory.length === 0 ? (
@@ -146,19 +146,19 @@ export const TeacherNotes: React.FC<{ readOnly?: boolean }> = ({ readOnly = fals
                   notesHistory.map(note => {
                     const student = students.find(s => s.id === note.studentId);
                     return (
-                      <div key={note.id} className="p-4 border border-slate-100 dark:border-emerald-900/30 rounded-xl bg-slate-50 dark:bg-[#0f1a15]">
+                      <div key={note.id} className="p-4 border border-slate-100 dark:border-[#163832] rounded-[12px] bg-slate-50 dark:bg-[#163832]/50">
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <span className="font-semibold text-slate-800 dark:text-emerald-50 text-sm">{student ? student.name : 'Santri tidak diketahui'}</span>
-                            <span className={`text-[10px] ml-2 px-2 py-0.5 rounded font-medium ${
-                              note.type === 'KEDISIPLINAN' ? 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300' :
-                              note.type === 'PRESTASI' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300' :
-                              'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
+                            <span className="font-semibold text-slate-800 dark:text-[#DAF1DE] text-sm">{student ? student.name : 'Santri tidak diketahui'}</span>
+                            <span className={`text-[10px] ml-2 px-2 py-0.5 rounded-[8px] font-medium ${
+                              note.type === 'KEDISIPLINAN' ? 'bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-200' :
+                              note.type === 'PRESTASI' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200' :
+                              'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200'
                             }`}>{note.type}</span>
                           </div>
-                          <span className="text-[10px] text-slate-400">{new Date(note.createdAt).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit'})}</span>
+                          <span className="text-[10px] text-slate-400 dark:text-[#8EB69B]">{new Date(note.createdAt).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit'})}</span>
                         </div>
-                        <p className="text-xs text-slate-600 dark:text-emerald-100/70">{note.note}</p>
+                        <p className="text-xs text-slate-600 dark:text-[#DAF1DE]">{note.note}</p>
                       </div>
                     )
                   })
@@ -173,35 +173,35 @@ export const TeacherNotes: React.FC<{ readOnly?: boolean }> = ({ readOnly = fals
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-[#121f1a] rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+            className="bg-white dark:bg-[#0B2B26] rounded-[16px] shadow-xl w-full max-w-md overflow-hidden"
           >
-            <div className="p-5 border-b border-slate-200 dark:border-emerald-900/40 flex justify-between items-center bg-slate-50 dark:bg-[#0f1a15]">
-              <h3 className="font-bold text-slate-800 dark:text-emerald-50">Tulis Buku Penghubung</h3>
+            <div className="p-5 border-b border-slate-200 dark:border-[#163832] flex justify-between items-center bg-slate-50 dark:bg-[#163832]">
+              <h3 className="font-bold text-slate-800 dark:text-[#DAF1DE]">Tulis Buku Penghubung</h3>
             </div>
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
               <div>
-                <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80 mb-1">Pilih Santri</label>
-                <select required value={formData.studentId} onChange={e => setFormData({...formData, studentId: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500">
+                <label className="block text-xs font-medium text-slate-600 dark:text-[#8EB69B] mb-1">Pilih Santri</label>
+                <select required value={formData.studentId} onChange={e => setFormData({...formData, studentId: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded-[12px] text-sm dark:text-[#DAF1DE] outline-none focus:border-[#8EB69B]">
                   <option value="">-- Pilih --</option>
                   {students.map(s => <option key={s.id} value={s.id}>{s.name} ({s.className})</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80 mb-1">Kategori Catatan</label>
-                <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500">
+                <label className="block text-xs font-medium text-slate-600 dark:text-[#8EB69B] mb-1">Kategori Catatan</label>
+                <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded-[12px] text-sm dark:text-[#DAF1DE] outline-none focus:border-[#8EB69B]">
                   <option value="KEDISIPLINAN">Kedisiplinan & Pelanggaran</option>
                   <option value="PRESTASI">Prestasi & Apresiasi</option>
                   <option value="AKADEMIK">Info Akademik</option>
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80 mb-1">Isi Catatan</label>
-                <textarea required rows={4} value={formData.note} onChange={e => setFormData({...formData, note: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500" placeholder="Ketikkan catatan untuk wali santri..." />
+                <label className="block text-xs font-medium text-slate-600 dark:text-[#8EB69B] mb-1">Isi Catatan</label>
+                <textarea required rows={4} value={formData.note} onChange={e => setFormData({...formData, note: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded-[12px] text-sm dark:text-[#DAF1DE] outline-none focus:border-[#8EB69B]" placeholder="Ketikkan catatan untuk wali santri..." />
               </div>
               
-              <div className="pt-4 border-t border-slate-200 dark:border-emerald-900/40 flex justify-end gap-3">
-                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-emerald-300 dark:hover:bg-emerald-900/40 rounded-lg transition-colors">Batal</button>
-                <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 flex items-center gap-2 rounded-lg transition-colors shadow-sm">
+              <div className="pt-4 border-t border-slate-200 dark:border-[#163832] flex justify-end gap-3">
+                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-[#DAF1DE] dark:hover:bg-[#163832] rounded-[12px] transition-colors">Batal</button>
+                <button type="submit" className="px-4 py-2 text-sm font-medium text-white dark:text-[#051F20] bg-[#163832] hover:bg-[#0B2B26] dark:bg-[#8EB69B] dark:hover:bg-[#DAF1DE] flex items-center gap-2 rounded-[12px] transition-colors shadow-sm">
                   <Send className="w-4 h-4" />
                   Kirim ke Wali
                 </button>

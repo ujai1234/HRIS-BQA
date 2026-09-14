@@ -22,9 +22,9 @@ export const StaffView: React.FC<StaffViewProps> = ({ initialTab = 'presensi' })
   return (
     <div className="space-y-5">
       {/* Compact Clean Header Bar (No bloated greetings/subtitles) */}
-      <div className="bg-white dark:bg-[#121f1a] p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-emerald-900/30 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white dark:bg-[#0B2B26] p-4 sm:p-5 rounded-[16px] border border-slate-200/90 dark:border-[#163832] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-[#065f46] dark:text-emerald-400 flex items-center justify-center border border-emerald-200/60 dark:border-emerald-800/40 shrink-0">
+          <div className="w-10 h-10 rounded-[12px] bg-emerald-50 dark:bg-[#163832] text-[#065f46] dark:text-[#8EB69B] flex items-center justify-center border border-emerald-200/60 dark:border-[#0B2B26] shrink-0">
             {activeTab === 'presensi' ? (
               isDapur ? <Utensils className="w-5 h-5" /> : <Wrench className="w-5 h-5" />
             ) : (
@@ -32,13 +32,13 @@ export const StaffView: React.FC<StaffViewProps> = ({ initialTab = 'presensi' })
             )}
           </div>
           <div>
-            <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-emerald-50 tracking-tight">
+            <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-[#DAF1DE] tracking-tight">
               {activeTab === 'presensi' 
                 ? (isDapur ? 'Presensi & Menu Dapur' : isSarpras ? 'Presensi & Perbaikan Sarpras' : 'Presensi & Operasional Staff')
                 : (isDapur ? 'Jurnal Kerja & Belanja Dapur' : isSarpras ? 'Jurnal Kerja & Belanja Sarpras' : 'Jurnal Kerja & Pengajuan Belanja')}
             </h1>
-            <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500 dark:text-emerald-400/70">
-              <span className="font-semibold text-slate-700 dark:text-emerald-200">{currentUser?.name}</span>
+            <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500 dark:text-[#8EB69B]">
+              <span className="font-semibold text-slate-700 dark:text-[#DAF1DE]">{currentUser?.name}</span>
               <span>•</span>
               <span>{currentUser?.position || 'Staff'}</span>
               <span>•</span>
@@ -48,7 +48,7 @@ export const StaffView: React.FC<StaffViewProps> = ({ initialTab = 'presensi' })
         </div>
 
         <div className="shrink-0 flex items-center gap-2">
-          <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40">
+          <span className="text-[11px] font-bold px-2.5 py-1 rounded-[8px] bg-emerald-50 dark:bg-[#163832] text-emerald-800 dark:text-[#8EB69B] border border-emerald-200/60 dark:border-[#0B2B26]">
             {currentUser?.unit || 'PESANTREN'}
           </span>
         </div>
@@ -69,9 +69,9 @@ export const StaffView: React.FC<StaffViewProps> = ({ initialTab = 'presensi' })
             ) : isSarpras ? (
               <InventoryModule showJournalAndExpense={false} />
             ) : (
-              <div className="p-8 text-center bg-white dark:bg-[#121f1a] rounded-2xl border border-slate-200 dark:border-emerald-900/40">
+              <div className="p-8 text-center bg-white dark:bg-[#0B2B26] rounded-[16px] border border-slate-200 dark:border-[#163832]">
                 <AlertCircle className="w-10 h-10 text-amber-500 mx-auto mb-2" />
-                <p className="text-xs text-slate-500 dark:text-emerald-400/60">Posisi staff belum dikonfigurasi.</p>
+                <p className="text-xs text-slate-500 dark:text-[#8EB69B]">Posisi staff belum dikonfigurasi.</p>
               </div>
             )
           ) : (
