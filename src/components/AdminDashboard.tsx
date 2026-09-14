@@ -548,13 +548,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
 
   return (
     <div className="space-y-6">
-      {/* 1. Premium & Minimalist Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bqa-card p-4 sm:p-5">
+      {/* 1. Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-base sm:text-lg font-display font-semibold text-slate-900 dark:text-emerald-50 tracking-tight">
-            Dashboard Administrasi
+          <h1 className="text-3xl font-bold text-[#051F20] tracking-tight">
+            Dashboard
           </h1>
-          <p className="text-xs text-slate-500 dark:text-emerald-400/70 mt-0.5">
+          <p className="text-sm text-[#8EB69B] mt-1 font-medium">
             Periode {selectedPeriod} • Pesantren Baitul Qur'an Al-Ikhwan
           </p>
         </div>
@@ -565,104 +565,104 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
             setOfficialReportType('executive_summary');
             setShowOfficialReportModal(true);
           }}
-          className="bqa-btn-gold px-4 py-2 self-start sm:self-auto"
+          className="bg-[#051F20] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-[#163832] transition-colors shadow-sm"
         >
           Cetak Laporan PDF
         </button>
       </div>
 
-      {/* 2. Key Metrics (4 Pristine Minimalist Cards) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bqa-card p-4 sm:p-5">
-          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block uppercase tracking-wider">Total Guru</span>
-          <p className="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-emerald-50 mt-2 font-mono tracking-tight">
+      {/* 2. Key Metrics */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white rounded-[24px] p-6 shadow-sm">
+          <span className="text-sm font-medium text-[#163832]/70 block">Total Guru</span>
+          <p className="text-4xl font-bold text-[#051F20] mt-3 tracking-tight">
             {totalTeachers}
           </p>
-          <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold block mt-1.5">
+          <span className="text-xs text-[#8EB69B] block mt-2 font-medium">
             Semua Aktif
           </span>
         </div>
 
-        <div className="bqa-card p-4 sm:p-5">
-          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block uppercase tracking-wider">Beban KBM</span>
-          <p className="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-emerald-50 mt-2 font-mono tracking-tight">
-            {totalWeeklyJP} <span className="text-xs font-normal text-slate-500 dark:text-emerald-400/70 font-sans">JP/mgg</span>
+        <div className="bg-white rounded-[24px] p-6 shadow-sm">
+          <span className="text-sm font-medium text-[#163832]/70 block">Beban KBM</span>
+          <p className="text-4xl font-bold text-[#051F20] mt-3 tracking-tight flex items-baseline gap-1">
+            {totalWeeklyJP} <span className="text-sm font-medium text-[#8EB69B]">JP/mgg</span>
           </p>
-          <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 block mt-1.5 font-mono">
+          <span className="text-xs text-[#8EB69B] block mt-2 font-medium">
             {totalSchedules} Sesi Terjadwal
           </span>
         </div>
 
-        <div className="bqa-card p-4 sm:p-5">
-          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block uppercase tracking-wider">Kepatuhan Jurnal</span>
-          <p className="text-2xl sm:text-3xl font-semibold text-emerald-700 dark:text-emerald-400 mt-2 font-mono tracking-tight">
+        <div className="bg-white rounded-[24px] p-6 shadow-sm">
+          <span className="text-sm font-medium text-[#163832]/70 block">Kepatuhan Jurnal</span>
+          <p className="text-4xl font-bold text-[#051F20] mt-3 tracking-tight">
             {complianceRate}%
           </p>
-          <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 block mt-1.5 font-mono">
+          <span className="text-xs text-[#8EB69B] block mt-2 font-medium">
             {completedJournals} Selesai • {pendingJournals} Pending
           </span>
         </div>
 
-        <div className="bqa-card p-4 sm:p-5">
-          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block uppercase tracking-wider">Estimasi Kafa'ah</span>
-          <p className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-emerald-50 mt-2 font-mono tracking-tight truncate">
+        <div className="bg-white rounded-[24px] p-6 shadow-sm">
+          <span className="text-sm font-medium text-[#163832]/70 block">Estimasi Kafa'ah</span>
+          <p className="text-2xl sm:text-3xl font-bold text-[#051F20] mt-3 tracking-tight truncate">
             {formatRupiah(payrollSummary.totalNet)}
           </p>
-          <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 block mt-1.5 font-mono truncate">
+          <span className="text-xs text-[#8EB69B] block mt-2 font-medium truncate">
             Potongan: -{formatRupiah(payrollSummary.totalDeductions)}
           </span>
         </div>
       </div>
 
-      {/* 2.2 Pending Learning Needs Summary Banner (Sleek, No Icon) */}
+      {/* Pending Learning Needs Summary Banner */}
       <div 
         onClick={() => setCurrentPath('/dashboard/admin/kebutuhan')}
-        className="bg-slate-50 dark:bg-[#0f1a15] p-4 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-100/50 dark:hover:bg-[#162720]/50 transition-all cursor-pointer group shadow-sm"
+        className="bg-[#DAF1DE] p-5 rounded-[24px] flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#8EB69B]/40 transition-all cursor-pointer group"
       >
-        <div className="flex items-center gap-3">
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+        <div className="flex items-center gap-4">
+          <span className={`text-xs font-bold px-3 py-1.5 rounded-lg ${
             pendingLearningNeeds > 0 
-              ? 'bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-300' 
-              : 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300'
+              ? 'bg-[#0B2B26] text-white' 
+              : 'bg-[#163832] text-white'
           }`}>
             {pendingLearningNeeds > 0 ? `${pendingLearningNeeds} Ajuan Pending` : 'Terverifikasi'}
           </span>
           <div>
-            <span className="text-xs font-semibold text-slate-800 dark:text-emerald-100">
+            <span className="text-sm font-bold text-[#051F20]">
               Pengajuan Kebutuhan Pembelajaran Guru
             </span>
-            <p className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-0.5 font-mono">
+            <p className="text-xs text-[#163832]/80 mt-0.5 font-medium">
               Rincian: SMP ({pendingSMP}), MA ({pendingMA}), Ponpes ({pendingPesantren})
             </p>
           </div>
         </div>
-        <div className="text-xs font-semibold text-slate-600 dark:text-emerald-300/80 group-hover:text-slate-900 dark:group-hover:text-white transition-colors self-end sm:self-auto hover:underline">
-          Kelola Modul Kebutuhan
+        <div className="text-sm font-bold text-[#051F20] flex items-center gap-2 group-hover:translate-x-1 transition-transform">
+          Kelola Modul <span className="text-lg leading-none">→</span>
         </div>
       </div>
 
-      {/* 3. Performance & Compliance Analytics Grid (Minimalist & Informative Recharts) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* 3. Analytics Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Card 1: Tren & Distribusi Presensi KBM */}
-        <div className="bqa-card p-4 sm:p-5 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-emerald-900/40">
+        <div className="bg-white rounded-[24px] p-6 shadow-sm space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
             <div>
-              <h2 className="text-sm font-semibold text-slate-900 dark:text-emerald-50">
+              <h2 className="text-base font-bold text-[#051F20]">
                 Tren & Distribusi Presensi KBM
               </h2>
-              <p className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-0.5">
+              <p className="text-xs font-medium text-[#8EB69B] mt-1">
                 Sesi tepat waktu, terlambat, badal, dan rasio kehadiran
               </p>
             </div>
 
-            <div className="flex items-center gap-1.5 self-start sm:self-auto">
+            <div className="flex items-center gap-2 self-start sm:self-auto bg-slate-50 p-1 rounded-xl">
               <button
                 type="button"
                 onClick={() => setWeeklyViewMode('daily_week')}
-                className={`text-[10px] font-semibold px-2.5 py-1 rounded transition-colors cursor-pointer ${
+                className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                   weeklyViewMode === 'daily_week'
-                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                    : 'bg-slate-100 text-slate-600 dark:bg-[#0f1a15] dark:text-emerald-400/70 hover:bg-slate-200'
+                    ? 'bg-[#051F20] text-white shadow-sm'
+                    : 'text-[#8EB69B] hover:text-[#051F20]'
                 }`}
               >
                 Harian
@@ -670,10 +670,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
               <button
                 type="button"
                 onClick={() => setWeeklyViewMode('monthly_weeks')}
-                className={`text-[10px] font-semibold px-2.5 py-1 rounded transition-colors cursor-pointer ${
+                className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                   weeklyViewMode === 'monthly_weeks'
-                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                    : 'bg-slate-100 text-slate-600 dark:bg-[#0f1a15] dark:text-emerald-400/70 hover:bg-slate-200'
+                    ? 'bg-[#051F20] text-white shadow-sm'
+                    : 'text-[#8EB69B] hover:text-[#051F20]'
                 }`}
               >
                 Pekanan
@@ -681,180 +681,128 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
             </div>
           </div>
 
-          {/* Quick Informative Badges */}
-          <div className="flex items-center justify-between text-[11px]">
-            <div className="flex items-center gap-3">
-              <span className="text-slate-500 dark:text-emerald-400/70">
-                Rerata Kehadiran: <strong className="text-slate-900 dark:text-emerald-50 font-mono">{weeklyStatsSummary.avgRate}%</strong>
+          <div className="flex items-center justify-between text-xs font-medium">
+            <div className="flex items-center gap-4">
+              <span className="text-[#8EB69B]">
+                Rerata: <strong className="text-[#051F20] text-sm">{weeklyStatsSummary.avgRate}%</strong>
               </span>
-              <span className="text-slate-500 dark:text-emerald-400/70">
-                Ketepatan: <strong className="text-emerald-700 dark:text-emerald-400 font-mono">{weeklyStatsSummary.punctualityRate}%</strong>
+              <span className="text-[#8EB69B]">
+                Ketepatan: <strong className="text-[#051F20] text-sm">{weeklyStatsSummary.punctualityRate}%</strong>
               </span>
             </div>
 
-            {/* Minimalist Legend */}
-            <div className="hidden sm:flex items-center gap-2.5 text-[10px]">
-              <span className="inline-flex items-center gap-1 text-slate-600 dark:text-emerald-400/70">
-                <span className="w-2 h-2 rounded-sm bg-emerald-600 dark:bg-emerald-500" /> Tepat
+            <div className="hidden sm:flex items-center gap-4">
+              <span className="inline-flex items-center gap-1.5 text-[#163832]/80">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#163832]" /> Tepat
               </span>
-              <span className="inline-flex items-center gap-1 text-slate-600 dark:text-emerald-400/70">
-                <span className="w-2 h-2 rounded-sm bg-amber-500" /> Terlambat
+              <span className="inline-flex items-center gap-1.5 text-[#163832]/80">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#8EB69B]" /> Terlambat
               </span>
-              <span className="inline-flex items-center gap-1 text-slate-600 dark:text-emerald-400/70">
-                <span className="w-2 h-2 rounded-sm bg-indigo-500" /> Pengganti
-              </span>
-              <span className="inline-flex items-center gap-1 text-slate-600 dark:text-emerald-400/70">
-                <span className="w-3 h-0.5 bg-slate-900 dark:bg-slate-200" /> Hadir %
+              <span className="inline-flex items-center gap-1.5 text-[#163832]/80">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#DAF1DE]" /> Pengganti
               </span>
             </div>
           </div>
 
-          {/* Recharts ComposedChart */}
-          <div className="h-56 w-full pt-1">
+          <div className="h-60 w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={weeklyAttendanceData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" strokeOpacity={1} />
-                <XAxis 
-                  dataKey="periodLabel" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 10, fill: 'var(--chart-axis-text)' }} 
-                  dy={6}
-                />
-                <YAxis 
-                  yAxisId="left" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 10, fill: 'var(--chart-axis-text)' }} 
-                />
-                <YAxis 
-                  yAxisId="right" 
-                  orientation="right" 
-                  domain={[0, 100]} 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 10, fill: 'var(--chart-axis-text)' }} 
-                  unit="%" 
-                  dx={6}
-                />
-                <Tooltip content={<AttendanceTooltip />} />
-                <Bar yAxisId="left" dataKey="tepatWaktu" name="Tepat Waktu" stackId="a" fill="#059669" radius={[0, 0, 0, 0]} maxBarSize={28} />
-                <Bar yAxisId="left" dataKey="terlambat" name="Terlambat" stackId="a" fill="#f59e0b" radius={[0, 0, 0, 0]} maxBarSize={28} />
-                <Bar yAxisId="left" dataKey="badal" name="Pengganti" stackId="a" fill="#6366f1" radius={[3, 3, 0, 0]} maxBarSize={28} />
-                <Line yAxisId="right" type="monotone" dataKey="rate" name="Tingkat Hadir" stroke="#1c1917" strokeWidth={2} dot={{ r: 3, fill: '#1c1917' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="periodLabel" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#8EB69B', fontWeight: 500 }} dy={10} />
+                <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#8EB69B', fontWeight: 500 }} />
+                <YAxis yAxisId="right" orientation="right" domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#8EB69B', fontWeight: 500 }} unit="%" dx={10} />
+                <Tooltip content={<AttendanceTooltip />} cursor={{fill: '#f8fafc'}} />
+                <Bar yAxisId="left" dataKey="tepatWaktu" name="Tepat Waktu" stackId="a" fill="#163832" radius={[0, 0, 0, 0]} maxBarSize={32} />
+                <Bar yAxisId="left" dataKey="terlambat" name="Terlambat" stackId="a" fill="#8EB69B" radius={[0, 0, 0, 0]} maxBarSize={32} />
+                <Bar yAxisId="left" dataKey="badal" name="Pengganti" stackId="a" fill="#DAF1DE" radius={[6, 6, 0, 0]} maxBarSize={32} />
+                <Line yAxisId="right" type="monotone" dataKey="rate" name="Tingkat Hadir" stroke="#051F20" strokeWidth={3} dot={{ r: 4, fill: '#051F20', strokeWidth: 0 }} activeDot={{ r: 6 }} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Card 2: Kepatuhan Jurnal Mengajar */}
-        <div className="bqa-card p-4 sm:p-5 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-emerald-900/40">
+        <div className="bg-white rounded-[24px] p-6 shadow-sm space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
             <div>
-              <h2 className="text-sm font-semibold text-slate-900 dark:text-emerald-50">
+              <h2 className="text-base font-bold text-[#051F20]">
                 Performa Kepatuhan Jurnal Mengajar
               </h2>
-              <p className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-0.5">
+              <p className="text-xs font-medium text-[#8EB69B] mt-1">
                 Pengisian jurnal lengkap vs pending dan tingkat kepatuhan (%)
               </p>
             </div>
           </div>
 
-          {/* Quick Informative Badges */}
-          <div className="flex items-center justify-between text-[11px]">
-            <span className="text-slate-500 dark:text-emerald-400/70">
-              Total Log: <strong className="text-slate-900 dark:text-emerald-50 font-mono">{completedJournals} Selesai</strong> • <span className="text-amber-700 dark:text-amber-400 font-mono">{pendingJournals} Pending</span>
+          <div className="flex items-center justify-between text-xs font-medium">
+            <span className="text-[#8EB69B]">
+              Total Log: <strong className="text-[#051F20] text-sm">{completedJournals} Selesai</strong> • <span className="text-[#8EB69B] text-sm">{pendingJournals} Pending</span>
             </span>
 
-            {/* Minimalist Legend */}
-            <div className="flex items-center gap-2.5 text-[10px]">
-              <span className="inline-flex items-center gap-1 text-slate-600 dark:text-emerald-400/70">
-                <span className="w-2 h-2 rounded-sm bg-indigo-600 dark:bg-indigo-500" /> Selesai
+            <div className="flex items-center gap-4">
+              <span className="inline-flex items-center gap-1.5 text-[#163832]/80">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#0B2B26]" /> Selesai
               </span>
-              <span className="inline-flex items-center gap-1 text-slate-600 dark:text-emerald-400/70">
-                <span className="w-2 h-2 rounded-sm bg-rose-500" /> Pending
-              </span>
-              <span className="inline-flex items-center gap-1 text-slate-600 dark:text-emerald-400/70">
-                <span className="w-3 h-0.5 bg-emerald-600 dark:bg-emerald-400" /> Kepatuhan %
+              <span className="inline-flex items-center gap-1.5 text-[#163832]/80">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#DAF1DE]" /> Pending
               </span>
             </div>
           </div>
 
-          {/* Recharts ComposedChart */}
-          <div className="h-56 w-full pt-1">
+          <div className="h-60 w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={monthlyPerformanceData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" strokeOpacity={1} />
-                <XAxis 
-                  dataKey="bulan" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 10, fill: 'var(--chart-axis-text)' }} 
-                  dy={6}
-                />
-                <YAxis 
-                  yAxisId="left" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 10, fill: 'var(--chart-axis-text)' }} 
-                />
-                <YAxis 
-                  yAxisId="right" 
-                  orientation="right" 
-                  domain={[50, 100]} 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 10, fill: 'var(--chart-axis-text)' }} 
-                  unit="%" 
-                  dx={6}
-                />
-                <Tooltip content={<MinimalJournalTooltip />} />
-                <Bar yAxisId="left" dataKey="jurnalSelesai" name="Jurnal Selesai" stackId="j" fill="#4f46e5" radius={[0, 0, 0, 0]} maxBarSize={28} />
-                <Bar yAxisId="left" dataKey="jurnalPending" name="Jurnal Pending" stackId="j" fill="#f43f5e" radius={[3, 3, 0, 0]} maxBarSize={28} />
-                <Line yAxisId="right" type="monotone" dataKey="kepatuhanJurnal" name="Kepatuhan" stroke="#059669" strokeWidth={2} dot={{ r: 3, fill: '#059669' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#8EB69B', fontWeight: 500 }} dy={10} />
+                <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#8EB69B', fontWeight: 500 }} />
+                <YAxis yAxisId="right" orientation="right" domain={[50, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#8EB69B', fontWeight: 500 }} unit="%" dx={10} />
+                <Tooltip content={<MinimalJournalTooltip />} cursor={{fill: '#f8fafc'}} />
+                <Bar yAxisId="left" dataKey="jurnalSelesai" name="Jurnal Selesai" stackId="j" fill="#0B2B26" radius={[0, 0, 0, 0]} maxBarSize={32} />
+                <Bar yAxisId="left" dataKey="jurnalPending" name="Jurnal Pending" stackId="j" fill="#DAF1DE" radius={[6, 6, 0, 0]} maxBarSize={32} />
+                <Line yAxisId="right" type="monotone" dataKey="kepatuhanJurnal" name="Kepatuhan" stroke="#163832" strokeWidth={3} dot={{ r: 4, fill: '#163832', strokeWidth: 0 }} activeDot={{ r: 6 }} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      {/* 4. Monitoring Aktivitas KBM (Clean Table, No Icons) */}
-      <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-slate-100 dark:border-emerald-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* 4. Monitoring Aktivitas KBM */}
+      <div className="bg-white rounded-[24px] overflow-hidden shadow-sm border border-slate-100/50 mt-6">
+        <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="font-semibold text-sm text-slate-900 dark:text-emerald-50">
+            <h2 className="font-bold text-base text-[#051F20]">
               Aktivitas Presensi Terkini
             </h2>
           </div>
 
-          <div className="relative w-full sm:w-60">
+          <div className="relative w-full sm:w-64">
             <input
               type="text"
               value={searchActivity}
               onChange={(e) => setSearchActivity(e.target.value)}
-              placeholder="Cari guru atau mata pelajaran..."
-              className="w-full px-3 py-1.5 text-xs bg-slate-50 dark:bg-[#0f1a15] rounded-lg border border-slate-200 dark:border-emerald-800/40 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-emerald-50"
+              placeholder="Cari guru atau mapel..."
+              className="w-full px-4 py-2 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-none focus:border-[#163832] text-[#051F20]"
             />
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-sm">
             <thead>
-              <tr className="bg-slate-50 dark:bg-[#0f1a15] text-slate-500 dark:text-emerald-400/70 font-medium border-b border-slate-200/70 dark:border-emerald-800/40">
-                <th className="py-2.5 px-4">Tanggal & Sesi</th>
-                <th className="py-2.5 px-4">Mata Pelajaran</th>
-                <th className="py-2.5 px-4">Guru</th>
-                <th className="py-2.5 px-3">Jam Masuk</th>
-                <th className="py-2.5 px-3">Status Masuk</th>
-                <th className="py-2.5 px-3">Jurnal</th>
-                <th className="py-2.5 px-4 text-right">Honor Sesi</th>
+              <tr className="bg-slate-50/50 text-[#8EB69B] font-medium border-b border-slate-100">
+                <th className="py-3 px-6">Tanggal & Sesi</th>
+                <th className="py-3 px-6">Mata Pelajaran</th>
+                <th className="py-3 px-6">Guru</th>
+                <th className="py-3 px-4">Jam Masuk</th>
+                <th className="py-3 px-4">Status Masuk</th>
+                <th className="py-3 px-4">Jurnal</th>
+                <th className="py-3 px-6 text-right">Honor Sesi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-emerald-300/80">
+            <tbody className="divide-y divide-slate-100 text-[#051F20]">
               {recentActivities.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-6 text-center text-slate-400 dark:text-slate-600">
+                  <td colSpan={7} className="py-8 text-center text-[#8EB69B] font-medium">
                     Tidak ada aktivitas yang sesuai
                   </td>
                 </tr>
@@ -864,60 +812,59 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
                   const origTeacher = teachers.find((t) => t.id === att.teacherId);
                   const actualTeacher = teachers.find((t) => t.id === att.actualTeacherId);
                   const isBadal = att.isBadal;
-                  const lateBadge = getLateCategoryLabel(att.lateCategory);
                   const hours = sched ? sched.hours : 2;
 
                   return (
-                    <tr key={att.id} className="hover:bg-slate-50 dark:bg-[#0f1a15]/50 dark:hover:bg-[#162720]/50/30 transition-colors">
-                      <td className="py-2.5 px-4 whitespace-nowrap">
-                        <p className="font-semibold text-slate-800 dark:text-emerald-100">{formatIndonesianDate(att.date)}</p>
-                        <p className="text-[11px] text-slate-400 dark:text-emerald-500/60 font-mono">{sched?.startTime} - {sched?.endTime}</p>
+                    <tr key={att.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="py-3 px-6 whitespace-nowrap">
+                        <p className="font-semibold">{formatIndonesianDate(att.date)}</p>
+                        <p className="text-xs text-[#8EB69B] font-mono mt-0.5">{sched?.startTime} - {sched?.endTime}</p>
                       </td>
-                      <td className="py-2.5 px-4">
-                        <p className="font-semibold text-slate-900 dark:text-emerald-50">{sched?.subject || 'KBM Reguler'}</p>
-                        <p className="text-[11px] text-slate-400 dark:text-emerald-500/60">{sched?.className} • {sched?.unit}</p>
+                      <td className="py-3 px-6">
+                        <p className="font-semibold">{sched?.subject || 'KBM Reguler'}</p>
+                        <p className="text-xs text-[#8EB69B] mt-0.5">{sched?.className} • {sched?.unit}</p>
                       </td>
-                      <td className="py-2.5 px-4">
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-slate-100 dark:bg-[#0f1a15] text-slate-700 dark:text-emerald-300/80 font-bold text-[10px] uppercase">
+                      <td className="py-3 px-6">
+                        <div className="flex items-center gap-3">
+                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#DAF1DE] text-[#051F20] font-bold text-xs uppercase">
                             {(actualTeacher?.name || origTeacher?.name || 'G')[0]}
                           </span>
                           <div>
-                            <p className="font-semibold text-slate-900 dark:text-emerald-50">
+                            <p className="font-semibold">
                               {actualTeacher?.name || origTeacher?.name || 'Guru'}
                             </p>
                             {isBadal && (
-                              <span className="text-[10px] text-purple-750 dark:text-purple-400 font-semibold block">
+                              <span className="text-[11px] text-[#163832] font-semibold block mt-0.5">
                                 Pengganti: {origTeacher?.name}
                               </span>
                             )}
                           </div>
                         </div>
                       </td>
-                      <td className="py-2.5 px-3 font-mono text-slate-800 dark:text-emerald-100">
+                      <td className="py-3 px-4 font-mono font-medium">
                         {att.clockInTime || '-'}
                       </td>
-                      <td className="py-2.5 px-3">
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${lateBadge.badge}`}>
+                      <td className="py-3 px-4">
+                        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-md ${att.lateMinutes > 0 ? 'bg-rose-100 text-rose-900' : 'bg-[#DAF1DE] text-[#0B2B26]'}`}>
                           {att.lateMinutes > 0 ? `+${att.lateMinutes}m` : 'Tepat Waktu'}
                         </span>
                       </td>
-                      <td className="py-2.5 px-3">
+                      <td className="py-3 px-4">
                         {att.status === 'SELESAI' ? (
-                          <span className="text-[10px] font-semibold text-emerald-800 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-200/80 dark:border-emerald-800/50">
+                          <span className="text-[11px] font-bold text-[#051F20] bg-[#DAF1DE] px-2.5 py-1 rounded-md">
                             Lengkap
                           </span>
                         ) : att.status === 'HADIR_JURNAL_KOSONG' ? (
-                          <span className="text-[10px] font-semibold text-amber-800 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800/50">
+                          <span className="text-[11px] font-bold text-white bg-[#163832] px-2.5 py-1 rounded-md">
                             Pending
                           </span>
                         ) : (
-                          <span className="text-[10px] text-slate-500 dark:text-emerald-400/70">
+                          <span className="text-[11px] text-[#8EB69B] font-medium">
                             {att.status}
                           </span>
                         )}
                       </td>
-                      <td className="py-2.5 px-4 text-right font-semibold text-emerald-800 dark:text-emerald-400 whitespace-nowrap font-mono">
+                      <td className="py-3 px-6 text-right font-bold text-[#163832] whitespace-nowrap font-mono">
                         {formatRupiah(hours * (actualTeacher?.hourlyRate || 40000))}
                       </td>
                     </tr>
@@ -929,99 +876,89 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
         </div>
       </div>
 
-      {/* 5. Analisis Unit & Potongan Disiplin (Clean Tables & Recharts, No Icons) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* 5. Analisis Unit & Potongan Disiplin */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         {/* Struktur Komponen Kafa'ah per Unit */}
-        <div className="bg-white dark:bg-[#121f1a] p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 space-y-4 shadow-sm">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-emerald-900/40">
+        <div className="bg-white p-6 rounded-[24px] shadow-sm space-y-5">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
             <div>
-              <h3 className="font-semibold text-sm text-slate-900 dark:text-emerald-50">
+              <h3 className="font-bold text-base text-[#051F20]">
                 Komposisi Kafa'ah per Unit Pendidikan
               </h3>
-              <p className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-0.5">
+              <p className="text-xs font-medium text-[#8EB69B] mt-1">
                 Distribusi Gaji Pokok, Honor Mengajar, dan Tunjangan Transport
               </p>
             </div>
             
-            {/* Minimal Legend */}
-            <div className="hidden sm:flex items-center gap-2 text-[10px]">
-              <span className="inline-flex items-center gap-1 text-slate-600 dark:text-emerald-400/70">
-                <span className="w-2 h-2 rounded-sm bg-slate-700 dark:bg-slate-50 dark:bg-[#0f1a15]0" /> Gapok
+            <div className="hidden sm:flex items-center gap-3 text-[11px] font-medium">
+              <span className="inline-flex items-center gap-1.5 text-[#163832]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#051F20]" /> Gapok
               </span>
-              <span className="inline-flex items-center gap-1 text-slate-600 dark:text-emerald-400/70">
-                <span className="w-2 h-2 rounded-sm bg-emerald-600 dark:bg-emerald-500" /> Honor JP
+              <span className="inline-flex items-center gap-1.5 text-[#163832]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#163832]" /> Honor JP
               </span>
-              <span className="inline-flex items-center gap-1 text-slate-600 dark:text-emerald-400/70">
-                <span className="w-2 h-2 rounded-sm bg-amber-500" /> Transport
+              <span className="inline-flex items-center gap-1.5 text-[#163832]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#DAF1DE]" /> Transport
               </span>
             </div>
           </div>
 
-          {/* Recharts BarChart */}
-          <div className="h-44 w-full pt-1">
+          <div className="h-48 w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={unitStats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" strokeOpacity={1} />
-                <XAxis 
-                  dataKey="unit" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 10, fill: 'var(--chart-axis-text)' }} 
-                  dy={4}
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 9, fill: 'var(--chart-axis-text)' }} 
-                  tickFormatter={(val) => `${(val / 1000000).toFixed(1)}jt`}
-                />
-                <Tooltip content={<CurrencyTooltip />} />
-                <Bar dataKey="baseSalary" name="Gaji Pokok" stackId="unitSalary" fill="#334155" maxBarSize={32} />
-                <Bar dataKey="honor" name="Honor JP" stackId="unitSalary" fill="#059669" maxBarSize={32} />
-                <Bar dataKey="transport" name="Transport" stackId="unitSalary" fill="#f59e0b" radius={[3, 3, 0, 0]} maxBarSize={32} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="unit" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#8EB69B', fontWeight: 500 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#8EB69B', fontWeight: 500 }} tickFormatter={(val) => `${(val / 1000000).toFixed(1)}jt`} />
+                <Tooltip content={<CurrencyTooltip />} cursor={{fill: '#f8fafc'}} />
+                <Bar dataKey="baseSalary" name="Gaji Pokok" stackId="unitSalary" fill="#051F20" maxBarSize={40} />
+                <Bar dataKey="honor" name="Honor JP" stackId="unitSalary" fill="#163832" maxBarSize={40} />
+                <Bar dataKey="transport" name="Transport" stackId="unitSalary" fill="#DAF1DE" radius={[6, 6, 0, 0]} maxBarSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Transparansi Penegakan SOP */}
-        <div className="bg-white dark:bg-[#121f1a] p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 space-y-4 shadow-sm">
-          <div className="pb-2 border-b border-slate-100 dark:border-emerald-900/40 flex items-center justify-between">
-            <h3 className="font-semibold text-sm text-slate-900 dark:text-emerald-50">
-              Penegakan SOP & Potongan Disiplin
-            </h3>
-            <span className="text-[10px] font-semibold text-slate-500 dark:text-emerald-400/70 bg-slate-100 dark:bg-[#0f1a15] px-2 py-0.5 rounded">
-              Otomatisasi Sistem
+        {/* Transparansi Penegakan SOP - Dark Card */}
+        <div className="bg-[#0B2B26] p-6 rounded-[24px] space-y-5 shadow-sm text-white">
+          <div className="pb-4 border-b border-[#235347] flex items-center justify-between">
+            <div>
+              <h3 className="font-bold text-base text-white">
+                Penegakan SOP & Potongan Disiplin
+              </h3>
+              <p className="text-xs font-medium text-[#8EB69B] mt-1">Denda otomatis dari sistem</p>
+            </div>
+            <span className="text-xs font-bold text-[#DAF1DE] bg-[#163832] px-3 py-1.5 rounded-lg">
+              Otomatis
             </span>
           </div>
 
-          <div className="space-y-3 pt-1">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-[#0f1a15]/50 border border-slate-100 dark:border-emerald-900/40">
+          <div className="space-y-4 pt-1">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-[#051F20]/50 border border-[#163832]">
               <div>
-                <span className="text-xs font-semibold text-slate-800 dark:text-emerald-100 block">Denda Keterlambatan</span>
-                <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 block">Potongan per menit keterlambatan KBM</span>
+                <span className="text-sm font-bold text-white block">Denda Keterlambatan</span>
+                <span className="text-xs text-[#8EB69B] block mt-1">Potongan per menit keterlambatan KBM</span>
               </div>
-              <span className="font-mono font-semibold text-rose-600 dark:text-rose-400 text-xs">
+              <span className="font-mono font-bold text-rose-400 text-sm">
                 -{formatRupiah(payrollSummary.items.reduce((s, i) => s + i.latePenaltyTotal, 0))}
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-[#0f1a15]/50 border border-slate-100 dark:border-emerald-900/40">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-[#051F20]/50 border border-[#163832]">
               <div>
-                <span className="text-xs font-semibold text-slate-800 dark:text-emerald-100 block">Penalti Jurnal Belum Lengkap</span>
-                <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 block">Penalti 50% honor per sesi KBM kosong</span>
+                <span className="text-sm font-bold text-white block">Penalti Jurnal Kosong</span>
+                <span className="text-xs text-[#8EB69B] block mt-1">Penalti 50% honor per sesi</span>
               </div>
-              <span className="font-mono font-semibold text-rose-600 dark:text-rose-400 text-xs">
+              <span className="font-mono font-bold text-rose-400 text-sm">
                 -{formatRupiah(payrollSummary.items.reduce((s, i) => s + i.emptyJournalPenalty, 0))}
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/70 dark:border-emerald-800/50">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-[#DAF1DE] border border-[#DAF1DE] text-[#051F20]">
               <div>
-                <span className="text-xs font-semibold text-emerald-950 dark:text-emerald-100 block">Total Potongan Bulan Ini</span>
-                <span className="text-[11px] text-emerald-700 dark:text-emerald-400 block">Diterapkan otomatis ke slip gaji</span>
+                <span className="text-sm font-bold block">Total Potongan Bulan Ini</span>
+                <span className="text-xs font-medium text-[#163832] block mt-1">Diterapkan otomatis ke slip gaji</span>
               </div>
-              <span className="font-mono font-bold text-emerald-900 dark:text-emerald-300 text-xs">
+              <span className="font-mono font-bold text-rose-600 text-base">
                 -{formatRupiah(payrollSummary.totalDeductions)}
               </span>
             </div>
@@ -1029,19 +966,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
         </div>
       </div>
 
-      {/* 6. Grid: Timeline Jurnal & Antrean Kebutuhan (Clean & Minimalist) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* 6. Timeline & Antrean Kebutuhan */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         
-        {/* Card 1: Timeline Aktivitas */}
-        <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 overflow-hidden flex flex-col justify-between shadow-sm">
+        {/* Card 1: Timeline Aktivitas (Light Mint Card) */}
+        <div className="bg-[#DAF1DE] rounded-[24px] overflow-hidden flex flex-col justify-between shadow-sm">
           <div>
-            {/* Header with Category Filter */}
-            <div className="p-4 border-b border-slate-100 dark:border-emerald-900/40 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="font-semibold text-sm text-slate-900 dark:text-emerald-50">
+            <div className="p-6 border-b border-[#8EB69B]/30 flex flex-wrap items-center justify-between gap-3">
+              <h2 className="font-bold text-base text-[#051F20]">
                 Timeline Aktivitas
               </h2>
 
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2 bg-white/50 p-1.5 rounded-xl">
                 {[
                   { id: 'ALL', label: 'Semua' },
                   { id: 'KEHADIRAN', label: 'Presensi' },
@@ -1052,10 +988,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
                     key={cat.id}
                     type="button"
                     onClick={() => setTimelineCategory(cat.id as any)}
-                    className={`text-[10px] font-semibold px-2 py-0.5 rounded transition-colors cursor-pointer ${
+                    className={`text-[11px] font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                       timelineCategory === cat.id
-                        ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                        : 'text-slate-500 hover:text-slate-900 dark:text-emerald-400/70 dark:hover:text-slate-200'
+                        ? 'bg-[#0B2B26] text-white shadow-sm'
+                        : 'text-[#163832] hover:bg-white/80'
                     }`}
                   >
                     {cat.label}
@@ -1064,48 +1000,47 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
               </div>
             </div>
 
-            {/* Timeline Feed */}
-            <div className="p-4 max-h-[440px] overflow-y-auto">
+            <div className="p-6 max-h-[440px] overflow-y-auto">
               {filteredTimelineActivities.length === 0 ? (
-                <div className="py-12 text-center text-xs text-slate-400 dark:text-emerald-500/60">
-                  Tidak ada aktivitas yang sesuai.
+                <div className="py-12 text-center text-sm text-[#163832] font-medium">
+                  Tidak ada aktivitas.
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                <div className="divide-y divide-[#8EB69B]/20">
                   {filteredTimelineActivities.slice(0, 12).map((act) => {
                     const isExpanded = !!expandedJournalIds[act.id];
                     return (
-                      <div key={act.id} className="py-3 first:pt-0 last:pb-0 space-y-1">
-                        <div className="flex items-center justify-between gap-2 text-xs">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-slate-900 dark:text-emerald-50">
+                      <div key={act.id} className="py-4 first:pt-0 last:pb-0 space-y-2">
+                        <div className="flex items-center justify-between gap-3 text-sm">
+                          <div className="flex items-center gap-3">
+                            <span className="font-bold text-[#051F20]">
                               {act.teacherName}
                             </span>
-                            <span className="text-[10px] font-mono text-slate-400 dark:text-emerald-500/60">
+                            <span className="text-[11px] font-bold text-[#163832] bg-white/60 px-2 py-0.5 rounded-md">
                               {act.unit}
                             </span>
                           </div>
-                          <span className="text-[10px] font-mono text-slate-400 dark:text-emerald-500/60">
+                          <span className="text-xs font-mono font-bold text-[#163832]">
                             {act.time || 'KBM'} • {formatShortDate(act.date)}
                           </span>
                         </div>
 
-                        <p className="text-xs text-slate-600 dark:text-emerald-400/70">
+                        <p className="text-sm text-[#163832]/90 font-medium">
                           {act.description}
                         </p>
 
                         {act.type === 'JURNAL' && (
-                          <div>
+                          <div className="pt-1">
                             <button
                               type="button"
                               onClick={() => toggleJournalExpand(act.id)}
-                              className="text-[10px] font-medium text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer"
+                              className="text-xs font-bold text-[#0B2B26] hover:underline cursor-pointer"
                             >
                               {isExpanded ? 'Sembunyikan' : 'Rincian Jurnal'}
                             </button>
 
                             {isExpanded && act.journal && (
-                              <div className="mt-2 text-xs text-slate-600 dark:text-emerald-400/70 space-y-1.5 pt-2 border-t border-slate-100 dark:border-emerald-900/40 font-sans">
+                              <div className="mt-3 text-sm text-[#051F20] space-y-2 pt-3 border-t border-[#8EB69B]/30 font-medium bg-white/40 p-4 rounded-xl">
                                 {act.journal.learningObjectives && (
                                   <p><strong>Capaian:</strong> {act.journal.learningObjectives}</p>
                                 )}
@@ -1113,7 +1048,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
                                   <p><strong>Catatan:</strong> {act.journal.classNotes}</p>
                                 )}
                                 {act.journal.studentAttendance && (
-                                  <p className="font-mono text-[11px] text-slate-500 dark:text-emerald-400/70">
+                                  <p className="font-mono text-xs text-[#163832] font-bold">
                                     Santri: {act.journal.studentAttendance.presentCount}/{act.journal.studentAttendance.totalStudents} Hadir
                                   </p>
                                 )}
@@ -1128,53 +1063,52 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
               )}
             </div>
           </div>
-
-          <div className="p-3 bg-slate-50 dark:bg-[#0f1a15]/40 text-center border-t border-slate-100 dark:border-emerald-900/40 text-xs text-slate-500 dark:text-emerald-400/70 font-mono">
+          <div className="p-4 bg-[#8EB69B]/20 text-center text-xs font-bold text-[#051F20] font-mono">
             {filteredTimelineActivities.length} Aktivitas Tercatat
           </div>
         </div>
 
         {/* Card 2: Antrean Pengajuan Kebutuhan */}
-        <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 overflow-hidden flex flex-col justify-between shadow-sm">
+        <div className="bg-white rounded-[24px] overflow-hidden flex flex-col justify-between shadow-sm">
           <div>
-            <div className="p-4 border-b border-slate-100 dark:border-emerald-900/40 flex items-center justify-between">
-              <h2 className="font-semibold text-sm text-slate-900 dark:text-emerald-50">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="font-bold text-base text-[#051F20]">
                 Pengajuan Kebutuhan Guru
               </h2>
               <button 
                 type="button"
                 onClick={() => setCurrentPath('/dashboard/admin/kebutuhan')}
-                className="text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 transition-colors cursor-pointer"
+                className="text-sm font-bold text-[#163832] hover:text-[#0B2B26] transition-colors cursor-pointer"
               >
-                Kelola Semua
+                Kelola Semua →
               </button>
             </div>
 
-            <div className="p-4 max-h-[440px] overflow-y-auto">
+            <div className="p-6 max-h-[440px] overflow-y-auto">
               {pendingRequests.length === 0 ? (
-                <div className="py-12 text-center text-xs text-slate-400 dark:text-emerald-500/60">
+                <div className="py-12 text-center text-sm font-medium text-[#8EB69B]">
                   Tidak ada pengajuan pending.
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                <div className="divide-y divide-slate-100">
                   {pendingRequests.map((req) => {
                     const teacher = teachers.find(t => t.id === req.teacherId);
                     return (
-                      <div key={req.id} className="py-3 first:pt-0 last:pb-0 space-y-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-semibold text-xs text-slate-900 dark:text-emerald-50">
+                      <div key={req.id} className="py-4 first:pt-0 last:pb-0 space-y-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="font-bold text-sm text-[#051F20]">
                             {req.title}
                           </span>
-                          <span className="text-[10px] font-mono text-slate-400 dark:text-emerald-500/60">
+                          <span className="text-[11px] font-mono font-bold text-[#8EB69B]">
                             {formatShortDate(req.createdAt)}
                           </span>
                         </div>
 
-                        <p className="text-[11px] text-slate-500 dark:text-emerald-400/70 font-mono">
+                        <p className="text-xs font-bold text-[#163832] bg-[#DAF1DE] px-2.5 py-1 rounded-md inline-block">
                           {teacher?.name} • {req.category}
                         </p>
 
-                        <p className="text-xs text-slate-600 dark:text-emerald-400/70 line-clamp-2">
+                        <p className="text-sm font-medium text-[#8EB69B] line-clamp-2 leading-relaxed pt-1">
                           {req.description}
                         </p>
                       </div>
@@ -1184,8 +1118,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
               )}
             </div>
           </div>
-
-          <div className="p-3 bg-slate-50 dark:bg-[#0f1a15]/40 text-center border-t border-slate-100 dark:border-emerald-900/40 text-xs text-slate-500 dark:text-emerald-400/70 font-mono">
+          <div className="p-4 bg-slate-50 text-center text-xs font-bold text-[#8EB69B] font-mono border-t border-slate-100">
             {pendingRequests.length} Ajuan Perlu Ditindaklanjuti
           </div>
         </div>
