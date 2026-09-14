@@ -130,20 +130,20 @@ export const TahfidzPayrollView: React.FC = () => {
   return (
     <div className="space-y-5">
       {/* Minimal Header Controls */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-[#16201b] p-4 rounded-2xl border border-slate-200/80 dark:border-emerald-950/60 shadow-sm">
+      <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/40 flex items-center justify-center text-[#047857] dark:text-emerald-400 font-bold">
+          <div className="w-10 h-10 rounded-[12px] bg-slate-50 border border-slate-200 flex items-center justify-center text-[#163832] font-bold">
             <Award className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-slate-800 dark:text-white tracking-tight">Payroll Tahfidz</h1>
-              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium ${isConnected ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50' : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50'}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+              <h1 className="text-lg font-bold text-[#051F20] tracking-tight">Payroll Tahfidz</h1>
+              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider ${isConnected ? 'bg-[#DAF1DE] text-[#051F20]' : 'bg-rose-100 text-rose-700'}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-[#163832] animate-pulse' : 'bg-rose-500'}`} />
                 {isConnected ? 'Terhubung API' : 'Mode Sinkron'}
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Rp 40.000 / JP (Subuh & Maghrib)</p>
+            <p className="text-[11px] font-semibold text-[#8EB69B] mt-0.5">Rp 40.000 / JP (Subuh & Maghrib)</p>
           </div>
         </div>
 
@@ -151,7 +151,7 @@ export const TahfidzPayrollView: React.FC = () => {
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(Number(e.target.value))}
-            className="px-3 py-1.5 bg-slate-50 dark:bg-[#111a16] border border-slate-200 dark:border-emerald-900/50 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="px-3 py-2 bg-white border border-slate-200 rounded-[12px] text-xs font-bold text-[#051F20] focus:outline-none focus:ring-2 focus:ring-[#163832]"
           >
             {months.map(m => (
               <option key={m.value} value={m.value}>{m.label}</option>
@@ -161,7 +161,7 @@ export const TahfidzPayrollView: React.FC = () => {
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="px-3 py-1.5 bg-slate-50 dark:bg-[#111a16] border border-slate-200 dark:border-emerald-900/50 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="px-3 py-2 bg-white border border-slate-200 rounded-[12px] text-xs font-bold text-[#051F20] focus:outline-none focus:ring-2 focus:ring-[#163832]"
           >
             {years.map(y => (
               <option key={y} value={y}>{y}</option>
@@ -171,95 +171,95 @@ export const TahfidzPayrollView: React.FC = () => {
           <button 
             onClick={loadData}
             disabled={isFetching}
-            className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-emerald-950/50 rounded-xl border border-slate-200 dark:border-emerald-900/50 transition-colors"
+            className="p-2.5 text-[#051F20] hover:bg-slate-100 rounded-[12px] border border-slate-200 shadow-xs transition-colors cursor-pointer"
             title="Sinkronkan Data"
           >
-            <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin text-emerald-600' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
 
       {/* Sleek Minimal Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bqa-card p-4 flex items-center justify-between">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total Ustadz</span>
-            <div className="text-xl font-bold text-slate-800 dark:text-white mt-0.5">
+            <span className="text-xs font-semibold text-[#163832]/60 block uppercase tracking-wider">Total Ustadz</span>
+            <div className="text-2xl sm:text-3xl font-bold text-[#051F20] tracking-tight mt-1 font-sans">
               {tahfidzPayroll?.totalUstadz || 0}
             </div>
           </div>
-          <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-emerald-950/40 flex items-center justify-center text-slate-600 dark:text-emerald-400">
-            <Users className="w-4 h-4" />
+          <div className="w-10 h-10 rounded-[12px] bg-slate-50 flex items-center justify-center text-[#163832]">
+            <Users className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bqa-card p-4 flex items-center justify-between">
+        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Hadir Subuh</span>
-            <div className="text-xl font-bold text-slate-800 dark:text-white mt-0.5 flex items-baseline gap-1">
-              {tahfidzPayroll?.totalSubuhJP || 0} <span className="text-xs font-normal text-slate-400">JP</span>
+            <span className="text-xs font-semibold text-[#163832]/60 block uppercase tracking-wider">Hadir Subuh</span>
+            <div className="text-2xl sm:text-3xl font-bold text-[#051F20] tracking-tight mt-1 font-sans flex items-baseline gap-1">
+              {tahfidzPayroll?.totalSubuhJP || 0} <span className="text-xs font-bold text-[#8EB69B]">JP</span>
             </div>
           </div>
-          <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
-            <Sun className="w-4 h-4" />
+          <div className="w-10 h-10 rounded-[12px] bg-slate-50 flex items-center justify-center text-[#8EB69B]">
+            <Sun className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bqa-card p-4 flex items-center justify-between">
+        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Hadir Maghrib</span>
-            <div className="text-xl font-bold text-slate-800 dark:text-white mt-0.5 flex items-baseline gap-1">
-              {tahfidzPayroll?.totalMaghribJP || 0} <span className="text-xs font-normal text-slate-400">JP</span>
+            <span className="text-xs font-semibold text-[#163832]/60 block uppercase tracking-wider">Hadir Maghrib</span>
+            <div className="text-2xl sm:text-3xl font-bold text-[#051F20] tracking-tight mt-1 font-sans flex items-baseline gap-1">
+              {tahfidzPayroll?.totalMaghribJP || 0} <span className="text-xs font-bold text-[#8EB69B]">JP</span>
             </div>
           </div>
-          <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-            <Moon className="w-4 h-4" />
+          <div className="w-10 h-10 rounded-[12px] bg-slate-50 flex items-center justify-center text-[#051F20]">
+            <Moon className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bqa-card p-4 flex items-center justify-between border-l-4 border-l-emerald-600">
+        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs flex items-center justify-between border-l-4 border-l-[#163832]">
           <div>
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total Honor</span>
-            <div className="text-xl font-bold text-emerald-700 dark:text-emerald-400 mt-0.5">
+            <span className="text-xs font-semibold text-[#163832]/60 block uppercase tracking-wider">Total Honor</span>
+            <div className="text-2xl sm:text-3xl font-bold text-[#163832] tracking-tight mt-1 font-sans">
               Rp {(tahfidzPayroll?.totalHonor || 0).toLocaleString('id-ID')}
             </div>
           </div>
-          <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-            <Banknote className="w-4 h-4" />
+          <div className="w-10 h-10 rounded-[12px] bg-[#DAF1DE] flex items-center justify-center text-[#163832]">
+            <Banknote className="w-5 h-5" />
           </div>
         </div>
       </div>
 
       {/* Modern Compact Table */}
-      <div className="bg-white dark:bg-[#16201b] rounded-2xl border border-slate-200/80 dark:border-emerald-950/60 shadow-sm overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-slate-100 dark:border-emerald-900/30 flex justify-between items-center bg-slate-50/50 dark:bg-[#111a16]">
-          <h2 className="text-xs font-bold tracking-wider text-slate-500 dark:text-emerald-400 uppercase">
+      <div className="bg-white rounded-[16px] border border-slate-200 shadow-xs overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
+          <h2 className="text-xs font-bold tracking-wider text-[#051F20] uppercase">
             Rincian Honor Ustadz — {tahfidzPayroll?.period}
           </h2>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <button 
               onClick={handleExportCSV}
               disabled={!tahfidzPayroll || tahfidzPayroll.items.length === 0}
-              className="p-1.5 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-emerald-900/40 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 text-[#051F20] px-3 py-1.5 rounded-[8px] text-[10px] font-bold border border-slate-200 transition-all cursor-pointer shadow-xs uppercase tracking-wider disabled:opacity-40"
               title="Export CSV"
             >
-              <Download className="w-3.5 h-3.5" /> CSV
+              <Download className="w-3 h-3 text-[#051F20]" strokeWidth={2} /> CSV
             </button>
             <button 
               onClick={handlePrintPDF}
               disabled={!tahfidzPayroll || tahfidzPayroll.items.length === 0}
-              className="p-1.5 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-emerald-900/40 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-40"
+              className="inline-flex items-center justify-center gap-1.5 bg-[#051F20] hover:bg-[#163832] text-white px-3 py-1.5 rounded-[8px] text-[10px] font-bold shadow-xs transition-all cursor-pointer uppercase tracking-wider disabled:opacity-40"
               title="Cetak PDF"
             >
-              <Printer className="w-3.5 h-3.5" /> PDF
+              <Printer className="w-3 h-3 text-white" strokeWidth={2} /> PDF
             </button>
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left">
-            <thead className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider bg-slate-50/80 dark:bg-[#0d1612] border-b border-slate-100 dark:border-emerald-950">
+            <thead className="bg-slate-50 text-[#8EB69B] font-bold border-b border-slate-200 text-[10px] uppercase tracking-wider">
               <tr>
                 <th className="px-5 py-3">Nama Ustadz</th>
                 <th className="px-5 py-3 text-center">Subuh</th>
@@ -268,40 +268,40 @@ export const TahfidzPayrollView: React.FC = () => {
                 <th className="px-5 py-3 text-right">Honor (Rp)</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-emerald-900/20">
+            <tbody className="divide-y divide-slate-100">
               {tahfidzPayroll?.items.map((item, idx) => (
-                <tr key={idx} className="hover:bg-slate-50/60 dark:hover:bg-[#111a16]/60 transition-colors">
-                  <td className="px-5 py-3">
-                    <div className="font-semibold text-slate-800 dark:text-slate-200">{item.teacherName}</div>
-                    <div className="text-[11px] text-slate-400 dark:text-slate-500">{item.halqah}</div>
+                <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-5 py-3.5">
+                    <div className="font-bold text-[#051F20]">{item.teacherName}</div>
+                    <div className="text-[10px] text-[#8EB69B] font-semibold mt-0.5">{item.halqah}</div>
                   </td>
-                  <td className="px-5 py-3 text-center">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-semibold">
+                  <td className="px-5 py-3.5 text-center">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-[8px] bg-slate-100 text-[#163832] font-bold font-mono">
                       {item.totalSubuhHadir}
                     </span>
                   </td>
-                  <td className="px-5 py-3 text-center">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 font-semibold">
+                  <td className="px-5 py-3.5 text-center">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-[8px] bg-slate-100 text-[#051F20] font-bold font-mono">
                       {item.totalMaghribHadir}
                     </span>
                   </td>
-                  <td className="px-5 py-3 text-center font-bold text-slate-700 dark:text-slate-300">
+                  <td className="px-5 py-3.5 text-center font-bold font-mono text-[#163832]">
                     {item.totalJP} JP
                   </td>
-                  <td className="px-5 py-3 text-right font-bold text-emerald-700 dark:text-emerald-400">
+                  <td className="px-5 py-3.5 text-right font-bold font-mono text-[#163832]">
                     Rp {item.totalHonor.toLocaleString('id-ID')}
                   </td>
                 </tr>
               ))}
             </tbody>
             {tahfidzPayroll && tahfidzPayroll.items.length > 0 && (
-              <tfoot className="bg-slate-50/80 dark:bg-[#0d1612] font-semibold text-slate-800 dark:text-slate-200 border-t border-slate-200 dark:border-emerald-900/40">
+              <tfoot className="bg-slate-50 font-bold text-[#051F20] border-t border-slate-200">
                 <tr>
-                  <td className="px-5 py-3 font-bold uppercase text-[11px] text-slate-500">Total</td>
-                  <td className="px-5 py-3 text-center">{tahfidzPayroll.totalSubuhJP}</td>
-                  <td className="px-5 py-3 text-center">{tahfidzPayroll.totalMaghribJP}</td>
-                  <td className="px-5 py-3 text-center font-bold text-emerald-600">{tahfidzPayroll.totalJP} JP</td>
-                  <td className="px-5 py-3 text-right font-bold text-emerald-700 dark:text-emerald-400 text-sm">
+                  <td className="px-5 py-4 font-bold uppercase text-[11px] text-[#8EB69B] tracking-wider">Total Keseluruhan</td>
+                  <td className="px-5 py-4 text-center font-mono">{tahfidzPayroll.totalSubuhJP}</td>
+                  <td className="px-5 py-4 text-center font-mono">{tahfidzPayroll.totalMaghribJP}</td>
+                  <td className="px-5 py-4 text-center font-bold text-[#163832] font-mono">{tahfidzPayroll.totalJP} JP</td>
+                  <td className="px-5 py-4 text-right font-bold text-[#051F20] text-sm font-mono">
                     Rp {tahfidzPayroll.totalHonor.toLocaleString('id-ID')}
                   </td>
                 </tr>

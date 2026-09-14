@@ -105,66 +105,66 @@ export const PayrollRecap: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* Aggregate Payroll Metrics */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <div className="bqa-card p-3.5">
-          <span className="text-[11px] text-slate-500 dark:text-emerald-400/70 font-medium block">Gaji Pokok</span>
-          <p className="text-base font-semibold text-slate-900 dark:text-emerald-50 mt-1 font-mono">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+          <span className="text-xs font-semibold text-[#163832]/60 block">Gaji Pokok</span>
+          <p className="text-2xl sm:text-3xl font-bold text-[#051F20] tracking-tight mt-1 font-sans">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.baseSalary, 0))}
           </p>
         </div>
 
-        <div className="bqa-card p-3.5">
-          <span className="text-[11px] text-slate-500 dark:text-emerald-400/70 font-medium block">Honor Mengajar</span>
-          <p className="text-base font-semibold text-emerald-800 dark:text-emerald-400 mt-1 font-mono">
+        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+          <span className="text-xs font-semibold text-[#163832]/60 block">Honor Mengajar</span>
+          <p className="text-2xl sm:text-3xl font-bold text-[#163832] tracking-tight mt-1 font-sans">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.teachingHonorarium, 0))}
           </p>
         </div>
 
-        <div className="bqa-card p-3.5">
-          <span className="text-[11px] text-slate-500 dark:text-emerald-400/70 font-medium block">Uang Transport</span>
-          <p className="text-base font-semibold text-slate-900 dark:text-emerald-50 mt-1 font-mono">
+        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+          <span className="text-xs font-semibold text-[#163832]/60 block">Uang Transport</span>
+          <p className="text-2xl sm:text-3xl font-bold text-[#051F20] tracking-tight mt-1 font-sans">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.totalTransport, 0))}
           </p>
         </div>
 
-        <div className="bqa-card p-3.5">
-          <span className="text-[11px] text-slate-500 dark:text-emerald-400/70 font-medium block">Potongan SOP</span>
-          <p className="text-base font-semibold text-rose-600 dark:text-rose-400 mt-1 font-mono">
+        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+          <span className="text-xs font-semibold text-[#163832]/60 block">Potongan SOP</span>
+          <p className="text-2xl sm:text-3xl font-bold text-rose-600 tracking-tight mt-1 font-sans">
             -{formatRupiah(payrollSummary.totalDeductions)}
           </p>
         </div>
 
-        <div className="bqa-card p-3.5 col-span-2 sm:col-span-1">
-          <span className="text-[11px] text-slate-500 dark:text-emerald-400/70 font-medium block">Total Bersih</span>
-          <p className="text-base font-semibold text-emerald-800 dark:text-emerald-400 mt-1 font-mono">
+        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs col-span-2 sm:col-span-1">
+          <span className="text-xs font-semibold text-[#163832]/60 block">Total Bersih</span>
+          <p className="text-2xl sm:text-3xl font-bold text-[#8EB69B] tracking-tight mt-1 font-sans">
             {formatRupiah(payrollSummary.totalNet)}
           </p>
         </div>
       </div>
 
       {/* Filter and Action Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex flex-1 items-center gap-2.5">
+      <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex flex-1 items-center gap-3 w-full">
           <div className="relative flex-1 max-w-xs">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" />
+            <Search className="w-4 h-4 text-[#8EB69B] absolute left-3 top-1/2 -translate-y-1/2" strokeWidth={2} />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari guru..."
-              className="w-full pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-[#121f1a] rounded-lg border border-slate-200 dark:border-emerald-900/40 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-emerald-50"
+              className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-[12px] text-xs font-bold text-[#051F20] focus:outline-none focus:ring-2 focus:ring-[#163832]"
             />
           </div>
 
-          <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-[#0f1a15] p-0.5 rounded-lg">
+          <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-[12px] border border-slate-200 shrink-0">
             {['ALL', 'SMP', 'MA', 'PESANTREN'].map((unit) => (
               <button
                 key={unit}
                 onClick={() => setUnitFilter(unit)}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                className={`px-3 py-1.5 rounded-[8px] text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
                   unitFilter === unit
-                    ? 'bg-white dark:bg-[#162720]/50 text-slate-900 dark:text-emerald-50 shadow-2xs'
-                    : 'text-slate-500 dark:text-emerald-400/70 hover:text-slate-800 dark:hover:text-slate-200'
+                    ? 'bg-white text-[#163832] shadow-xs'
+                    : 'text-[#8EB69B] hover:text-[#051F20]'
                 }`}
               >
                 {unit === 'ALL' ? 'Semua' : unit}
@@ -173,81 +173,81 @@ export const PayrollRecap: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={handleExportExcel}
-            className="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-[#0f1a15] hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-emerald-300/80 text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 dark:border-emerald-800/40 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 text-[#051F20] px-4 py-2.5 rounded-[12px] text-xs font-bold border border-slate-200 transition-all cursor-pointer shadow-xs uppercase tracking-wider"
           >
-            <Download className="w-3.5 h-3.5 text-slate-500 dark:text-emerald-400/70" />
+            <Download className="w-3.5 h-3.5 text-[#051F20]" strokeWidth={2} />
             <span>Ekspor CSV</span>
           </button>
 
           <button
             onClick={() => setShowOfficialPdfModal(true)}
-            className="bqa-btn-emerald px-3 py-1.5"
+            className="inline-flex items-center justify-center gap-1.5 bg-[#051F20] hover:bg-[#163832] text-white px-4 py-2.5 rounded-[12px] text-xs font-bold shadow-xs transition-all cursor-pointer uppercase tracking-wider"
           >
-            <Printer className="w-3.5 h-3.5" />
+            <Printer className="w-3.5 h-3.5 text-white" strokeWidth={2} />
             <span>Cetak Rekap PDF</span>
           </button>
         </div>
       </div>
 
       {/* Payroll Table */}
-      <div className="bqa-card overflow-hidden">
+      <div className="bg-white rounded-[16px] border border-slate-200 overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="bg-slate-50 dark:bg-[#0f1a15] text-slate-500 dark:text-emerald-400/70 font-medium border-b border-slate-200/70 dark:border-emerald-800/40">
-                <th className="py-2.5 px-3 text-center w-9">No</th>
-                <th className="py-2.5 px-4">Nama & NIP</th>
-                <th className="py-2.5 px-3">Unit</th>
-                <th className="py-2.5 px-3 text-right">Gaji Pokok</th>
-                <th className="py-2.5 px-3 text-center">JP</th>
-                <th className="py-2.5 px-3 text-right">Honor JP</th>
-                <th className="py-2.5 px-3 text-right">Honor Tahfidz</th>
-                <th className="py-2.5 px-3 text-center">Hadir</th>
-                <th className="py-2.5 px-3 text-right">Transport</th>
-                <th className="py-2.5 px-3 text-right">Potongan</th>
-                <th className="py-2.5 px-4 text-right">Gaji Bersih</th>
+              <tr className="bg-slate-50 text-[#8EB69B] font-bold border-b border-slate-200 text-[10px] uppercase tracking-wider">
+                <th className="py-3 px-4 text-center w-9">No</th>
+                <th className="py-3 px-4">Nama & NIP</th>
+                <th className="py-3 px-4 text-center">Unit</th>
+                <th className="py-3 px-4 text-right">Gaji Pokok</th>
+                <th className="py-3 px-4 text-center">JP</th>
+                <th className="py-3 px-4 text-right">Honor JP</th>
+                <th className="py-3 px-4 text-right">Honor Tahfidz</th>
+                <th className="py-3 px-4 text-center">Hadir</th>
+                <th className="py-3 px-4 text-right">Transport</th>
+                <th className="py-3 px-4 text-right">Potongan</th>
+                <th className="py-3 px-4 text-right">Gaji Bersih</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-emerald-300/80">
+            <tbody className="divide-y divide-slate-100 text-[#051F20]">
               {filteredItems.map((item, idx) => (
-                <tr key={item.teacher.id} className="hover:bg-slate-50 dark:bg-[#0f1a15]/50 dark:hover:bg-[#162720]/50/30 transition-colors">
-                  <td className="py-2.5 px-3 text-center text-slate-400 dark:text-emerald-500/60 font-mono">
+                <tr key={item.teacher.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="py-3.5 px-4 text-center font-bold font-mono">
                     {idx + 1}
                   </td>
-                  <td className="py-2.5 px-4">
-                    <p className="font-medium text-slate-900 dark:text-emerald-50">{item.teacher.name}</p>
-                    <p className="text-[11px] text-slate-400 dark:text-emerald-500/60 font-mono">{item.teacher.nip}</p>
+                  <td className="py-3.5 px-4">
+                    <p className="font-bold text-[#051F20]">{item.teacher.name}</p>
+                    <p className="text-[10px] text-[#8EB69B] font-semibold font-mono mt-0.5">{item.teacher.nip}</p>
                   </td>
-                  <td className="py-2.5 px-3">
-                    <span className="text-[11px] text-slate-600 dark:text-emerald-300/80 bg-slate-100 dark:bg-[#0f1a15] px-2 py-0.5 rounded border border-slate-200 dark:border-emerald-800/40">
+                  <td className="py-3.5 px-4 text-center">
+                    <span className="text-[9px] font-bold text-[#163832] bg-slate-100 px-2 py-1 rounded-[8px] uppercase tracking-wider">
                       {item.teacher.unit}
                     </span>
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono text-slate-800 dark:text-emerald-100">
+                  <td className="py-3.5 px-4 text-right font-mono font-bold text-[#051F20]">
                     {formatRupiah(item.baseSalary)}
                   </td>
-                  <td className="py-2.5 px-3 text-center font-mono font-medium text-slate-900 dark:text-emerald-50">
+                  <td className="py-3.5 px-4 text-center font-mono font-bold text-[#163832]">
                     {item.totalTaughtHours}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono text-emerald-800 dark:text-emerald-400 font-medium">
+                  <td className="py-3.5 px-4 text-right font-mono font-bold text-[#8EB69B]">
                     {formatRupiah(item.teachingHonorarium)}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono text-emerald-800 dark:text-emerald-400 font-medium">
+                  <td className="py-3.5 px-4 text-right font-mono font-bold text-[#8EB69B]">
                     {formatRupiah(item.tahfidzHonorarium || 0)}
                   </td>
-                  <td className="py-2.5 px-3 text-center font-mono text-slate-900 dark:text-emerald-50">
+                  <td className="py-3.5 px-4 text-center font-mono font-bold text-[#163832]">
                     {item.totalPresentDays}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono text-slate-700 dark:text-emerald-300/80">
+                  <td className="py-3.5 px-4 text-right font-mono font-bold text-[#051F20]">
                     {formatRupiah(item.totalTransport)}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono text-rose-600 dark:text-rose-400">
+                  <td className="py-3.5 px-4 text-right font-mono font-bold text-rose-500">
                     {item.totalDeductions > 0 ? `-${formatRupiah(item.totalDeductions)}` : '-'}
                   </td>
-                  <td className="py-2.5 px-4 text-right font-mono font-semibold text-emerald-800 dark:text-emerald-400 whitespace-nowrap">
+                  <td className="py-3.5 px-4 text-right font-mono font-bold text-[#163832] whitespace-nowrap">
                     {formatRupiah(item.netSalary)}
                   </td>
                 </tr>

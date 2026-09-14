@@ -312,30 +312,19 @@ export const Header: React.FC<HeaderProps> = ({
       >
         <div className="flex flex-col flex-1 overflow-y-auto scrollbar-thin">
           
-          {/* Sidebar Brand Header - High Contrast Sharp BQA Logo */}
-          <div className="h-16 px-4 border-b border-[#163832]/50 flex items-center justify-between shrink-0 bg-[#051F20] backdrop-blur-xs">
-            <div className="flex items-center gap-3 overflow-hidden">
-              <BrandLogo size="md" className="filter drop-shadow-md" />
-              
-              {!sidebarFolded && (
-                <div className="leading-tight overflow-hidden">
-                  <h1 className="font-display font-bold text-sm text-white tracking-tight truncate">Baitul Qur'an</h1>
-                  <p className="text-[10px] text-[#8EB69B] font-bold tracking-wider uppercase truncate">Al-Ikhwan • HRIS</p>
-                </div>
-              )}
-            </div>
-
+          {/* Sidebar Brand Header - Removed Logo & Text per user request */}
+          <div className="h-16 px-4 border-b border-[#163832]/50 flex items-center justify-end shrink-0 bg-[#051F20] backdrop-blur-xs lg:hidden">
             {/* Mobile close button */}
             <button 
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-[#8EB69B] hover:text-white p-1 rounded-md hover:bg-white/10 transition-colors cursor-pointer"
+              className="text-[#8EB69B] hover:text-white p-1 rounded-md hover:bg-white/10 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Sidebar Navigation Links */}
-          <div className="p-3 space-y-4 flex-1">
+          <div className="p-3 space-y-4 flex-1 mt-2">
             {navSections.map((section, sIdx) => {
               const isExpanded = expandedSections[section.title] ?? true;
               return (
@@ -343,10 +332,10 @@ export const Header: React.FC<HeaderProps> = ({
                   {!sidebarFolded && (
                     <button 
                       onClick={() => toggleSection(section.title)}
-                      className="w-full flex items-center justify-between px-3 py-1 text-[10px] font-bold text-[#8EB69B] uppercase tracking-widest mb-1.5 hover:text-[#DAF1DE] transition-colors cursor-pointer"
+                      className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-[#8EB69B] uppercase tracking-widest mb-2 hover:text-[#DAF1DE] transition-colors cursor-pointer"
                     >
                       <span>{section.title}</span>
-                      <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
                     </button>
                   )}
                   
@@ -362,14 +351,14 @@ export const Header: React.FC<HeaderProps> = ({
                             setSidebarOpen(false);
                           }}
                           title={sidebarFolded ? item.label : undefined}
-                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs transition-all text-left cursor-pointer group relative ${
+                          className={`w-full flex items-center justify-between px-4 py-3 rounded-[12px] text-sm transition-all text-left cursor-pointer group relative ${
                             isActive
                               ? 'bg-[#163832] text-[#DAF1DE] font-bold shadow-md'
-                              : 'text-white/70 hover:text-white hover:bg-white/5 font-medium'
+                              : 'text-white/70 hover:text-white hover:bg-white/5 font-semibold'
                           }`}
                         >
                           <div className="flex items-center gap-3 min-w-0">
-                            <IconComponent className={`w-4 h-4 shrink-0 transition-transform duration-150 ${
+                            <IconComponent className={`w-5 h-5 shrink-0 transition-transform duration-150 ${
                               isActive ? 'text-[#DAF1DE] scale-110' : 'text-[#8EB69B] group-hover:text-white'
                             }`} strokeWidth={1.75} />
                             
@@ -380,7 +369,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                           {/* Badge if present */}
                           {!sidebarFolded && item.badge && (
-                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
                               isActive ? 'bg-[#DAF1DE] text-[#051F20]' : item.badgeColor || 'bg-[#163832] text-[#DAF1DE] border border-[#8EB69B]/40'
                             }`}>
                               {item.badge}
