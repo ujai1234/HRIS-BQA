@@ -439,7 +439,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* ========================================================= */}
       {/* TOP HEADER (CHeader)                                      */}
       {/* ========================================================= */}
-      <header className={`fixed top-0 right-0 left-0 z-30 bg-white border-b border-slate-200 transition-all duration-300 print:hidden ${
+      <header className={`fixed top-0 right-0 left-0 z-30 bg-white dark:bg-[#0B2B26] border-b border-slate-200 dark:border-[#163832]/60 transition-all duration-300 print:hidden ${
         sidebarFolded ? 'lg:left-20' : 'lg:left-64'
       }`}>
         
@@ -450,7 +450,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-2 text-[#051F20] hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+              className="lg:hidden p-2 text-[#051F20] dark:text-[#DAF1DE] hover:bg-slate-100 dark:hover:bg-[#163832]/50 rounded-lg transition-colors cursor-pointer"
               aria-label="Toggle Menu"
             >
               <Menu className="w-5 h-5" />
@@ -462,7 +462,7 @@ export const Header: React.FC<HeaderProps> = ({
 
               <div className="leading-tight">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-display font-bold text-sm text-[#051F20]">Baitul Qur'an Al-Ikhwan</span>
+                  <span className="font-display font-bold text-sm text-[#051F20] dark:text-[#DAF1DE]">Baitul Qur'an Al-Ikhwan</span>
                   <span className="hidden md:inline-flex items-center px-2 py-0.5 text-[9px] font-bold bg-[#DAF1DE] text-[#163832] rounded border border-[#8EB69B]/30">
                     HRIS Asatidz
                   </span>

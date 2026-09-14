@@ -152,7 +152,7 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-[#051F20] flex font-sans antialiased transition-colors duration-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#051F20] text-[#051F20] dark:text-[#DAF1DE] flex font-sans antialiased transition-colors duration-200">
       {/* Sidebar & Topbar Shell */}
       <Header 
         sidebarOpen={sidebarOpen}
@@ -182,18 +182,18 @@ const MainContent: React.FC = () => {
         </main>
 
         {/* Institutional Footer */}
-        <footer className="bg-white border-t border-slate-200 py-4 mt-auto print:hidden">
+        <footer className="bg-white dark:bg-[#0B2B26] border-t border-slate-200 dark:border-[#163832]/60 py-4 mt-auto print:hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
             <div className="flex items-center gap-2 text-xs">
-              <span className="font-display font-bold text-[#051F20]">Baitul Qur'an Al-Ikhwan</span>
-              <span className="text-slate-300">•</span>
+              <span className="font-display font-bold text-[#051F20] dark:text-[#DAF1DE]">Baitul Qur'an Al-Ikhwan</span>
+              <span className="text-slate-300 dark:text-[#8EB69B]/40">•</span>
               <span className="text-[#8EB69B] hidden md:inline font-medium">HRIS & Kafa'ah Asatidz</span>
             </div>
 
             <div className="flex items-center gap-2 text-[#8EB69B] text-[11px] font-medium">
               <span>Tahun Ajaran 2026/2027</span>
               <span>•</span>
-              <span className="text-[#163832] font-bold">Sistem Aktif</span>
+              <span className="text-[#163832] dark:text-[#DAF1DE] font-bold">Sistem Aktif</span>
             </div>
           </div>
         </footer>

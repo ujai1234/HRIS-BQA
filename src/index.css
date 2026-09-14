@@ -144,6 +144,11 @@ html, body, button, input, select, textarea {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html.dark {
+  background-color: #051F20;
+  color-scheme: dark;
+}
+
 body {
   background-color: #f8fafc;
   color: #051F20;
@@ -152,9 +157,9 @@ body {
 }
 
 .dark body {
-  background-color: #f8fafc;
-  color: #051F20;
-  --chart-grid: rgba(226, 232, 240, 0.6);
+  background-color: #051F20;
+  color: #DAF1DE;
+  --chart-grid: rgba(142, 182, 155, 0.15);
   --chart-axis-text: #8EB69B;
 }
 
@@ -226,12 +231,14 @@ body {
   }
 
   .dark .bqa-card {
-    background-color: #ffffff;
-    border-color: rgba(226, 232, 240, 0.85);
+    background-color: #0B2B26;
+    border-color: rgba(142, 182, 155, 0.2);
+    color: #DAF1DE;
   }
 
   .dark .bqa-card:hover {
-    box-shadow: 0 20px 30px -5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 30px -5px rgba(0, 0, 0, 0.4);
+    border-color: rgba(142, 182, 155, 0.4);
   }
 
   /* BQA Standard Card Alias */
@@ -244,8 +251,9 @@ body {
   }
 
   .dark .cui-card {
-    background-color: #ffffff;
-    border-color: rgba(226, 232, 240, 0.9);
+    background-color: #0B2B26;
+    border-color: rgba(142, 182, 155, 0.2);
+    color: #DAF1DE;
   }
 
   /* === BQA BUTTON STYLES === */
@@ -349,3 +357,93 @@ body {
     box-shadow: 0 20px 25px -5px rgba(5, 31, 32, 0.1);
   }
 }
+
+/* ============================================================
+   GLOBAL DARK MODE DESIGN SYSTEM (PALETTE: #051F20, #0B2B26, #163832, #8EB69B, #DAF1DE)
+   ============================================================ */
+
+html.dark {
+  /* Dynamic Backgrounds */
+  .bg-white {
+    background-color: #0B2B26 !important;
+  }
+
+  .bg-slate-50,
+  .bg-slate-100\/50,
+  .bg-\[\#faf9f6\],
+  .bg-\[\#f8fafc\] {
+    background-color: #051F20 !important;
+  }
+
+  .bg-slate-100,
+  .bg-slate-200\/50 {
+    background-color: #092622 !important;
+  }
+
+  /* Dynamic Borders & Dividers */
+  .border-slate-200,
+  .border-slate-100,
+  .border-slate-300,
+  .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+  .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+    border-color: rgba(142, 182, 155, 0.2) !important;
+  }
+
+  /* Typography / Text Colors */
+  .text-\[\#051F20\],
+  .text-slate-900,
+  .text-slate-800,
+  .text-slate-700 {
+    color: #DAF1DE !important;
+  }
+
+  .text-\[\#163832\] {
+    color: #8EB69B !important;
+  }
+
+  .text-slate-600,
+  .text-slate-500 {
+    color: #8EB69B !important;
+  }
+
+  .text-slate-400 {
+    color: rgba(142, 182, 155, 0.7) !important;
+  }
+
+  /* Form Elements (Inputs, Selects, Textareas) */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    background-color: #051F20 !important;
+    color: #DAF1DE !important;
+    border-color: rgba(142, 182, 155, 0.3) !important;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: rgba(142, 182, 155, 0.5) !important;
+  }
+
+  /* Table Customizations */
+  table thead tr {
+    background-color: #051F20 !important;
+    border-bottom-color: rgba(142, 182, 155, 0.25) !important;
+  }
+
+  table tbody tr {
+    border-bottom-color: rgba(142, 182, 155, 0.15) !important;
+  }
+
+  table tbody tr:hover {
+    background-color: rgba(22, 56, 50, 0.5) !important;
+  }
+
+  /* Modal Backdrop Overlay */
+  .fixed.inset-0.bg-black\/50,
+  .fixed.inset-0.bg-slate-900\/50,
+  .fixed.inset-0.bg-\[\#051F20\]\/60 {
+    background-color: rgba(5, 31, 32, 0.8) !important;
+    backdrop-filter: blur(8px);
+  }
+}
+
