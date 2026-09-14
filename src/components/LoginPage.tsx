@@ -79,6 +79,15 @@ export const LoginPage: React.FC = () => {
 
     try {
       const email = username.includes('@') ? username : `${username}@bqa.local`;
+
+      // -- BYPASS UNTUK TESTING DUMMY DATA --
+      const dummyMatch = teachers.find((t: any) => t.username === email && t.password === password && password !== undefined && password !== '');
+      if (dummyMatch) {
+        login(dummyMatch.role, dummyMatch.id);
+        return;
+      }
+      // ------------------------------------
+
       const { data, error: authError } = await authClient.signIn.email({ email, password });
 
       if (authError) {

@@ -30,8 +30,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
     expenses,
     selectedPeriod,
     calculateAllPayroll,
-    setCurrentPath
+    setCurrentPath,
+    isDarkMode
   } = useHRIS();
+
+  const chartColors = {
+    tepatWaktu: isDarkMode ? '#DAF1DE' : '#163832',
+    terlambat: isDarkMode ? '#8EB69B' : '#8EB69B',
+    badal: isDarkMode ? '#163832' : '#DAF1DE',
+    rateLine: isDarkMode ? '#DAF1DE' : '#051F20',
+    grid: isDarkMode ? '#1a332a' : '#f1f5f9',
+    text: isDarkMode ? '#8EB69B' : '#8EB69B',
+    jurnalSelesai: isDarkMode ? '#DAF1DE' : '#0B2B26',
+    jurnalPending: isDarkMode ? '#163832' : '#DAF1DE',
+    kepatuhanLine: isDarkMode ? '#DAF1DE' : '#163832'
+  };
 
   const [unitFilter, setUnitFilter] = useState<'ALL' | 'SMP' | 'MA' | 'PESANTREN'>('ALL');
   const [searchActivity, setSearchActivity] = useState('');
@@ -692,14 +705,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
             </div>
 
             <div className="hidden sm:flex items-center gap-4">
-              <span className="inline-flex items-center gap-1.5 text-[#163832]/80">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#163832]" /> Tepat
+              <span className="inline-flex items-center gap-1.5 text-[#163832]/80 dark:text-[#8EB69B]">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: chartColors.tepatWaktu }} /> Tepat
               </span>
-              <span className="inline-flex items-center gap-1.5 text-[#163832]/80">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#8EB69B]" /> Terlambat
+              <span className="inline-flex items-center gap-1.5 text-[#163832]/80 dark:text-[#8EB69B]">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: chartColors.terlambat }} /> Terlambat
               </span>
-              <span className="inline-flex items-center gap-1.5 text-[#163832]/80">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#DAF1DE]" /> Pengganti
+              <span className="inline-flex items-center gap-1.5 text-[#163832]/80 dark:text-[#8EB69B]">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: chartColors.badal }} /> Pengganti
               </span>
             </div>
           </div>
@@ -707,15 +720,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
           <div className="h-60 w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={weeklyAttendanceData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="periodLabel" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#8EB69B', fontWeight: 500 }} dy={10} />
-                <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#8EB69B', fontWeight: 500 }} />
-                <YAxis yAxisId="right" orientation="right" domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#8EB69B', fontWeight: 500 }} unit="%" dx={10} />
-                <Tooltip content={<AttendanceTooltip />} cursor={{fill: '#f8fafc'}} />
-                <Bar yAxisId="left" dataKey="tepatWaktu" name="Tepat Waktu" stackId="a" fill="#163832" radius={[0, 0, 0, 0]} maxBarSize={32} />
-                <Bar yAxisId="left" dataKey="terlambat" name="Terlambat" stackId="a" fill="#8EB69B" radius={[0, 0, 0, 0]} maxBarSize={32} />
-                <Bar yAxisId="left" dataKey="badal" name="Pengganti" stackId="a" fill="#DAF1DE" radius={[6, 6, 0, 0]} maxBarSize={32} />
-                <Line yAxisId="right" type="monotone" dataKey="rate" name="Tingkat Hadir" stroke="#051F20" strokeWidth={3} dot={{ r: 4, fill: '#051F20', strokeWidth: 0 }} activeDot={{ r: 6 }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
+                <XAxis dataKey="periodLabel" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: chartColors.text, fontWeight: 500 }} dy={10} />
+                <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: chartColors.text, fontWeight: 500 }} />
+                <YAxis yAxisId="right" orientation="right" domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: chartColors.text, fontWeight: 500 }} unit="%" dx={10} />
+                <Tooltip content={<AttendanceTooltip />} cursor={{fill: isDarkMode ? '#0d261e' : '#f8fafc'}} />
+                <Bar yAxisId="left" dataKey="tepatWaktu" name="Tepat Waktu" stackId="a" fill={chartColors.tepatWaktu} radius={[0, 0, 0, 0]} maxBarSize={32} />
+                <Bar yAxisId="left" dataKey="terlambat" name="Terlambat" stackId="a" fill={chartColors.terlambat} radius={[0, 0, 0, 0]} maxBarSize={32} />
+                <Bar yAxisId="left" dataKey="badal" name="Pengganti" stackId="a" fill={chartColors.badal} radius={[6, 6, 0, 0]} maxBarSize={32} />
+                <Line yAxisId="right" type="monotone" dataKey="rate" name="Tingkat Hadir" stroke={chartColors.rateLine} strokeWidth={3} dot={{ r: 4, fill: chartColors.rateLine, strokeWidth: 0 }} activeDot={{ r: 6 }} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
@@ -740,11 +753,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
             </span>
 
             <div className="flex items-center gap-4">
-              <span className="inline-flex items-center gap-1.5 text-[#163832]/80">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#0B2B26]" /> Selesai
+              <span className="inline-flex items-center gap-1.5 text-[#163832]/80 dark:text-[#8EB69B]">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: chartColors.jurnalSelesai }} /> Selesai
               </span>
-              <span className="inline-flex items-center gap-1.5 text-[#163832]/80">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#DAF1DE]" /> Pending
+              <span className="inline-flex items-center gap-1.5 text-[#163832]/80 dark:text-[#8EB69B]">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: chartColors.jurnalPending }} /> Pending
               </span>
             </div>
           </div>
@@ -752,14 +765,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
           <div className="h-60 w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={monthlyPerformanceData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#8EB69B', fontWeight: 500 }} dy={10} />
-                <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#8EB69B', fontWeight: 500 }} />
-                <YAxis yAxisId="right" orientation="right" domain={[50, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#8EB69B', fontWeight: 500 }} unit="%" dx={10} />
-                <Tooltip content={<MinimalJournalTooltip />} cursor={{fill: '#f8fafc'}} />
-                <Bar yAxisId="left" dataKey="jurnalSelesai" name="Jurnal Selesai" stackId="j" fill="#0B2B26" radius={[0, 0, 0, 0]} maxBarSize={32} />
-                <Bar yAxisId="left" dataKey="jurnalPending" name="Jurnal Pending" stackId="j" fill="#DAF1DE" radius={[6, 6, 0, 0]} maxBarSize={32} />
-                <Line yAxisId="right" type="monotone" dataKey="kepatuhanJurnal" name="Kepatuhan" stroke="#163832" strokeWidth={3} dot={{ r: 4, fill: '#163832', strokeWidth: 0 }} activeDot={{ r: 6 }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
+                <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: chartColors.text, fontWeight: 500 }} dy={10} />
+                <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: chartColors.text, fontWeight: 500 }} />
+                <YAxis yAxisId="right" orientation="right" domain={[50, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: chartColors.text, fontWeight: 500 }} unit="%" dx={10} />
+                <Tooltip content={<MinimalJournalTooltip />} cursor={{fill: isDarkMode ? '#0d261e' : '#f8fafc'}} />
+                <Bar yAxisId="left" dataKey="jurnalSelesai" name="Jurnal Selesai" stackId="j" fill={chartColors.jurnalSelesai} radius={[0, 0, 0, 0]} maxBarSize={32} />
+                <Bar yAxisId="left" dataKey="jurnalPending" name="Jurnal Pending" stackId="j" fill={chartColors.jurnalPending} radius={[6, 6, 0, 0]} maxBarSize={32} />
+                <Line yAxisId="right" type="monotone" dataKey="kepatuhanJurnal" name="Kepatuhan" stroke={chartColors.kepatuhanLine} strokeWidth={3} dot={{ r: 4, fill: chartColors.kepatuhanLine, strokeWidth: 0 }} activeDot={{ r: 6 }} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>

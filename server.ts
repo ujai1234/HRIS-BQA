@@ -339,6 +339,25 @@ async function startServer() {
   app.post('/api/teachers', async (req, res) => {
     try {
       const result = await db.insert(schema.teachers).values(req.body).returning();
+      
+      // Auto-register to Better Auth if username and password provided
+      if (req.body.username && req.body.password) {
+        try {
+          const email = req.body.username.includes('@') ? req.body.username : `${req.body.username}@bqa.local`;
+          await auth.api.signUpEmail({
+            body: {
+              email: email,
+              password: req.body.password,
+              name: req.body.name,
+              teacherId: result[0].id
+            },
+            asResponse: true
+          });
+        } catch (authErr) {
+          console.error("Auto-register failed (might already exist):", authErr);
+        }
+      }
+
       res.json(result[0]);
     } catch (error) {
       res.status(500).json({ error: 'Failed to create teacher' });
