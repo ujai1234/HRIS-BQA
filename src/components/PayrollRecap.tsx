@@ -105,38 +105,38 @@ export const PayrollRecap: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* Aggregate Payroll Metrics */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
-          <span className="text-xs font-semibold text-[#163832]/60 block">Gaji Pokok</span>
-          <p className="text-2xl sm:text-3xl font-bold text-[#051F20] tracking-tight mt-1 font-sans">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs">
+          <span className="text-[11px] font-bold text-[#8EB69B] uppercase tracking-wider block">Gaji Pokok</span>
+          <p className="text-base sm:text-lg font-bold text-[#051F20] tracking-tight mt-1 truncate">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.baseSalary, 0))}
           </p>
         </div>
 
-        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
-          <span className="text-xs font-semibold text-[#163832]/60 block">Honor Mengajar</span>
-          <p className="text-2xl sm:text-3xl font-bold text-[#163832] tracking-tight mt-1 font-sans">
+        <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs">
+          <span className="text-[11px] font-bold text-[#8EB69B] uppercase tracking-wider block">Honor Mengajar</span>
+          <p className="text-base sm:text-lg font-bold text-[#163832] tracking-tight mt-1 truncate">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.teachingHonorarium, 0))}
           </p>
         </div>
 
-        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
-          <span className="text-xs font-semibold text-[#163832]/60 block">Uang Transport</span>
-          <p className="text-2xl sm:text-3xl font-bold text-[#051F20] tracking-tight mt-1 font-sans">
+        <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs">
+          <span className="text-[11px] font-bold text-[#8EB69B] uppercase tracking-wider block">Uang Transport</span>
+          <p className="text-base sm:text-lg font-bold text-[#051F20] tracking-tight mt-1 truncate">
             {formatRupiah(payrollSummary.items.reduce((s, i) => s + i.totalTransport, 0))}
           </p>
         </div>
 
-        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
-          <span className="text-xs font-semibold text-[#163832]/60 block">Potongan SOP</span>
-          <p className="text-2xl sm:text-3xl font-bold text-rose-600 tracking-tight mt-1 font-sans">
+        <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs">
+          <span className="text-[11px] font-bold text-rose-500 uppercase tracking-wider block">Potongan SOP</span>
+          <p className="text-base sm:text-lg font-bold text-rose-600 tracking-tight mt-1 truncate">
             -{formatRupiah(payrollSummary.totalDeductions)}
           </p>
         </div>
 
-        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs col-span-2 sm:col-span-1">
-          <span className="text-xs font-semibold text-[#163832]/60 block">Total Bersih</span>
-          <p className="text-2xl sm:text-3xl font-bold text-[#8EB69B] tracking-tight mt-1 font-sans">
+        <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs col-span-2 sm:col-span-1 border-l-4 border-l-[#163832]">
+          <span className="text-[11px] font-bold text-[#163832] uppercase tracking-wider block">Total Bersih</span>
+          <p className="text-base sm:text-lg font-bold text-[#163832] tracking-tight mt-1 truncate">
             {formatRupiah(payrollSummary.totalNet)}
           </p>
         </div>

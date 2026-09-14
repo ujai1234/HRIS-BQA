@@ -180,52 +180,52 @@ export const TahfidzPayrollView: React.FC = () => {
       </div>
 
       {/* Sleek Minimal Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs flex items-center justify-between">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold text-[#163832]/60 block uppercase tracking-wider">Total Ustadz</span>
-            <div className="text-2xl sm:text-3xl font-bold text-[#051F20] tracking-tight mt-1 font-sans">
+            <span className="text-[11px] font-bold text-[#8EB69B] block uppercase tracking-wider">Total Ustadz</span>
+            <div className="text-base sm:text-lg font-bold text-[#051F20] tracking-tight mt-1 font-sans">
               {tahfidzPayroll?.totalUstadz || 0}
             </div>
           </div>
-          <div className="w-10 h-10 rounded-[12px] bg-slate-50 flex items-center justify-center text-[#163832]">
-            <Users className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-[12px] bg-slate-50 flex items-center justify-center text-[#163832]">
+            <Users className="w-4.5 h-4.5" />
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold text-[#163832]/60 block uppercase tracking-wider">Hadir Subuh</span>
-            <div className="text-2xl sm:text-3xl font-bold text-[#051F20] tracking-tight mt-1 font-sans flex items-baseline gap-1">
-              {tahfidzPayroll?.totalSubuhJP || 0} <span className="text-xs font-bold text-[#8EB69B]">JP</span>
+            <span className="text-[11px] font-bold text-[#8EB69B] block uppercase tracking-wider">Hadir Subuh</span>
+            <div className="text-base sm:text-lg font-bold text-[#051F20] tracking-tight mt-1 font-sans flex items-baseline gap-1">
+              {tahfidzPayroll?.totalSubuhJP || 0} <span className="text-[10px] font-bold text-[#8EB69B]">JP</span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-[12px] bg-slate-50 flex items-center justify-center text-[#8EB69B]">
-            <Sun className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-[12px] bg-slate-50 flex items-center justify-center text-[#8EB69B]">
+            <Sun className="w-4.5 h-4.5" />
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold text-[#163832]/60 block uppercase tracking-wider">Hadir Maghrib</span>
-            <div className="text-2xl sm:text-3xl font-bold text-[#051F20] tracking-tight mt-1 font-sans flex items-baseline gap-1">
-              {tahfidzPayroll?.totalMaghribJP || 0} <span className="text-xs font-bold text-[#8EB69B]">JP</span>
+            <span className="text-[11px] font-bold text-[#8EB69B] block uppercase tracking-wider">Hadir Maghrib</span>
+            <div className="text-base sm:text-lg font-bold text-[#051F20] tracking-tight mt-1 font-sans flex items-baseline gap-1">
+              {tahfidzPayroll?.totalMaghribJP || 0} <span className="text-[10px] font-bold text-[#8EB69B]">JP</span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-[12px] bg-slate-50 flex items-center justify-center text-[#051F20]">
-            <Moon className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-[12px] bg-slate-50 flex items-center justify-center text-[#051F20]">
+            <Moon className="w-4.5 h-4.5" />
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs flex items-center justify-between border-l-4 border-l-[#163832]">
+        <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs flex items-center justify-between border-l-4 border-l-[#163832]">
           <div>
-            <span className="text-xs font-semibold text-[#163832]/60 block uppercase tracking-wider">Total Honor</span>
-            <div className="text-2xl sm:text-3xl font-bold text-[#163832] tracking-tight mt-1 font-sans">
+            <span className="text-[11px] font-bold text-[#163832] block uppercase tracking-wider">Total Honor</span>
+            <div className="text-base sm:text-lg font-bold text-[#163832] tracking-tight mt-1 font-sans truncate">
               Rp {(tahfidzPayroll?.totalHonor || 0).toLocaleString('id-ID')}
             </div>
           </div>
-          <div className="w-10 h-10 rounded-[12px] bg-[#DAF1DE] flex items-center justify-center text-[#163832]">
-            <Banknote className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-[12px] bg-[#DAF1DE] flex items-center justify-center text-[#163832]">
+            <Banknote className="w-4.5 h-4.5" />
           </div>
         </div>
       </div>
