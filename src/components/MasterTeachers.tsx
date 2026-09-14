@@ -283,11 +283,13 @@ export const MasterTeachers: React.FC = () => {
                         <span className={`inline-block px-2.5 py-1 rounded-[8px] text-[10px] font-bold uppercase tracking-wider ${
                           t.role === 'ADMIN'
                             ? 'bg-blue-50 text-blue-700'
-                            : t.role === 'KEPALA_PESANTREN'
+                            : (t.role === 'KEPALA_PESANTREN' || t.role === 'KEPALA_SMP' || t.role === 'KEPALA_MA')
                             ? 'bg-amber-100 text-amber-700'
+                            : t.role === 'STAFF'
+                            ? 'bg-slate-100 text-slate-700'
                             : 'text-[#163832] bg-[#DAF1DE]'
                         }`}>
-                          {t.role === 'ADMIN' ? 'Admin' : t.role === 'KEPALA_PESANTREN' ? 'Kepsek' : 'Guru'}
+                          {t.role === 'ADMIN' ? 'Admin' : (t.role === 'KEPALA_PESANTREN' || t.role === 'KEPALA_SMP' || t.role === 'KEPALA_MA') ? 'Kepsek' : t.role === 'STAFF' ? 'Staff' : 'Guru'}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-center">
