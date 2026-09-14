@@ -37,17 +37,21 @@ export const LoginPage: React.FC = () => {
       let finalTeacherId = teacherId;
 
       if (teacherId) {
+        if (teachers.length === 0) return; // Wait for teachers to load
+
         const targetTeacher = teachers.find((t: any) => t.id === teacherId);
         if (targetTeacher) {
           role = targetTeacher.role;
         }
       } else {
+        if (teachers.length === 0) return; // Wait for teachers to load
+
         // @ts-ignore
         const email = session.user.email as string;
         const targetByEmail = teachers.find((t: any) =>
           t.id.toLowerCase() === email.split('@')[0].toLowerCase() ||
           // @ts-ignore
-          t.name.toLowerCase() === session.user.name.toLowerCase() ||
+          t.name?.toLowerCase() === session.user?.name?.toLowerCase() ||
           t.username?.toLowerCase() === email.toLowerCase()
         );
 
@@ -79,15 +83,6 @@ export const LoginPage: React.FC = () => {
 
     try {
       const email = username.includes('@') ? username : `${username}@bqa.local`;
-
-      // -- BYPASS UNTUK TESTING DUMMY DATA --
-      const dummyMatch = teachers.find((t: any) => t.username === email && t.password === password && password !== undefined && password !== '');
-      if (dummyMatch) {
-        login(dummyMatch.role, dummyMatch.id);
-        return;
-      }
-      // ------------------------------------
-
       const { data, error: authError } = await authClient.signIn.email({ email, password });
 
       if (authError) {

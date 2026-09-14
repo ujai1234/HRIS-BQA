@@ -143,7 +143,7 @@ export const KepsekAuditView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* 1. Header & Scoped Unit Banner */}
-      <div className="bqa-card p-6">
+      <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -210,49 +210,49 @@ export const KepsekAuditView: React.FC = () => {
 
       {/* 2. Unit-Scoped KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bqa-card p-4 sm:p-5">
-          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">Ketaatan Jurnal</span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-emerald-700 dark:text-emerald-400 mt-1">
+        <div className="bg-white dark:bg-[#051F20]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] relative overflow-hidden group">
+          <span className="text-sm font-medium text-slate-500 dark:text-[#8EB69B] block relative z-10">Ketaatan Jurnal</span>
+          <p className="text-3xl sm:text-4xl font-display font-bold tracking-tight text-[#051F20] dark:text-[#DAF1DE] mt-2 relative z-10">
             {journalComplianceRate}%
           </p>
-          <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-1.5 block">
+          <span className="text-xs text-slate-500 dark:text-[#8EB69B]/80 font-medium mt-2 block relative z-10">
             {completedJournals} terisi ({totalEffectiveSessions} sesi)
           </span>
         </div>
 
-        <div className="bqa-card p-4 sm:p-5">
-          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">Kedisiplinan Waktu</span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-slate-900 dark:text-emerald-50 mt-1">
+        <div className="bg-white dark:bg-[#051F20]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] relative overflow-hidden group">
+          <span className="text-sm font-medium text-slate-500 dark:text-[#8EB69B] block relative z-10">Kedisiplinan Waktu</span>
+          <p className="text-3xl sm:text-4xl font-display font-bold tracking-tight text-[#051F20] dark:text-[#DAF1DE] mt-2 relative z-10">
             {punctualityRate}%
           </p>
-          <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-1.5 block">
+          <span className="text-xs text-slate-500 dark:text-[#8EB69B]/80 font-medium mt-2 block relative z-10">
             {onTimeAttendance} sesi tepat waktu
           </span>
         </div>
 
-        <div className="bqa-card p-4 sm:p-5">
-          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">Jurnal Tertunda</span>
-          <p className={`text-2xl sm:text-3xl font-semibold font-mono tracking-tight mt-1 ${pendingJournals > 0 ? 'text-[#D97706]' : 'text-slate-900 dark:text-emerald-50'}`}>
-            {pendingJournals} <span className="text-xs font-normal text-slate-500 font-sans">Sesi</span>
+        <div className="bg-white dark:bg-[#051F20]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] relative overflow-hidden group">
+          <span className="text-sm font-medium text-slate-500 dark:text-[#8EB69B] block relative z-10">Jurnal Tertunda</span>
+          <p className={`text-3xl sm:text-4xl font-display font-bold tracking-tight mt-2 relative z-10 ${pendingJournals > 0 ? 'text-[#D97706] dark:text-amber-400' : 'text-[#051F20] dark:text-[#DAF1DE]'}`}>
+            {pendingJournals} <span className="text-sm font-medium font-sans">Sesi</span>
           </p>
-          <span className={`text-[11px] mt-1.5 block ${pendingJournals > 0 ? 'text-[#D97706]' : 'text-emerald-700 dark:text-emerald-400'}`}>
+          <span className={`text-xs font-medium mt-2 block relative z-10 ${pendingJournals > 0 ? 'text-amber-600 dark:text-amber-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
             {pendingJournals > 0 ? 'Perlu supervisi harian' : 'Semua jurnal tuntas'}
           </span>
         </div>
 
-        <div className="bqa-card p-4 sm:p-5">
-          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">Pendidik Unit</span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-slate-900 dark:text-emerald-50 mt-1">
-            {unitTeachers.length} <span className="text-xs font-normal text-slate-500 font-sans">Guru</span>
+        <div className="bg-white dark:bg-[#051F20]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] relative overflow-hidden group">
+          <span className="text-sm font-medium text-slate-500 dark:text-[#8EB69B] block relative z-10">Pendidik Unit</span>
+          <p className="text-3xl sm:text-4xl font-display font-bold tracking-tight text-[#051F20] dark:text-[#DAF1DE] mt-2 relative z-10">
+            {unitTeachers.length} <span className="text-sm font-medium font-sans">Guru</span>
           </p>
-          <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-1.5 block">
+          <span className="text-xs text-slate-500 dark:text-[#8EB69B]/80 font-medium mt-2 block relative z-10">
             {totalScheduledHours} JP Terjadwal / Pekan
           </span>
         </div>
       </div>
 
       {/* 3. Search & Filter Bar */}
-      <div className="bqa-card p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" strokeWidth={1.5} />
           <input
@@ -264,38 +264,38 @@ export const KepsekAuditView: React.FC = () => {
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-          <div className="flex items-center bg-slate-100 dark:bg-[#0f1a15] p-1 rounded-lg text-xs">
+        <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+          <div className="flex flex-wrap items-center gap-2 text-sm">
             <button
               onClick={() => setStatusFilter('ALL')}
-              className={`px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-full font-medium transition-all cursor-pointer ${
                 statusFilter === 'ALL'
-                  ? 'bg-white dark:bg-[#121f1a] text-[#1B4332] dark:text-emerald-400 shadow-xs'
-                  : 'text-slate-500 dark:text-emerald-400/70'
+                  ? 'bg-[#051F20] dark:bg-[#8EB69B] text-white dark:text-[#051F20] shadow-md'
+                  : 'bg-slate-50 dark:bg-transparent text-slate-500 hover:text-[#051F20] dark:text-[#8EB69B]/70 dark:hover:text-[#DAF1DE] hover:bg-slate-100 dark:hover:bg-[#163832]/30 border border-slate-200 dark:border-[#163832]'
               }`}
             >
               Semua ({payrollSummary.items.length})
             </button>
             <button
               onClick={() => setStatusFilter('NEED_SUPERVISION')}
-              className={`px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-4 py-2 rounded-full font-medium transition-all cursor-pointer flex items-center gap-2 ${
                 statusFilter === 'NEED_SUPERVISION'
-                  ? 'bg-white dark:bg-[#121f1a] text-[#D97706] shadow-xs'
-                  : 'text-slate-500 dark:text-emerald-400/70'
+                  ? 'bg-amber-600 dark:bg-amber-500 text-white shadow-md'
+                  : 'bg-slate-50 dark:bg-transparent text-amber-700 dark:text-amber-400 hover:bg-slate-100 dark:hover:bg-[#163832]/30 border border-slate-200 dark:border-[#163832]'
               }`}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#D97706]"></span>
+              <span className={`w-2 h-2 rounded-full ${statusFilter === 'NEED_SUPERVISION' ? 'bg-white' : 'bg-amber-500'}`}></span>
               Perlu Supervisi ({payrollSummary.items.filter(i => i.emptyJournalCount > 0).length})
             </button>
             <button
               onClick={() => setStatusFilter('COMPLETED')}
-              className={`px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-4 py-2 rounded-full font-medium transition-all cursor-pointer flex items-center gap-2 ${
                 statusFilter === 'COMPLETED'
-                  ? 'bg-white dark:bg-[#121f1a] text-[#1B4332] shadow-xs'
-                  : 'text-slate-500 dark:text-emerald-400/70'
+                  ? 'bg-emerald-600 dark:bg-emerald-500 text-white shadow-md'
+                  : 'bg-slate-50 dark:bg-transparent text-emerald-700 dark:text-emerald-400 hover:bg-slate-100 dark:hover:bg-[#163832]/30 border border-slate-200 dark:border-[#163832]'
               }`}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#1B4332]"></span>
+              <span className={`w-2 h-2 rounded-full ${statusFilter === 'COMPLETED' ? 'bg-white' : 'bg-emerald-500'}`}></span>
               KBM Tuntas
             </button>
           </div>
@@ -303,7 +303,7 @@ export const KepsekAuditView: React.FC = () => {
       </div>
 
       {/* 4. Leadership Audit Table */}
-      <div className="bqa-card overflow-hidden">
+      <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>

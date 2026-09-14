@@ -51,7 +51,8 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
     attendances, 
     badalAssignments, 
     currentUser,
-    currentRole
+    currentRole,
+    isDarkMode
   } = useHRIS();
 
   const userUnit = getRoleUnit(currentRole, currentUser?.unit);
@@ -379,7 +380,7 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
     <div className="space-y-5">
       
       {/* 1. Header Minimalis & Modern */}
-      <div className="bqa-card p-4 sm:p-5">
+      <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
@@ -428,23 +429,23 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
         </div>
 
         {/* Sub-Tab Navigation */}
-        <div className="flex items-center gap-1.5 mt-4 pt-3.5 border-t border-slate-100 dark:border-emerald-900/40 text-xs font-medium">
+        <div className="flex flex-wrap items-center gap-2 mt-6 pt-5 border-t border-slate-100 dark:border-[#163832]/60 text-sm font-medium">
           <button
             onClick={() => setActiveView('REALTIME')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-full transition-all cursor-pointer ${
               activeView === 'REALTIME'
-                ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:bg-[#0f1a15] dark:hover:bg-[#162720]/50'
+                ? 'bg-[#051F20] dark:bg-[#8EB69B] text-white dark:text-[#051F20] font-semibold shadow-md'
+                : 'text-slate-500 hover:text-[#051F20] dark:text-[#8EB69B]/70 dark:hover:text-[#DAF1DE] hover:bg-slate-50 dark:hover:bg-[#163832]/30'
             }`}
           >
             Live Sesi Hari Ini ({totalSessionsToday})
           </button>
           <button
             onClick={() => setActiveView('BADAL')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-full transition-all cursor-pointer flex items-center gap-2 ${
               activeView === 'BADAL'
-                ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:bg-[#0f1a15] dark:hover:bg-[#162720]/50'
+                ? 'bg-[#051F20] dark:bg-[#8EB69B] text-white dark:text-[#051F20] font-semibold shadow-md'
+                : 'text-slate-500 hover:text-[#051F20] dark:text-[#8EB69B]/70 dark:hover:text-[#DAF1DE] hover:bg-slate-50 dark:hover:bg-[#163832]/30'
             }`}
           >
             Guru Pengganti
@@ -456,10 +457,10 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
           </button>
           <button
             onClick={() => setActiveView('REKAP')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-full transition-all cursor-pointer ${
               activeView === 'REKAP'
-                ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:bg-[#0f1a15] dark:hover:bg-[#162720]/50'
+                ? 'bg-[#051F20] dark:bg-[#8EB69B] text-white dark:text-[#051F20] font-semibold shadow-md'
+                : 'text-slate-500 hover:text-[#051F20] dark:text-[#8EB69B]/70 dark:hover:text-[#DAF1DE] hover:bg-slate-50 dark:hover:bg-[#163832]/30'
             }`}
           >
             Rekap & Analitik Kinerja
@@ -468,55 +469,67 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
       </div>
 
       {/* 2. Key Metrics Bar (Clean, Minimal, High Contrast) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Metric 1: Kehadiran Hari Ini */}
-        <div className="bqa-card p-4">
-          <div className="text-xs font-medium text-slate-500 dark:text-emerald-400/70">
+        <div className="bg-white dark:bg-[#051F20]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <CheckCircle2 className="w-16 h-16 text-[#051F20] dark:text-[#8EB69B]" />
+          </div>
+          <div className="text-sm font-medium text-slate-500 dark:text-[#8EB69B] relative z-10">
             Kehadiran Asatidz
           </div>
-          <div className="text-2xl sm:text-3xl font-mono font-bold text-slate-900 dark:text-emerald-50 mt-1">
+          <div className="text-3xl sm:text-4xl font-display font-bold text-[#051F20] dark:text-[#DAF1DE] mt-2 relative z-10">
             {presentCount}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">
-            {lateCount > 0 ? `${lateCount} hadir terlambat` : 'Semua hadir tepat waktu'}
+          <div className="text-xs text-slate-500 dark:text-[#8EB69B]/80 mt-2 relative z-10 font-medium">
+            {lateCount > 0 ? <span className="text-amber-600 dark:text-amber-400">{lateCount} hadir terlambat</span> : <span className="text-emerald-600 dark:text-emerald-400">Semua hadir tepat waktu</span>}
           </div>
         </div>
 
         {/* Metric 2: Ketaatan Jurnal Hari Ini */}
-        <div className="bqa-card p-4">
-          <div className="text-xs font-medium text-slate-500 dark:text-emerald-400/70">
+        <div className="bg-white dark:bg-[#051F20]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <CheckCircle2 className="w-16 h-16 text-[#051F20] dark:text-[#8EB69B]" />
+          </div>
+          <div className="text-sm font-medium text-slate-500 dark:text-[#8EB69B] relative z-10">
             Jurnal KBM Terisi
           </div>
-          <div className="text-2xl sm:text-3xl font-mono font-bold text-slate-900 dark:text-emerald-50 mt-1">
+          <div className="text-3xl sm:text-4xl font-display font-bold text-[#051F20] dark:text-[#DAF1DE] mt-2 relative z-10">
             {completedJournalCount}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">
-            {pendingJournalCount > 0 ? `${pendingJournalCount} jurnal belum diserahkan` : 'Semua jurnal lengkap'}
+          <div className="text-xs text-slate-500 dark:text-[#8EB69B]/80 mt-2 relative z-10 font-medium">
+            {pendingJournalCount > 0 ? <span className="text-rose-600 dark:text-rose-400">{pendingJournalCount} jurnal belum diserahkan</span> : <span className="text-emerald-600 dark:text-emerald-400">Semua jurnal lengkap</span>}
           </div>
         </div>
 
         {/* Metric 3: Guru Pengganti */}
-        <div className="bqa-card p-4">
-          <div className="text-xs font-medium text-slate-500 dark:text-emerald-400/70">
+        <div className="bg-white dark:bg-[#051F20]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <UserCheck className="w-16 h-16 text-indigo-500 dark:text-indigo-400" />
+          </div>
+          <div className="text-sm font-medium text-slate-500 dark:text-[#8EB69B] relative z-10">
             Guru Pengganti
           </div>
-          <div className="text-2xl sm:text-3xl font-mono font-bold text-amber-600 dark:text-amber-400 mt-1">
+          <div className="text-3xl sm:text-4xl font-display font-bold text-indigo-600 dark:text-indigo-400 mt-2 relative z-10">
             {activeBadalCount}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">
+          <div className="text-xs text-slate-500 dark:text-[#8EB69B]/80 mt-2 relative z-10 font-medium">
             {activeBadalCount > 0 ? 'Semua terisi guru pengganti' : 'Tidak ada kebutuhan badal'}
           </div>
         </div>
 
         {/* Metric 4: Ketepatan Waktu Check-In */}
-        <div className="bqa-card p-4">
-          <div className="text-xs font-medium text-slate-500 dark:text-emerald-400/70">
+        <div className="bg-white dark:bg-[#051F20]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <TrendingUp className="w-16 h-16 text-[#051F20] dark:text-[#8EB69B]" />
+          </div>
+          <div className="text-sm font-medium text-slate-500 dark:text-[#8EB69B] relative z-10">
             Ketepatan Waktu KBM
           </div>
-          <div className="text-2xl sm:text-3xl font-mono font-bold text-slate-900 dark:text-emerald-50 mt-1">
+          <div className="text-3xl sm:text-4xl font-display font-bold text-[#051F20] dark:text-[#DAF1DE] mt-2 relative z-10">
             {onTimePercentage}%
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">
+          <div className="text-xs text-slate-500 dark:text-[#8EB69B]/80 mt-2 relative z-10 font-medium">
             Target kedisiplinan 95%
           </div>
         </div>
@@ -524,57 +537,57 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
 
       {/* 3. VIEW 1: LIVE REALTIME MONITORING TABLE */}
       {activeView === 'REALTIME' && (
-        <div className="bqa-card overflow-hidden">
+        <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] overflow-hidden">
           {/* Table Filters & Search */}
           <div className="p-3.5 border-b border-slate-100 dark:border-emerald-900/40 flex flex-col md:flex-row md:items-center justify-between gap-3">
             {/* Filter chips */}
             <div className="flex flex-wrap items-center gap-1.5 text-xs">
               <button
                 onClick={() => setStatusFilter('ALL')}
-                className={`px-2.5 py-1 rounded-lg border font-medium transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-full border text-xs font-medium transition-all cursor-pointer ${
                   statusFilter === 'ALL'
-                    ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100'
-                    : 'bg-white dark:bg-[#121f1a] text-slate-600 dark:text-emerald-400/70 border-slate-200 dark:border-emerald-900/40 hover:bg-slate-50 dark:bg-[#0f1a15]'
+                    ? 'bg-[#051F20] dark:bg-[#8EB69B] text-white dark:text-[#051F20] border-[#051F20] dark:border-[#8EB69B]'
+                    : 'bg-white dark:bg-transparent text-slate-600 dark:text-[#8EB69B]/80 border-slate-200 dark:border-[#163832] hover:bg-slate-50 dark:hover:bg-[#163832]/30'
                 }`}
               >
                 Semua ({liveSessions.length})
               </button>
               <button
                 onClick={() => setStatusFilter('HADIR')}
-                className={`px-2.5 py-1 rounded-lg border font-medium transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-full border text-xs font-medium transition-all cursor-pointer ${
                   statusFilter === 'HADIR'
-                    ? 'bg-emerald-600 text-white border-emerald-600'
-                    : 'bg-white dark:bg-[#121f1a] text-emerald-700 dark:text-emerald-400 border-slate-200 dark:border-emerald-900/40 hover:bg-slate-50 dark:bg-[#0f1a15]'
+                    ? 'bg-emerald-600 dark:bg-emerald-500 text-white border-emerald-600 dark:border-emerald-500'
+                    : 'bg-white dark:bg-transparent text-emerald-700 dark:text-emerald-400 border-slate-200 dark:border-[#163832] hover:bg-slate-50 dark:hover:bg-[#163832]/30'
                 }`}
               >
                 Tepat Waktu ({liveSessions.filter(s => s.attendanceStatus === 'HADIR_TEPAT').length})
               </button>
               <button
                 onClick={() => setStatusFilter('TERLAMBAT')}
-                className={`px-2.5 py-1 rounded-lg border font-medium transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-full border text-xs font-medium transition-all cursor-pointer ${
                   statusFilter === 'TERLAMBAT'
-                    ? 'bg-amber-600 text-white border-amber-600'
-                    : 'bg-white dark:bg-[#121f1a] text-amber-700 dark:text-amber-400 border-slate-200 dark:border-emerald-900/40 hover:bg-slate-50 dark:bg-[#0f1a15]'
+                    ? 'bg-amber-600 dark:bg-amber-500 text-white border-amber-600 dark:border-amber-500'
+                    : 'bg-white dark:bg-transparent text-amber-700 dark:text-amber-400 border-slate-200 dark:border-[#163832] hover:bg-slate-50 dark:hover:bg-[#163832]/30'
                 }`}
               >
                 Terlambat ({lateCount})
               </button>
               <button
                 onClick={() => setStatusFilter('PENDING_JURNAL')}
-                className={`px-2.5 py-1 rounded-lg border font-medium transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-full border text-xs font-medium transition-all cursor-pointer ${
                   statusFilter === 'PENDING_JURNAL'
-                    ? 'bg-rose-600 text-white border-rose-600'
-                    : 'bg-white dark:bg-[#121f1a] text-rose-700 dark:text-rose-400 border-slate-200 dark:border-emerald-900/40 hover:bg-slate-50 dark:bg-[#0f1a15]'
+                    ? 'bg-rose-600 dark:bg-rose-500 text-white border-rose-600 dark:border-rose-500'
+                    : 'bg-white dark:bg-transparent text-rose-700 dark:text-rose-400 border-slate-200 dark:border-[#163832] hover:bg-slate-50 dark:hover:bg-[#163832]/30'
                 }`}
               >
                 Pending Jurnal ({pendingJournalCount})
               </button>
               <button
                 onClick={() => setStatusFilter('BADAL')}
-                className={`px-2.5 py-1 rounded-lg border font-medium transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-full border text-xs font-medium transition-all cursor-pointer ${
                   statusFilter === 'BADAL'
-                    ? 'bg-indigo-600 text-white border-indigo-600'
-                    : 'bg-white dark:bg-[#121f1a] text-[#4F46E5] dark:text-indigo-400 border-slate-200 dark:border-emerald-900/40 hover:bg-slate-50 dark:bg-[#0f1a15]'
+                    ? 'bg-indigo-600 dark:bg-indigo-500 text-white border-indigo-600 dark:border-indigo-500'
+                    : 'bg-white dark:bg-transparent text-[#4F46E5] dark:text-indigo-400 border-slate-200 dark:border-[#163832] hover:bg-slate-50 dark:hover:bg-[#163832]/30'
                 }`}
               >
                 Guru Badal ({activeBadalCount})
@@ -714,7 +727,7 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
       {/* 4. VIEW 2: MONITORING GURU PENGGANTI (BADAL) */}
       {activeView === 'BADAL' && (
         <div className="space-y-6">
-          <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 p-5 shadow-xs">
+          <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 className="text-sm font-display font-bold text-slate-900 dark:text-emerald-50">
@@ -793,8 +806,8 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
       {activeView === 'REKAP' && (
         <div className="space-y-6">
           {/* 7-Day Teacher Attendance Trend Chart */}
-          <div className="bg-white dark:bg-[#121f1a] p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 dark:border-emerald-900/40 gap-3">
+          <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 dark:border-[#163832]/60 gap-3">
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-sm font-bold text-slate-900 dark:text-emerald-50">
@@ -867,17 +880,17 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
                       return null;
                     }}
                   />
-                  <Bar dataKey="tepat" name="Tepat Waktu" stackId="a" fill="#1B4332" radius={[0, 0, 0, 0]} />
-                  <Bar dataKey="terlambat" name="Terlambat" stackId="a" fill="#D97706" radius={[0, 0, 0, 0]} />
-                  <Bar dataKey="izin" name="Izin / Sakit" stackId="a" fill="#94a3b8" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="tepat" name="Tepat Waktu" stackId="a" fill={isDarkMode ? '#8EB69B' : '#1B4332'} radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="terlambat" name="Terlambat" stackId="a" fill={isDarkMode ? '#DAF1DE' : '#D97706'} radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="izin" name="Izin / Sakit" stackId="a" fill={isDarkMode ? '#163832' : '#94a3b8'} radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           {/* Monthly Trajectory Chart */}
-          <div className="bg-white dark:bg-[#121f1a] p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 dark:border-emerald-900/40 gap-2">
+          <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 dark:border-[#163832]/60 gap-2">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-emerald-50">
                   Tren Kehadiran & Ketaatan Jurnal Semester
@@ -928,9 +941,9 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
                       return null;
                     }} 
                   />
-                  <Area type="monotone" dataKey="kehadiran" name="Kehadiran" stroke="#1B4332" strokeWidth={2} fill="#1B4332" fillOpacity={0.08} />
-                  <Line type="monotone" dataKey="jurnal" name="Jurnal KBM" stroke="#4F46E5" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="tepat" name="Tepat Waktu" stroke="#D97706" strokeWidth={2} strokeDasharray="3 3" dot={{ r: 2.5 }} />
+                  <Area type="monotone" dataKey="kehadiran" name="Kehadiran" stroke={isDarkMode ? '#DAF1DE' : '#1B4332'} strokeWidth={2} fill={isDarkMode ? '#DAF1DE' : '#1B4332'} fillOpacity={0.08} />
+                  <Line type="monotone" dataKey="jurnal" name="Jurnal KBM" stroke={isDarkMode ? '#8EB69B' : '#4F46E5'} strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="tepat" name="Tepat Waktu" stroke={isDarkMode ? '#163832' : '#D97706'} strokeWidth={2} strokeDasharray="3 3" dot={{ r: 2.5 }} />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
@@ -939,8 +952,8 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
           {/* 2-Column Visuals Grid: Status Distribution Donut & Radar Evaluasi Kompetensi */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {/* Donut Chart: Komposisi Status KBM Hari Ini */}
-            <div className="bg-white dark:bg-[#121f1a] p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-emerald-900/40">
+            <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#163832]/60">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 dark:text-emerald-50">
                     Distribusi Status Sesi KBM Hari Ini
@@ -1003,8 +1016,8 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
             </div>
 
             {/* Radar Chart: Evaluasi Mutu & Kinerja Akademik */}
-            <div className="bg-white dark:bg-[#121f1a] p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-emerald-900/40">
+            <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#163832]/60">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 dark:text-emerald-50">
                     Rubrik Mutu & Standar Kinerja Asatidz
@@ -1031,8 +1044,8 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
                     <PolarGrid stroke="#e2e8f0" className="dark:opacity-15" />
                     <PolarAngleAxis dataKey="metric" tick={{ fontSize: 10, fill: '#64748b' }} />
                     <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 9, fill: '#94a3b8' }} />
-                    <Radar name="Capaian" dataKey="score" stroke="#1B4332" fill="#1B4332" fillOpacity={0.25} />
-                    <Radar name="Target Mutu" dataKey="target" stroke="#94a3b8" fill="#94a3b8" fillOpacity={0.08} strokeDasharray="3 3" />
+                    <Radar name="Capaian" dataKey="score" stroke={isDarkMode ? '#DAF1DE' : '#1B4332'} fill={isDarkMode ? '#DAF1DE' : '#1B4332'} fillOpacity={0.25} />
+                    <Radar name="Target Mutu" dataKey="target" stroke={isDarkMode ? '#8EB69B' : '#94a3b8'} fill={isDarkMode ? '#8EB69B' : '#94a3b8'} fillOpacity={0.08} strokeDasharray="3 3" />
                     <Tooltip
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
@@ -1059,8 +1072,8 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
           </div>
 
           {/* TOP 5 USTADZ TERBAIK (DI PALING BAWAH - SIMPEL, MINIMALIS, MODERN) */}
-          <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 p-5 shadow-xs space-y-3">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-emerald-900/40">
+          <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] space-y-3">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#163832]/60">
               <h3 className="text-sm font-bold text-slate-900 dark:text-emerald-50">
                 Top 5 Ustadz Terbaik
               </h3>

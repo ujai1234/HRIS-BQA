@@ -351,6 +351,11 @@ async function startServer() {
               name: req.body.name,
               teacherId: result[0].id
             },
+            headers: new Headers({
+              'host': req.headers.host || 'localhost:3000',
+              'origin': req.headers.origin || 'http://localhost:3000',
+              'x-forwarded-host': req.headers.host || 'localhost:3000'
+            }),
             asResponse: true
           });
         } catch (authErr) {

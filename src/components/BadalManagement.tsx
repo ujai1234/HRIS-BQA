@@ -323,7 +323,7 @@ export const BadalManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* 1. Header and Context Banner */}
-      <div className="bg-white rounded-[16px] border border-slate-200 p-5 sm:p-6 shadow-xs">
+      <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -372,7 +372,7 @@ export const BadalManagement: React.FC = () => {
 
       {/* 2. Stat Metric Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+        <div className="bg-white dark:bg-[#051F20]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] relative overflow-hidden group">
           <span className="text-xs font-semibold text-[#163832]/60 block">Total Sesi Pengganti</span>
           <p className="text-4xl font-bold text-[#051F20] tracking-tight mt-1 mb-2">
             {stats.totalSessions}
@@ -382,7 +382,7 @@ export const BadalManagement: React.FC = () => {
           </span>
         </div>
 
-        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+        <div className="bg-white dark:bg-[#051F20]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] relative overflow-hidden group">
           <span className="text-xs font-semibold text-[#163832]/60 block">Total Jam Mengajar</span>
           <p className="text-4xl font-bold text-[#051F20] tracking-tight mt-1 mb-2">
             {stats.totalJP}
@@ -392,7 +392,7 @@ export const BadalManagement: React.FC = () => {
           </span>
         </div>
 
-        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+        <div className="bg-white dark:bg-[#051F20]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] relative overflow-hidden group">
           <span className="text-xs font-semibold text-[#163832]/60 block">Izin & Pengganti</span>
           <p className="text-4xl font-bold text-[#051F20] tracking-tight mt-1 mb-2">
             {stats.pendingCount}
@@ -403,7 +403,7 @@ export const BadalManagement: React.FC = () => {
         </div>
 
         {isKepsek ? (
-          <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+          <div className="bg-white dark:bg-[#051F20]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] relative overflow-hidden group">
             <span className="text-xs font-semibold text-[#163832]/60 block">Sesi Pengganti Disetujui</span>
             <p className="text-4xl font-bold text-[#051F20] tracking-tight mt-1 mb-2">
               {stats.approvedCount}
@@ -413,7 +413,7 @@ export const BadalManagement: React.FC = () => {
             </span>
           </div>
         ) : (
-          <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+          <div className="bg-white dark:bg-[#051F20]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] relative overflow-hidden group">
             <span className="text-xs font-semibold text-[#163832]/60 block">Alokasi Kafa'ah Pengganti</span>
             <p className="text-2xl font-bold text-[#051F20] tracking-tight mt-1 mb-2 truncate pt-2">
               {formatRupiah(stats.totalHonor)}
@@ -465,7 +465,7 @@ export const BadalManagement: React.FC = () => {
               return (
                 <div 
                   key={b.id} 
-                  className="bg-white dark:bg-[#121f1a] p-4 sm:p-5 rounded-xl border border-slate-200/90 dark:border-emerald-900/40 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+                  className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] flex flex-col lg:flex-row lg:items-center justify-between gap-4"
                 >
                   {/* Left Column: Teacher & Leave Information */}
                   <div className="space-y-2 flex-1">
@@ -591,7 +591,7 @@ export const BadalManagement: React.FC = () => {
       {(!isKepsek || activeTab === 'daftar_penugasan') && (
         <div className="space-y-4">
           {/* Filter Bar */}
-          <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
             {/* Unit Filter - For Admin */}
             {isAdmin && (
               <div className="flex items-center gap-1 bg-slate-50 p-1.5 rounded-[12px] text-xs overflow-x-auto max-w-full border border-slate-200">
@@ -638,7 +638,7 @@ export const BadalManagement: React.FC = () => {
           </div>
 
           {/* Badal Records Table */}
-          <div className="bqa-card overflow-hidden">
+          <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
@@ -778,7 +778,7 @@ export const BadalManagement: React.FC = () => {
       {/* 6. CONTENT VIEW: SMART FINDER */}
       {isKepsek && activeTab === 'cari_guru' && (
         <div className="space-y-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#121f1a] p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs">
+          <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
             <h3 className="text-xs font-bold text-slate-900 dark:text-emerald-50 mb-4 flex items-center gap-2 uppercase tracking-wider">
               <UserCheck className="w-4 h-4 text-[#1B4332] dark:text-emerald-400" strokeWidth={1.5} />
               <span>Pencocokan Jadwal Guru Kosong (Smart Finder)</span>

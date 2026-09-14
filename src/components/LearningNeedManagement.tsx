@@ -274,7 +274,7 @@ export const LearningNeedManagement: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* 1. Clean Minimalist Header */}
-      <div className="bg-white rounded-[16px] border border-slate-200 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
         <div className="space-y-1">
           <h1 className="text-xl sm:text-2xl font-bold text-[#051F20] tracking-tight font-sans">
             {isKepsek 
@@ -315,7 +315,7 @@ export const LearningNeedManagement: React.FC = () => {
 
       {/* 2. Proportional Compact Metric Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+        <div className="bg-white dark:bg-[#051F20]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] relative overflow-hidden group">
           <span className="text-xs font-semibold text-[#163832]/60 block">
             Total Pengajuan
           </span>
@@ -365,7 +365,7 @@ export const LearningNeedManagement: React.FC = () => {
       </div>
 
       {/* 3. Search & Filter Bar */}
-      <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
         <div className="relative flex-1 sm:w-64 w-full">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8EB69B]" strokeWidth={2} />
           <input
@@ -407,7 +407,7 @@ export const LearningNeedManagement: React.FC = () => {
       </div>
 
       {/* 4. Table / List of Requests */}
-      <div className="bg-white rounded-[16px] border border-slate-200 overflow-hidden shadow-xs">
+      <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] overflow-hidden">
         {filteredRequests.length === 0 ? (
           <div className="p-12 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
             Tidak ada data pengajuan yang sesuai.
