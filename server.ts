@@ -338,9 +338,12 @@ async function startServer() {
 
   app.post('/api/teachers', async (req, res) => {
     try {
+      if (req.body.password && req.body.password.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
+      }
+
       const result = await db.insert(schema.teachers).values(req.body).returning();
       
-      // Auto-register to Better Auth if username and password provided
       if (req.body.username && req.body.password) {
         try {
           const email = req.body.username.includes('@') ? req.body.username : `${req.body.username}@bqa.local`;
@@ -359,7 +362,7 @@ async function startServer() {
             asResponse: true
           });
         } catch (authErr) {
-          console.error("Auto-register failed (might already exist):", authErr);
+          console.error("Auto-register failed:", authErr);
         }
       }
 
@@ -385,6 +388,10 @@ async function startServer() {
 
   app.patch('/api/teachers/:id', async (req, res) => {
     try {
+      if (req.body.password && req.body.password.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
+      }
+
       const existingTeacher = await db.query.teachers.findFirst({
         where: eq(schema.teachers.id, req.params.id)
       });
@@ -436,15 +443,36 @@ async function startServer() {
         await db.delete(schema.attendances);
         await db.delete(schema.badalAssignments);
         await db.delete(schema.schedules);
+        
+        // Delete all Better Auth records linked to teachers
+        await db.delete(schema.session);
+        await db.delete(schema.account);
+        await db.delete(schema.user);
+        
         await db.delete(schema.teachers);
         return res.json({ success: true, message: 'All teachers and related data deleted' });
       }
+      
       // Delete dependent records first to maintain relational integrity
       await db.delete(schema.learningNeedRequests).where(eq(schema.learningNeedRequests.teacherId, id));
       await db.delete(schema.journals).where(eq(schema.journals.teacherId, id));
       await db.delete(schema.attendances).where(or(eq(schema.attendances.teacherId, id), eq(schema.attendances.actualTeacherId, id)));
       await db.delete(schema.badalAssignments).where(or(eq(schema.badalAssignments.originalTeacherId, id), eq(schema.badalAssignments.badalTeacherId, id)));
       await db.delete(schema.schedules).where(eq(schema.schedules.teacherId, id));
+      
+      // Delete dependent staff and student records
+      await db.delete(schema.staffTasks).where(eq(schema.staffTasks.staffId, id));
+      await db.delete(schema.staffExpenses).where(eq(schema.staffExpenses.reporterId, id));
+      await db.delete(schema.studentNotes).where(eq(schema.studentNotes.teacherId, id));
+
+      // Delete Better-Auth user if exists
+      const existingUser = await db.query.user.findFirst({ where: eq(schema.user.teacherId, id) });
+      if (existingUser) {
+        await db.delete(schema.session).where(eq(schema.session.userId, existingUser.id));
+        await db.delete(schema.account).where(eq(schema.account.userId, existingUser.id));
+        await db.delete(schema.user).where(eq(schema.user.id, existingUser.id));
+      }
+
       await db.delete(schema.teachers).where(eq(schema.teachers.id, id));
       res.json({ success: true });
     } catch (error) {
