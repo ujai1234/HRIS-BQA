@@ -185,7 +185,7 @@ export const MasterTeachers: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 p-1.5 rounded-[12px]">
-                {['ALL', 'SMP', 'MA', 'PESANTREN'].map((unit) => (
+                {['ALL', 'SMP', 'MA', 'PESANTREN', 'UMUM'].map((unit) => (
                   <button
                     key={unit}
                     onClick={() => setUnitFilter(unit)}
@@ -364,6 +364,7 @@ export const MasterTeachers: React.FC = () => {
                     <option value="SMP">SMP</option>
                     <option value="MA">MA</option>
                     <option value="PESANTREN">Pesantren</option>
+                    <option value="UMUM">Umum</option>
                   </select>
                 </div>
               </div>
@@ -428,8 +429,17 @@ export const MasterTeachers: React.FC = () => {
               <div className="space-y-1">
                 <label className="text-slate-600 dark:text-emerald-400/70 font-medium block">Hak Akses</label>
                 <select
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
+                  value={formData.role === 'STAFF' ? (formData.position?.toLowerCase().includes('dapur') ? 'STAFF_DAPUR' : (formData.position?.toLowerCase().includes('sarpras') || formData.position?.toLowerCase().includes('inventaris')) ? 'STAFF_SARPRAS' : 'STAFF') : formData.role}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === 'STAFF_DAPUR') {
+                      setFormData({ ...formData, role: 'STAFF', position: 'Staff Dapur' });
+                    } else if (val === 'STAFF_SARPRAS') {
+                      setFormData({ ...formData, role: 'STAFF', position: 'Staff Sarpras' });
+                    } else {
+                      setFormData({ ...formData, role: val as any });
+                    }
+                  }}
                   className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-emerald-50"
                 >
                   <option value="GURU">Guru Pengajar</option>
@@ -437,7 +447,9 @@ export const MasterTeachers: React.FC = () => {
                   <option value="KEPALA_SMP">Kepala Sekolah SMP</option>
                   <option value="KEPALA_MA">Kepala Madrasah Aliyah</option>
                   <option value="KEPALA_PESANTREN">Kepala Pesantren</option>
-                  <option value="STAFF">Staff Pesantren</option>
+                  <option value="STAFF">Staff Pesantren (Umum)</option>
+                  <option value="STAFF_DAPUR">Staff Dapur</option>
+                  <option value="STAFF_SARPRAS">Staff Sarpras / Inventaris</option>
                 </select>
               </div>
 
