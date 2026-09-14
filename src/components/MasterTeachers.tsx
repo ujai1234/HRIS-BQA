@@ -432,6 +432,8 @@ export const MasterTeachers: React.FC = () => {
                 >
                   <option value="GURU">Guru Pengajar</option>
                   <option value="ADMIN">Administrator TU</option>
+                  <option value="KEPALA_SMP">Kepala Sekolah SMP</option>
+                  <option value="KEPALA_MA">Kepala Madrasah Aliyah</option>
                   <option value="KEPALA_PESANTREN">Kepala Pesantren</option>
                   <option value="STAFF">Staff Pesantren</option>
                 </select>
