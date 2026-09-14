@@ -385,12 +385,44 @@ async function startServer() {
 
   app.patch('/api/teachers/:id', async (req, res) => {
     try {
-      const result = await db.update(schema.teachers)
-        .set(req.body)
-        .where(eq(schema.teachers.id, req.params.id))
-        .returning();
-      res.json(result[0]);
+      const existingTeacher = await db.query.teachers.findFirst({
+        where: eq(schema.teachers.id, req.params.id)
+      });
+      if (!existingTeacher) return res.status(404).json({ error: 'Teacher not found' });
+      
+      const result = await db.update(schema.teachers).set(req.body).where(eq(schema.teachers.id, req.params.id)).returning();
+      const updatedTeacher = result[0];
+      
+      if (req.body.username || req.body.password || req.body.name) {
+        try {
+          const existingUser = await db.query.user.findFirst({ where: eq(schema.user.teacherId, req.params.id) });
+          const newEmail = req.body.username ? (req.body.username.includes('@') ? req.body.username : `${req.body.username}@bqa.local`) : (existingUser?.email || `${updatedTeacher.username}@bqa.local`);
+          const newName = req.body.name || updatedTeacher.name;
+          const passwordChanged = req.body.password && req.body.password !== existingTeacher.password;
+          
+          if (passwordChanged) {
+            if (existingUser) {
+              await db.delete(schema.session).where(eq(schema.session.userId, existingUser.id));
+              await db.delete(schema.account).where(eq(schema.account.userId, existingUser.id));
+              await db.delete(schema.user).where(eq(schema.user.id, existingUser.id));
+            }
+            await auth.api.signUpEmail({
+              body: { email: newEmail, password: req.body.password, name: newName, teacherId: updatedTeacher.id },
+              headers: new Headers({ 'host': req.headers.host || 'localhost:3000', 'origin': req.headers.origin || 'http://localhost:3000', 'x-forwarded-host': req.headers.host || 'localhost:3000' }),
+              asResponse: true
+            });
+            console.log(`[Admin] Re-created Better Auth user for ${updatedTeacher.id} due to password change.`);
+          } else if (existingUser && (req.body.username || req.body.name)) {
+            await db.update(schema.user).set({ email: newEmail, name: newName }).where(eq(schema.user.id, existingUser.id));
+            console.log(`[Admin] Updated Better Auth email/name for ${updatedTeacher.id}.`);
+          }
+        } catch (authErr) {
+          console.error('Failed to sync teacher update with Better-Auth:', authErr);
+        }
+      }
+      res.json(updatedTeacher);
     } catch (error) {
+      console.error(error);
       res.status(500).json({ error: 'Failed to update teacher' });
     }
   });
@@ -2829,7 +2861,9 @@ async function startServer() {
       res.status(500).json({ error: 'Failed to update parent' });
     }
   });
-  // --- FASE 6 API ENDPOINTS (Master Data Edit & Relations) ---
+
+
+
   app.put('/api/students/:id', async (req, res) => {
     try {
       const result = await db.update(schema.students)
