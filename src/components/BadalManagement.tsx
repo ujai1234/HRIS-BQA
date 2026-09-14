@@ -323,18 +323,18 @@ export const BadalManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* 1. Header and Context Banner */}
-      <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 p-5 sm:p-6 shadow-xs">
+      <div className="bg-white rounded-[16px] border border-slate-200 p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-emerald-50 tracking-tight font-sans">
+              <h1 className="text-xl sm:text-2xl font-bold text-[#051F20] tracking-tight font-sans">
                 Penugasan Guru Pengganti
               </h1>
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40">
+              <span className="text-[10px] font-bold px-2.5 py-1 rounded-[8px] bg-[#DAF1DE] text-[#163832] uppercase tracking-wider">
                 {isKepsek ? `Otoritas Kepala ${userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}` : 'Monitoring Admin (View-Only)'}
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-emerald-400/70">
+            <p className="text-xs text-[#8EB69B] font-semibold">
               {isKepsek 
                 ? `Persetujuan izin guru dan penunjukan Asatidz Badal pengganti KBM Unit ${userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}` 
                 : 'Monitoring & rekapitulasi data penugasan Guru Badal (Hak persetujuan & penunjukan dipegang Kepala Sekolah unit masing-masing)'}
@@ -345,9 +345,9 @@ export const BadalManagement: React.FC = () => {
             <button
               id="btn-export-pdf-badal"
               onClick={() => setShowBadalReportModal(true)}
-              className="inline-flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-[#0f1a15] hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-emerald-100 px-3.5 py-2 rounded-lg text-xs font-semibold border border-slate-200 dark:border-emerald-800/40 transition-all cursor-pointer shadow-xs"
+              className="inline-flex items-center justify-center gap-1.5 bg-slate-50 hover:bg-slate-100 text-[#051F20] px-4 py-2.5 rounded-[12px] text-xs font-bold border border-slate-200 transition-all cursor-pointer shadow-xs uppercase tracking-wider"
             >
-              <FileText className="w-3.5 h-3.5 text-slate-400" strokeWidth={1.5} />
+              <FileText className="w-3.5 h-3.5 text-[#051F20]" strokeWidth={2} />
               <span>Pratinjau & Unduh Laporan</span>
             </button>
 
@@ -358,9 +358,9 @@ export const BadalManagement: React.FC = () => {
                   handleModalUnitOrDateChange(userUnit === 'ALL' ? 'SMP' : userUnit as UnitType);
                   setShowAddModal(true);
                 }}
-                className="inline-flex items-center justify-center gap-1.5 bg-[#1B4332] hover:bg-[#1B4332]/95 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 bg-[#163832] hover:bg-[#0B2B26] text-[#DAF1DE] px-4 py-2.5 rounded-[12px] text-xs font-bold shadow-xs transition-all cursor-pointer uppercase tracking-wider"
               >
-                <Plus className="w-3.5 h-3.5" strokeWidth={1.5} />
+                <Plus className="w-3.5 h-3.5" strokeWidth={2} />
                 <span>Tunjuk Guru Pengganti</span>
               </button>
             )}
@@ -370,53 +370,53 @@ export const BadalManagement: React.FC = () => {
 
       {/* 2. Stat Metric Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-[#121f1a] p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs">
-          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">Total Sesi Pengganti</span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-slate-900 dark:text-emerald-50 mt-1">
-            {stats.totalSessions} <span className="text-xs font-normal text-slate-500 font-sans">Sesi</span>
+        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+          <span className="text-[10px] font-bold text-[#8EB69B] uppercase tracking-wider block">Total Sesi Pengganti</span>
+          <p className="text-3xl font-bold font-mono tracking-tight text-[#051F20] mt-1.5">
+            {stats.totalSessions} <span className="text-xs font-bold text-[#8EB69B] font-sans uppercase">Sesi</span>
           </p>
-          <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-1.5 block">
+          <span className="text-[10px] font-semibold text-slate-400 mt-2 block uppercase tracking-wider">
             Penggantian KBM aktif
           </span>
         </div>
 
-        <div className="bg-white dark:bg-[#121f1a] p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs">
-          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">Total Jam Mengajar</span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-slate-900 dark:text-emerald-50 mt-1">
-            {stats.totalJP} <span className="text-xs font-normal text-slate-500 font-sans">JP</span>
+        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+          <span className="text-[10px] font-bold text-[#8EB69B] uppercase tracking-wider block">Total Jam Mengajar</span>
+          <p className="text-3xl font-bold font-mono tracking-tight text-[#051F20] mt-1.5">
+            {stats.totalJP} <span className="text-xs font-bold text-[#8EB69B] font-sans uppercase">JP</span>
           </p>
-          <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-1.5 block">
+          <span className="text-[10px] font-semibold text-slate-400 mt-2 block uppercase tracking-wider">
             Beban JP teralihkan
           </span>
         </div>
 
-        <div className="bg-white dark:bg-[#121f1a] p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs">
-          <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">Izin & Pengganti</span>
-          <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-amber-600 dark:text-amber-400 mt-1">
-            {stats.pendingCount} <span className="text-xs font-normal text-slate-500 font-sans">Pengajuan</span>
+        <div className="bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
+          <span className="text-[10px] font-bold text-[#8EB69B] uppercase tracking-wider block">Izin & Pengganti</span>
+          <p className="text-3xl font-bold font-mono tracking-tight text-amber-500 mt-1.5">
+            {stats.pendingCount} <span className="text-xs font-bold text-[#8EB69B] font-sans uppercase">Pengajuan</span>
           </p>
-          <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-1.5 block">
+          <span className="text-[10px] font-semibold text-slate-400 mt-2 block uppercase tracking-wider">
             {isKepsek ? `Unit ${userUnit === 'PESANTREN' ? 'Pesantren' : userUnit}` : 'Seluruh Unit'}
           </span>
         </div>
 
         {isKepsek ? (
-          <div className="bg-white dark:bg-[#121f1a] p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs">
-            <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">Sesi Pengganti Disetujui</span>
-            <p className="text-2xl sm:text-3xl font-semibold font-mono tracking-tight text-emerald-700 dark:text-emerald-400 mt-1">
-              {stats.approvedCount} <span className="text-xs font-normal text-slate-500 font-sans">Sesi</span>
+          <div className="bg-[#163832] p-5 rounded-[16px] border border-[#163832] shadow-xs">
+            <span className="text-[10px] font-bold text-[#8EB69B] uppercase tracking-wider block">Sesi Pengganti Disetujui</span>
+            <p className="text-3xl font-bold font-mono tracking-tight text-[#DAF1DE] mt-1.5">
+              {stats.approvedCount} <span className="text-xs font-bold text-[#8EB69B] font-sans uppercase">Sesi</span>
             </p>
-            <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-1.5 block">
+            <span className="text-[10px] font-semibold text-[#8EB69B] mt-2 block uppercase tracking-wider">
               Telah disahkan Kepala Unit
             </span>
           </div>
         ) : (
-          <div className="bg-white dark:bg-[#121f1a] p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs">
-            <span className="text-xs font-medium text-slate-500 dark:text-emerald-400/70 block">Alokasi Kafa'ah Pengganti</span>
-            <p className="text-xl sm:text-2xl font-semibold font-mono tracking-tight text-emerald-700 dark:text-emerald-400 mt-1 truncate">
+          <div className="bg-[#163832] p-5 rounded-[16px] border border-[#163832] shadow-xs">
+            <span className="text-[10px] font-bold text-[#8EB69B] uppercase tracking-wider block">Alokasi Kafa'ah Pengganti</span>
+            <p className="text-2xl font-bold font-mono tracking-tight text-[#DAF1DE] mt-1.5 truncate">
               {formatRupiah(stats.totalHonor)}
             </p>
-            <span className="text-[11px] text-slate-400 dark:text-emerald-500/60 mt-1.5 block font-mono">
+            <span className="text-[10px] font-semibold text-[#8EB69B] mt-2 block uppercase tracking-wider font-mono">
               Honor pengganti KBM
             </span>
           </div>
@@ -600,18 +600,18 @@ export const BadalManagement: React.FC = () => {
       {(!isKepsek || activeTab === 'daftar_penugasan') && (
         <div className="space-y-4">
           {/* Filter Bar */}
-          <div className="bg-white dark:bg-[#121f1a] p-4 rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
             {/* Unit Filter - For Admin */}
             {isAdmin && (
-              <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#0f1a15] p-1 rounded-lg text-xs overflow-x-auto max-w-full">
+              <div className="flex items-center gap-1 bg-slate-50 p-1.5 rounded-[12px] text-xs overflow-x-auto max-w-full border border-slate-200">
                 {(['ALL', 'SMP', 'MA', 'PESANTREN'] as const).map((unit) => (
                   <button
                     key={unit}
                     onClick={() => setSelectedUnit(unit)}
-                    className={`px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer shrink-0 ${
+                    className={`px-3 py-1.5 rounded-[8px] text-[10px] uppercase tracking-wider font-bold transition-all cursor-pointer shrink-0 ${
                       selectedUnit === unit
-                        ? 'bg-white dark:bg-[#121f1a] text-[#1B4332] dark:text-emerald-400 shadow-xs'
-                        : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
+                        ? 'bg-white text-[#051F20] shadow-xs border border-slate-200'
+                        : 'text-[#8EB69B] hover:text-[#051F20]'
                     }`}
                   >
                     {unit === 'ALL' ? 'Semua Unit' : unit === 'PESANTREN' ? 'Pesantren' : unit}
@@ -622,21 +622,21 @@ export const BadalManagement: React.FC = () => {
 
             {/* Search Input & Status Filter */}
             <div className="flex items-center gap-3 w-full sm:w-auto ml-auto">
-              <div className="relative flex-1 sm:w-56">
-                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth={1.5} />
+              <div className="relative flex-1 sm:w-64">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8EB69B]" strokeWidth={2} />
                 <input
                   type="text"
                   placeholder="Cari guru / mapel / alasan..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-xs text-slate-900 dark:text-emerald-50 focus:outline-none focus:border-[#1B4332]"
+                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-[12px] text-xs font-bold text-[#051F20] focus:outline-none focus:ring-2 focus:ring-[#163832]"
                 />
               </div>
 
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-xs text-slate-700 dark:text-emerald-300/80 focus:outline-none"
+                className="px-3 py-2 bg-white border border-slate-200 rounded-[12px] text-xs font-bold uppercase tracking-wider text-[#051F20] focus:outline-none focus:ring-2 focus:ring-[#163832]"
               >
                 <option value="ALL">Semua Status</option>
                 <option value="PENDING">Menunggu Persetujuan</option>
@@ -647,11 +647,11 @@ export const BadalManagement: React.FC = () => {
           </div>
 
           {/* Badal Records Table */}
-          <div className="bg-white dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 dark:border-emerald-900/40 overflow-hidden shadow-xs">
+          <div className="bqa-card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="bg-slate-50 dark:bg-[#0f1a15]/75 dark:bg-[#0f1a15] text-slate-500 dark:text-emerald-400/70 font-bold border-b border-slate-200/70 dark:border-emerald-800/40 text-[10px] uppercase tracking-wider">
+                  <tr className="bg-slate-50 text-[#8EB69B] font-bold border-b border-slate-200 text-[10px] uppercase tracking-wider">
                     <th className="py-3 px-4">Tanggal</th>
                     <th className="py-3 px-4">Unit</th>
                     <th className="py-3 px-4">Mata Pelajaran & Sesi</th>
@@ -667,10 +667,10 @@ export const BadalManagement: React.FC = () => {
                     <th className="py-3 px-4 text-center w-24">Aksi</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-emerald-300/80">
+                <tbody className="divide-y divide-slate-100 text-[#051F20]">
                   {filteredBadal.length === 0 ? (
                     <tr>
-                      <td colSpan={isKepsek ? 9 : 9} className="py-12 text-center text-slate-400 dark:text-emerald-500/60 font-medium">
+                      <td colSpan={isKepsek ? 9 : 9} className="py-12 text-center text-slate-400 font-bold uppercase tracking-wider text-[10px]">
                         Tidak ada catatan penugasan guru badal yang sesuai filter.
                       </td>
                     </tr>
@@ -686,31 +686,31 @@ export const BadalManagement: React.FC = () => {
                       const isPending = b.status === 'PENDING';
 
                       return (
-                        <tr key={b.id} className="hover:bg-slate-50 dark:bg-[#0f1a15]/50 dark:hover:bg-[#162720]/50/20 transition-colors">
+                        <tr key={b.id} className="hover:bg-slate-50 transition-colors">
                           <td className="py-3.5 px-4 whitespace-nowrap">
-                            <p className="font-semibold text-slate-900 dark:text-emerald-50">{formatIndonesianDate(b.date)}</p>
+                            <p className="font-bold text-[#051F20]">{formatIndonesianDate(b.date)}</p>
                           </td>
                           <td className="py-3.5 px-4 whitespace-nowrap">
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#0f1a15] text-slate-700 dark:text-emerald-300/80 border border-slate-200/40">
+                            <span className="text-[10px] font-bold px-2.5 py-1 rounded-[8px] bg-[#DAF1DE] text-[#163832] uppercase tracking-wider">
                               {sched?.unit || 'SMP'}
                             </span>
                           </td>
                           <td className="py-3.5 px-4">
-                            <p className="font-semibold text-slate-900 dark:text-emerald-50">{sched?.subject || 'KBM'}</p>
-                            <p className="text-[10px] text-slate-400 dark:text-emerald-500/60 font-mono">
+                            <p className="font-bold text-[#051F20]">{sched?.subject || 'KBM'}</p>
+                            <p className="text-[10px] text-[#8EB69B] font-mono font-bold mt-0.5">
                               {sched?.className} • {sched?.startTime} - {sched?.endTime} ({jp} JP)
                             </p>
                           </td>
                           <td className="py-3.5 px-4">
-                            <p className="text-slate-800 dark:text-emerald-100 font-medium">{origTeacher?.name || 'Guru Utama'}</p>
-                            <span className="text-[10px] text-slate-400">{origTeacher?.position}</span>
+                            <p className="font-bold text-[#051F20]">{origTeacher?.name || 'Guru Utama'}</p>
+                            <span className="text-[10px] text-[#8EB69B] font-semibold">{origTeacher?.position}</span>
                           </td>
                           <td className="py-3.5 px-4 max-w-xs">
-                            <span className="inline-block text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/50 dark:border-amber-800/40 px-2 py-0.5 rounded mb-1">
+                            <span className="inline-block text-[9px] uppercase tracking-wider font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-[8px] mb-1">
                               {b.reason}
                             </span>
                             {b.notes && (
-                              <p className="text-[11px] text-slate-600 dark:text-emerald-400/70 italic line-clamp-2">
+                              <p className="text-[10px] font-semibold text-slate-500 italic line-clamp-2">
                                 "{b.notes}"
                               </p>
                             )}
@@ -718,31 +718,31 @@ export const BadalManagement: React.FC = () => {
                           <td className="py-3.5 px-4">
                             {badalTeacher ? (
                               <div>
-                                <p className="font-bold text-[#1B4332] dark:text-emerald-400">{badalTeacher.name}</p>
-                                <span className="text-[10px] text-slate-400">{badalTeacher.position}</span>
+                                <p className="font-bold text-[#051F20]">{badalTeacher.name}</p>
+                                <span className="text-[10px] font-semibold text-[#8EB69B]">{badalTeacher.position}</span>
                               </div>
                             ) : (
-                              <span className="text-[11px] italic text-amber-600 dark:text-amber-400">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500 bg-amber-50 px-2 py-1 rounded-[8px]">
                                 Menunggu Penugasan
                               </span>
                             )}
                           </td>
                           {isKepsek ? (
-                            <td className="py-3.5 px-4 text-center font-mono font-bold text-slate-800 dark:text-emerald-100">
+                            <td className="py-3.5 px-4 text-center font-mono font-bold text-[#051F20]">
                               {jp} JP
                             </td>
                           ) : (
-                            <td className="py-3.5 px-4 text-right font-mono text-[#1B4332] dark:text-emerald-400 font-bold whitespace-nowrap">
+                            <td className="py-3.5 px-4 text-right font-mono text-[#163832] font-bold whitespace-nowrap bg-[#DAF1DE]/20 rounded-lg">
                               {formatRupiah(jp * badalRate)}
                             </td>
                           )}
                           <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                            <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded ${
+                            <span className={`text-[9px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-[8px] ${
                               isApproved 
-                                ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50' 
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
                                 : isCompleted 
-                                ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200/40' 
-                                : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/50'
+                                ? 'bg-[#163832] text-[#DAF1DE]' 
+                                : 'bg-amber-50 text-amber-600 border border-amber-200'
                             }`}>
                               {isApproved ? 'Disetujui Kepsek' : isCompleted ? 'Selesai KBM' : 'Menunggu Persetujuan'}
                             </span>
@@ -754,21 +754,21 @@ export const BadalManagement: React.FC = () => {
                                   <button
                                     onClick={() => handleApprovePendingItem(b)}
                                     title="Setujui & Tugaskan Badal"
-                                    className="p-1.5 rounded bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 transition-colors cursor-pointer border border-emerald-200/60"
+                                    className="p-1.5 rounded-lg bg-[#DAF1DE] hover:bg-[#163832] text-[#163832] hover:text-[#DAF1DE] transition-colors cursor-pointer"
                                   >
-                                    <Check className="w-3.5 h-3.5" strokeWidth={2} />
+                                    <Check className="w-4 h-4" strokeWidth={2} />
                                   </button>
                                 )}
                                 <button
                                   onClick={() => setBadalToCancel(b)}
                                   title="Batalkan Penugasan"
-                                  className="p-1.5 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors cursor-pointer"
+                                  className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer"
                                 >
-                                  <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+                                  <Trash2 className="w-4 h-4" strokeWidth={2} />
                                 </button>
                               </div>
                             ) : (
-                              <span className="text-[10px] text-slate-400 font-semibold italic">
+                              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider italic">
                                 Read-Only Admin
                               </span>
                             )}

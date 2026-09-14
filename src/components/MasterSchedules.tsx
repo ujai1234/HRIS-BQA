@@ -124,10 +124,10 @@ export const MasterSchedules: React.FC = () => {
       
       {/* 1. Header Title */}
       <div className="flex items-center justify-between">
-        <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-emerald-50 tracking-tight">
+        <h2 className="text-base sm:text-lg font-bold text-[#051F20] tracking-tight">
           Manajemen Jadwal KBM Asatidz
         </h2>
-        <span className="text-xs text-slate-400 dark:text-emerald-500/60 font-mono">
+        <span className="text-xs text-[#8EB69B] font-bold uppercase tracking-wider">
           {schedules.length} Jam Pelajaran
         </span>
       </div>
@@ -138,27 +138,27 @@ export const MasterSchedules: React.FC = () => {
           
           {/* Top Row Left: Clear, prominent search input */}
           <div className="relative w-full lg:max-w-md">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari asatidz, mata pelajaran, kelas..."
-              className="w-full pl-10 pr-4 py-3 text-xs bg-slate-50 dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-emerald-50 focus:bg-white transition-all font-sans"
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-[12px] text-sm focus:ring-2 focus:ring-[#163832] outline-none"
             />
           </div>
 
           {/* Top Row Right: Unit filter & Main operation buttons */}
           <div className="flex items-center gap-2.5 flex-wrap justify-end">
-            <div className="flex items-center bg-slate-50 dark:bg-[#121f1a] p-1 rounded-xl border border-slate-200/60 dark:border-emerald-900/40/40">
+            <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 p-1.5 rounded-[12px]">
               {['ALL', 'SMP', 'MA', 'PESANTREN'].map((unit) => (
                 <button
                   key={unit}
                   onClick={() => setSelectedUnitFilter(unit)}
-                  className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-[8px] text-[10px] font-bold transition-colors cursor-pointer uppercase tracking-wider ${
                     selectedUnitFilter === unit
-                      ? 'bg-white dark:bg-[#0f1a15] text-slate-900 dark:text-emerald-50 shadow-3xs border border-slate-200/40 dark:border-emerald-800/40/40'
-                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
+                      ? 'bg-white text-[#051F20] shadow-xs border border-slate-200'
+                      : 'text-[#8EB69B] hover:text-[#051F20]'
                   }`}
                 >
                   {unit === 'ALL' ? 'Semua Unit' : unit}
@@ -166,12 +166,12 @@ export const MasterSchedules: React.FC = () => {
               ))}
             </div>
 
-            <div className="h-6 w-[1px] bg-slate-200 dark:bg-[#0f1a15] hidden sm:block" />
+            <div className="h-6 w-[1px] bg-slate-200 hidden sm:block" />
 
             <div className="flex items-center gap-2">
               <button
                 onClick={handleReset}
-                className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl border border-slate-200/60 dark:border-emerald-900/40/60 transition-colors cursor-pointer"
+                className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl border border-slate-200 transition-colors cursor-pointer"
                 title="Atur Ulang Semua Jadwal"
               >
                 <RotateCcw className="w-4 h-4" />
@@ -179,15 +179,15 @@ export const MasterSchedules: React.FC = () => {
 
               <button
                 onClick={() => setIsBulkUploadOpen(true)}
-                className="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-[#0f1a15] hover:bg-slate-100 dark:bg-[#121f1a] dark:hover:bg-[#162720]/50 text-slate-700 dark:text-emerald-300/80 text-xs font-bold px-3 py-2 rounded-xl border border-slate-200 dark:border-emerald-900/40 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 text-[#051F20] text-xs font-bold px-3 py-2 rounded-[10px] border border-slate-200 transition-all cursor-pointer uppercase tracking-wider"
               >
-                <UploadCloud className="w-3.5 h-3.5 text-[#B08968]" />
+                <UploadCloud className="w-3.5 h-3.5 text-[#051F20]" />
                 <span>Unggah CSV</span>
               </button>
               
               <button
                 onClick={handleOpenAdd}
-                className="inline-flex items-center gap-1.5 bg-[#1B4332] hover:bg-[#143326] dark:bg-emerald-800 dark:hover:bg-emerald-700 text-[#F5EBE0] hover:text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer"
+                className="inline-flex items-center gap-1.5 bg-[#163832] hover:bg-[#0B2B26] text-[#DAF1DE] text-xs font-bold px-4 py-2 rounded-[10px] transition-all cursor-pointer uppercase tracking-wider"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Tambah Jadwal</span>
@@ -197,20 +197,20 @@ export const MasterSchedules: React.FC = () => {
         </div>
 
         {/* Bottom Row: Elongated Day Selection Badges stretching beautifully below */}
-        <div className="space-y-2 pt-3 border-t border-slate-100/60 dark:border-emerald-900/40/60">
+        <div className="space-y-2 pt-3 border-t border-slate-100">
           <div className="flex items-center gap-1">
-            <Info className="w-3 h-3 text-[#B08968]" />
-            <label className="text-[10px] font-bold text-slate-500 dark:text-emerald-400/70 uppercase tracking-wider">
+            <Info className="w-3 h-3 text-[#8EB69B]" />
+            <label className="text-[10px] font-bold text-[#8EB69B] uppercase tracking-wider">
               Pilih Hari Pembelajaran
             </label>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 p-1 bg-slate-50 dark:bg-[#121f1a] rounded-xl border border-slate-200/60 dark:border-emerald-900/40/40 w-full">
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 p-1 border-b border-slate-100 w-full">
             <button
               onClick={() => setSelectedDayFilter('ALL')}
-              className={`py-2 rounded-lg text-xs font-bold transition-all cursor-pointer text-center ${
+              className={`py-2 rounded-[10px] text-[11px] font-bold transition-all cursor-pointer text-center uppercase tracking-wider ${
                 selectedDayFilter === 'ALL'
-                  ? 'bg-[#1B4332] text-white shadow-xs'
-                  : 'text-slate-600 dark:text-emerald-400/70 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/40 dark:hover:bg-[#162720]/50/30'
+                  ? 'bg-[#163832] text-[#DAF1DE] shadow-xs'
+                  : 'text-[#8EB69B] hover:text-[#051F20] hover:bg-slate-50'
               }`}
             >
               Semua Hari
@@ -219,10 +219,10 @@ export const MasterSchedules: React.FC = () => {
               <button
                 key={day}
                 onClick={() => setSelectedDayFilter(day)}
-                className={`py-2 rounded-lg text-xs font-bold transition-all cursor-pointer text-center ${
+                className={`py-2 rounded-[10px] text-[11px] font-bold transition-all cursor-pointer text-center uppercase tracking-wider ${
                   selectedDayFilter === day
-                    ? 'bg-[#1B4332] text-white shadow-xs'
-                    : 'text-slate-600 dark:text-emerald-400/70 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/40 dark:hover:bg-[#162720]/50/30'
+                    ? 'bg-[#163832] text-[#DAF1DE] shadow-xs'
+                    : 'text-[#8EB69B] hover:text-[#051F20] hover:bg-slate-50'
                 }`}
               >
                 {day}
@@ -232,7 +232,7 @@ export const MasterSchedules: React.FC = () => {
         </div>
 
         {/* Subtle dynamic summary of loaded data */}
-        <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-emerald-500/60 font-semibold uppercase tracking-wider pl-1 border-t border-slate-100 dark:border-emerald-900/40 pt-2.5">
+        <div className="flex items-center gap-2 text-[10px] text-[#8EB69B] font-bold uppercase tracking-wider pl-1 pt-2.5">
           <Sparkles className="w-3 h-3 text-amber-500" />
           <span>Ditemukan {filteredSchedules.length} Jadwal Aktif dari total {schedules.length} jam pelajaran pekanan</span>
         </div>
@@ -243,7 +243,7 @@ export const MasterSchedules: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="bg-slate-50 dark:bg-[#121f1a] text-slate-500 dark:text-emerald-400/70 font-bold border-b border-slate-200/60 dark:border-emerald-900/40 uppercase tracking-wider text-[9px]">
+              <tr className="bg-slate-50 text-[#8EB69B] font-bold border-b border-slate-200 uppercase tracking-wider text-[10px]">
                 <th className="py-3 px-4 text-center w-24">Hari</th>
                 <th className="py-3 px-4">Waktu Pelajaran</th>
                 <th className="py-3 px-4">Beban KBM</th>
@@ -254,57 +254,57 @@ export const MasterSchedules: React.FC = () => {
                 <th className="py-3 px-4 text-center w-24">Aksi Kontrol</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-emerald-300/80">
+            <tbody className="divide-y divide-slate-100 text-[#051F20]">
               {filteredSchedules.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400 dark:text-emerald-500/60">
+                  <td colSpan={8} className="py-12 text-center text-slate-400">
                     <BookOpen className="w-8 h-8 mx-auto opacity-30 text-slate-400 mb-2" />
-                    <p className="text-xs font-semibold">Tidak ada jadwal KBM yang cocok dengan kriteria pencarian.</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-[#8EB69B]">Tidak ada jadwal KBM yang cocok dengan kriteria pencarian.</p>
                   </td>
                 </tr>
               ) : (
                 filteredSchedules.map((s) => {
                   const teacher = teachers.find((t) => t.id === s.teacherId);
                   return (
-                    <tr key={s.id} className="hover:bg-slate-50 dark:bg-[#0f1a15]/50 dark:hover:bg-[#162720]/50/30 transition-colors">
+                    <tr key={s.id} className="hover:bg-slate-50 transition-colors">
                       <td className="py-3.5 px-4 text-center">
-                        <span className="inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold bg-[#1B4332]/5 dark:bg-emerald-950/20 text-[#1B4332] dark:text-emerald-400 border border-[#1B4332]/10 dark:border-emerald-900/30">
+                        <span className="inline-block px-3 py-1 rounded-[8px] text-[10px] font-bold bg-slate-100 text-[#051F20] border border-slate-200 uppercase tracking-wider">
                           {s.dayOfWeek}
                         </span>
                       </td>
                       <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-1.5 font-mono font-bold text-slate-900 dark:text-emerald-50">
-                          <Clock className="w-3.5 h-3.5 text-[#B08968]" />
+                        <div className="flex items-center gap-1.5 font-mono font-bold text-[#051F20]">
+                          <Clock className="w-3.5 h-3.5 text-[#163832]" />
                           <span>{s.startTime} - {s.endTime}</span>
                         </div>
                       </td>
                       <td className="py-3.5 px-4">
-                        <span className="px-2 py-0.5 rounded-md font-bold text-[10px] font-mono bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30">
+                        <span className="px-2.5 py-1 rounded-[8px] font-bold text-[10px] font-mono bg-[#DAF1DE] text-[#163832] uppercase tracking-wider">
                           {s.hours} JP
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 font-bold text-slate-950 dark:text-emerald-50">
+                      <td className="py-3.5 px-4 font-bold text-[#051F20]">
                         {s.subject}
                       </td>
                       <td className="py-3.5 px-4">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${getUnitStyles(s.unit)}`}>
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-[8px] uppercase tracking-wider text-[#163832] bg-[#DAF1DE]`}>
                           {s.unit} • {s.className}
                         </span>
                       </td>
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-[#0f1a15] text-slate-800 dark:text-emerald-100 flex items-center justify-center font-bold text-[10px]">
+                          <div className="w-6 h-6 rounded-full bg-slate-100 text-[#8EB69B] border border-slate-200 flex items-center justify-center font-bold text-[10px]">
                             {teacher?.name ? teacher.name[0] : 'G'}
                           </div>
                           <div>
-                            <p className="font-bold text-slate-900 dark:text-emerald-50">{teacher?.name || 'Guru'}</p>
-                            <p className="text-[10px] text-slate-400 dark:text-emerald-500/60">{teacher?.position || '-'}</p>
+                            <p className="font-bold text-[#051F20]">{teacher?.name || 'Guru'}</p>
+                            <p className="text-[10px] text-[#8EB69B] font-semibold">{teacher?.position || '-'}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 text-slate-600 dark:text-emerald-400/70 font-medium">
+                      <td className="py-3.5 px-4 text-[#8EB69B] font-semibold">
                         <div className="flex items-center gap-1">
-                          <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                          <MapPin className="w-3.5 h-3.5 text-[#8EB69B]" />
                           <span>{s.room}</span>
                         </div>
                       </td>
@@ -312,7 +312,7 @@ export const MasterSchedules: React.FC = () => {
                         <div className="flex items-center justify-center gap-1.5">
                           <button
                             onClick={() => handleOpenEdit(s)}
-                            className="p-1.5 text-slate-400 hover:text-slate-950 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-[#162720]/50 rounded-lg transition-colors cursor-pointer"
+                            className="p-1.5 text-[#8EB69B] hover:text-[#051F20] hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
                             title="Sunting Jadwal"
                           >
                             <Edit3 className="w-3.5 h-3.5" />
@@ -323,7 +323,7 @@ export const MasterSchedules: React.FC = () => {
                                 deleteSchedule(s.id);
                               }
                             }}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors cursor-pointer"
+                            className="p-1.5 text-[#8EB69B] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                             title="Hapus"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
