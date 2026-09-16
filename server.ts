@@ -334,7 +334,9 @@ async function startServer() {
 
   app.post('/api/staff-tasks', async (req, res) => {
     try {
-      const result = await db.insert(schema.staffTasks).values(req.body).returning();
+      const data = { ...req.body };
+      delete data.createdAt;
+      const result = await db.insert(schema.staffTasks).values(data).returning();
       res.json(result[0]);
     } catch (error) {
       console.error('Failed to create staff task:', error);
@@ -358,6 +360,7 @@ async function startServer() {
   app.post('/api/staff-expenses', async (req, res) => {
     try {
       const data = { ...req.body };
+      delete data.createdAt;
       // Dapur expenses are automatically approved, others are pending
       if (data.category === 'DAPUR') {
         data.status = 'APPROVED';

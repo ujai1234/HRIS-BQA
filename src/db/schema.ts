@@ -307,3 +307,29 @@ export const tahfidzTasmi = sqliteTable('tahfidz_tasmi', {
   examinerName: text('examiner_name'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
+
+// ====== STAFF JOURNAL & EXPENSE TABLES ======
+export const staffTasks = sqliteTable('staff_tasks', {
+  id: text('id').primaryKey(),
+  staffId: text('staff_id').references(() => teachers.id).notNull(),
+  staffName: text('staff_name').notNull(),
+  date: text('date').notNull(),
+  category: text('category').notNull(),
+  taskToday: text('task_today').notNull(),
+  taskTomorrow: text('task_tomorrow').notNull(),
+  photoUrl: text('photo_url'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+
+export const staffExpenses = sqliteTable('staff_expenses', {
+  id: text('id').primaryKey(),
+  reporterId: text('reporter_id').references(() => teachers.id).notNull(),
+  reporterName: text('reporter_name').notNull(),
+  date: text('date').notNull(),
+  category: text('category').notNull(),
+  description: text('description').notNull(),
+  amount: integer('amount').notNull(),
+  status: text('status').notNull().default('PENDING'),
+  receiptUrl: text('receipt_url'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
