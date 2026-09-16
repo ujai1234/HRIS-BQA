@@ -274,7 +274,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const newRecord: import('../types').ExpenseRecord = {
       ...record,
       id: `EXP-${Date.now()}`,
-      status: 'PENDING',
+      status: record.category === 'DAPUR' ? 'APPROVED' : 'PENDING',
       createdAt: new Date().toISOString()
     };
     

@@ -319,6 +319,74 @@ async function startServer() {
     }
   });
 
+  // Staff Tasks (Jurnal Kerja)
+  app.get('/api/staff-tasks', async (req, res) => {
+    try {
+      const tasks = await db.query.staffTasks.findMany({
+        orderBy: (st, { desc }) => [desc(st.createdAt)]
+      });
+      res.json(tasks);
+    } catch (error) {
+      console.error('Failed to fetch staff tasks:', error);
+      res.status(500).json({ error: 'Failed to fetch staff tasks' });
+    }
+  });
+
+  app.post('/api/staff-tasks', async (req, res) => {
+    try {
+      const result = await db.insert(schema.staffTasks).values(req.body).returning();
+      res.json(result[0]);
+    } catch (error) {
+      console.error('Failed to create staff task:', error);
+      res.status(500).json({ error: 'Failed to create staff task' });
+    }
+  });
+
+  // Staff Expenses (Pengajuan Belanja)
+  app.get('/api/staff-expenses', async (req, res) => {
+    try {
+      const expensesList = await db.query.staffExpenses.findMany({
+        orderBy: (se, { desc }) => [desc(se.createdAt)]
+      });
+      res.json(expensesList);
+    } catch (error) {
+      console.error('Failed to fetch staff expenses:', error);
+      res.status(500).json({ error: 'Failed to fetch staff expenses' });
+    }
+  });
+
+  app.post('/api/staff-expenses', async (req, res) => {
+    try {
+      const data = { ...req.body };
+      // Dapur expenses are automatically approved, others are pending
+      if (data.category === 'DAPUR') {
+        data.status = 'APPROVED';
+      } else {
+        data.status = 'PENDING';
+      }
+      
+      const result = await db.insert(schema.staffExpenses).values(data).returning();
+      res.json(result[0]);
+    } catch (error) {
+      console.error('Failed to create staff expense:', error);
+      res.status(500).json({ error: 'Failed to create staff expense' });
+    }
+  });
+
+  app.patch('/api/staff-expenses/:id', async (req, res) => {
+    try {
+      const { status } = req.body;
+      const result = await db.update(schema.staffExpenses)
+        .set({ status })
+        .where(eq(schema.staffExpenses.id, req.params.id))
+        .returning();
+      res.json(result[0]);
+    } catch (error) {
+      console.error('Failed to update staff expense:', error);
+      res.status(500).json({ error: 'Failed to update staff expense' });
+    }
+  });
+
   // Teachers
   app.get('/api/teachers', async (req, res) => {
     try {
