@@ -151,6 +151,9 @@ export const students = sqliteTable('students', {
   name: text('name').notNull(),
   gender: text('gender').notNull(), // 'L' | 'P'
   className: text('class_name').notNull(),
+  halqah: text('halqah'), // For Tahfidz Integration
+  tingkatan: integer('tingkatan'), // For Tahfidz Integration
+  jalur: text('jalur').default('Reguler'), // For Tahfidz Integration
   status: text('status').notNull().default('AKTIF'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
