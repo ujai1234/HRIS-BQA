@@ -164,10 +164,6 @@ sqliteDb.exec(`
   BEGIN;
   PRAGMA user_version;
   COMMIT;
-`);
-
-try { sqliteDb.exec("ALTER TABLE staff_tasks ADD COLUMN photo_url TEXT;"); } catch(e) {}
-try { sqliteDb.exec("ALTER TABLE staff_expenses ADD COLUMN receipt_url TEXT;"); } catch(e) {}
 
   -- Better Auth Tables
   CREATE TABLE IF NOT EXISTS user (
@@ -218,6 +214,9 @@ try { sqliteDb.exec("ALTER TABLE staff_expenses ADD COLUMN receipt_url TEXT;"); 
     updated_at INTEGER NOT NULL
   );
 `);
+
+try { sqliteDb.exec("ALTER TABLE staff_tasks ADD COLUMN photo_url TEXT;"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE staff_expenses ADD COLUMN receipt_url TEXT;"); } catch(e) {}
 
 export const db = drizzle(sqliteDb, { schema });
 
