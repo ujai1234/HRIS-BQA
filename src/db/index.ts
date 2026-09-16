@@ -143,6 +143,7 @@ sqliteDb.exec(`
     category TEXT NOT NULL,
     task_today TEXT NOT NULL,
     task_tomorrow TEXT NOT NULL,
+    photo_url TEXT,
     created_at INTEGER NOT NULL
   );
 
@@ -155,8 +156,18 @@ sqliteDb.exec(`
     description TEXT NOT NULL,
     amount INTEGER NOT NULL,
     status TEXT NOT NULL DEFAULT 'PENDING',
+    receipt_url TEXT,
     created_at INTEGER NOT NULL
   );
+
+  -- Safe migrations for existing tables
+  BEGIN;
+  PRAGMA user_version;
+  COMMIT;
+`);
+
+try { sqliteDb.exec("ALTER TABLE staff_tasks ADD COLUMN photo_url TEXT;"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE staff_expenses ADD COLUMN receipt_url TEXT;"); } catch(e) {}
 
   -- Better Auth Tables
   CREATE TABLE IF NOT EXISTS user (
