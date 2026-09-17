@@ -213,7 +213,84 @@ sqliteDb.exec(`
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS parents (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    nik TEXT,
+    kk_number TEXT,
+    phone TEXT,
+    address TEXT,
+    job TEXT,
+    income TEXT,
+    vehicle TEXT,
+    home_ownership TEXT,
+    created_at INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS student_parents (
+    id TEXT PRIMARY KEY,
+    student_id TEXT NOT NULL,
+    parent_id TEXT NOT NULL,
+    relation TEXT NOT NULL DEFAULT 'AYAH'
+  );
+
+  CREATE TABLE IF NOT EXISTS payments (
+    id TEXT PRIMARY KEY,
+    student_id TEXT NOT NULL,
+    billing_month TEXT NOT NULL,
+    amount INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'BELUM_LUNAS',
+    receipt_url TEXT,
+    payment_date TEXT,
+    recorded_by TEXT,
+    created_at INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS student_notes (
+    id TEXT PRIMARY KEY,
+    student_id TEXT NOT NULL,
+    teacher_id TEXT NOT NULL,
+    type TEXT NOT NULL,
+    note TEXT NOT NULL,
+    created_at INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS curriculums (
+    id TEXT PRIMARY KEY,
+    schedule_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT,
+    week_number INTEGER NOT NULL,
+    created_at INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS assignments (
+    id TEXT PRIMARY KEY,
+    schedule_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    deadline TEXT NOT NULL,
+    created_at INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS student_grades (
+    id TEXT PRIMARY KEY,
+    student_id TEXT NOT NULL,
+    assignment_id TEXT NOT NULL,
+    score INTEGER NOT NULL,
+    feedback TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS student_attendances (
+    id TEXT PRIMARY KEY,
+    student_id TEXT NOT NULL,
+    journal_id TEXT NOT NULL,
+    status TEXT NOT NULL
+  );
 `);
+
+try { sqliteDb.exec("ALTER TABLE students ADD COLUMN nik TEXT;"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE students ADD COLUMN kk_number TEXT;"); } catch(e) {}
+
 
 try { sqliteDb.exec("ALTER TABLE staff_tasks ADD COLUMN photo_url TEXT;"); } catch(e) {}
 try { sqliteDb.exec("ALTER TABLE staff_expenses ADD COLUMN receipt_url TEXT;"); } catch(e) {}
