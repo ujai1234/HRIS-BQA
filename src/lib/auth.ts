@@ -47,6 +47,12 @@ export const auth = betterAuth({
             }
         }
     },
+    account: {
+        accountLinking: {
+            enabled: true,
+            trustedProviders: ["google"]
+        }
+    },
     trustedOrigins: [
         "http://localhost:5173",
         "http://localhost:5174",
