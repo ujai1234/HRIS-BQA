@@ -107,6 +107,11 @@ async function startServer() {
         headers: new Headers()
       });
 
+      // Force emailVerified = true so Google Auth account linking works
+      await db.update(schema.user)
+        .set({ emailVerified: true })
+        .where(eq(schema.user.email, adminEmail));
+
       res.send(`
         <html><body>
         <h1>AKUN ADMIN BERHASIL DIPERBAIKI!</h1>
