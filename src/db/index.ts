@@ -218,6 +218,10 @@ sqliteDb.exec(`
 try { sqliteDb.exec("ALTER TABLE staff_tasks ADD COLUMN photo_url TEXT;"); } catch(e) {}
 try { sqliteDb.exec("ALTER TABLE staff_expenses ADD COLUMN receipt_url TEXT;"); } catch(e) {}
 try { sqliteDb.exec("ALTER TABLE user ADD COLUMN teacher_id TEXT REFERENCES teachers(id);"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE account ADD COLUMN password TEXT;"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE account ADD COLUMN issuer TEXT;"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE session ADD COLUMN ip_address TEXT;"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE session ADD COLUMN user_agent TEXT;"); } catch(e) {}
 
 export const db = drizzle(sqliteDb, { schema });
 
