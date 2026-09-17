@@ -2741,10 +2741,10 @@ async function startServer() {
 
   app.post('/api/students', async (req, res) => {
     try {
-      const { nis, nik, kkNumber, name, gender, className, status } = req.body;
+      const { nis, nik, kkNumber, name, gender, className, status, halqah, tingkatan } = req.body;
       const id = require('crypto').randomUUID();
       const newStudent = await db.insert(schema.students).values({
-        id, nis, nik, kkNumber, name, gender, className, status: status || 'AKTIF'
+        id, nis, nik, kkNumber, name, gender, className, status: status || 'AKTIF', halqah, tingkatan
       }).returning();
       res.json(newStudent[0]);
     } catch (error) {
@@ -3043,7 +3043,9 @@ async function startServer() {
           name: req.body.name,
           gender: req.body.gender,
           className: req.body.className,
-          status: req.body.status
+          status: req.body.status,
+          halqah: req.body.halqah,
+          tingkatan: req.body.tingkatan
         })
         .where(eq(schema.students.id, req.params.id))
         .returning();
