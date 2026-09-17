@@ -300,11 +300,33 @@ export const MasterStudents: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80 mb-1">Halqah Tahfidz (Opsional)</label>
-                  <input type="text" placeholder="Misal: Halqah 1 (Ikhwan)" value={formData.halqah} onChange={e => setFormData({...formData, halqah: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500" />
+                  <select value={formData.halqah} onChange={e => setFormData({...formData, halqah: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500">
+                    <option value="">- Belum Ditentukan -</option>
+                    <option value="Halqah 1 (Ikhwan)">Halqah 1 (Ikhwan)</option>
+                    <option value="Halqah 1 (Akhwat)">Halqah 1 (Akhwat)</option>
+                    <option value="Halqah 2 (Ikhwan)">Halqah 2 (Ikhwan)</option>
+                    <option value="Halqah 2 (Akhwat)">Halqah 2 (Akhwat)</option>
+                    <option value="Halqah 3 (Ikhwan)">Halqah 3 (Ikhwan)</option>
+                    <option value="Halqah 3 (Akhwat)">Halqah 3 (Akhwat)</option>
+                    <option value="Halqah 4 (Ikhwan)">Halqah 4 (Ikhwan)</option>
+                    <option value="Halqah 4 (Akhwat)">Halqah 4 (Akhwat)</option>
+                    <option value="Halqah 5 (Ikhwan)">Halqah 5 (Ikhwan)</option>
+                    <option value="Halqah 5 (Akhwat)">Halqah 5 (Akhwat)</option>
+                    <option value="Halqah 6 (Ikhwan)">Halqah 6 (Ikhwan)</option>
+                    <option value="Halqah 6 (Akhwat)">Halqah 6 (Akhwat)</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80 mb-1">Tingkatan (Opsional)</label>
-                  <input type="number" placeholder="Misal: 1" value={formData.tingkatan} onChange={e => setFormData({...formData, tingkatan: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500" />
+                  <select value={formData.tingkatan} onChange={e => setFormData({...formData, tingkatan: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500">
+                    <option value="">- Belum Ditentukan -</option>
+                    <option value="1">Tingkat 1</option>
+                    <option value="2">Tingkat 2</option>
+                    <option value="3">Tingkat 3</option>
+                    <option value="4">Tingkat 4</option>
+                    <option value="5">Tingkat 5</option>
+                    <option value="6">Tingkat 6</option>
+                  </select>
                 </div>
               </div>
               <div className="pt-4 border-t border-slate-200 dark:border-emerald-900/40 flex justify-end gap-3">
