@@ -124,8 +124,17 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  // Loading: identik dengan Tahfidz
-  if (sessionPending) {
+  // Track initial loading so background refetches don't unmount the form
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
+
+  React.useEffect(() => {
+    if (!sessionPending) {
+      setInitialLoadDone(true);
+    }
+  }, [sessionPending]);
+
+  // Loading: identik dengan Tahfidz, tapi hanya tampil di render pertama
+  if (!initialLoadDone) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#065f46] via-[#044e3a] to-[#0f1713] flex flex-col items-center justify-center p-4 font-sans antialiased bqa-bg-pattern">
         <div className="flex flex-col items-center gap-5 relative z-10 animate-fade-up">
