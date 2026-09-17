@@ -55,6 +55,71 @@ async function startServer() {
   // Better Auth
   app.all(/^\/api\/auth(\/.*)?$/, toNodeHandler(auth));
 
+  // EMERGENCY RECOVERY ENDPOINT
+  app.get('/api/admin/fix-admin', async (req, res) => {
+    try {
+      // Create or reset admin user
+      const adminEmail = 'ujai757@gmail.com';
+      const defaultPassword = 'PasswordKuat!2026';
+      
+      // Ensure the teacher record exists
+      const existingTeacher = await db.query.teachers.findFirst({
+        where: eq(schema.teachers.id, 'T-ADMIN-SUPER')
+      });
+      
+      if (!existingTeacher) {
+        await db.insert(schema.teachers).values({
+          id: 'T-ADMIN-SUPER',
+          nip: 'ADMIN-SUPER-01',
+          name: 'Super Admin Ujai',
+          position: 'Super Administrator',
+          unit: 'UMUM',
+          baseSalary: 1000000,
+          hourlyRate: 50000,
+          dailyTransport: 20000,
+          role: 'ADMIN',
+          username: adminEmail,
+          password: defaultPassword,
+          isActive: true
+        });
+      }
+
+      // Find if better-auth user exists
+      const existingUser = await db.query.user.findFirst({
+        where: eq(schema.user.email, adminEmail)
+      });
+
+      if (existingUser) {
+        // Delete it so we can recreate it cleanly with the known password
+        await db.delete(schema.account).where(eq(schema.account.userId, existingUser.id));
+        await db.delete(schema.session).where(eq(schema.session.userId, existingUser.id));
+        await db.delete(schema.user).where(eq(schema.user.id, existingUser.id));
+      }
+
+      // Recreate using better-auth API
+      await auth.api.signUpEmail({
+        body: {
+            email: adminEmail,
+            password: defaultPassword,
+            name: 'Super Admin Ujai',
+            teacherId: 'T-ADMIN-SUPER'
+        },
+        headers: new Headers()
+      });
+
+      res.send(`
+        <html><body>
+        <h1>AKUN ADMIN BERHASIL DIPERBAIKI!</h1>
+        <p>Email: <b>${adminEmail}</b></p>
+        <p>Password: <b>${defaultPassword}</b></p>
+        <p><a href="/">Klik disini untuk kembali ke Login</a></p>
+        </body></html>
+      `);
+    } catch (err: any) {
+      res.status(500).send(`<h1>GAGAL MEMPERBAIKI AKUN</h1><pre>${err.message}</pre><pre>${err.stack}</pre>`);
+    }
+  });
+
   // Portal Santri Integration Endpoints
   
   // 1. Get Linked Students for a Parent
