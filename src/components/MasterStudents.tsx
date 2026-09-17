@@ -16,7 +16,9 @@ export const MasterStudents: React.FC = () => {
     kkNumber: '',
     name: '',
     gender: 'L',
-    className: ''
+    className: '',
+    halqah: '',
+    tingkatan: ''
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -46,17 +48,22 @@ export const MasterStudents: React.FC = () => {
       const url = isEdit ? `/api/students/${editingId}` : '/api/students';
       const method = isEdit ? 'PUT' : 'POST';
 
+      const payload = {
+        ...formData,
+        tingkatan: formData.tingkatan ? parseInt(String(formData.tingkatan), 10) : null
+      };
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         toast.success(isEdit ? 'Data santri berhasil diperbarui' : 'Santri berhasil ditambahkan');
         setShowModal(false);
         setEditingId(null);
         fetchStudents();
-        setFormData({ nis: '', nik: '', kkNumber: '', name: '', gender: 'L', className: '' });
+        setFormData({ nis: '', nik: '', kkNumber: '', name: '', gender: 'L', className: '', halqah: '', tingkatan: '' });
       } else {
         toast.error('Gagal menyimpan data santri');
       }
@@ -67,7 +74,7 @@ export const MasterStudents: React.FC = () => {
 
   const openAddModal = () => {
     setEditingId(null);
-    setFormData({ nis: '', nik: '', kkNumber: '', name: '', gender: 'L', className: '' });
+    setFormData({ nis: '', nik: '', kkNumber: '', name: '', gender: 'L', className: '', halqah: '', tingkatan: '' });
     setShowModal(true);
   };
 
@@ -79,7 +86,9 @@ export const MasterStudents: React.FC = () => {
       kkNumber: student.kkNumber || '',
       name: student.name || '',
       gender: student.gender || 'L',
-      className: student.className || ''
+      className: student.className || '',
+      halqah: student.halqah || '',
+      tingkatan: student.tingkatan || ''
     });
     setShowModal(true);
   };
@@ -197,6 +206,8 @@ export const MasterStudents: React.FC = () => {
                 <th className="px-6 py-4 font-semibold">Nama Lengkap</th>
                 <th className="px-6 py-4 font-semibold">Jenis Kelamin</th>
                 <th className="px-6 py-4 font-semibold">Kelas</th>
+                <th className="px-6 py-4 font-semibold">Halqah</th>
+                <th className="px-6 py-4 font-semibold">Tingkat</th>
                 <th className="px-6 py-4 font-semibold">Status</th>
                 <th className="px-6 py-4 font-semibold text-right">Aksi</th>
               </tr>
@@ -208,7 +219,7 @@ export const MasterStudents: React.FC = () => {
                 </tr>
               ) : filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500">Tidak ada santri ditemukan.</td>
+                  <td colSpan={8} className="px-6 py-8 text-center text-slate-500">Tidak ada santri ditemukan.</td>
                 </tr>
               ) : (
                 filteredStudents.map((student) => (
@@ -221,6 +232,8 @@ export const MasterStudents: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-slate-600 dark:text-emerald-100">{student.className}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-emerald-100">{student.halqah || '-'}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-emerald-100">{student.tingkatan || '-'}</td>
                     <td className="px-6 py-4">
                       <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
                         <CheckCircle2 className="w-3.5 h-3.5" />
@@ -282,6 +295,16 @@ export const MasterStudents: React.FC = () => {
                 <div>
                   <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80 mb-1">Kelas Utama</label>
                   <input required type="text" placeholder="Misal: 7A" value={formData.className} onChange={e => setFormData({...formData, className: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80 mb-1">Halqah Tahfidz (Opsional)</label>
+                  <input type="text" placeholder="Misal: Halqah 1 (Ikhwan)" value={formData.halqah} onChange={e => setFormData({...formData, halqah: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80 mb-1">Tingkatan (Opsional)</label>
+                  <input type="number" placeholder="Misal: 1" value={formData.tingkatan} onChange={e => setFormData({...formData, tingkatan: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500" />
                 </div>
               </div>
               <div className="pt-4 border-t border-slate-200 dark:border-emerald-900/40 flex justify-end gap-3">
