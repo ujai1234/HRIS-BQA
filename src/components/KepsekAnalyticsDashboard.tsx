@@ -116,22 +116,12 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
         } else {
           attendanceStatus = 'HADIR_TERLAMBAT';
         }
-      } else if (idx % 4 !== 3) {
-        const mockTime = `07:${(idx * 7) % 55 < 10 ? '0' + (idx * 7) % 55 : (idx * 7) % 55}`;
-        checkInTime = mockTime;
-        if (idx % 5 === 2) {
-          attendanceStatus = 'HADIR_TERLAMBAT';
-          lateMinutes = 12;
-        } else {
-          attendanceStatus = 'HADIR_TEPAT';
-          lateMinutes = 0;
-        }
       }
 
-      const isJournalComplete = att?.status === 'SELESAI' || (idx % 3 !== 0 && attendanceStatus !== 'BELUM_HADIR');
-      const journalTopic = att?.journal?.topic || (isJournalComplete ? `Halaqoh: Bab ${schedule.subject} - Sesi ${idx + 1}` : null);
-      const isBadal = !!badal || idx === 1;
-      const actualTeacherName = isBadal ? (badalTeacher?.name || 'Ust Syuhada') : (teacher?.name || 'Asatidz');
+      const isJournalComplete = att?.status === 'SELESAI';
+      const journalTopic = att?.journal?.topic || null;
+      const isBadal = !!badal;
+      const actualTeacherName = isBadal ? (badalTeacher?.name || 'Guru Pengganti') : (teacher?.name || 'Asatidz');
 
       return {
         id: schedule.id,
@@ -140,8 +130,8 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
         originalTeacherName: teacher?.name || 'Ust Asatidz',
         actualTeacherName,
         isBadal,
-        badalReason: isBadal ? (badal?.reason || 'Izin Keperluan Mendesak') : null,
-        badalStatus: isBadal ? (badal?.status || 'APPROVED') : null,
+        badalReason: isBadal ? badal?.reason : null,
+        badalStatus: isBadal ? badal?.status : null,
         className: schedule.className,
         subject: schedule.subject,
         timeSlot: `${schedule.startTime} - ${schedule.endTime}`,
@@ -152,8 +142,8 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
         lateMinutes,
         isJournalComplete,
         journalTopic,
-        studentPresentCount: 18 - (idx % 3),
-        totalStudents: 18
+        studentPresentCount: 0,
+        totalStudents: 0
       };
     });
   }, [filteredSchedules, teachers, attendances, badalAssignments]);
@@ -189,35 +179,21 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
 
   // 7-Day Teacher Attendance Trend Data
   const last7DaysData = useMemo(() => {
-    const totalGuru = filteredTeachers.length || 19;
     return [
-      { date: 'Sen (24/8)', hadir: Math.min(totalGuru, 18), tepat: 17, terlambat: 1, izin: 1, persentase: 95 },
-      { date: 'Sel (25/8)', hadir: Math.min(totalGuru, 19), tepat: 18, terlambat: 1, izin: 0, persentase: 100 },
-      { date: 'Rab (26/8)', hadir: Math.min(totalGuru, 19), tepat: 19, terlambat: 0, izin: 0, persentase: 100 },
-      { date: 'Kam (27/8)', hadir: Math.min(totalGuru, 18), tepat: 16, terlambat: 2, izin: 1, persentase: 95 },
-      { date: 'Jum (28/8)', hadir: Math.min(totalGuru, 19), tepat: 19, terlambat: 0, izin: 0, persentase: 100 },
-      { date: 'Sab (29/8)', hadir: Math.min(totalGuru, 18), tepat: 17, terlambat: 1, izin: 1, persentase: 95 },
       { 
         date: 'Hari Ini', 
-        hadir: Math.max(1, presentCount), 
-        tepat: Math.max(1, presentCount - lateCount), 
+        hadir: presentCount, 
+        tepat: Math.max(0, presentCount - lateCount), 
         terlambat: lateCount, 
         izin: Math.max(0, totalSessionsToday - presentCount),
-        persentase: totalSessionsToday > 0 ? Math.round((presentCount / totalSessionsToday) * 100) : 95 
+        persentase: totalSessionsToday > 0 ? Math.round((presentCount / totalSessionsToday) * 100) : 0 
       }
     ];
-  }, [filteredTeachers, presentCount, lateCount, totalSessionsToday]);
+  }, [presentCount, lateCount, totalSessionsToday]);
 
   // Monthly Trajectory Trends Data
   const monthlyTrendsData = useMemo(() => {
-    return [
-      { month: 'Juli', kehadiran: 95, jurnal: 92, tepat: 91 },
-      { month: 'Agustus', kehadiran: 96, jurnal: 94, tepat: 93 },
-      { month: 'September', kehadiran: 97, jurnal: 96, tepat: 94 },
-      { month: 'Oktober', kehadiran: 96, jurnal: 95, tepat: 92 },
-      { month: 'November', kehadiran: 98, jurnal: 97, tepat: 96 },
-      { month: 'Desember', kehadiran: 99, jurnal: 98, tepat: 97 }
-    ];
+    return [];
   }, []);
 
   // Status Distribution Data for Donut Chart
@@ -234,137 +210,41 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
   const evaluationRadarData = useMemo(() => {
     return [
       { metric: 'KBM Tepat Waktu', score: onTimePercentage, target: 95 },
-      { metric: 'Ketaatan Jurnal', score: presentCount > 0 ? Math.round((completedJournalCount / presentCount) * 100) : 96, target: 90 },
-      { metric: 'Tuntas Materi', score: 94, target: 90 },
-      { metric: 'Presensi Santri', score: 98, target: 95 },
-      { metric: 'Evaluasi Santri', score: 92, target: 85 },
-      { metric: 'Kerapian Modul', score: 90, target: 85 }
+      { metric: 'Ketaatan Jurnal', score: presentCount > 0 ? Math.round((completedJournalCount / presentCount) * 100) : 0, target: 90 },
+      { metric: 'Tuntas Materi', score: 0, target: 90 },
+      { metric: 'Presensi Santri', score: 0, target: 95 },
+      { metric: 'Evaluasi Santri', score: 0, target: 85 },
+      { metric: 'Kerapian Modul', score: 0, target: 85 }
     ];
   }, [onTimePercentage, presentCount, completedJournalCount]);
 
   // Top 5 Ustadz Terbaik (Kinerja & Kedisiplinan)
   const top5Teachers = useMemo(() => {
-    const defaultTopList = [
-      {
-        id: 'top-1',
-        name: 'Ust. Ahmad Dahlan, M.Pd.',
-        nip: '198503122010011002',
-        position: 'Guru Mukim / Pengajar MA',
-        unit: 'MA' as UnitType,
-        avatarColor: 'bg-[#1B4332]',
-        overallScore: 99.4,
-        onTimeRate: 100,
-        journalRate: 98.8,
-        totalJP: 28,
-        studentRating: 4.9,
-        badgeLabel: 'Teladan Utama',
-        awards: ['Hadir 100% Tepat Waktu', 'Jurnal KBM Selalu Lengkap', 'Evaluasi Santri 4.9/5']
-      },
-      {
-        id: 'top-2',
-        name: 'Ust. Muhammad Ridwan, S.Ag.',
-        nip: '198807212014021005',
-        position: 'Guru Tahfidz Al-Qur\'an',
-        unit: 'PESANTREN' as UnitType,
-        avatarColor: 'bg-emerald-700',
-        overallScore: 98.7,
-        onTimeRate: 98.5,
-        journalRate: 100,
-        totalJP: 26,
-        studentRating: 4.9,
-        badgeLabel: 'Disiplin Tinggi',
-        awards: ['Tahfidz Best Mentor', 'Jurnal 100% On-Time', 'Kedisiplinan Subuh']
-      },
-      {
-        id: 'top-3',
-        name: 'Ust. H. Mahmud Zaky, Lc.',
-        nip: '198211052008031001',
-        position: 'Pengampu Kitab Kuning / MA',
-        unit: 'MA' as UnitType,
-        avatarColor: 'bg-[#4F46E5]',
-        overallScore: 98.1,
-        onTimeRate: 97.2,
-        journalRate: 99.0,
-        totalJP: 24,
-        studentRating: 4.8,
-        badgeLabel: 'Jurnal Presisi',
-        awards: ['Rekomendasi Mudir', 'Aktif Menyusun Modul', 'Zero Absence']
-      },
-      {
-        id: 'top-4',
-        name: 'Ust. Abdullah Faqih, S.H.I.',
-        nip: '199004152016011003',
-        position: 'Guru Fiqih & Bahasa Arab',
-        unit: 'SMP' as UnitType,
-        avatarColor: 'bg-slate-700',
-        overallScore: 97.5,
-        onTimeRate: 96.8,
-        journalRate: 98.2,
-        totalJP: 22,
-        studentRating: 4.8,
-        badgeLabel: 'Inovatif',
-        awards: ['Media Pembelajaran Kreatif', 'Presensi Santri Rapi']
-      },
-      {
-        id: 'top-5',
-        name: 'Ust. Hasan Basri, S.Pd.I.',
-        nip: '199208032018021008',
-        position: 'Guru IPA / SMP IT',
-        unit: 'SMP' as UnitType,
-        avatarColor: 'bg-slate-700',
-        overallScore: 96.9,
-        onTimeRate: 96.0,
-        journalRate: 97.8,
-        totalJP: 20,
-        studentRating: 4.7,
-        badgeLabel: 'Konsisten',
-        awards: ['Ekskul Sains Mentor', 'Zero Late Check-in']
-      }
-    ];
-
     if (filteredTeachers.length > 0) {
       const mapped = filteredTeachers.map((teacher, index) => {
         const teacherSchedules = filteredSchedules.filter(s => s.teacherId === teacher.id);
-        const hours = teacherSchedules.reduce((acc, s) => acc + (s.hours || 2), 0) * 4 || (18 + (index * 3) % 12);
+        const hours = teacherSchedules.reduce((acc, s) => acc + (s.hours || 2), 0);
         
-        const onTime = Math.min(100, Math.max(90, 100 - (index % 4) * 1.5));
-        const journal = Math.min(100, Math.max(92, 100 - (index % 3) * 1.2));
-        const rating = (4.7 + ((index * 3) % 3) * 0.1).toFixed(1);
-        const score = Math.min(99.8, (onTime * 0.45 + journal * 0.45 + (parseFloat(rating) / 5 * 100) * 0.1)).toFixed(1);
-
-        const badges = ['Teladan Utama', 'Disiplin Tinggi', 'Jurnal Presisi', 'Inovatif', 'Konsisten'];
-
         return {
           id: teacher.id,
           name: teacher.name,
-          nip: teacher.nip || `NIP.${19850000 + index}`,
+          nip: teacher.nip || '-',
           position: teacher.position || 'Pengajar',
           unit: teacher.unit,
-          avatarColor: teacher.avatarColor || (index % 2 === 0 ? 'bg-[#1B4332]' : 'bg-[#4F46E5]'),
-          overallScore: parseFloat(score),
-          onTimeRate: Math.round(onTime),
-          journalRate: Math.round(journal),
+          avatarColor: teacher.avatarColor || 'bg-emerald-700',
+          overallScore: 0,
+          onTimeRate: 0,
+          journalRate: 0,
           totalJP: hours,
-          studentRating: parseFloat(rating),
-          badgeLabel: badges[index % badges.length],
-          awards: ['Kehadiran Konsisten', 'Pengisian Jurnal Tepat Waktu', 'Evaluasi Santri Baik']
+          studentRating: 0,
+          badgeLabel: '-',
+          awards: []
         };
       });
 
-      const sorted = mapped.sort((a, b) => b.overallScore - a.overallScore).slice(0, 5);
-
-      if (sorted.length < 5) {
-        defaultTopList.forEach(def => {
-          if (sorted.length < 5 && !sorted.some(s => s.name === def.name)) {
-            sorted.push(def);
-          }
-        });
-      }
-
-      return sorted.slice(0, 5);
+      return mapped.slice(0, 5);
     }
-
-    return defaultTopList;
+    return [];
   }, [filteredTeachers, filteredSchedules]);
 
   const handleRefresh = () => {
