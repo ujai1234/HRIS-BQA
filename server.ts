@@ -3020,7 +3020,11 @@ async function startServer() {
           job: req.body.job,
           income: req.body.income,
           vehicle: req.body.vehicle,
-          homeOwnership: req.body.homeOwnership
+          homeOwnership: req.body.homeOwnership,
+          ktpUrl: req.body.ktpUrl,
+          kkUrl: req.body.kkUrl,
+          scholarshipDocUrl: req.body.scholarshipDocUrl,
+          scholarshipType: req.body.scholarshipType
         })
         .where(eq(schema.parents.id, parent.id))
         .returning();

@@ -173,6 +173,10 @@ export const parents = sqliteTable('parents', {
   income: text('income'), // Penghasilan (e.g., '< 5 Juta', '5 - 10 Juta')
   vehicle: text('vehicle'), // Kendaraan (e.g., 'Motor', 'Mobil', 'Tidak Ada')
   homeOwnership: text('home_ownership'), // Status Rumah (e.g., 'Milik Sendiri', 'Sewa/Kontrak')
+  ktpUrl: text('ktp_url'), // Foto KTP
+  kkUrl: text('kk_url'), // Foto KK
+  scholarshipDocUrl: text('scholarship_doc_url'), // Foto Persyaratan Beasiswa
+  scholarshipType: text('scholarship_type'), // Jenis Beasiswa (KIP, KJP, Yatim, Dhuafa, Prestasi, dll)
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
 

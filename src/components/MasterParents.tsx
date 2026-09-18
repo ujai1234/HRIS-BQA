@@ -15,7 +15,8 @@ export const MasterParents: React.FC = () => {
   
   // Profile Form State
   const [profileData, setProfileData] = useState({
-    nik: '', kkNumber: '', phone: '', address: '', job: '', income: '', vehicle: '', homeOwnership: ''
+    nik: '', kkNumber: '', phone: '', address: '', job: '', income: '', vehicle: '', homeOwnership: '',
+    scholarshipType: '', ktpUrl: '', kkUrl: '', scholarshipDocUrl: ''
   });
 
   // Relation State
@@ -77,7 +78,11 @@ export const MasterParents: React.FC = () => {
       job: parent.job || '',
       income: parent.income || '',
       vehicle: parent.vehicle || '',
-      homeOwnership: parent.homeOwnership || ''
+      homeOwnership: parent.homeOwnership || '',
+      scholarshipType: parent.scholarshipType || '',
+      ktpUrl: parent.ktpUrl || '',
+      kkUrl: parent.kkUrl || '',
+      scholarshipDocUrl: parent.scholarshipDocUrl || ''
     });
     fetchLinkedStudents(parent.id);
     setActiveTab('profile');
@@ -287,6 +292,66 @@ export const MasterParents: React.FC = () => {
                     <div>
                       <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80 mb-1">Penghasilan</label>
                       <input type="text" value={profileData.income} onChange={e => setProfileData({...profileData, income: e.target.value})} placeholder="Contoh: 3-5 Juta" className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80 mb-1">Jenis Beasiswa / Jalur Masuk</label>
+                    <select value={profileData.scholarshipType} onChange={e => setProfileData({...profileData, scholarshipType: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500">
+                      <option value="">-- Pilih Jenis Beasiswa --</option>
+                      <option value="Tidak Ada">Tidak Ada (Reguler)</option>
+                      <option value="KIP">KIP (Kartu Indonesia Pintar)</option>
+                      <option value="KJP">KJP (Kartu Jakarta Pintar)</option>
+                      <option value="BSM">BSM (Bantuan Siswa Miskin)</option>
+                      <option value="Yatim/Piatu">Jalur Yatim/Piatu</option>
+                      <option value="Dhuafa">Jalur Dhuafa</option>
+                      <option value="Prestasi">Jalur Prestasi</option>
+                    </select>
+                  </div>
+                  <div className="pt-4 border-t border-slate-200 dark:border-emerald-900/40">
+                    <h4 className="text-sm font-bold text-slate-800 dark:text-emerald-50 mb-3">Dokumen Berkas Wali</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* KTP */}
+                      <div className="space-y-2">
+                        <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80">Foto KTP</label>
+                        {profileData.ktpUrl ? (
+                          <div className="border border-slate-200 dark:border-emerald-900/40 rounded-lg overflow-hidden bg-slate-50 dark:bg-black/20 aspect-video flex items-center justify-center relative group">
+                            <img src={profileData.ktpUrl} alt="KTP" className="max-h-full max-w-full object-contain" />
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <a href={profileData.ktpUrl} target="_blank" rel="noreferrer" className="text-white text-xs font-semibold px-3 py-1.5 bg-emerald-600 rounded-md">Buka Gambar</a>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="border border-dashed border-slate-300 dark:border-emerald-900/40 rounded-lg p-4 text-center text-xs text-slate-400 bg-slate-50 dark:bg-black/10">Belum diunggah</div>
+                        )}
+                      </div>
+                      {/* KK */}
+                      <div className="space-y-2">
+                        <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80">Foto KK</label>
+                        {profileData.kkUrl ? (
+                          <div className="border border-slate-200 dark:border-emerald-900/40 rounded-lg overflow-hidden bg-slate-50 dark:bg-black/20 aspect-video flex items-center justify-center relative group">
+                            <img src={profileData.kkUrl} alt="KK" className="max-h-full max-w-full object-contain" />
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <a href={profileData.kkUrl} target="_blank" rel="noreferrer" className="text-white text-xs font-semibold px-3 py-1.5 bg-emerald-600 rounded-md">Buka Gambar</a>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="border border-dashed border-slate-300 dark:border-emerald-900/40 rounded-lg p-4 text-center text-xs text-slate-400 bg-slate-50 dark:bg-black/10">Belum diunggah</div>
+                        )}
+                      </div>
+                      {/* Scholarship Doc */}
+                      <div className="space-y-2">
+                        <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80">Dokumen Beasiswa</label>
+                        {profileData.scholarshipDocUrl ? (
+                          <div className="border border-slate-200 dark:border-emerald-900/40 rounded-lg overflow-hidden bg-slate-50 dark:bg-black/20 aspect-video flex items-center justify-center relative group">
+                            <img src={profileData.scholarshipDocUrl} alt="Beasiswa" className="max-h-full max-w-full object-contain" />
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <a href={profileData.scholarshipDocUrl} target="_blank" rel="noreferrer" className="text-white text-xs font-semibold px-3 py-1.5 bg-emerald-600 rounded-md">Buka Gambar</a>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="border border-dashed border-slate-300 dark:border-emerald-900/40 rounded-lg p-4 text-center text-xs text-slate-400 bg-slate-50 dark:bg-black/10">Belum diunggah</div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </form>
