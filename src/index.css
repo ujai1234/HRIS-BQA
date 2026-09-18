@@ -144,6 +144,18 @@ html, body, button, input, select, textarea {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Make UI elements and fonts scale down automatically on smartphones */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+}
+@media (max-width: 380px) {
+  html {
+    font-size: 13px;
+  }
+}
+
 html.dark {
   background-color: #051F20;
   color-scheme: dark;
