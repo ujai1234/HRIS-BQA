@@ -286,6 +286,17 @@ sqliteDb.exec(`
     journal_id TEXT NOT NULL,
     status TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS parent_feedbacks (
+    id TEXT PRIMARY KEY,
+    student_id TEXT NOT NULL,
+    parent_id TEXT NOT NULL,
+    category TEXT NOT NULL,
+    message TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'BARU',
+    admin_response TEXT,
+    created_at INTEGER NOT NULL
+  );
 `);
 
 try { sqliteDb.exec("ALTER TABLE students ADD COLUMN nik TEXT;"); } catch(e) {}
