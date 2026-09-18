@@ -55,7 +55,37 @@ async function startServer() {
   // Better Auth
   app.all(/^\/api\/auth(\/.*)?$/, toNodeHandler(auth));
 
+  // ====== MIDDLEWARE: PORTAL SANTRI PARENT AUTH ======
+  const requireParentAuth = async (req: any, res: any, next: any) => {
+    try {
+      const headersObj = new Headers();
+      for (const [key, value] of Object.entries(req.headers)) {
+        if (value !== undefined) {
+          headersObj.set(key, Array.isArray(value) ? value.join(', ') : (value as string));
+        }
+      }
+      const session = await auth.api.getSession({ headers: headersObj });
+      if (!session?.user) {
+        res.status(401).json({ error: 'Sesi tidak valid. Silakan login kembali ke Portal Santri.' });
+        return;
+      }
+      let parent = await db.query.parents.findFirst({
+        where: eq(schema.parents.userId, session.user.id)
+      });
+      if (!parent) {
+        parent = { id: session.user.id, userId: session.user.id, isNew: true } as any;
+      }
+      req.authenticatedParent = parent;
+      req.authenticatedUserId = session.user.id;
+      next();
+    } catch (error) {
+      console.error('[requireParentAuth] error:', error);
+      res.status(401).json({ error: 'Gagal memverifikasi sesi.' });
+    }
+  };
+
   // EMERGENCY RECOVERY ENDPOINT
+
   app.get('/api/admin/fix-admin', async (req, res) => {
     try {
       const adminEmail = 'ujai757@gmail.com';
@@ -1945,38 +1975,7 @@ async function startServer() {
   });
 
   // ====== MIDDLEWARE: PORTAL SANTRI PARENT AUTH ======
-  /**
-   * requireParentAuth — verifikasi sesi Better-Auth dan temukan parent record.
-   * Menambahkan req.authenticatedParent dan req.authenticatedUserId ke request.
-   */
-  const requireParentAuth = async (req, res, next) => {
-    try {
-      const headersObj = new Headers();
-      for (const [key, value] of Object.entries(req.headers)) {
-        if (value !== undefined) {
-          headersObj.set(key, Array.isArray(value) ? value.join(', ') : value);
-        }
-      }
-      const session = await auth.api.getSession({ headers: headersObj });
-      if (!session?.user) {
-        res.status(401).json({ error: 'Sesi tidak valid. Silakan login kembali ke Portal Santri.' });
-        return;
-      }
-      let parent = await db.query.parents.findFirst({
-        where: eq(schema.parents.userId, session.user.id)
-      });
-      if (!parent) {
-        // Fallback parent object for newly registered users before linking
-        parent = { id: session.user.id, userId: session.user.id, isNew: true } as any;
-      }
-      req.authenticatedParent = parent;
-      req.authenticatedUserId = session.user.id;
-      next();
-    } catch (error) {
-      console.error('[requireParentAuth] error:', error);
-      res.status(401).json({ error: 'Gagal memverifikasi sesi.' });
-    }
-  };
+
 
 
   /** verifyStudentOwnership — pastikan studentId benar-benar milik wali ini */
