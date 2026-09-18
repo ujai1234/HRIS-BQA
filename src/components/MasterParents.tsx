@@ -57,6 +57,35 @@ export const MasterParents: React.FC = () => {
   };
 
 
+  const [replyText, setReplyText] = useState<{ [key: string]: string }>({});
+  const [isReplying, setIsReplying] = useState<{ [key: string]: boolean }>({});
+
+  const handleReplyFeedback = async (id: string) => {
+    if (!replyText[id]?.trim()) {
+      toast.error('Balasan tidak boleh kosong');
+      return;
+    }
+    setIsReplying(prev => ({ ...prev, [id]: true }));
+    try {
+      const res = await fetch(`/api/parent-feedbacks/${id}/reply`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminResponse: replyText[id] })
+      });
+      if (res.ok) {
+        toast.success('Balasan berhasil dikirim');
+        setReplyText(prev => ({ ...prev, [id]: '' }));
+        fetchFeedbacks();
+      } else {
+        toast.error('Gagal mengirim balasan');
+      }
+    } catch (e) {
+      toast.error('Terjadi kesalahan jaringan');
+    } finally {
+      setIsReplying(prev => ({ ...prev, [id]: false }));
+    }
+  };
+
   const fetchAllStudents = async () => {
     try {
       const res = await fetch('/api/students');
@@ -289,10 +318,35 @@ export const MasterParents: React.FC = () => {
                   <p className="text-sm text-slate-800 dark:text-emerald-100 font-medium whitespace-pre-wrap leading-relaxed">
                     "{fb.message}"
                   </p>
-                  <div className="mt-3 pt-2 border-t border-slate-200/60 dark:border-emerald-900/20 text-xs text-slate-500 flex justify-between">
-                    <span>ID Wali: <strong className="text-emerald-700 dark:text-emerald-300">{fb.parentId}</strong></span>
-                    <span>Status: <strong className="uppercase text-amber-600">{fb.status || 'BARU'}</strong></span>
+                  <div className="mt-3 pt-2 border-t border-slate-200/60 dark:border-emerald-900/20 text-xs flex justify-between items-center">
+                    <span className="text-slate-500">Pengirim: <strong className="text-emerald-700 dark:text-emerald-300">{fb.parentName || fb.parentId}</strong></span>
+                    <span className="text-slate-500">Status: <strong className="uppercase text-amber-600">{fb.status || 'BARU'}</strong></span>
                   </div>
+                  
+                  {/* Admin Response Section */}
+                  {fb.adminResponse ? (
+                    <div className="mt-3 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-100 dark:border-emerald-800/30">
+                      <p className="text-xs font-bold text-emerald-800 dark:text-emerald-400 mb-1">Balasan Admin:</p>
+                      <p className="text-sm text-slate-700 dark:text-emerald-100">{fb.adminResponse}</p>
+                    </div>
+                  ) : (
+                    <div className="mt-3 flex gap-2">
+                      <input 
+                        type="text" 
+                        placeholder="Tulis balasan..." 
+                        value={replyText[fb.id] || ''}
+                        onChange={(e) => setReplyText(prev => ({ ...prev, [fb.id]: e.target.value }))}
+                        className="flex-1 text-xs p-2 bg-white dark:bg-[#121f1a] border border-slate-200 dark:border-emerald-900/40 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500"
+                      />
+                      <button 
+                        onClick={() => handleReplyFeedback(fb.id)}
+                        disabled={isReplying[fb.id]}
+                        className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-bold"
+                      >
+                        {isReplying[fb.id] ? '...' : 'Balas'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

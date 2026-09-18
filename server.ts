@@ -331,13 +331,61 @@ async function startServer() {
   // GET /api/parent-feedbacks — Ambil semua masukan wali untuk Admin
   app.get('/api/parent-feedbacks', async (_req, res) => {
     try {
+      // Manual join via two queries or simply fetch users to map names
       const feedbacks = await db.query.parentFeedbacks.findMany({
+        orderBy: (f, { desc }) => [desc(f.createdAt)]
+      });
+      const allParents = await db.query.parents.findMany();
+      const allUsers = await db.query.user.findMany();
+      
+      const enrichedFeedbacks = feedbacks.map(fb => {
+        const parentRecord = allParents.find(p => p.id === fb.parentId);
+        const userRecord = parentRecord ? allUsers.find(u => u.id === parentRecord.userId) : null;
+        return {
+          ...fb,
+          parentName: userRecord?.name || parentRecord?.userId || 'Wali Santri'
+        };
+      });
+
+      res.json({ success: true, data: enrichedFeedbacks });
+    } catch (error) {
+      console.error('Failed to fetch parent feedbacks:', error);
+      res.status(500).json({ error: 'Failed to fetch parent feedbacks' });
+    }
+  });
+
+  // PUT /api/parent-feedbacks/:id/reply — Admin membalas masukan
+  app.put('/api/parent-feedbacks/:id/reply', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { adminResponse } = req.body;
+      
+      const updated = await db.update(schema.parentFeedbacks)
+        .set({ 
+          adminResponse,
+          status: 'DITANGGAPI' 
+        })
+        .where(eq(schema.parentFeedbacks.id, id))
+        .returning();
+        
+      res.json({ success: true, data: updated[0] });
+    } catch (error) {
+      console.error('Failed to reply feedback:', error);
+      res.status(500).json({ error: 'Failed to reply feedback' });
+    }
+  });
+
+  // GET /api/parents/feedbacks/me — Wali melihat riwayat masukan sendiri
+  app.get('/api/parents/feedbacks/me', requireParentAuth, async (req, res) => {
+    try {
+      const parent = (req as any).authenticatedParent;
+      const feedbacks = await db.query.parentFeedbacks.findMany({
+        where: eq(schema.parentFeedbacks.parentId, parent.id),
         orderBy: (f, { desc }) => [desc(f.createdAt)]
       });
       res.json({ success: true, data: feedbacks });
     } catch (error) {
-      console.error('Failed to fetch parent feedbacks:', error);
-      res.status(500).json({ error: 'Failed to fetch parent feedbacks' });
+      res.status(500).json({ error: 'Failed to fetch feedbacks' });
     }
   });
 
