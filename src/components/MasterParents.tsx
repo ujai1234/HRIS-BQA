@@ -5,9 +5,13 @@ import { toast } from 'sonner';
 
 export const MasterParents: React.FC = () => {
   const [parents, setParents] = useState<any[]>([]);
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   
+  // Main View Tab: 'parents' | 'feedbacks'
+  const [mainTab, setMainTab] = useState<'parents' | 'feedbacks'>('parents');
+
   // Modal states
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'profile' | 'students'>('profile');
@@ -40,6 +44,19 @@ export const MasterParents: React.FC = () => {
     }
   };
 
+  const fetchFeedbacks = async () => {
+    try {
+      const res = await fetch('/api/parent-feedbacks');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.data) setFeedbacks(data.data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+
   const fetchAllStudents = async () => {
     try {
       const res = await fetch('/api/students');
@@ -66,6 +83,7 @@ export const MasterParents: React.FC = () => {
   useEffect(() => {
     fetchParents();
     fetchAllStudents();
+    fetchFeedbacks();
   }, []);
 
   const openEditModal = (parent: any) => {
@@ -165,64 +183,123 @@ export const MasterParents: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bqa-card p-5">
         <div>
-          <h2 className="text-xl font-bold text-slate-800 dark:text-emerald-50">Master Data Wali Santri</h2>
-          <p className="text-sm text-slate-500 dark:text-emerald-400/70 mt-1">Kelola profil wali dan hubungkan akun wali ke data santri.</p>
+          <h2 className="text-xl font-bold text-slate-800 dark:text-emerald-50">Master Data Wali & Masukan</h2>
+          <p className="text-sm text-slate-500 dark:text-emerald-400/70 mt-1">Kelola profil wali, relasi santri, dan baca masukan/saran dari wali santri.</p>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex bg-slate-100 dark:bg-[#0f1a15] p-1 rounded-xl">
+          <button
+            onClick={() => setMainTab('parents')}
+            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+              mainTab === 'parents' 
+                ? 'bg-white dark:bg-[#121f1a] text-emerald-800 dark:text-emerald-300 shadow-xs' 
+                : 'text-slate-500 hover:text-slate-700 dark:text-emerald-400/60'
+            }`}
+          >
+            Daftar Wali Santri ({parents.length})
+          </button>
+          <button
+            onClick={() => setMainTab('feedbacks')}
+            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
+              mainTab === 'feedbacks' 
+                ? 'bg-white dark:bg-[#121f1a] text-emerald-800 dark:text-emerald-300 shadow-xs' 
+                : 'text-slate-500 hover:text-slate-700 dark:text-emerald-400/60'
+            }`}
+          >
+            Masukan Wali ({feedbacks.length})
+          </button>
         </div>
       </div>
 
-      {/* Filter & Search */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input 
-            type="text" 
-            placeholder="Cari User ID atau No HP..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-[#121f1a] border border-slate-200 dark:border-emerald-900/40 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 dark:text-emerald-100 outline-none"
-          />
-        </div>
-      </div>
+      {mainTab === 'parents' ? (
+        <>
+          {/* Filter & Search */}
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1 max-w-md">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Cari User ID atau No HP..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-[#121f1a] border border-slate-200 dark:border-emerald-900/40 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 dark:text-emerald-100 outline-none"
+              />
+            </div>
+          </div>
 
-      {/* Table */}
-      <div className="bqa-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 dark:bg-[#0f1a15] text-slate-500 dark:text-emerald-400/80 border-b border-slate-200 dark:border-emerald-900/40">
-              <tr>
-                <th className="px-6 py-4 font-semibold">User ID</th>
-                <th className="px-6 py-4 font-semibold">NIK</th>
-                <th className="px-6 py-4 font-semibold">No. HP</th>
-                <th className="px-6 py-4 font-semibold">Alamat</th>
-                <th className="px-6 py-4 font-semibold text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-emerald-900/40">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-slate-500">Memuat data...</td>
-                </tr>
-              ) : filteredParents.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-slate-500">Belum ada data wali santri.</td>
-                </tr>
-              ) : (
-                filteredParents.map((parent) => (
-                  <tr key={parent.id} className="hover:bg-slate-50 dark:bg-[#0f1a15] dark:hover:bg-[#162720]/50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-emerald-50">{parent.userId}</td>
-                    <td className="px-6 py-4 font-mono text-xs text-slate-600 dark:text-emerald-300/80">{parent.nik || '-'}</td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-emerald-100">{parent.phone || '-'}</td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-emerald-100 truncate max-w-xs">{parent.address || '-'}</td>
-                    <td className="px-6 py-4 text-right">
-                      <button onClick={() => openEditModal(parent)} className="text-emerald-600 hover:text-emerald-700 font-medium text-xs bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors">Edit / Relasi</button>
-                    </td>
+          {/* Table */}
+          <div className="bqa-card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-slate-50 dark:bg-[#0f1a15] text-slate-500 dark:text-emerald-400/80 border-b border-slate-200 dark:border-emerald-900/40">
+                  <tr>
+                    <th className="px-6 py-4 font-semibold">User ID</th>
+                    <th className="px-6 py-4 font-semibold">NIK</th>
+                    <th className="px-6 py-4 font-semibold">No. HP</th>
+                    <th className="px-6 py-4 font-semibold">Alamat</th>
+                    <th className="px-6 py-4 font-semibold text-right">Aksi</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                </thead>
+                <tbody className="divide-y divide-slate-200 dark:divide-emerald-900/40">
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-8 text-center text-slate-500">Memuat data...</td>
+                    </tr>
+                  ) : filteredParents.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-8 text-center text-slate-500">Belum ada data wali santri.</td>
+                    </tr>
+                  ) : (
+                    filteredParents.map((parent) => (
+                      <tr key={parent.id} className="hover:bg-slate-50 dark:bg-[#0f1a15] dark:hover:bg-[#162720]/50 transition-colors">
+                        <td className="px-6 py-4 font-medium text-slate-900 dark:text-emerald-50">{parent.userId}</td>
+                        <td className="px-6 py-4 font-mono text-xs text-slate-600 dark:text-emerald-300/80">{parent.nik || '-'}</td>
+                        <td className="px-6 py-4 text-slate-600 dark:text-emerald-100">{parent.phone || '-'}</td>
+                        <td className="px-6 py-4 text-slate-600 dark:text-emerald-100 truncate max-w-xs">{parent.address || '-'}</td>
+                        <td className="px-6 py-4 text-right">
+                          <button onClick={() => openEditModal(parent)} className="text-emerald-600 hover:text-emerald-700 font-medium text-xs bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors">Edit / Relasi</button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      ) : (
+        /* Feedbacks View */
+        <div className="bqa-card p-6">
+          <h3 className="text-base font-bold text-slate-800 dark:text-emerald-50 mb-4">Kotak Masukan Wali Santri</h3>
+          {feedbacks.length === 0 ? (
+            <div className="text-center py-8 text-slate-500 text-sm italic">Belum ada masukan yang dikirimkan oleh wali santri.</div>
+          ) : (
+            <div className="space-y-4">
+              {feedbacks.map((fb) => (
+                <div key={fb.id} className="bg-slate-50 dark:bg-[#0f1a15] p-4 rounded-xl border border-slate-200 dark:border-emerald-900/40">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+                      {fb.category}
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      {new Date(fb.createdAt).toLocaleString('id-ID')}
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-800 dark:text-emerald-100 font-medium whitespace-pre-wrap leading-relaxed">
+                    "{fb.message}"
+                  </p>
+                  <div className="mt-3 pt-2 border-t border-slate-200/60 dark:border-emerald-900/20 text-xs text-slate-500 flex justify-between">
+                    <span>ID Wali: <strong className="text-emerald-700 dark:text-emerald-300">{fb.parentId}</strong></span>
+                    <span>Status: <strong className="uppercase text-amber-600">{fb.status || 'BARU'}</strong></span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      )}
+
 
       {/* Modal */}
       {showModal && (

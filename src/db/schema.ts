@@ -208,6 +208,17 @@ export const studentNotes = sqliteTable('student_notes', {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
 
+export const parentFeedbacks = sqliteTable('parent_feedbacks', {
+  id: text('id').primaryKey(),
+  parentId: text('parent_id').references(() => parents.id).notNull(),
+  studentId: text('student_id').references(() => students.id),
+  category: text('category').notNull().default('SARAN'), // SARAN, PERTANYAAN, APRESIASI, KELUHAN
+  message: text('message').notNull(),
+  status: text('status').notNull().default('BARU'), // BARU, DIBACA, DITANGGAPI
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+
+
 export const curriculums = sqliteTable('curriculums', {
   id: text('id').primaryKey(),
   scheduleId: text('schedule_id').references(() => schedules.id).notNull(),

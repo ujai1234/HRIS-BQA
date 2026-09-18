@@ -58,11 +58,9 @@ async function startServer() {
   // EMERGENCY RECOVERY ENDPOINT
   app.get('/api/admin/fix-admin', async (req, res) => {
     try {
-      // Create or reset admin user
       const adminEmail = 'ujai757@gmail.com';
       const defaultPassword = 'PasswordKuat!2026';
       
-      // Ensure the teacher record exists
       const existingTeacher = await db.query.teachers.findFirst({
         where: eq(schema.teachers.id, 'T-ADMIN-SUPER')
       });
@@ -84,19 +82,16 @@ async function startServer() {
         });
       }
 
-      // Find if better-auth user exists
       const existingUser = await db.query.user.findFirst({
         where: eq(schema.user.email, adminEmail)
       });
 
       if (existingUser) {
-        // Delete it so we can recreate it cleanly with the known password
         await db.delete(schema.account).where(eq(schema.account.userId, existingUser.id));
         await db.delete(schema.session).where(eq(schema.session.userId, existingUser.id));
         await db.delete(schema.user).where(eq(schema.user.id, existingUser.id));
       }
 
-      // Recreate using better-auth API
       await auth.api.signUpEmail({
         body: {
             email: adminEmail,
@@ -107,7 +102,6 @@ async function startServer() {
         headers: new Headers()
       });
 
-      // Force emailVerified = true so Google Auth account linking works
       await db.update(schema.user)
         .set({ emailVerified: true })
         .where(eq(schema.user.email, adminEmail));
@@ -174,7 +168,6 @@ async function startServer() {
         return res.status(400).json({ error: 'Data tidak lengkap. Mohon isi NIS dan Nomor Kartu Keluarga.' });
       }
 
-      // Find student by NIS and No KK to validate
       const validatingStudent = await db.query.students.findFirst({
         where: and(
           eq(schema.students.nis, nis),
@@ -186,12 +179,10 @@ async function startServer() {
         return res.status(404).json({ error: 'Data santri dengan NIS dan No KK tersebut tidak ditemukan. Mohon periksa kembali data Anda.' });
       }
 
-      // Find all students in the same family (same kkNumber)
       const siblings = await db.query.students.findMany({
         where: eq(schema.students.kkNumber, kkNumber)
       });
 
-      // Find or create parent
       let parentRecord = await db.query.parents.findFirst({
         where: eq(schema.parents.userId, userId)
       });
@@ -205,7 +196,6 @@ async function startServer() {
         parentRecord = newParent[0];
       }
 
-      // Link ALL siblings to this parent
       for (const sibling of siblings) {
         const existingLink = await db.query.studentParents.findFirst({
           where: and(
@@ -231,7 +221,7 @@ async function startServer() {
     }
   });
 
-  // Tahfidz App Integration
+  // Tahfidz App Integration - Progress
   app.get('/api/tahfidz/student-progress/:studentId', async (req, res) => {
     try {
       const { studentId } = req.params;
@@ -251,7 +241,6 @@ async function startServer() {
       const lastEval = evaluations.length > 0 ? evaluations[0] : null;
       const lastTasmi = tasmiList.length > 0 ? tasmiList[0] : null;
 
-      // Fallback to dummy data if DB is empty to satisfy demo requirements
       const fallbackJuzCompleted = lastEval?.juzCompleted || 2;
       const fallbackTasmi = lastTasmi || { score: 85, predicate: 'Mumtaz', juz: 30 };
 
@@ -269,17 +258,87 @@ async function startServer() {
     }
   });
 
+  // GET /api/tahfidz/evaluations/:studentId — Riwayat Evaluasi Harian Tahfidz
+  app.get('/api/tahfidz/evaluations/:studentId', async (req, res) => {
+    try {
+      const { studentId } = req.params;
+      const list = await db.query.tahfidzEvaluations.findMany({
+        where: eq(schema.tahfidzEvaluations.studentId, studentId),
+        orderBy: (t, { desc }) => [desc(t.createdAt)],
+        limit: 30
+      });
+      res.json({ success: true, data: list });
+    } catch (error) {
+      console.error('Failed to fetch tahfidz evaluations:', error);
+      res.status(500).json({ error: 'Failed to fetch tahfidz evaluations' });
+    }
+  });
+
+  // POST /api/tahfidz/evaluations — Input Evaluasi Harian Tahfidz baru
+  app.post('/api/tahfidz/evaluations', async (req, res) => {
+    try {
+      const { studentId, date, session: evalSession, juzCompleted, status, notes, teacherName } = req.body;
+      if (!studentId || !date || !evalSession || !status) {
+        return res.status(400).json({ error: 'Data evaluasi tidak lengkap' });
+      }
+      const newEval = await db.insert(schema.tahfidzEvaluations).values({
+        id: `EVAL-${Date.now()}`,
+        studentId,
+        date,
+        session: evalSession,
+        juzCompleted: Number(juzCompleted) || 0,
+        status,
+        notes: notes || null,
+        teacherName: teacherName || 'Ustadz / Muallim'
+      }).returning();
+      res.json({ success: true, data: newEval[0] });
+    } catch (error) {
+      console.error('Failed to save tahfidz evaluation:', error);
+      res.status(500).json({ error: 'Failed to save tahfidz evaluation' });
+    }
+  });
+
+  // GET /api/parent-feedbacks — Ambil semua masukan wali untuk Admin
+  app.get('/api/parent-feedbacks', async (_req, res) => {
+    try {
+      const feedbacks = await db.query.parentFeedbacks.findMany({
+        orderBy: (f, { desc }) => [desc(f.createdAt)]
+      });
+      res.json({ success: true, data: feedbacks });
+    } catch (error) {
+      console.error('Failed to fetch parent feedbacks:', error);
+      res.status(500).json({ error: 'Failed to fetch parent feedbacks' });
+    }
+  });
+
+  // POST /api/parent-feedbacks — Kirim masukan wali dari Portal
+  app.post('/api/parent-feedbacks', requireParentAuth, async (req, res) => {
+    try {
+      const parent = (req as any).authenticatedParent;
+      const { studentId, category, message } = req.body;
+      if (!message || message.trim() === '') {
+        return res.status(400).json({ error: 'Pesan masukan tidak boleh kosong.' });
+      }
+      const newFeedback = await db.insert(schema.parentFeedbacks).values({
+        id: `FB-${Date.now()}`,
+        parentId: parent.id,
+        studentId: studentId || null,
+        category: category || 'SARAN',
+        message: message.trim(),
+        status: 'BARU'
+      }).returning();
+      res.json({ success: true, data: newFeedback[0] });
+    } catch (error) {
+      console.error('Failed to save feedback:', error);
+      res.status(500).json({ error: 'Failed to save feedback' });
+    }
+  });
+
   // ========================================================
   // INTEGRASI PAYROLL TAHFIDZ
-  // Proxy ke server Aplikasi Tahfidz BQA
-  // URL dikonfigurasi via env TAHFIDZ_API_URL (default: https://tahfidz.baitulquranalikhwan.cloud)
   // ========================================================
   const TAHFIDZ_BASE_URL = (process.env.TAHFIDZ_API_URL || 'https://tahfidz.baitulquranalikhwan.cloud').replace(/\/$/, '');
 
-  /**
-   * GET /api/tahfidz/status
-   * Health-check: Cek apakah server Tahfidz aktif & bisa dijangkau.
-   */
   app.get('/api/tahfidz/status', async (_req, res) => {
     try {
       const controller = new AbortController();
@@ -356,7 +415,6 @@ async function startServer() {
       const payrollData = await tahfidzRes.json() as TahfidzPayrollSummary;
       const allTeachers = await db.query.teachers.findMany();
 
-      // Cocokkan username / nama ke teacherId HRIS
       const mappedItems = payrollData.items.map((item) => {
         let matchedTeacher = allTeachers.find(
           (t) => String(t.username ?? '').toLowerCase() === item.teacherUsername.toLowerCase()
@@ -1904,12 +1962,12 @@ async function startServer() {
         res.status(401).json({ error: 'Sesi tidak valid. Silakan login kembali ke Portal Santri.' });
         return;
       }
-      const parent = await db.query.parents.findFirst({
+      let parent = await db.query.parents.findFirst({
         where: eq(schema.parents.userId, session.user.id)
       });
       if (!parent) {
-        res.status(403).json({ error: 'Akun ini bukan wali santri terdaftar.' });
-        return;
+        // Fallback parent object for newly registered users before linking
+        parent = { id: session.user.id, userId: session.user.id, isNew: true } as any;
       }
       req.authenticatedParent = parent;
       req.authenticatedUserId = session.user.id;
@@ -1919,6 +1977,7 @@ async function startServer() {
       res.status(401).json({ error: 'Gagal memverifikasi sesi.' });
     }
   };
+
 
   /** verifyStudentOwnership — pastikan studentId benar-benar milik wali ini */
   const verifyStudentOwnership = async (parentId, studentId) => {
@@ -3004,13 +3063,44 @@ async function startServer() {
     }
   });
 
-  // [PROTECTED] PUT /api/parents/:id — hanya bisa edit profil sendiri
+  // [PROTECTED] PUT /api/parents/:id — edit/create profil sendiri
   app.put('/api/parents/:id', requireParentAuth, async (req, res) => {
     try {
       const parent = (req as any).authenticatedParent;
-      if (req.params.id !== parent.id) {
+      const authenticatedUserId = (req as any).authenticatedUserId as string;
+
+      // If parent record does not exist yet in DB or has isNew flag, create it now
+      let existing = await db.query.parents.findFirst({
+        where: eq(schema.parents.userId, authenticatedUserId)
+      });
+
+      if (!existing) {
+        const inserted = await db.insert(schema.parents).values({
+          id: `PRT-${Date.now()}`,
+          userId: authenticatedUserId,
+          nik: req.body.nik,
+          kkNumber: req.body.kkNumber,
+          phone: req.body.phone,
+          address: req.body.address,
+          job: req.body.job,
+          income: req.body.income,
+          vehicle: req.body.vehicle,
+          homeOwnership: req.body.homeOwnership,
+          ktpUrl: req.body.ktpUrl,
+          kkUrl: req.body.kkUrl,
+          scholarshipDocUrl: req.body.scholarshipDocUrl,
+          scholarshipType: req.body.scholarshipType
+        }).returning();
+        return res.json({ data: inserted[0] });
+      }
+
+      parentIdToUpdate = existing.id;
+
+
+      if (req.params.id !== parentIdToUpdate && req.params.id !== authenticatedUserId) {
         return res.status(403).json({ error: 'Akses ditolak: bukan profil Anda.' });
       }
+
       const result = await db.update(schema.parents)
         .set({
           nik: req.body.nik,
@@ -3026,7 +3116,7 @@ async function startServer() {
           scholarshipDocUrl: req.body.scholarshipDocUrl,
           scholarshipType: req.body.scholarshipType
         })
-        .where(eq(schema.parents.id, parent.id))
+        .where(eq(schema.parents.id, parentIdToUpdate))
         .returning();
       res.json({ data: result[0] });
     } catch (error) {
@@ -3034,6 +3124,7 @@ async function startServer() {
       res.status(500).json({ error: 'Failed to update parent' });
     }
   });
+
 
 
 
