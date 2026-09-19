@@ -837,7 +837,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Master Data Guru CRUD
   const addTeacher = (teacherInput: Omit<Teacher, 'id'>) => {
-    const newId = `T-${String(teachers.length + 1).padStart(2, '0')}`;
+    const newId = `T-${Date.now()}`;
     const newTeacher: Teacher = {
       ...teacherInput,
       id: newId,
@@ -867,7 +867,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const cleanUsername = input.username || input.name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 15) || `guru${nextIdx}`;
       return {
         ...input,
-        id: `T-${String(nextIdx).padStart(2, '0')}`,
+        id: `T-${Date.now()}-${idx}`,
         username: cleanUsername,
         password: input.password || 'guru123',
         avatarColor: input.avatarColor || colors[nextIdx % colors.length],
