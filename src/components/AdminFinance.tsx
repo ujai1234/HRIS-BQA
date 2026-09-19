@@ -36,7 +36,7 @@ export const AdminFinance: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bqa-card p-6">
         <div>
-          <h2 className="text-xl font-bold text-[#051F20]">Laporan Keuangan (Read-Only)</h2>
+          <h2 className="text-xl font-bold text-[#051F20]">Laporan Keuangan</h2>
           <p className="text-sm text-[#8EB69B] mt-1 font-medium">Pencatatan kas dan verifikasi pembayaran SPP kini dikelola melalui Aplikasi Keuangan BQA.</p>
         </div>
         <a 

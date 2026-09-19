@@ -4,7 +4,7 @@ import cors from 'cors';
 
 import { db, sqliteDb } from './src/db';
 import * as schema from './src/db/schema';
-import { eq, and, or, inArray } from 'drizzle-orm';
+import { eq, and, or, inArray, desc } from 'drizzle-orm';
 import { calculateLatePenalty } from './src/utils/formatters';
 import {
   INITIAL_TEACHERS, 
@@ -121,6 +121,177 @@ async function startServer() {
       res.status(401).json({ error: 'Gagal memverifikasi sesi.' });
     }
   };
+
+  // ==========================================
+  // KEUANGAN API (Requires Finance Auth)
+  // ==========================================
+
+  const financeRouter = express.Router();
+  financeRouter.use(requireFinanceAuth);
+
+  financeRouter.get('/summary', async (req, res) => {
+    try {
+      const allTxs = await db.select({
+        amount: schema.financeTransactions.amount,
+        type: schema.financeCategories.type
+      })
+      .from(schema.financeTransactions)
+      .leftJoin(schema.financeCategories, eq(schema.financeTransactions.categoryId, schema.financeCategories.id));
+
+      let income = 0;
+      let expense = 0;
+      for (const tx of allTxs) {
+        if (tx.type === 'INCOME') income += tx.amount;
+        else if (tx.type === 'EXPENSE') expense += tx.amount;
+      }
+      res.json({ income, expense, balance: income - expense });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  financeRouter.get('/transactions', async (req, res) => {
+    try {
+      const allTxs = await db.select({
+        id: schema.financeTransactions.id,
+        date: schema.financeTransactions.date,
+        description: schema.financeTransactions.description,
+        amount: schema.financeTransactions.amount,
+        category_name: schema.financeCategories.name,
+        category_type: schema.financeCategories.type
+      })
+      .from(schema.financeTransactions)
+      .leftJoin(schema.financeCategories, eq(schema.financeTransactions.categoryId, schema.financeCategories.id))
+      .orderBy(desc(schema.financeTransactions.date));
+
+      res.json(allTxs);
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  financeRouter.post('/transactions', async (req, res) => {
+    try {
+      const data = req.body;
+      const inserted = await db.insert(schema.financeTransactions).values({
+        categoryId: data.categoryId || 1, // assume 1 is general
+        amount: data.amount,
+        date: data.date,
+        description: data.description,
+      }).returning();
+      res.json(inserted[0]);
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  financeRouter.get('/spp/pending', async (req, res) => {
+    try {
+      const pending = await db.select({
+        id: schema.payments.id,
+        studentName: schema.students.name,
+        billingMonth: schema.payments.billingMonth,
+        amount: schema.payments.amount,
+        receiptUrl: schema.payments.receiptUrl,
+        paymentDate: schema.payments.paymentDate
+      })
+      .from(schema.payments)
+      .leftJoin(schema.students, eq(schema.payments.studentId, schema.students.id))
+      .where(eq(schema.payments.status, 'MENUNGGU_VERIFIKASI'));
+      res.json(pending);
+    } catch (e) {
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  financeRouter.post('/spp/verify/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const payment = await db.query.payments.findFirst({ where: eq(schema.payments.id, id) });
+      if (!payment) return res.status(404).json({ error: 'Not found' });
+      
+      await db.update(schema.payments).set({ status: 'LUNAS' }).where(eq(schema.payments.id, id));
+      
+      // Auto insert transaction
+      let cat = await db.query.financeCategories.findFirst({ where: eq(schema.financeCategories.name, 'Pemasukan SPP') });
+      if (!cat) {
+        const ins = await db.insert(schema.financeCategories).values({ name: 'Pemasukan SPP', type: 'INCOME' }).returning();
+        cat = ins[0];
+      }
+      
+      await db.insert(schema.financeTransactions).values({
+        categoryId: cat.id,
+        amount: payment.amount,
+        date: new Date().toISOString().split('T')[0],
+        description: `Pembayaran SPP ${payment.billingMonth} (${payment.studentId})`,
+        referenceType: 'SANTRI',
+        referenceId: payment.id
+      });
+
+      res.json({ success: true });
+    } catch (e) {
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  financeRouter.get('/payroll-preview', async (req, res) => {
+    res.json([]);
+  });
+
+  app.use('/api/finance', financeRouter);
+
+  // ==========================================
+  // PORTAL SANTRI PAYMENTS API 
+  // ==========================================
+  const portalPaymentsRouter = express.Router();
+  portalPaymentsRouter.use(requireParentAuth);
+
+  portalPaymentsRouter.get('/', async (req, res) => {
+    try {
+      const parent = (req as any).authenticatedParent;
+      const studentLinks = await db.query.studentParents.findMany({
+        where: eq(schema.studentParents.parentId, parent.id)
+      });
+      const studentIds = studentLinks.map(s => s.studentId);
+      if (studentIds.length === 0) return res.json({ data: [] });
+      
+      const p = await db.select({
+        id: schema.payments.id,
+        studentId: schema.payments.studentId,
+        studentName: schema.students.name,
+        billingMonth: schema.payments.billingMonth,
+        amount: schema.payments.amount,
+        status: schema.payments.status,
+      })
+      .from(schema.payments)
+      .leftJoin(schema.students, eq(schema.payments.studentId, schema.students.id))
+      .where(inArray(schema.payments.studentId, studentIds));
+
+      res.json({ data: p });
+    } catch(e) {
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  portalPaymentsRouter.post('/students/:studentId/payments/:payId/upload', async (req, res) => {
+    try {
+      const { studentId, payId } = req.params;
+      const { receiptUrl } = req.body;
+      await db.update(schema.payments).set({ 
+        status: 'MENUNGGU_VERIFIKASI', 
+        receiptUrl,
+        paymentDate: new Date().toISOString().split('T')[0]
+      }).where(eq(schema.payments.id, payId));
+      res.json({ success: true });
+    } catch (e) {
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  app.use('/api/payments', portalPaymentsRouter);
 
   // EMERGENCY RECOVERY ENDPOINT
 
@@ -655,6 +826,11 @@ async function startServer() {
     try {
       if (req.body.password && req.body.password.length < 8) {
         return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
+      }
+      
+      // FIX: Map empty username to null to prevent UNIQUE constraint failure on sqlite empty string
+      if (typeof req.body.username === 'string' && req.body.username.trim() === '') {
+        req.body.username = null;
       }
 
       const result = await db.insert(schema.teachers).values(req.body).returning();
