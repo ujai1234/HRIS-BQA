@@ -87,6 +87,41 @@ async function startServer() {
     }
   };
 
+  // ====== MIDDLEWARE: KEUANGAN AUTH ======
+  const requireFinanceAuth = async (req: any, res: any, next: any) => {
+    try {
+      const headersObj = new Headers();
+      for (const [key, value] of Object.entries(req.headers)) {
+        if (value !== undefined) {
+          headersObj.set(key, Array.isArray(value) ? value.join(', ') : (value as string));
+        }
+      }
+      const session = await auth.api.getSession({ headers: headersObj });
+      if (!session?.user) {
+        res.status(401).json({ error: 'Sesi tidak valid. Silakan login.' });
+        return;
+      }
+      const userRecord = await db.query.user.findFirst({
+        where: eq(schema.user.id, session.user.id)
+      });
+      if (!userRecord || !userRecord.teacherId) {
+        res.status(403).json({ error: 'Akses ditolak. Anda bukan staff/pegawai terdaftar.' });
+        return;
+      }
+      const teacher = await db.query.teachers.findFirst({
+        where: eq(schema.teachers.id, userRecord.teacherId)
+      });
+      if (!teacher || (teacher.role !== 'ADMIN' && teacher.role !== 'KEUANGAN')) {
+         res.status(403).json({ error: 'Akses ditolak. Hanya bagian keuangan dan admin yang diizinkan.' });
+         return;
+      }
+      next();
+    } catch (error) {
+      console.error('[requireFinanceAuth] error:', error);
+      res.status(401).json({ error: 'Gagal memverifikasi sesi.' });
+    }
+  };
+
   // EMERGENCY RECOVERY ENDPOINT
 
   app.get('/api/admin/fix-admin', async (req, res) => {
@@ -3346,7 +3381,7 @@ async function startServer() {
   // FINANCE (KEUANGAN) API ROUTES
   // ========================================================
 
-  app.get('/api/finance/summary', async (req, res) => {
+  app.get('/api/finance/summary', requireFinanceAuth, async (req, res) => {
     try {
       const rows = sqliteDb.prepare(`
         SELECT c.type, SUM(t.amount) as total 
@@ -3366,7 +3401,7 @@ async function startServer() {
     }
   });
 
-  app.get('/api/finance/categories', async (req, res) => {
+  app.get('/api/finance/categories', requireFinanceAuth, async (req, res) => {
     try {
       const cats = await db.query.financeCategories.findMany();
       res.json(cats);
@@ -3375,7 +3410,7 @@ async function startServer() {
     }
   });
 
-  app.post('/api/finance/categories', async (req, res) => {
+  app.post('/api/finance/categories', requireFinanceAuth, async (req, res) => {
     try {
       const { name, type } = req.body;
       const newCat = await db.insert(schema.financeCategories).values({ name, type }).returning();
@@ -3385,7 +3420,7 @@ async function startServer() {
     }
   });
 
-  app.get('/api/finance/transactions', async (req, res) => {
+  app.get('/api/finance/transactions', requireFinanceAuth, async (req, res) => {
     try {
       const txs = sqliteDb.prepare(`
         SELECT t.*, c.name as category_name, c.type as category_type
@@ -3399,7 +3434,7 @@ async function startServer() {
     }
   });
 
-  app.post('/api/finance/transactions', async (req, res) => {
+  app.post('/api/finance/transactions', requireFinanceAuth, async (req, res) => {
     try {
       const { categoryId, amount, date, description, referenceType, referenceId } = req.body;
       const newTx = await db.insert(schema.financeTransactions).values({
@@ -3411,7 +3446,7 @@ async function startServer() {
     }
   });
 
-  app.get('/api/finance/spp/pending', async (req, res) => {
+  app.get('/api/finance/spp/pending', requireFinanceAuth, async (req, res) => {
     try {
       const pending = await db.query.payments.findMany({
         where: eq(schema.payments.status, 'MENUNGGU_VERIFIKASI')
@@ -3422,7 +3457,7 @@ async function startServer() {
     }
   });
 
-  app.post('/api/finance/spp/verify/:id', async (req, res) => {
+  app.post('/api/finance/spp/verify/:id', requireFinanceAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const updated = await db.update(schema.payments)
@@ -3435,7 +3470,7 @@ async function startServer() {
     }
   });
 
-  app.get('/api/finance/payroll-preview', async (req, res) => {
+  app.get('/api/finance/payroll-preview', requireFinanceAuth, async (req, res) => {
     try {
       const teachers = await db.query.teachers.findMany({
         where: eq(schema.teachers.isActive, true as any)

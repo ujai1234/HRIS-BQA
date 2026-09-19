@@ -40,7 +40,7 @@ export const AdminFinance: React.FC = () => {
           <p className="text-sm text-[#8EB69B] mt-1 font-medium">Pencatatan kas dan verifikasi pembayaran SPP kini dikelola melalui Aplikasi Keuangan BQA.</p>
         </div>
         <a 
-          href="http://localhost:5500/Keuangan-BQA/index.html" 
+          href={window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5500/Keuangan-BQA/index.html' : 'https://keuangan.baitulquranalikhwan.cloud/'} 
           target="_blank" 
           rel="noopener noreferrer"
           className="flex items-center gap-2 bg-[#163832] hover:bg-[#0B2B26] text-[#DAF1DE] px-5 py-2.5 rounded-[12px] text-sm font-bold transition-colors"
