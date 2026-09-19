@@ -429,13 +429,20 @@ export const MasterTeachers: React.FC = () => {
               <div className="space-y-1">
                 <label className="text-slate-600 dark:text-emerald-400/70 font-medium block">Hak Akses</label>
                 <select
-                  value={formData.role === 'STAFF' ? (formData.position?.toLowerCase().includes('dapur') ? 'STAFF_DAPUR' : (formData.position?.toLowerCase().includes('sarpras') || formData.position?.toLowerCase().includes('inventaris')) ? 'STAFF_SARPRAS' : 'STAFF') : formData.role}
+                  value={
+                    formData.role === 'STAFF' 
+                      ? (formData.position?.toLowerCase().includes('dapur') ? 'STAFF_DAPUR' : (formData.position?.toLowerCase().includes('sarpras') || formData.position?.toLowerCase().includes('inventaris')) ? 'STAFF_SARPRAS' : 'STAFF') 
+                      : formData.role === 'ADMIN' && formData.position?.toLowerCase().includes('keuangan') ? 'ADMIN_KEUANGAN' 
+                      : formData.role
+                  }
                   onChange={(e) => {
                     const val = e.target.value;
                     if (val === 'STAFF_DAPUR') {
-                      setFormData({ ...formData, role: 'STAFF', position: 'Staff Dapur' });
+                      setFormData({ ...formData, role: 'STAFF', position: 'Staff Dapur' as any });
                     } else if (val === 'STAFF_SARPRAS') {
-                      setFormData({ ...formData, role: 'STAFF', position: 'Staff Sarpras' });
+                      setFormData({ ...formData, role: 'STAFF', position: 'Staff Sarpras' as any });
+                    } else if (val === 'ADMIN_KEUANGAN') {
+                      setFormData({ ...formData, role: 'ADMIN', position: 'Admin Keuangan' as any });
                     } else {
                       setFormData({ ...formData, role: val as any });
                     }
@@ -444,6 +451,7 @@ export const MasterTeachers: React.FC = () => {
                 >
                   <option value="GURU">Guru Pengajar</option>
                   <option value="ADMIN">Administrator TU</option>
+                  <option value="ADMIN_KEUANGAN">Admin / Staff Keuangan</option>
                   <option value="KEPALA_SMP">Kepala Sekolah SMP</option>
                   <option value="KEPALA_MA">Kepala Madrasah Aliyah</option>
                   <option value="KEPALA_PESANTREN">Kepala Pesantren</option>

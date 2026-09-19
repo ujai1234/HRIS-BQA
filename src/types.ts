@@ -37,6 +37,7 @@ export type PositionCategory =
   | 'Wakasek Pesantren'
   | 'Sekretaris Pesantren'
   | 'Operator Sekolah'
+  | 'Admin Keuangan'
   | 'Guru (Ust Muqim)'
   | 'Guru (Ustadzah Muqim)'
   | 'Guru Mukim'
@@ -46,6 +47,7 @@ export type PositionCategory =
   | 'Guru Tahfidz'
   | 'Staff Dapur'
   | 'Staff Inventaris'
+  | 'Staff Sarpras'
   | 'Super Administrator';
 
 export type UnitType = 'SMP' | 'MA' | 'PESANTREN' | 'UMUM';
