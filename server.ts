@@ -818,6 +818,7 @@ async function startServer() {
       });
       res.json(teachers);
     } catch (error) {
+      console.error('Failed to fetch teachers:', error);
       res.status(500).json({ error: 'Failed to fetch teachers' });
     }
   });
@@ -859,6 +860,7 @@ async function startServer() {
 
       res.json(result[0]);
     } catch (error) {
+      console.error('Failed to create teacher:', error);
       res.status(500).json({ error: 'Failed to create teacher' });
     }
   });
