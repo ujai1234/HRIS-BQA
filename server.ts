@@ -34,6 +34,7 @@ async function startServer() {
     process.env.APP_URL,
     'https://hris.baitulquranalikhwan.cloud',
     'https://portal.baitulquranalikhwan.cloud',
+    'https://keuangan.baitulquranalikhwan.cloud',
   ].filter(Boolean) as string[];
 
   app.use(cors({
