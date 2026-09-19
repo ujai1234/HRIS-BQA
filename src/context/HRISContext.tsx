@@ -846,9 +846,16 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newTeacher)
-    }).then(() => {
+    }).then(async (res) => {
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        toast.error(errData.error || 'Gagal menambahkan guru');
+        return;
+      }
       fetchAllData();
       toast.success(`Data guru ${newTeacher.name} berhasil ditambahkan`);
+    }).catch((err) => {
+      toast.error('Terjadi kesalahan jaringan');
     });
 
     logActivity(
