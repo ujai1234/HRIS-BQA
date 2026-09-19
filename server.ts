@@ -3355,7 +3355,7 @@ async function startServer() {
         return res.json({ data: inserted[0] });
       }
 
-      parentIdToUpdate = existing.id;
+      let parentIdToUpdate = existing.id;
 
 
       if (req.params.id !== parentIdToUpdate && req.params.id !== authenticatedUserId) {

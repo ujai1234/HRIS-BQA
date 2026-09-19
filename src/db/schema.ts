@@ -215,6 +215,7 @@ export const parentFeedbacks = sqliteTable('parent_feedbacks', {
   category: text('category').notNull().default('SARAN'), // SARAN, PERTANYAAN, APRESIASI, KELUHAN
   message: text('message').notNull(),
   status: text('status').notNull().default('BARU'), // BARU, DIBACA, DITANGGAPI
+  adminResponse: text('admin_response'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
 

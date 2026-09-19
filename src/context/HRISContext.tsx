@@ -344,7 +344,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Check if we need to force sign out from better-auth due to overnight expiry
   useEffect(() => {
     if (localStorage.getItem('hris_pbq_force_signout') === 'true') {
-      authClient.signOut().finally(() => {
+      authClient.signOut({}).finally(() => {
         localStorage.removeItem('hris_pbq_force_signout');
       });
     }
