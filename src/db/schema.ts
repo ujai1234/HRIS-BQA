@@ -325,3 +325,24 @@ export const tahfidzTasmi = sqliteTable('tahfidz_tasmi', {
   examinerName: text('examiner_name'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
+
+// ==========================================
+// FINANCE (KEUANGAN) TABLES
+// ==========================================
+
+export const financeCategories = sqliteTable('finance_categories', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  type: text('type').notNull(), // 'INCOME' or 'EXPENSE'
+});
+
+export const financeTransactions = sqliteTable('finance_transactions', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  categoryId: integer('category_id').references(() => financeCategories.id),
+  amount: integer('amount').notNull(),
+  date: text('date').notNull(),
+  description: text('description'),
+  referenceType: text('reference_type'), // 'SANTRI', 'EMPLOYEE', 'OPERATIONAL'
+  referenceId: text('reference_id'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});

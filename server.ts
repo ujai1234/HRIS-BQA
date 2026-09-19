@@ -29,6 +29,8 @@ async function startServer() {
     'http://localhost:5173',
     'http://localhost:5174',
     'http://localhost:5175',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500',
     process.env.APP_URL,
     'https://hris.baitulquranalikhwan.cloud',
     'https://portal.baitulquranalikhwan.cloud',
@@ -3336,6 +3338,117 @@ async function startServer() {
       res.json({ data: result[0] });
     } catch (error) {
       res.status(500).json({ error: 'Failed to add student note' });
+    }
+  });
+
+  // ========================================================
+  // FINANCE (KEUANGAN) API ROUTES
+  // ========================================================
+
+  app.get('/api/finance/summary', async (req, res) => {
+    try {
+      const rows = sqliteDb.prepare(`
+        SELECT c.type, SUM(t.amount) as total 
+        FROM finance_transactions t
+        JOIN finance_categories c ON t.category_id = c.id
+        GROUP BY c.type
+      `).all() as { type: string, total: number }[];
+      
+      let income = 0, expense = 0;
+      for (const r of rows) {
+        if (r.type === 'INCOME') income += r.total;
+        if (r.type === 'EXPENSE') expense += r.total;
+      }
+      res.json({ income, expense, balance: income - expense });
+    } catch (e) {
+      res.status(500).json({ error: 'Failed to fetch summary' });
+    }
+  });
+
+  app.get('/api/finance/categories', async (req, res) => {
+    try {
+      const cats = await db.query.financeCategories.findMany();
+      res.json(cats);
+    } catch (e) {
+      res.status(500).json({ error: 'Failed to fetch categories' });
+    }
+  });
+
+  app.post('/api/finance/categories', async (req, res) => {
+    try {
+      const { name, type } = req.body;
+      const newCat = await db.insert(schema.financeCategories).values({ name, type }).returning();
+      res.json({ success: true, data: newCat[0] });
+    } catch (e) {
+      res.status(500).json({ error: 'Failed to add category' });
+    }
+  });
+
+  app.get('/api/finance/transactions', async (req, res) => {
+    try {
+      const txs = sqliteDb.prepare(`
+        SELECT t.*, c.name as category_name, c.type as category_type
+        FROM finance_transactions t
+        LEFT JOIN finance_categories c ON t.category_id = c.id
+        ORDER BY t.created_at DESC
+      `).all();
+      res.json(txs);
+    } catch (e) {
+      res.status(500).json({ error: 'Failed to fetch transactions' });
+    }
+  });
+
+  app.post('/api/finance/transactions', async (req, res) => {
+    try {
+      const { categoryId, amount, date, description, referenceType, referenceId } = req.body;
+      const newTx = await db.insert(schema.financeTransactions).values({
+        categoryId, amount, date, description, referenceType, referenceId
+      }).returning();
+      res.json({ success: true, data: newTx[0] });
+    } catch (e) {
+      res.status(500).json({ error: 'Failed to create transaction' });
+    }
+  });
+
+  app.get('/api/finance/spp/pending', async (req, res) => {
+    try {
+      const pending = await db.query.payments.findMany({
+        where: eq(schema.payments.status, 'MENUNGGU_VERIFIKASI')
+      });
+      res.json(pending);
+    } catch (e) {
+      res.status(500).json({ error: 'Failed to fetch pending spp' });
+    }
+  });
+
+  app.post('/api/finance/spp/verify/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updated = await db.update(schema.payments)
+        .set({ status: 'LUNAS' })
+        .where(eq(schema.payments.id, id))
+        .returning();
+      res.json({ success: true, data: updated[0] });
+    } catch (e) {
+      res.status(500).json({ error: 'Failed to verify spp' });
+    }
+  });
+
+  app.get('/api/finance/payroll-preview', async (req, res) => {
+    try {
+      const teachers = await db.query.teachers.findMany({
+        where: eq(schema.teachers.isActive, true as any)
+      });
+      // Just returning base structure for Keuangan App to process
+      res.json(teachers.map(t => ({
+        id: t.id,
+        name: t.name,
+        position: t.position,
+        baseSalary: t.baseSalary,
+        hourlyRate: t.hourlyRate
+      })));
+    } catch (e) {
+      res.status(500).json({ error: 'Failed to fetch payroll preview' });
     }
   });
 
