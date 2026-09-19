@@ -57,8 +57,11 @@ export const auth = betterAuth({
         "http://localhost:5173",
         "http://localhost:5174",
         "http://localhost:5175",
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
         sanitizeUrl(process.env.APP_URL) || productionUrl,
         productionUrl,
-        "https://portal.baitulquranalikhwan.cloud"
+        "https://portal.baitulquranalikhwan.cloud",
+        "https://keuangan.baitulquranalikhwan.cloud"
     ].filter((v, i, arr): v is string => typeof v === 'string' && v.length > 0 && arr.indexOf(v) === i)
 });
