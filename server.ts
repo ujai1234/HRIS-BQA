@@ -317,21 +317,6 @@ async function startServer() {
     }
   });
 
-  portalPaymentsRouter.post('/students/:studentId/payments/:payId/upload', async (req, res) => {
-    try {
-      const { studentId, payId } = req.params;
-      const { receiptUrl } = req.body;
-      await db.update(schema.payments).set({ 
-        status: 'MENUNGGU_VERIFIKASI', 
-        receiptUrl,
-        paymentDate: new Date().toISOString().split('T')[0]
-      }).where(eq(schema.payments.id, payId));
-      res.json({ success: true });
-    } catch (e) {
-      res.status(500).json({ error: 'Server error' });
-    }
-  });
-
   app.use('/api/payments', portalPaymentsRouter);
 
   // EMERGENCY RECOVERY ENDPOINT

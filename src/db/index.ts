@@ -167,7 +167,7 @@ sqliteDb.exec(`
   );
 
   CREATE TABLE IF NOT EXISTS finance_transactions (
-    id TEXT PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     category_id INTEGER NOT NULL REFERENCES finance_categories(id),
     amount INTEGER NOT NULL,
     date TEXT NOT NULL,
