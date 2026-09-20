@@ -3121,40 +3121,6 @@ async function startServer() {
     }
   });
 
-      res.json(allPayments);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch payments' });
-    }
-  });
-
-
-      if (activeStudents.length === 0) {
-        return res.status(404).json({ error: 'No active students found' });
-      }
-
-      const paymentsToInsert = activeStudents.map(student => ({
-        id: `PAY-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-        studentId: student.id,
-        billingMonth,
-        amount,
-        status: 'BELUM_LUNAS',
-        recordedBy: recordedBy || 'System'
-      }));
-
-      const result = await db.insert(schema.payments).values(paymentsToInsert).returning();
-      res.json({ success: true, generatedCount: result.length });
-    } catch (error) {
-      console.error('Failed to bulk generate payments:', error);
-      res.status(500).json({ error: 'Failed to generate payments' });
-    }
-  });
-
-      res.json(studentPayments);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch student payments' });
-    }
-  });
-
   // --- CURRICULUMS & ASSIGNMENTS (ACADEMICS) ---
   app.get('/api/schedules/:id/curriculums', async (req, res) => {
     try {
