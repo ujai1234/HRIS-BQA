@@ -3894,6 +3894,23 @@ async function startServer() {
     });
   }
 
+    const keuanganEmail = 'keuangan@bqa.local';
+    const keuanganExists = await db.select().from(schema.user).where(eq(schema.user.email, keuanganEmail));
+    if (keuanganExists.length === 0) {
+      console.log('Creating admin keuangan user...');
+      const authReq = new Request('http://localhost:3000/api/auth/sign-up/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Admin Keuangan',
+          email: keuanganEmail,
+          password: 'PasswordKuat!2026'
+        })
+      });
+      await auth.handler(authReq);
+      console.log('Admin Keuangan created.');
+    }
+
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://0.0.0.0:${PORT}`);
   });
