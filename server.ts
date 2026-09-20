@@ -120,6 +120,7 @@ async function startServer() {
          res.status(403).json({ error: 'Akses ditolak. Admin hanya memiliki hak akses lihat (view-only) pada modul keuangan.' });
          return;
       }
+      (req as any).teacherRole = teacher.role;
       next();
     } catch (error) {
       console.error('[requireFinanceAuth] error:', error);
@@ -133,6 +134,10 @@ async function startServer() {
 
   const financeRouter = express.Router();
   financeRouter.use(requireFinanceAuth);
+
+  financeRouter.get('/me', (req, res) => {
+    res.json({ role: (req as any).teacherRole });
+  });
 
   financeRouter.get('/summary', async (req, res) => {
     try {

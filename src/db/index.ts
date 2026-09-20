@@ -160,6 +160,23 @@ sqliteDb.exec(`
     created_at INTEGER NOT NULL
   );
 
+    CREATE TABLE IF NOT EXISTS finance_categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS finance_transactions (
+    id TEXT PRIMARY KEY,
+    category_id INTEGER NOT NULL REFERENCES finance_categories(id),
+    amount INTEGER NOT NULL,
+    date TEXT NOT NULL,
+    description TEXT,
+    reference_type TEXT,
+    reference_id TEXT,
+    created_at INTEGER NOT NULL
+  );
+
   -- Safe migrations for existing tables
   BEGIN;
   PRAGMA user_version;
