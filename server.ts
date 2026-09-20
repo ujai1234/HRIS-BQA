@@ -115,6 +115,11 @@ async function startServer() {
          res.status(403).json({ error: 'Akses ditolak. Hanya bagian keuangan dan admin yang diizinkan.' });
          return;
       }
+
+      if (req.method !== 'GET' && teacher.role === 'ADMIN') {
+         res.status(403).json({ error: 'Akses ditolak. Admin hanya memiliki hak akses lihat (view-only) pada modul keuangan.' });
+         return;
+      }
       next();
     } catch (error) {
       console.error('[requireFinanceAuth] error:', error);
@@ -237,6 +242,37 @@ async function startServer() {
     }
   });
 
+  financeRouter.post('/spp/bulk-generate', async (req, res) => {
+    try {
+      const { billingMonth, amount, recordedBy } = req.body;
+      if (!billingMonth || !amount) {
+        return res.status(400).json({ error: 'Billing month and amount are required' });
+      }
+
+      const activeStudents = await db.query.students.findMany({
+        where: eq(schema.students.status, 'AKTIF')
+      });
+
+      if (activeStudents.length === 0) {
+        return res.status(404).json({ error: 'No active students found' });
+      }
+
+      const paymentsToInsert = activeStudents.map(student => ({
+        id: PAY- + Date.now() + - + Math.floor(Math.random() * 1000),
+        studentId: student.id,
+        billingMonth,
+        amount,
+        status: 'BELUM_LUNAS',
+        recordedBy: recordedBy || 'System'
+      }));
+
+      const result = await db.insert(schema.payments).values(paymentsToInsert).returning();
+      res.json({ success: true, generatedCount: result.length });
+    } catch (error) {
+      console.error('Failed to bulk generate payments:', error);
+      res.status(500).json({ error: 'Failed to generate payments' });
+    }
+  });
   financeRouter.get('/payroll-preview', async (req, res) => {
     res.json([]);
   });
@@ -3085,29 +3121,12 @@ async function startServer() {
     }
   });
 
-  // --- PAYMENTS ---
-  app.get('/api/payments', async (req, res) => {
-    try {
-      const allPayments = await db.query.payments.findMany({
-        with: { student: true } // Assuming relation is set, otherwise frontend joins
-      });
       res.json(allPayments);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch payments' });
     }
   });
 
-  app.post('/api/payments/bulk-generate', async (req, res) => {
-    try {
-      const { billingMonth, amount, recordedBy } = req.body;
-      if (!billingMonth || !amount) {
-        return res.status(400).json({ error: 'Billing month and amount are required' });
-      }
-
-      // Find all active students
-      const activeStudents = await db.query.students.findMany({
-        where: eq(schema.students.status, 'AKTIF')
-      });
 
       if (activeStudents.length === 0) {
         return res.status(404).json({ error: 'No active students found' });
@@ -3130,13 +3149,6 @@ async function startServer() {
     }
   });
 
-  app.get('/api/students/:id/payments', async (req, res) => {
-    try {
-      const studentId = req.params.id;
-      const studentPayments = await db.query.payments.findMany({
-        where: eq(schema.payments.studentId, studentId),
-        orderBy: (payments, { desc }) => [desc(payments.createdAt)]
-      });
       res.json(studentPayments);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch student payments' });
@@ -3881,40 +3893,6 @@ async function startServer() {
   });
 
   // --- FASE 5 API ENDPOINTS ---
-  app.get('/api/payments', async (req, res) => {
-    try {
-      const allPayments = await db.query.payments.findMany();
-      res.json({ data: allPayments });
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch payments' });
-    }
-  });
-
-  app.put('/api/payments/:id', async (req, res) => {
-    try {
-      const { status } = req.body;
-      const result = await db.update(schema.payments)
-        .set({ status })
-        .where(eq(schema.payments.id, req.params.id))
-        .returning();
-      res.json({ data: result[0] });
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to update payment status' });
-    }
-  });
-
-  app.post('/api/students/:studentId/payments/:paymentId/upload', async (req, res) => {
-    try {
-      const { receiptUrl } = req.body;
-      const result = await db.update(schema.payments)
-        .set({ receiptUrl, status: 'MENUNGGU VERIFIKASI' })
-        .where(eq(schema.payments.id, req.params.paymentId))
-        .returning();
-      res.json({ data: result[0] });
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to upload receipt' });
-    }
-  });
 
   app.get('/api/students/:studentId/notes', async (req, res) => {
     try {
