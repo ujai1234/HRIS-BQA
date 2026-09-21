@@ -263,7 +263,7 @@ async function startServer() {
       }
 
       const paymentsToInsert = activeStudents.map(student => ({
-        id: PAY- + Date.now() + - + Math.floor(Math.random() * 1000),
+        id: `PAY-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
         studentId: student.id,
         billingMonth,
         amount,
@@ -272,7 +272,7 @@ async function startServer() {
       }));
 
       const result = await db.insert(schema.payments).values(paymentsToInsert).returning();
-      res.json({ success: true, generatedCount: result.length });
+      res.json({ success: true, generatedCount: result.length, count: result.length });
     } catch (error) {
       console.error('Failed to bulk generate payments:', error);
       res.status(500).json({ error: 'Failed to generate payments' });
@@ -3919,6 +3919,21 @@ async function startServer() {
         })
       });
       await auth.handler(authReq);
+      
+      const newKeuangan = await db.query.user.findFirst({ where: eq(schema.user.email, keuanganEmail) });
+      if (newKeuangan) {
+        const tIns = await db.insert(schema.teachers).values({
+          id: 'TCH-KEUANGAN',
+          nip: 'KEU-01',
+          name: 'Admin Keuangan',
+          position: 'Staff Keuangan',
+          unit: 'Manajemen',
+          baseSalary: 0,
+          role: 'KEUANGAN',
+          isActive: true
+        }).returning();
+        await db.update(schema.user).set({ teacherId: tIns[0].id }).where(eq(schema.user.id, newKeuangan.id));
+      }
       console.log('Admin Keuangan created.');
     }
 
