@@ -197,6 +197,41 @@ async function startServer() {
     }
   });
 
+  financeRouter.put('/transactions/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = req.body;
+      const updated = await db.update(schema.financeTransactions)
+        .set({
+          amount: data.amount,
+          date: data.date,
+          description: data.description,
+          categoryId: data.categoryId,
+        })
+        .where(eq(schema.financeTransactions.id, id))
+        .returning();
+      if (updated.length === 0) return res.status(404).json({ error: 'Not found' });
+      res.json(updated[0]);
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  financeRouter.delete('/transactions/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await db.delete(schema.financeTransactions)
+        .where(eq(schema.financeTransactions.id, id))
+        .returning();
+      if (deleted.length === 0) return res.status(404).json({ error: 'Not found' });
+      res.json({ success: true });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
   financeRouter.get('/spp/pending', async (req, res) => {
     try {
       const pending = await db.select({
@@ -242,6 +277,41 @@ async function startServer() {
 
       res.json({ success: true });
     } catch (e) {
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  financeRouter.put('/spp/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = req.body;
+      const updated = await db.update(schema.payments)
+        .set({
+          amount: data.amount,
+          status: data.status,
+          billingMonth: data.billingMonth,
+          paymentDate: data.paymentDate,
+        })
+        .where(eq(schema.payments.id, id))
+        .returning();
+      if (updated.length === 0) return res.status(404).json({ error: 'Not found' });
+      res.json(updated[0]);
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  financeRouter.delete('/spp/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await db.delete(schema.payments)
+        .where(eq(schema.payments.id, id))
+        .returning();
+      if (deleted.length === 0) return res.status(404).json({ error: 'Not found' });
+      res.json({ success: true });
+    } catch (e) {
+      console.error(e);
       res.status(500).json({ error: 'Server error' });
     }
   });
