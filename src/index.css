@@ -392,9 +392,29 @@ html.dark {
     background-color: #092622 !important;
   }
 
+  .bg-slate-50\/50 {
+    background-color: #0B2B26 !important;
+  }
+
+  .bg-\[\#DAF1DE\] {
+    background-color: #092622 !important;
+  }
+
+  .bg-rose-100,
+  .bg-rose-50 {
+    background-color: rgba(220, 38, 38, 0.2) !important;
+  }
+
+  .text-\[\#163832\],
+  .text-\[\#163832\]\/70,
+  .text-\[\#163832\]\/80 {
+    color: #DAF1DE !important;
+  }
+
   /* Dynamic Borders & Dividers */
   .border-slate-200,
   .border-slate-100,
+  .border-slate-100\/50,
   .border-slate-300,
   .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
   .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
@@ -409,7 +429,9 @@ html.dark {
     color: #DAF1DE !important;
   }
 
-  .text-\[\#163832\] {
+  .text-\[\#163832\],
+  .text-\[\#163832\]\/70,
+  .text-\[\#163832\]\/80 {
     color: #8EB69B !important;
   }
 
@@ -420,6 +442,12 @@ html.dark {
 
   .text-slate-400 {
     color: rgba(142, 182, 155, 0.7) !important;
+  }
+
+  .text-rose-900,
+  .text-rose-700,
+  .text-rose-600 {
+    color: #fca5a5 !important;
   }
 
   /* Form Elements (Inputs, Selects, Textareas) */
