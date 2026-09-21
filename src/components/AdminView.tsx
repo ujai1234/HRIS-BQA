@@ -11,7 +11,7 @@ import { TahfidzPayrollView } from './TahfidzPayrollView';
 import { AdminStaffReportView } from './AdminStaffReportView';
 import { MasterStudents } from './MasterStudents';
 import { MasterParents } from './MasterParents';
-import { BukuPenghubungWidget } from './BukuPenghubungWidget';
+import { TeacherNotes } from './TeacherNotes';
 
 export type AdminTabType = 'dashboard' | 'guru_gaji' | 'master_jadwal' | 'guru_badal' | 'generate_payroll' | 'tahfidz_payroll' | 'laporan_staff' | 'settings_lokasi' | 'master_santri' | 'master_wali_santri' | 'buku_penghubung';
 
@@ -63,7 +63,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ initialTab = 'dashboard' }
           {activeSubTab === 'settings_lokasi' && <AdminSettingsView />}
           {activeSubTab === 'master_santri' && <MasterStudents />}
           {activeSubTab === 'master_wali_santri' && <MasterParents />}
-          {activeSubTab === 'buku_penghubung' && <BukuPenghubungWidget />}
+          {activeSubTab === 'buku_penghubung' && <TeacherNotes />}
         </motion.div>
       </AnimatePresence>
     </div>
