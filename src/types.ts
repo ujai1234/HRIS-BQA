@@ -5,7 +5,8 @@ export type UserRole =
   | 'KEPALA_MA' 
   | 'KEPALA_PESANTREN' 
   | 'SYSTEM'
-  | 'STAFF';
+  | 'STAFF'
+  | 'KEUANGAN';
 
 export const isKepsekRole = (role?: UserRole): boolean => {
   return role === 'KEPALA_SMP' || role === 'KEPALA_MA' || role === 'KEPALA_PESANTREN';
@@ -37,7 +38,7 @@ export type PositionCategory =
   | 'Wakasek Pesantren'
   | 'Sekretaris Pesantren'
   | 'Operator Sekolah'
-  | 'Admin Keuangan'
+  | 'Bendahara'
   | 'Guru (Ust Muqim)'
   | 'Guru (Ustadzah Muqim)'
   | 'Guru Mukim'

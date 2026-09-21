@@ -72,6 +72,13 @@ export const LoginPage: React.FC = () => {
         }
       }
 
+      if (role === 'KEUANGAN') {
+        authClient.signOut({ fetchOptions: {} }).then(() => {
+          setError(`Akun Anda adalah Staff Keuangan. Silakan login melalui Aplikasi Keuangan khusus Bendahara.`);
+        });
+        return;
+      }
+
       login(role, finalTeacherId);
     }
   }, [session, teachers, login]);
@@ -113,6 +120,13 @@ export const LoginPage: React.FC = () => {
         }
 
         const role = targetTeacher.role || 'GURU';
+        
+        if (role === 'KEUANGAN') {
+          await authClient.signOut({ fetchOptions: {} });
+          setError(`Akun Anda adalah Staff Keuangan. Silakan login melalui Aplikasi Keuangan khusus Bendahara.`);
+          return;
+        }
+
         login(role, teacherId);
       } else {
         setError('Login gagal. Terjadi kesalahan internal.');

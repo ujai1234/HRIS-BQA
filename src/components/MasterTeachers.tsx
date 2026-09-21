@@ -283,13 +283,15 @@ export const MasterTeachers: React.FC = () => {
                         <span className={`inline-block px-2.5 py-1 rounded-[8px] text-[10px] font-bold uppercase tracking-wider ${
                           t.role === 'ADMIN'
                             ? 'bg-blue-50 text-blue-700'
+                            : t.role === 'KEUANGAN'
+                            ? 'bg-emerald-100 text-emerald-800'
                             : (t.role === 'KEPALA_PESANTREN' || t.role === 'KEPALA_SMP' || t.role === 'KEPALA_MA')
                             ? 'bg-amber-100 text-amber-700'
                             : t.role === 'STAFF'
                             ? 'bg-slate-100 text-slate-700'
                             : 'text-[#163832] bg-[#DAF1DE]'
                         }`}>
-                          {t.role === 'ADMIN' ? 'Admin' : (t.role === 'KEPALA_PESANTREN' || t.role === 'KEPALA_SMP' || t.role === 'KEPALA_MA') ? 'Kepsek' : t.role === 'STAFF' ? 'Staff' : 'Guru'}
+                          {t.role === 'ADMIN' ? 'Admin' : t.role === 'KEUANGAN' ? 'Bendahara' : (t.role === 'KEPALA_PESANTREN' || t.role === 'KEPALA_SMP' || t.role === 'KEPALA_MA') ? 'Kepsek' : t.role === 'STAFF' ? 'Staff' : 'Guru'}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-center">
@@ -432,7 +434,7 @@ export const MasterTeachers: React.FC = () => {
                   value={
                     formData.role === 'STAFF' 
                       ? (formData.position?.toLowerCase().includes('dapur') ? 'STAFF_DAPUR' : (formData.position?.toLowerCase().includes('sarpras') || formData.position?.toLowerCase().includes('inventaris')) ? 'STAFF_SARPRAS' : 'STAFF') 
-                      : formData.role === 'ADMIN' && formData.position?.toLowerCase().includes('keuangan') ? 'ADMIN_KEUANGAN' 
+                      : formData.role === 'KEUANGAN' ? 'KEUANGAN' 
                       : formData.role
                   }
                   onChange={(e) => {
@@ -441,8 +443,8 @@ export const MasterTeachers: React.FC = () => {
                       setFormData({ ...formData, role: 'STAFF', position: 'Staff Dapur' as any });
                     } else if (val === 'STAFF_SARPRAS') {
                       setFormData({ ...formData, role: 'STAFF', position: 'Staff Sarpras' as any });
-                    } else if (val === 'ADMIN_KEUANGAN') {
-                      setFormData({ ...formData, role: 'ADMIN', position: 'Admin Keuangan' as any });
+                    } else if (val === 'KEUANGAN') {
+                      setFormData({ ...formData, role: 'KEUANGAN', position: 'Bendahara' as any });
                     } else {
                       setFormData({ ...formData, role: val as any });
                     }
@@ -451,7 +453,7 @@ export const MasterTeachers: React.FC = () => {
                 >
                   <option value="GURU">Guru Pengajar</option>
                   <option value="ADMIN">Administrator TU</option>
-                  <option value="ADMIN_KEUANGAN">Admin / Staff Keuangan</option>
+                  <option value="KEUANGAN">Bendahara</option>
                   <option value="KEPALA_SMP">Kepala Sekolah SMP</option>
                   <option value="KEPALA_MA">Kepala Madrasah Aliyah</option>
                   <option value="KEPALA_PESANTREN">Kepala Pesantren</option>

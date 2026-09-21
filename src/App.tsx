@@ -110,9 +110,6 @@ const MainContent: React.FC = () => {
       if (currentPath === '/dashboard/admin/wali') {
         return <AdminView initialTab="master_wali_santri" key="admin-wali" />;
       }
-      if (currentPath === '/dashboard/admin/keuangan') {
-        return <AdminView initialTab="verifikasi_keuangan" key="admin-keuangan" />;
-      }
       if (currentPath === '/dashboard/admin/catatan') {
         return <AdminView initialTab="buku_penghubung" key="admin-catatan" />;
       }

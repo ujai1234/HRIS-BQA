@@ -116,10 +116,7 @@ async function startServer() {
          return;
       }
 
-      if (req.method !== 'GET' && teacher.role === 'ADMIN') {
-         res.status(403).json({ error: 'Akses ditolak. Admin hanya memiliki hak akses lihat (view-only) pada modul keuangan.' });
-         return;
-      }
+      // Allow both ADMIN and KEUANGAN full access
       (req as any).teacherRole = teacher.role;
       next();
     } catch (error) {

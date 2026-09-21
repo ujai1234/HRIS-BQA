@@ -226,7 +226,6 @@ export const Header: React.FC<HeaderProps> = ({
           title: 'FINANSIAL & AUDIT',
           items: [
             { path: '/dashboard/admin/kebutuhan', label: 'Monitoring Kebutuhan', icon: ClipboardList },
-            { path: '/dashboard/admin/keuangan', label: 'Verifikasi Keuangan', icon: DollarSign },
             { path: '/dashboard/admin/payroll', label: 'Generate Payroll', icon: FileCheck },
             { path: '/dashboard/admin/tahfidz-payroll', label: 'Payroll Tahfidz', icon: BookOpen },
             { path: '/dashboard/admin/laporan-staff', label: 'Laporan Staff & Dapur', icon: Receipt },
