@@ -3597,7 +3597,18 @@ async function startServer() {
       const pending = await db.query.payments.findMany({
         where: eq(schema.payments.status, 'MENUNGGU_VERIFIKASI')
       });
-      res.json(pending);
+      // Fetch student details
+      const result = [];
+      for (const p of pending) {
+        const student = await db.query.students.findFirst({
+          where: eq(schema.students.id, p.studentId)
+        });
+        result.push({
+          ...p,
+          studentName: student ? student.name : 'Unknown'
+        });
+      }
+      res.json(result);
     } catch (e) {
       res.status(500).json({ error: 'Failed to fetch pending spp' });
     }
