@@ -182,8 +182,21 @@ async function startServer() {
   financeRouter.post('/transactions', async (req, res) => {
     try {
       const data = req.body;
+      let categoryId = data.categoryId;
+
+      if (!categoryId && data.categoryName && data.type) {
+        let cat = await db.query.financeCategories.findFirst({
+          where: and(eq(schema.financeCategories.name, data.categoryName), eq(schema.financeCategories.type, data.type))
+        });
+        if (!cat) {
+          const ins = await db.insert(schema.financeCategories).values({ name: data.categoryName, type: data.type }).returning();
+          cat = ins[0];
+        }
+        categoryId = cat.id;
+      }
+
       const inserted = await db.insert(schema.financeTransactions).values({
-        categoryId: data.categoryId || 1, // assume 1 is general if missing
+        categoryId: categoryId || 1, // assume 1 is general if missing
         amount: data.amount,
         date: data.date,
         description: data.description,
@@ -201,12 +214,25 @@ async function startServer() {
     try {
       const { id } = req.params;
       const data = req.body;
+      
+      let categoryId = data.categoryId;
+      if (!categoryId && data.categoryName && data.type) {
+        let cat = await db.query.financeCategories.findFirst({
+          where: and(eq(schema.financeCategories.name, data.categoryName), eq(schema.financeCategories.type, data.type))
+        });
+        if (!cat) {
+          const ins = await db.insert(schema.financeCategories).values({ name: data.categoryName, type: data.type }).returning();
+          cat = ins[0];
+        }
+        categoryId = cat.id;
+      }
+
       const updated = await db.update(schema.financeTransactions)
         .set({
           amount: data.amount,
           date: data.date,
           description: data.description,
-          categoryId: data.categoryId,
+          categoryId: categoryId,
         })
         .where(eq(schema.financeTransactions.id, id))
         .returning();
