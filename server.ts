@@ -183,12 +183,14 @@ async function startServer() {
     try {
       const data = req.body;
       const inserted = await db.insert(schema.financeTransactions).values({
-        categoryId: data.categoryId || 1, // assume 1 is general
+        categoryId: data.categoryId || 1, // assume 1 is general if missing
         amount: data.amount,
         date: data.date,
         description: data.description,
+        referenceType: data.referenceType || 'MANUAL',
+        referenceId: data.referenceId || ''
       }).returning();
-      res.json(inserted[0]);
+      res.json({ success: true, data: inserted[0] });
     } catch (e) {
       console.error(e);
       res.status(500).json({ error: 'Server error' });
@@ -3560,32 +3562,6 @@ async function startServer() {
       res.json({ success: true, data: newCat[0] });
     } catch (e) {
       res.status(500).json({ error: 'Failed to add category' });
-    }
-  });
-
-  app.get('/api/finance/transactions', requireFinanceAuth, async (req, res) => {
-    try {
-      const txs = sqliteDb.prepare(`
-        SELECT t.*, c.name as category_name, c.type as category_type
-        FROM finance_transactions t
-        LEFT JOIN finance_categories c ON t.category_id = c.id
-        ORDER BY t.created_at DESC
-      `).all();
-      res.json(txs);
-    } catch (e) {
-      res.status(500).json({ error: 'Failed to fetch transactions' });
-    }
-  });
-
-  app.post('/api/finance/transactions', requireFinanceAuth, async (req, res) => {
-    try {
-      const { categoryId, amount, date, description, referenceType, referenceId } = req.body;
-      const newTx = await db.insert(schema.financeTransactions).values({
-        categoryId, amount, date, description, referenceType, referenceId
-      }).returning();
-      res.json({ success: true, data: newTx[0] });
-    } catch (e) {
-      res.status(500).json({ error: 'Failed to create transaction' });
     }
   });
 
