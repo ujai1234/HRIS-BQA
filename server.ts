@@ -2470,7 +2470,7 @@ async function startServer() {
       if (!isOwner) return res.status(403).json({ error: 'Akses ditolak: bukan santri Anda.' });
       const { receiptUrl } = req.body;
       const updated = await db.update(schema.payments)
-        .set({ status: 'MENUNGGU VERIFIKASI', receiptUrl })
+        .set({ status: 'MENUNGGU_VERIFIKASI', receiptUrl })
         .where(eq(schema.payments.id, payId))
         .returning();
       res.json({ success: true, data: updated[0] });
