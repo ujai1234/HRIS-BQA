@@ -331,11 +331,11 @@ async function startServer() {
         return res.status(404).json({ error: 'No active students found' });
       }
 
-      const paymentsToInsert = activeStudents.map(student => ({
-        id: `PAY-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      const paymentsToInsert = activeStudents.map((student, index) => ({
+        id: `PAY-${Date.now()}-${student.id}-${index}`,
         studentId: student.id,
         billingMonth,
-        amount,
+        amount: Number(amount),
         status: 'BELUM_LUNAS',
         recordedBy: recordedBy || 'System'
       }));
