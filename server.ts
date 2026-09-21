@@ -3934,6 +3934,16 @@ async function startServer() {
       console.log('Admin Keuangan created.');
     }
 
+    // Initialize Finance Categories
+    const requiredIncomeCategories = ['Pemasukan SPP', 'Shodaqoh', 'Hibah', 'Dana BOS', 'Infaq'];
+    for (const catName of requiredIncomeCategories) {
+      const exists = await db.query.financeCategories.findFirst({ where: eq(schema.financeCategories.name, catName) });
+      if (!exists) {
+        await db.insert(schema.financeCategories).values({ name: catName, type: 'INCOME' });
+        console.log(`Inserted finance category: ${catName}`);
+      }
+    }
+
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://0.0.0.0:${PORT}`);
   });
