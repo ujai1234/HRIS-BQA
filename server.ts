@@ -4,7 +4,7 @@ import cors from 'cors';
 
 import { db, sqliteDb } from './src/db';
 import * as schema from './src/db/schema';
-import { eq, and, or, inArray, desc } from 'drizzle-orm';
+import { eq, and, or, inArray, desc, like } from 'drizzle-orm';
 import { calculateLatePenalty } from './src/utils/formatters';
 import {
   INITIAL_TEACHERS, 
@@ -138,12 +138,19 @@ async function startServer() {
 
   financeRouter.get('/summary', async (req, res) => {
     try {
+      const { month } = req.query;
+      let whereClause = undefined;
+      if (month && typeof month === 'string') {
+        whereClause = like(schema.financeTransactions.date, `${month}-%`);
+      }
+
       const allTxs = await db.select({
         amount: schema.financeTransactions.amount,
         type: schema.financeCategories.type
       })
       .from(schema.financeTransactions)
-      .leftJoin(schema.financeCategories, eq(schema.financeTransactions.categoryId, schema.financeCategories.id));
+      .leftJoin(schema.financeCategories, eq(schema.financeTransactions.categoryId, schema.financeCategories.id))
+      .where(whereClause);
 
       let income = 0;
       let expense = 0;
@@ -160,6 +167,12 @@ async function startServer() {
 
   financeRouter.get('/transactions', async (req, res) => {
     try {
+      const { month } = req.query;
+      let whereClause = undefined;
+      if (month && typeof month === 'string') {
+        whereClause = like(schema.financeTransactions.date, `${month}-%`);
+      }
+
       const allTxs = await db.select({
         id: schema.financeTransactions.id,
         date: schema.financeTransactions.date,
@@ -170,6 +183,7 @@ async function startServer() {
       })
       .from(schema.financeTransactions)
       .leftJoin(schema.financeCategories, eq(schema.financeTransactions.categoryId, schema.financeCategories.id))
+      .where(whereClause)
       .orderBy(desc(schema.financeTransactions.date));
 
       res.json(allTxs);
@@ -260,17 +274,33 @@ async function startServer() {
 
   financeRouter.get('/spp/pending', async (req, res) => {
     try {
+      const { month, status } = req.query;
+      const filters = [];
+      
+      if (month && typeof month === 'string') {
+        filters.push(eq(schema.payments.billingMonth, month));
+      }
+      
+      if (status && typeof status === 'string' && status !== 'ALL') {
+        filters.push(eq(schema.payments.status, status as any));
+      } else if (!month && !status) {
+        filters.push(eq(schema.payments.status, 'MENUNGGU_VERIFIKASI'));
+      }
+
       const pending = await db.select({
         id: schema.payments.id,
+        studentId: schema.payments.studentId,
         studentName: schema.students.name,
+        studentNis: schema.students.nis,
         billingMonth: schema.payments.billingMonth,
         amount: schema.payments.amount,
         receiptUrl: schema.payments.receiptUrl,
-        paymentDate: schema.payments.paymentDate
+        paymentDate: schema.payments.paymentDate,
+        status: schema.payments.status
       })
       .from(schema.payments)
       .leftJoin(schema.students, eq(schema.payments.studentId, schema.students.id))
-      .where(eq(schema.payments.status, 'MENUNGGU_VERIFIKASI'));
+      .where(filters.length > 0 ? and(...filters) : undefined);
       res.json(pending);
     } catch (e) {
       res.status(500).json({ error: 'Server error' });
