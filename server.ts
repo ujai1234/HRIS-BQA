@@ -3663,8 +3663,21 @@ async function startServer() {
 
   app.get('/api/finance/spp/pending', requireFinanceAuth, async (req, res) => {
     try {
+      const { month, status } = req.query;
+      const filters = [];
+      
+      if (month && typeof month === 'string') {
+        filters.push(eq(schema.payments.billingMonth, month));
+      }
+      
+      if (status && typeof status === 'string' && status !== 'ALL') {
+        filters.push(eq(schema.payments.status, status as any));
+      } else if (!month && !status) {
+        filters.push(eq(schema.payments.status, 'MENUNGGU_VERIFIKASI'));
+      }
+
       const pending = await db.query.payments.findMany({
-        where: eq(schema.payments.status, 'MENUNGGU_VERIFIKASI')
+        where: filters.length > 0 ? and(...filters) : undefined
       });
       // Fetch student details
       const result = [];
