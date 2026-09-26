@@ -63,5 +63,10 @@ export const auth = betterAuth({
         productionUrl,
         "https://portal.baitulquranalikhwan.cloud",
         "https://keuangan.baitulquranalikhwan.cloud"
-    ].filter((v, i, arr): v is string => typeof v === 'string' && v.length > 0 && arr.indexOf(v) === i)
+    ].filter((v, i, arr): v is string => typeof v === 'string' && v.length > 0 && arr.indexOf(v) === i),
+    advanced: {
+        crossSubDomainCookies: {
+            enabled: true
+        }
+    }
 });
