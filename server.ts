@@ -4,7 +4,7 @@ import cors from 'cors';
 
 import { db, sqliteDb } from './src/db';
 import * as schema from './src/db/schema';
-import { eq, and, or, inArray, desc, like } from 'drizzle-orm';
+import { eq, and, or, inArray, desc, like, ne } from 'drizzle-orm';
 import { calculateLatePenalty } from './src/utils/formatters';
 import {
   INITIAL_TEACHERS, 
@@ -977,42 +977,109 @@ async function startServer() {
   app.post('/api/teachers', async (req, res) => {
     try {
       if (req.body.password && req.body.password.length < 8) {
-        return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
-      }
-      
-      // FIX: Map empty username to null to prevent UNIQUE constraint failure on sqlite empty string
-      if (typeof req.body.username === 'string' && req.body.username.trim() === '') {
-        req.body.username = null;
+        return res.status(400).json({ error: 'Password minimal 8 karakter.' });
       }
 
-      const result = await db.insert(schema.teachers).values(req.body).returning();
-      
-      if (req.body.username && req.body.password) {
-        try {
-          const email = req.body.username.includes('@') ? req.body.username : `${req.body.username}@bqa.local`;
-          await auth.api.signUpEmail({
-            body: {
-              email: email,
-              password: req.body.password,
-              name: req.body.name,
-              teacherId: result[0].id
-            },
-            headers: new Headers({
-              'host': req.headers.host || 'localhost:3000',
-              'origin': req.headers.origin || 'http://localhost:3000',
-              'x-forwarded-host': req.headers.host || 'localhost:3000'
-            }),
-            asResponse: true
+      let cleanUsername: string | null = null;
+      if (typeof req.body.username === 'string' && req.body.username.trim() !== '') {
+        cleanUsername = req.body.username.trim().toLowerCase();
+      }
+
+      // 1. Cek duplikasi email / username pada guru lain
+      if (cleanUsername) {
+        const existingTeacherWithUsername = await db.query.teachers.findFirst({
+          where: eq(schema.teachers.username, cleanUsername)
+        });
+        if (existingTeacherWithUsername) {
+          return res.status(400).json({
+            error: `Email / Username "${cleanUsername}" sudah digunakan oleh guru lain (${existingTeacherWithUsername.name}, NIP: ${existingTeacherWithUsername.nip}). Silakan gunakan email / username lain.`
           });
+        }
+      }
+
+      // 2. Cek duplikasi NIP pada guru lain
+      if (req.body.nip && typeof req.body.nip === 'string') {
+        const cleanNip = req.body.nip.trim();
+        const existingTeacherWithNip = await db.query.teachers.findFirst({
+          where: eq(schema.teachers.nip, cleanNip)
+        });
+        if (existingTeacherWithNip) {
+          return res.status(400).json({
+            error: `NIP "${cleanNip}" sudah digunakan oleh guru lain (${existingTeacherWithNip.name}). Silakan gunakan NIP yang berbeda.`
+          });
+        }
+      }
+
+      const teacherId = req.body.id || `T-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+
+      // 3. Sanitasi objek agar hanya kolom valid di schema.teachers yang masuk ke database
+      const teacherPayload = {
+        id: teacherId,
+        nip: req.body.nip ? String(req.body.nip).trim() : `PBQ-${Date.now()}`,
+        name: String(req.body.name || '').trim(),
+        position: req.body.position ? String(req.body.position).trim() : 'Guru',
+        unit: req.body.unit || 'PESANTREN',
+        baseSalary: Number(req.body.baseSalary) || 0,
+        hourlyRate: Number(req.body.hourlyRate) || 0,
+        dailyTransport: Number(req.body.dailyTransport) || 0,
+        role: req.body.role || 'GURU',
+        phone: req.body.phone ? String(req.body.phone).trim() : null,
+        avatarColor: req.body.avatarColor || 'bg-teal-700',
+        avatarUrl: req.body.avatarUrl || null,
+        isActive: req.body.isActive !== undefined ? Boolean(req.body.isActive) : true,
+        username: cleanUsername,
+        password: req.body.password || null,
+      };
+
+      const result = await db.insert(schema.teachers).values(teacherPayload).returning();
+      
+      // 4. Sinkronisasi Better-Auth jika ada username & password
+      if (cleanUsername && req.body.password) {
+        try {
+          const email = cleanUsername.includes('@') ? cleanUsername : `${cleanUsername}@bqa.local`;
+          const existingAuthUser = await db.query.user.findFirst({
+            where: eq(schema.user.email, email)
+          });
+
+          if (existingAuthUser) {
+            await db.update(schema.user).set({
+              teacherId: result[0].id,
+              name: req.body.name
+            }).where(eq(schema.user.id, existingAuthUser.id));
+          } else {
+            await auth.api.signUpEmail({
+              body: {
+                email: email,
+                password: req.body.password,
+                name: req.body.name,
+                teacherId: result[0].id
+              },
+              headers: new Headers({
+                'host': req.headers.host || 'localhost:3000',
+                'origin': req.headers.origin || 'http://localhost:3000',
+                'x-forwarded-host': req.headers.host || 'localhost:3000'
+              }),
+              asResponse: true
+            });
+          }
         } catch (authErr) {
           console.error("Auto-register failed:", authErr);
         }
       }
 
       res.json(result[0]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create teacher:', error);
-      res.status(500).json({ error: 'Failed to create teacher' });
+      if (error?.message?.includes('UNIQUE constraint failed: teachers.username')) {
+        return res.status(400).json({ error: `Email / Username "${req.body.username}" sudah digunakan oleh guru lain.` });
+      }
+      if (error?.message?.includes('UNIQUE constraint failed: teachers.nip')) {
+        return res.status(400).json({ error: `NIP "${req.body.nip}" sudah digunakan oleh guru lain.` });
+      }
+      if (error?.message?.includes('UNIQUE constraint failed')) {
+        return res.status(400).json({ error: 'Gagal menambahkan guru: Terjadi duplikasi data unik (NIP atau Username).' });
+      }
+      res.status(500).json({ error: error?.message || 'Failed to create teacher' });
     }
   });
 
@@ -1022,26 +1089,96 @@ async function startServer() {
       if (!Array.isArray(list) || list.length === 0) {
         return res.status(400).json({ error: 'Data guru kosong' });
       }
-      const result = await db.insert(schema.teachers).values(list).returning();
+
+      const sanitizedList = list.map((item: any, idx: number) => ({
+        id: item.id || `T-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`,
+        nip: item.nip ? String(item.nip).trim() : `PBQ-${Date.now()}-${idx}`,
+        name: String(item.name || '').trim(),
+        position: item.position ? String(item.position).trim() : 'Guru',
+        unit: item.unit || 'PESANTREN',
+        baseSalary: Number(item.baseSalary) || 0,
+        hourlyRate: Number(item.hourlyRate) || 0,
+        dailyTransport: Number(item.dailyTransport) || 0,
+        role: item.role || 'GURU',
+        phone: item.phone ? String(item.phone).trim() : null,
+        avatarColor: item.avatarColor || 'bg-teal-700',
+        avatarUrl: item.avatarUrl || null,
+        isActive: item.isActive !== undefined ? Boolean(item.isActive) : true,
+        username: typeof item.username === 'string' && item.username.trim() ? item.username.trim().toLowerCase() : null,
+        password: item.password || null,
+      }));
+
+      const result = await db.insert(schema.teachers).values(sanitizedList).returning();
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Bulk teacher insertion error:', error);
-      res.status(500).json({ error: 'Failed to bulk insert teachers' });
+      res.status(500).json({ error: error?.message || 'Failed to bulk insert teachers' });
     }
   });
 
   app.patch('/api/teachers/:id', async (req, res) => {
     try {
       if (req.body.password && req.body.password.length < 8) {
-        return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
+        return res.status(400).json({ error: 'Password minimal 8 karakter.' });
       }
 
       const existingTeacher = await db.query.teachers.findFirst({
         where: eq(schema.teachers.id, req.params.id)
       });
       if (!existingTeacher) return res.status(404).json({ error: 'Teacher not found' });
-      
-      const result = await db.update(schema.teachers).set(req.body).where(eq(schema.teachers.id, req.params.id)).returning();
+
+      let cleanUsername: string | null | undefined = undefined;
+      if (req.body.username !== undefined) {
+        if (typeof req.body.username === 'string' && req.body.username.trim() !== '') {
+          cleanUsername = req.body.username.trim().toLowerCase();
+          const duplicate = await db.query.teachers.findFirst({
+            where: and(
+              eq(schema.teachers.username, cleanUsername),
+              ne(schema.teachers.id, req.params.id)
+            )
+          });
+          if (duplicate) {
+            return res.status(400).json({
+              error: `Email / Username "${cleanUsername}" sudah digunakan oleh guru lain (${duplicate.name}, NIP: ${duplicate.nip}).`
+            });
+          }
+        } else {
+          cleanUsername = null;
+        }
+      }
+
+      if (req.body.nip !== undefined && typeof req.body.nip === 'string') {
+        const cleanNip = req.body.nip.trim();
+        const duplicateNip = await db.query.teachers.findFirst({
+          where: and(
+            eq(schema.teachers.nip, cleanNip),
+            ne(schema.teachers.id, req.params.id)
+          )
+        });
+        if (duplicateNip) {
+          return res.status(400).json({
+            error: `NIP "${cleanNip}" sudah digunakan oleh guru lain (${duplicateNip.name}).`
+          });
+        }
+      }
+
+      const updateData: any = {};
+      if (req.body.nip !== undefined) updateData.nip = String(req.body.nip).trim();
+      if (req.body.name !== undefined) updateData.name = String(req.body.name).trim();
+      if (req.body.position !== undefined) updateData.position = String(req.body.position).trim();
+      if (req.body.unit !== undefined) updateData.unit = req.body.unit;
+      if (req.body.baseSalary !== undefined) updateData.baseSalary = Number(req.body.baseSalary) || 0;
+      if (req.body.hourlyRate !== undefined) updateData.hourlyRate = Number(req.body.hourlyRate) || 0;
+      if (req.body.dailyTransport !== undefined) updateData.dailyTransport = Number(req.body.dailyTransport) || 0;
+      if (req.body.role !== undefined) updateData.role = req.body.role;
+      if (req.body.phone !== undefined) updateData.phone = req.body.phone ? String(req.body.phone).trim() : null;
+      if (req.body.avatarColor !== undefined) updateData.avatarColor = req.body.avatarColor;
+      if (req.body.avatarUrl !== undefined) updateData.avatarUrl = req.body.avatarUrl;
+      if (req.body.isActive !== undefined) updateData.isActive = Boolean(req.body.isActive);
+      if (cleanUsername !== undefined) updateData.username = cleanUsername;
+      if (req.body.password !== undefined) updateData.password = req.body.password;
+
+      const result = await db.update(schema.teachers).set(updateData).where(eq(schema.teachers.id, req.params.id)).returning();
       const updatedTeacher = result[0];
       
       if (req.body.username || req.body.password || req.body.name) {
@@ -1072,9 +1209,12 @@ async function startServer() {
         }
       }
       res.json(updatedTeacher);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      res.status(500).json({ error: 'Failed to update teacher' });
+      if (error?.message?.includes('UNIQUE constraint failed')) {
+        return res.status(400).json({ error: 'Gagal memperbarui: NIP atau Username sudah digunakan guru lain.' });
+      }
+      res.status(500).json({ error: error?.message || 'Failed to update teacher' });
     }
   });
 

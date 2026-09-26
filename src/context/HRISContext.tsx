@@ -71,7 +71,7 @@ interface HRISContextType {
   deleteBadalAssignment: (badalId: string) => void;
   
   // Master Data
-  addTeacher: (teacher: Omit<Teacher, 'id'>) => void;
+  addTeacher: (teacher: Omit<Teacher, 'id'>) => Promise<boolean>;
   addTeachersBulk: (teachers: Omit<Teacher, 'id'>[]) => Promise<{ success: boolean; count: number }>;
   updateTeacher: (id: string, updates: Partial<Teacher>) => void;
   deleteTeacher: (id: string) => void;
@@ -836,34 +836,37 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Master Data Guru CRUD
-  const addTeacher = (teacherInput: Omit<Teacher, 'id'>) => {
+  const addTeacher = async (teacherInput: Omit<Teacher, 'id'>): Promise<boolean> => {
     const newId = `T-${Date.now()}`;
     const newTeacher: Teacher = {
       ...teacherInput,
       id: newId,
     };
-    fetch('/api/teachers', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newTeacher)
-    }).then(async (res) => {
+    try {
+      const res = await fetch('/api/teachers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newTeacher)
+      });
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
         toast.error(errData.error || 'Gagal menambahkan guru');
-        return;
+        return false;
       }
-      fetchAllData();
+      await fetchAllData();
       toast.success(`Data guru ${newTeacher.name} berhasil ditambahkan`);
-    }).catch((err) => {
-      toast.error('Terjadi kesalahan jaringan');
-    });
 
-    logActivity(
-      'CREATE_TEACHER',
-      'KAFAAH',
-      `Pendaftaran data guru & kafa'ah baru: ${newTeacher.name} (${newTeacher.position}, Unit ${newTeacher.unit}, Gaji Pokok: Rp ${newTeacher.baseSalary.toLocaleString('id-ID')})`,
-      'WARNING'
-    );
+      logActivity(
+        'CREATE_TEACHER',
+        'KAFAAH',
+        `Pendaftaran data guru & kafa'ah baru: ${newTeacher.name} (${newTeacher.position}, Unit ${newTeacher.unit}, Gaji Pokok: Rp ${newTeacher.baseSalary.toLocaleString('id-ID')})`,
+        'WARNING'
+      );
+      return true;
+    } catch (err) {
+      toast.error('Terjadi kesalahan jaringan');
+      return false;
+    }
   };
 
   const addTeachersBulk = async (teacherInputs: Omit<Teacher, 'id'>[]) => {

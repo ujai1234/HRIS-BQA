@@ -320,6 +320,12 @@ try { sqliteDb.exec("ALTER TABLE students ADD COLUMN nik TEXT;"); } catch(e) {}
 try { sqliteDb.exec("ALTER TABLE students ADD COLUMN kk_number TEXT;"); } catch(e) {}
 
 
+try { sqliteDb.exec("ALTER TABLE teachers ADD COLUMN avatar_color TEXT;"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE teachers ADD COLUMN avatar_url TEXT;"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE teachers ADD COLUMN username TEXT UNIQUE;"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE teachers ADD COLUMN password TEXT;"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE teachers ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1;"); } catch(e) {}
+
 try { sqliteDb.exec("ALTER TABLE staff_tasks ADD COLUMN photo_url TEXT;"); } catch(e) {}
 try { sqliteDb.exec("ALTER TABLE staff_expenses ADD COLUMN receipt_url TEXT;"); } catch(e) {}
 try { sqliteDb.exec("ALTER TABLE user ADD COLUMN teacher_id TEXT REFERENCES teachers(id);"); } catch(e) {}
