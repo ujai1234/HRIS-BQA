@@ -358,7 +358,7 @@ export const LoginPage: React.FC = () => {
           {/* Google OAuth Login Button */}
           <button
             type="button"
-            onClick={() => authClient.signIn.social({ provider: 'google' })}
+            onClick={() => authClient.signIn.social({ provider: 'google', callbackURL: window.location.origin })}
             className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-900 border border-[#e2e8f0] dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-emerald-500/30 text-[#1e293b] dark:text-slate-200 font-bold text-xs py-2.5 px-4 rounded-xl shadow-sm transition-all cursor-pointer group relative overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
