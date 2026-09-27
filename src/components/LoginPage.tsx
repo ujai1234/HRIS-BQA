@@ -59,23 +59,14 @@ export const LoginPage: React.FC = () => {
           role = targetByEmail.role;
           finalTeacherId = targetByEmail.id;
         } else {
-          // Akun ini tidak terdaftar sebagai asatidz/staf HRIS.
-          // Bisa jadi akun Wali Santri yang sesi-nya masih aktif.
-          const isWaliAccount = email.startsWith('ortu') || email.startsWith('wali') || email === 'walidemo@bqa.local';
-          const errorMsg = isWaliAccount
-            ? `Akun ${email} adalah akun Wali Santri (Portal Santri), bukan akun HRIS Asatidz. Gunakan username/NIP Asatidz untuk login ke HRIS.`
-            : `Akun dengan email ${email} tidak terdaftar sebagai Asatidz di Master Data HRIS. Hubungi Administrator.`;
-          authClient.signOut({ fetchOptions: {} }).then(() => {
-            setError(errorMsg);
-          });
+          // Akun ini tidak terdaftar sebagai asatidz/staf HRIS (kemungkinan Wali Santri).
+          setError(`Akun ${email} terdaftar sebagai Wali Santri (Portal Santri), bukan Asatidz HRIS.`);
           return;
         }
       }
 
       if (role === 'KEUANGAN') {
-        authClient.signOut({ fetchOptions: {} }).then(() => {
-          setError(`Akun Anda adalah Staff Keuangan. Silakan login melalui Aplikasi Keuangan khusus Bendahara.`);
-        });
+        setError(`Akun Anda adalah Staff Keuangan. Silakan login melalui Aplikasi Keuangan khusus Bendahara.`);
         return;
       }
 
@@ -271,9 +262,28 @@ export const LoginPage: React.FC = () => {
 
           {/* Error Alert — identik style Tahfidz */}
           {error && (
-            <div className="mb-4 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs font-semibold py-2.5 px-3.5 rounded-xl border border-rose-200 dark:border-rose-900/50 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{error}</span>
+            <div className="mb-4 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs font-semibold py-2.5 px-3.5 rounded-xl border border-rose-200 dark:border-rose-900/50 flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+              {error.includes('Portal Santri') && (
+                <div className="flex items-center gap-3 pt-2 mt-1 border-t border-rose-200 dark:border-rose-900/40">
+                  <a
+                    href="https://portal.baitulquranalikhwan.cloud"
+                    className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1"
+                  >
+                    Buka Portal Santri &rarr;
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => authClient.signOut({ fetchOptions: {} }).then(() => setError(null))}
+                    className="text-xs text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
+                  >
+                    Ganti Akun / Logout
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

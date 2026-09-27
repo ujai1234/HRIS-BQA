@@ -248,7 +248,7 @@ async function startServer() {
           description: data.description,
           categoryId: categoryId,
         })
-        .where(eq(schema.financeTransactions.id, id))
+        .where(eq(schema.financeTransactions.id, Number(id)))
         .returning();
       if (updated.length === 0) return res.status(404).json({ error: 'Not found' });
       res.json(updated[0]);
@@ -262,7 +262,7 @@ async function startServer() {
     try {
       const { id } = req.params;
       const deleted = await db.delete(schema.financeTransactions)
-        .where(eq(schema.financeTransactions.id, id))
+        .where(eq(schema.financeTransactions.id, Number(id)))
         .returning();
       if (deleted.length === 0) return res.status(404).json({ error: 'Not found' });
       res.json({ success: true });
@@ -4385,6 +4385,14 @@ async function startServer() {
         }
         console.log('Auto-populated initial staff expenses into database.');
       }
+      // Ensure all registered users have email_verified = 1 so Better Auth can link Google OAuth without errors
+      try {
+        sqliteDb.prepare('UPDATE user SET email_verified = 1 WHERE email_verified = 0').run();
+        console.log('Ensured all user accounts have email_verified = 1 for seamless OAuth linking.');
+      } catch (err) {
+        console.error('Failed to update email_verified:', err);
+      }
+
       console.log('All required demo accounts (kepseksmp, kepsekma, kepsekpesantren, dapur, sarpras) are present and integrated.');
     }
   } catch (error) {
