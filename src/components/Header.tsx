@@ -43,6 +43,7 @@ import {
   Database
 } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
+import { useConfirm } from '../context/ConfirmContext';
 import { UserRole, isKepsekRole } from '../types';
 import { useGuruNotifications, GuruNotificationItem, GuruNotifType } from '../hooks/useGuruNotifications';
 import { BrandLogo } from './BrandLogo';
@@ -77,6 +78,7 @@ export const Header: React.FC<HeaderProps> = ({
     isLoading
   } = useHRIS();
 
+  const { confirm } = useConfirm();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = async () => {
@@ -503,8 +505,15 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Reset Database Button (Admin only) */}
             {currentRole === 'ADMIN' && (
               <button
-                onClick={() => {
-                  if (window.confirm('Yakin ingin reset ulang semua data ke pengaturan awal?')) {
+                onClick={async () => {
+                  const ok = await confirm({
+                    title: 'Reset Ulang Data Sistem',
+                    message: 'Apakah Anda yakin ingin mengatur ulang semua data ke pengaturan awal? Tindakan ini akan mengembalikan data ke sampel awal.',
+                    confirmText: 'Ya, Reset Data',
+                    cancelText: 'Batal',
+                    variant: 'danger',
+                  });
+                  if (ok) {
                     resetToDefault();
                   }
                 }}

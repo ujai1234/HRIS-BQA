@@ -15,9 +15,11 @@ import {
 import { useHRIS } from '../context/HRISContext';
 import { ClassSchedule } from '../types';
 import { BulkScheduleUploadModal } from './BulkScheduleUploadModal';
+import { useConfirm } from '../context/ConfirmContext';
 
 export const MasterSchedules: React.FC = () => {
   const { schedules, teachers, addSchedule, updateSchedule, deleteSchedule, resetSchedules } = useHRIS();
+  const { confirm } = useConfirm();
 
   const [selectedDayFilter, setSelectedDayFilter] = useState<string>('ALL');
   const [selectedUnitFilter, setSelectedUnitFilter] = useState<string>('ALL');
@@ -39,8 +41,14 @@ export const MasterSchedules: React.FC = () => {
     room: 'Kelas 7A',
   });
 
-  const handleReset = () => {
-    if (window.confirm('PERINGATAN RESMI: Anda akan menghapus SELURUH database jadwal pelajaran. Tindakan ini tidak dapat dibatalkan. Apakah Anda yakin ingin melakukan pengaturan ulang?')) {
+  const handleReset = async () => {
+    const ok = await confirm({
+      title: 'Reset Database Jadwal KBM',
+      message: 'PERINGATAN RESMI: Anda akan menghapus SELURUH database jadwal pelajaran. Tindakan ini bersifat permanen dan tidak dapat dibatalkan. Apakah Anda yakin ingin melakukan pengaturan ulang?',
+      confirmText: 'Ya, Reset Seluruh Jadwal',
+      variant: 'danger',
+    });
+    if (ok) {
       resetSchedules();
     }
   };
@@ -318,8 +326,16 @@ export const MasterSchedules: React.FC = () => {
                             <Edit3 className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={() => {
-                              if (confirm(`Hapus jadwal ${s.subject}?`)) {
+                            onClick={async () => {
+                              const teacherName = teachers.find(t => t.id === s.teacherId)?.name || 'Asatidz';
+                              const ok = await confirm({
+                                title: 'Hapus Jadwal KBM',
+                                message: `Apakah Anda yakin ingin menghapus jadwal "${s.subject}" (${s.className}, ${s.dayOfWeek} ${s.startTime}-${s.endTime}, ${teacherName})?`,
+                                confirmText: 'Ya, Hapus Jadwal',
+                                cancelText: 'Batal',
+                                variant: 'danger',
+                              });
+                              if (ok) {
                                 deleteSchedule(s.id);
                               }
                             }}

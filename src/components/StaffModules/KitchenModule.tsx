@@ -63,15 +63,15 @@ export const KitchenModule: React.FC<KitchenModuleProps> = ({ showJournalAndExpe
 
   const handleAbsenMasuk = () => {
     if (hasClockedInToday) {
-      alert("Anda sudah melakukan absensi hari ini!");
+      toast.warning("Anda sudah melakukan absensi hari ini!");
       return;
     }
     if (isGpsRequiredMissing) {
-      alert("Tidak dapat absen. Pastikan GPS aktif dan terdeteksi.");
+      toast.error("Tidak dapat absen. Pastikan GPS aktif dan terdeteksi.");
       return;
     }
     if (isOutsideRadius) {
-      alert("Tidak dapat absen. Anda berada di luar wilayah pesantren.");
+      toast.error("Tidak dapat absen. Anda berada di luar wilayah pesantren.");
       return;
     }
     

@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Search, UserPlus, XCircle, Users, Link as LinkIcon, Trash2, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useConfirm } from '../context/ConfirmContext';
 
 export const MasterParents: React.FC = () => {
+  const { confirm } = useConfirm();
   const [parents, setParents] = useState<any[]>([]);
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -179,7 +181,14 @@ export const MasterParents: React.FC = () => {
   };
 
   const handleUnlinkStudent = async (studentId: string) => {
-    if (!confirm('Apakah Anda yakin ingin memutuskan relasi ini?')) return;
+    const ok = await confirm({
+      title: 'Putuskan Hubungan Santri',
+      message: 'Apakah Anda yakin ingin memutuskan relasi antara akun orang tua ini dengan data santri terkait?',
+      confirmText: 'Ya, Putuskan Hubungan',
+      cancelText: 'Batal',
+      variant: 'warning',
+    });
+    if (!ok) return;
     try {
       const res = await fetch(`/api/parents/${selectedParent.id}/link-student/${studentId}`, {
         method: 'DELETE'

@@ -12,6 +12,7 @@ import confetti from 'canvas-confetti';
 import { AttendanceRecord, ClassSchedule, Teacher, StudentAttendance } from '../types';
 import { useHRIS } from '../context/HRISContext';
 import { formatIndonesianDate } from '../utils/formatters';
+import { toast } from 'sonner';
 
 interface JournalModalProps {
   attendance?: AttendanceRecord | null;
@@ -164,7 +165,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({
       return;
     }
     if (!topic.trim()) {
-      alert('Mohon isi pokok materi KBM terlebih dahulu.');
+      toast.error('Mohon isi pokok materi KBM terlebih dahulu.');
       return;
     }
 

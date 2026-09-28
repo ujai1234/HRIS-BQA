@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Toaster } from 'sonner';
 import { motion } from 'motion/react';
 import { HRISProvider, useHRIS } from './context/HRISContext';
+import { ConfirmProvider } from './context/ConfirmContext';
 import { LoginPage } from './components/LoginPage';
 import { Header } from './components/Header';
 import { GuruView } from './components/GuruView';
@@ -202,9 +203,11 @@ const MainContent: React.FC = () => {
 export default function App() {
   return (
     <HRISProvider>
-      <Toaster position="top-center" richColors />
-      <SessionTimeoutManager />
-      <MainContent />
+      <ConfirmProvider>
+        <Toaster position="top-center" richColors />
+        <SessionTimeoutManager />
+        <MainContent />
+      </ConfirmProvider>
     </HRISProvider>
   );
 }

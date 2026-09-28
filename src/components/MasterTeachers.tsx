@@ -6,9 +6,11 @@ import { formatRupiah, formatCurrencyInput, parseCurrencyInput, validateCurrency
 import { BulkTeacherUploadModal } from './BulkTeacherUploadModal';
 import { KafaahManagementView } from './KafaahManagementView';
 import { TeacherAvatar } from './TeacherAvatar';
+import { useConfirm } from '../context/ConfirmContext';
 
 export const MasterTeachers: React.FC = () => {
   const { teachers, addTeacher, updateTeacher, deleteTeacher, resetTeachers } = useHRIS();
+  const { confirm } = useConfirm();
 
   const [activeSubView, setActiveSubView] = useState<'profil_guru' | 'tarif_kafaah'>('profil_guru');
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,8 +43,14 @@ export const MasterTeachers: React.FC = () => {
   const [monthlyTransportInput, setMonthlyTransportInput] = useState('250.000');
   const [monthlyMealInput, setMonthlyMealInput] = useState('375.000');
 
-  const handleReset = () => {
-    if (window.confirm('PERINGATAN: Anda akan menghapus SELURUH data guru. Tindakan ini tidak dapat dibatalkan. Lanjutkan?')) {
+  const handleReset = async () => {
+    const ok = await confirm({
+      title: 'Reset Total Data Guru',
+      message: 'PERINGATAN: Anda akan menghapus SELURUH data guru dari sistem. Tindakan ini bersifat permanen dan tidak dapat dibatalkan. Apakah Anda yakin ingin melanjutkan?',
+      confirmText: 'Ya, Reset Seluruh Data',
+      variant: 'danger',
+    });
+    if (ok) {
       resetTeachers();
     }
   };
@@ -304,8 +312,15 @@ export const MasterTeachers: React.FC = () => {
                             <Edit3 className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={() => {
-                              if (confirm(`Hapus data ${t.name}?`)) {
+                            onClick={async () => {
+                              const ok = await confirm({
+                                title: 'Hapus Data Guru',
+                                message: `Apakah Anda yakin ingin menghapus data "${t.name}" (NIP: ${t.nip})? Akses akun dan jadwal mengajar asatidz ini akan dihapus secara permanen.`,
+                                confirmText: 'Ya, Hapus Data',
+                                cancelText: 'Batal',
+                                variant: 'danger',
+                              });
+                              if (ok) {
                                 deleteTeacher(t.id);
                               }
                             }}
