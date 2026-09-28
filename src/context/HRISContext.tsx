@@ -1029,10 +1029,14 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addSchedulesBulk = async (newSchedules: Omit<ClassSchedule, 'id'>[]) => {
     try {
+      const schedulesWithId = newSchedules.map((s, idx) => ({
+        ...s,
+        id: (s as any).id || `SCH-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`
+      }));
       const res = await fetch('/api/schedules/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newSchedules)
+        body: JSON.stringify(schedulesWithId)
       });
       
       if (res.ok) {
@@ -1040,7 +1044,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toast.success(`Berhasil mengunggah ${newSchedules.length} jadwal KBM`);
       } else {
         // Fallback to sequential if bulk fails
-        for (const s of newSchedules) {
+        for (const s of schedulesWithId) {
           await fetch('/api/schedules', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

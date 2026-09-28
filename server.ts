@@ -1297,10 +1297,15 @@ async function startServer() {
 
   app.post('/api/schedules', async (req, res) => {
     try {
-      const result = await db.insert(schema.schedules).values(req.body).returning();
+      const scheduleData = {
+        ...req.body,
+        id: req.body.id || `SCH-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`
+      };
+      const result = await db.insert(schema.schedules).values(scheduleData).returning();
       res.json(result[0]);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to create schedule' });
+    } catch (error: any) {
+      console.error('Create schedule error:', error);
+      res.status(500).json({ error: error?.message || 'Failed to create schedule' });
     }
   });
 
@@ -1310,11 +1315,23 @@ async function startServer() {
       if (!Array.isArray(list) || list.length === 0) {
         return res.status(400).json({ error: 'Data jadwal kosong' });
       }
-      const result = await db.insert(schema.schedules).values(list).returning();
+      const sanitizedList = list.map((item: any, idx: number) => ({
+        id: item.id || `SCH-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`,
+        teacherId: item.teacherId,
+        subject: String(item.subject || '').trim(),
+        className: String(item.className || '').trim(),
+        unit: item.unit || 'SMP',
+        dayOfWeek: item.dayOfWeek || 'Senin',
+        startTime: item.startTime || '07:30',
+        endTime: item.endTime || '08:50',
+        hours: Number(item.hours) || 2,
+        room: item.room || '-',
+      }));
+      const result = await db.insert(schema.schedules).values(sanitizedList).returning();
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Bulk schedule insertion error:', error);
-      res.status(500).json({ error: 'Failed to bulk insert schedules' });
+      res.status(500).json({ error: error?.message || 'Failed to bulk insert schedules' });
     }
   });
 
