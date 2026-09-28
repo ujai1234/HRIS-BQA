@@ -75,13 +75,24 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
         'Kelas 7A'
       ],
       [
-        'PBQ-2026-002',
-        'Tahfidz',
-        'VIII-B (SMP)',
-        'SMP',
+        'PBQ-2026-001',
+        'Ushul Fiqih',
+        'X-MA',
+        'MA',
         'Selasa',
         '09:10',
         '10:30',
+        '2',
+        'Kelas 10 MA'
+      ],
+      [
+        'PBQ-2026-001',
+        'Tahfidz Al-Qur\'an',
+        'Halaqah Ula',
+        'PESANTREN',
+        'Rabu',
+        '16:00',
+        '17:20',
         '2',
         'Masjid Utama'
       ]
@@ -170,16 +181,23 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
           if (!rawSubject) errors.push('Mata pelajaran wajib diisi');
           if (!rawDay) errors.push('Hari wajib diisi');
 
-          // Find teacher by NIP
-          const teacher = teachers.find(t => t.nip === rawNip);
+          // Find teacher by NIP (case-insensitive & trimmed) or name
+          const cleanNip = rawNip.trim().toUpperCase();
+          const cleanName = rawNip.trim().toLowerCase();
+          const teacher = teachers.find(t => 
+            (t.nip && t.nip.trim().toUpperCase() === cleanNip) ||
+            (t.name && t.name.trim().toLowerCase() === cleanName) ||
+            (cleanName.length > 3 && t.name && t.name.trim().toLowerCase().includes(cleanName))
+          );
           if (rawNip && !teacher) {
-            errors.push(`Guru dengan NIP ${rawNip} tidak ditemukan`);
+            errors.push(`Guru dengan NIP/Nama "${rawNip}" tidak ditemukan di data asatidz`);
           }
 
           const validUnits: UnitType[] = ['SMP', 'MA', 'PESANTREN', 'UMUM'];
           if (!validUnits.includes(rawUnit as UnitType)) {
-             if (rawUnit.includes('SMP')) rawUnit = 'SMP';
-             else if (rawUnit.includes('MA')) rawUnit = 'MA';
+             if (rawUnit.includes('SMP') || rawUnit.includes('TSANAWIYAH')) rawUnit = 'SMP';
+             else if (rawUnit.includes('MA') || rawUnit.includes('ALIYAH')) rawUnit = 'MA';
+             else if (rawUnit.includes('PESANTREN') || rawUnit.includes('PONPES') || rawUnit.includes('SANTRI')) rawUnit = 'PESANTREN';
              else rawUnit = 'SMP';
           }
 
@@ -314,7 +332,7 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
               <div>
                 <h4 className="text-xs font-bold text-emerald-900 dark:text-emerald-100">Format Template Jadwal</h4>
                 <p className="text-xs text-emerald-800/90 dark:text-emerald-400/90 mt-0.5">
-                  Gunakan NIP Guru yang sudah terdaftar di sistem agar jadwal terhubung secara otomatis.
+                  Gunakan NIP Guru yang sudah terdaftar. Untuk guru yang mengajar di banyak unit (SMP, MA, & Pesantren), cukup tuliskan NIP yang sama di setiap baris jadwal kelasnya.
                 </p>
               </div>
             </div>

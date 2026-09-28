@@ -213,10 +213,17 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
           const validUnits: UnitType[] = ['SMP', 'MA', 'PESANTREN', 'UMUM'];
           if (!validUnits.includes(rawUnit as UnitType)) {
             // Attempt smart mapping
-            if (rawUnit.includes('SMP') || rawUnit.includes('TSANAWIYAH')) rawUnit = 'SMP';
-            else if (rawUnit.includes('MA') || rawUnit.includes('ALIYAH')) rawUnit = 'MA';
-            else if (rawUnit.includes('PONPES') || rawUnit.includes('SANTRI')) rawUnit = 'PESANTREN';
-            else rawUnit = 'PESANTREN';
+            if (rawUnit.includes('&') || rawUnit.includes('/') || rawUnit.includes('SEMUA') || rawUnit.includes('GABUNGAN') || rawUnit.includes('UMUM')) {
+              rawUnit = 'UMUM';
+            } else if (rawUnit.includes('SMP') || rawUnit.includes('TSANAWIYAH')) {
+              rawUnit = 'SMP';
+            } else if (rawUnit.includes('MA') || rawUnit.includes('ALIYAH')) {
+              rawUnit = 'MA';
+            } else if (rawUnit.includes('PONPES') || rawUnit.includes('SANTRI') || rawUnit.includes('PESANTREN')) {
+              rawUnit = 'PESANTREN';
+            } else {
+              rawUnit = 'UMUM';
+            }
           }
 
           const validRoles: UserRole[] = ['ADMIN', 'GURU', 'KEPALA_PESANTREN'];
@@ -363,7 +370,7 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
               <div>
                 <h4 className="text-xs font-bold text-emerald-900">Format Template Spreadsheet</h4>
                 <p className="text-xs text-emerald-800/90 mt-0.5">
-                  Unduh template standar (.CSV) yang telah disesuaikan dengan kolom NIP, Unit, Jabatan, dan Tarif Kafa'ah.
+                  Cukup daftarkan 1 baris per guru (1 NIP = 1 Akun). Jika mengajar lintas unit (SMP, MA, Pesantren), pilih unit utama atau 'UMUM'. Pembagian jam kelasnya diatur terpisah pada menu Upload Jadwal.
                 </p>
               </div>
             </div>
