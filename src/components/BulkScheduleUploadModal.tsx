@@ -201,10 +201,17 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
              else rawUnit = 'SMP';
           }
 
-          const validDays: DayOfWeek[] = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Ahad'];
-          if (!validDays.includes(rawDay as DayOfWeek)) {
-            if (rawDay === 'Minggu') rawDay = 'Ahad';
-            else rawDay = 'Senin';
+          // Normalize Day (supports Jum'at, Minggu, lowercase, etc.)
+          let normalizedDay = rawDay.replace(/['’`]/g, '').trim().toLowerCase();
+          if (normalizedDay === 'jumat') rawDay = 'Jumat';
+          else if (normalizedDay === 'senin') rawDay = 'Senin';
+          else if (normalizedDay === 'selasa') rawDay = 'Selasa';
+          else if (normalizedDay === 'rabu') rawDay = 'Rabu';
+          else if (normalizedDay === 'kamis') rawDay = 'Kamis';
+          else if (normalizedDay === 'sabtu') rawDay = 'Sabtu';
+          else if (normalizedDay === 'ahad' || normalizedDay === 'minggu') rawDay = 'Ahad';
+          else {
+            rawDay = 'Senin';
           }
 
           parsedData.push({
