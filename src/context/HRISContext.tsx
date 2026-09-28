@@ -879,7 +879,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...input,
         id: `T-${Date.now()}-${idx}`,
         username: cleanUsername,
-        password: input.password || 'guru123',
+        password: input.password || 'guru1234',
         avatarColor: input.avatarColor || colors[nextIdx % colors.length],
         isActive: input.isActive ?? true,
       };
@@ -968,8 +968,19 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates)
-    }).then(() => fetchAllData()).catch(err => {
+    }).then(async (res) => {
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        toast.error(errorData.error || 'Gagal menyimpan pembaruan guru');
+        fetchAllData();
+        return;
+      }
+      fetchAllData();
+      toast.success(`Data ${updates.name || origTeacher?.name || 'guru'} berhasil disimpan`);
+    }).catch(err => {
       console.error('Failed to patch teacher:', err);
+      toast.error('Terjadi kesalahan jaringan');
+      fetchAllData();
     });
 
     const isFinancial = 'baseSalary' in updates || 'hourlyRate' in updates || 'dailyTransport' in updates;
@@ -1074,7 +1085,20 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates)
-    }).then(() => fetchAllData());
+    }).then(async (res) => {
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        toast.error(errorData.error || 'Gagal memperbarui jadwal KBM');
+        fetchAllData();
+        return;
+      }
+      fetchAllData();
+      toast.success('Jadwal KBM berhasil diperbarui');
+    }).catch(err => {
+      console.error('Failed to patch schedule:', err);
+      toast.error('Terjadi kesalahan jaringan');
+      fetchAllData();
+    });
 
     logActivity(
       'UPDATE_SCHEDULE',

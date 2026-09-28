@@ -79,7 +79,7 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
         'GURU',
         '081234567890',
         'ahmad.fathoni',
-        'guru123'
+        'guru1234'
       ],
       [
         'PBQ-2026-031',
@@ -92,7 +92,7 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
         'GURU',
         '082198765432',
         'siti.khodijah',
-        'guru123'
+        'guru1234'
       ],
       [
         'PBQ-2026-032',
@@ -105,7 +105,7 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
         'GURU',
         '085612345678',
         'ridwan.musyrif',
-        'guru123'
+        'guru1234'
       ]
     ];
 

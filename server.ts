@@ -1118,14 +1118,18 @@ async function startServer() {
 
   app.patch('/api/teachers/:id', async (req, res) => {
     try {
-      if (req.body.password && req.body.password.length < 8) {
-        return res.status(400).json({ error: 'Password minimal 8 karakter.' });
-      }
-
       const existingTeacher = await db.query.teachers.findFirst({
         where: eq(schema.teachers.id, req.params.id)
       });
-      if (!existingTeacher) return res.status(404).json({ error: 'Teacher not found' });
+      if (!existingTeacher) return res.status(404).json({ error: 'Data guru tidak ditemukan' });
+
+      // Only validate password if a non-empty new password is provided and different from existing
+      if (req.body.password !== undefined && req.body.password !== null) {
+        const trimmedPass = String(req.body.password).trim();
+        if (trimmedPass !== '' && trimmedPass !== existingTeacher.password && trimmedPass.length < 8) {
+          return res.status(400).json({ error: 'Password baru minimal 8 karakter.' });
+        }
+      }
 
       let cleanUsername: string | null | undefined = undefined;
       if (req.body.username !== undefined) {
@@ -1176,12 +1180,15 @@ async function startServer() {
       if (req.body.avatarUrl !== undefined) updateData.avatarUrl = req.body.avatarUrl;
       if (req.body.isActive !== undefined) updateData.isActive = Boolean(req.body.isActive);
       if (cleanUsername !== undefined) updateData.username = cleanUsername;
-      if (req.body.password !== undefined) updateData.password = req.body.password;
+      if (req.body.password !== undefined && req.body.password !== null && String(req.body.password).trim() !== '') {
+        updateData.password = String(req.body.password).trim();
+      }
 
       const result = await db.update(schema.teachers).set(updateData).where(eq(schema.teachers.id, req.params.id)).returning();
       const updatedTeacher = result[0];
       
-      if (req.body.username || req.body.password || req.body.name) {
+      const newPasswordTrimmed = req.body.password !== undefined && req.body.password !== null ? String(req.body.password).trim() : '';
+      if (req.body.username || newPasswordTrimmed !== '' || req.body.name) {
         try {
           const existingUser = await db.query.user.findFirst({ where: eq(schema.user.teacherId, req.params.id) });
           const newEmail = req.body.username ? (req.body.username.includes('@') ? req.body.username : `${req.body.username}@bqa.local`) : (existingUser?.email || `${updatedTeacher.username}@bqa.local`);
@@ -1337,13 +1344,32 @@ async function startServer() {
 
   app.patch('/api/schedules/:id', async (req, res) => {
     try {
+      const existing = await db.query.schedules.findFirst({
+        where: eq(schema.schedules.id, req.params.id)
+      });
+      if (!existing) {
+        return res.status(404).json({ error: 'Jadwal pelajaran tidak ditemukan' });
+      }
+
+      const updateData: any = {};
+      if (req.body.teacherId !== undefined) updateData.teacherId = req.body.teacherId;
+      if (req.body.subject !== undefined) updateData.subject = String(req.body.subject).trim();
+      if (req.body.className !== undefined) updateData.className = String(req.body.className).trim();
+      if (req.body.unit !== undefined) updateData.unit = req.body.unit;
+      if (req.body.dayOfWeek !== undefined) updateData.dayOfWeek = req.body.dayOfWeek;
+      if (req.body.startTime !== undefined) updateData.startTime = req.body.startTime;
+      if (req.body.endTime !== undefined) updateData.endTime = req.body.endTime;
+      if (req.body.hours !== undefined) updateData.hours = Number(req.body.hours) || 2;
+      if (req.body.room !== undefined) updateData.room = req.body.room;
+
       const result = await db.update(schema.schedules)
-        .set(req.body)
+        .set(updateData)
         .where(eq(schema.schedules.id, req.params.id))
         .returning();
       res.json(result[0]);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to update schedule' });
+    } catch (error: any) {
+      console.error('Failed to update schedule:', error);
+      res.status(500).json({ error: error?.message || 'Failed to update schedule' });
     }
   });
 

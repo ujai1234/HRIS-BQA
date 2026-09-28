@@ -82,7 +82,7 @@ export const MasterTeachers: React.FC = () => {
       avatarColor: teacher.avatarColor || 'bg-emerald-700',
       isActive: teacher.isActive,
       username: teacher.username || '',
-      password: teacher.password || '',
+      password: '', // Kept empty so editing other fields does not trigger password length revalidation
     });
     setBaseSalaryInput(formatCurrencyInput(teacher.baseSalary));
     setHourlyRateInput(formatCurrencyInput(teacher.hourlyRate));
@@ -120,7 +120,7 @@ export const MasterTeachers: React.FC = () => {
     e.preventDefault();
     if (!formData.name.trim()) return;
 
-    const finalPayload = {
+    const finalPayload: any = {
       ...formData,
       baseSalary: parseCurrencyInput(baseSalaryInput),
       hourlyRate: parseCurrencyInput(hourlyRateInput),
@@ -130,6 +130,9 @@ export const MasterTeachers: React.FC = () => {
     };
 
     if (editingTeacher) {
+      if (!formData.password || !formData.password.trim()) {
+        delete finalPayload.password;
+      }
       updateTeacher(editingTeacher.id, finalPayload);
       setEditingTeacher(null);
     } else {
@@ -415,9 +418,12 @@ export const MasterTeachers: React.FC = () => {
                     type="text"
                     value={formData.password || ''}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    placeholder="Biarkan kosong jika SSO"
+                    placeholder={editingTeacher ? 'Biarkan kosong jika tidak diubah' : 'Min. 8 karakter (default: guru1234)'}
                     className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-emerald-50"
                   />
+                  {editingTeacher && (
+                    <p className="text-[10px] text-slate-400">Biarkan kosong jika tidak ingin mengubah password akun</p>
+                  )}
                 </div>
               </div>
 
