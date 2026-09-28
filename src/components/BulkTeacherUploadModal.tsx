@@ -203,7 +203,7 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
           let rawRole = (rawCols[7] || 'GURU').toUpperCase().trim();
           const rawPhone = rawCols[8] || '';
           const rawUsername = rawCols[9] || '';
-          const rawPassword = rawCols[10] || '';
+          const rawPassword = (rawCols[10] || '').trim() || 'guru1234';
 
           // Validations
           if (!rawName) {
@@ -238,7 +238,7 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
             role: rawRole as UserRole,
             phone: rawPhone,
             username: rawUsername || undefined,
-            password: rawPassword || undefined,
+            password: rawPassword,
             isValid: errors.length === 0,
             errors
           });

@@ -12,7 +12,11 @@ import {
   AlertCircle, 
   Building2, 
   Sparkles,
-  FlipHorizontal
+  FlipHorizontal,
+  KeyRound,
+  Lock,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useHRIS } from '../context/HRISContext';
@@ -30,6 +34,13 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
   const [phone, setPhone] = useState(currentUser?.phone || '');
   const [previewPhoto, setPreviewPhoto] = useState<string | null>(currentUser?.avatarUrl || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Self password reset state
+  const [newPass, setNewPass] = useState('');
+  const [confirmPass, setConfirmPass] = useState('');
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const [isChangingPass, setIsChangingPass] = useState(false);
 
   // Camera state
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -220,6 +231,36 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
     }
   };
 
+  const handleResetSelfPassword = async () => {
+    if (!newPass.trim()) {
+      toast.error('Silakan ketik kata sandi baru');
+      return;
+    }
+    if (newPass.trim().length < 6) {
+      toast.error('Kata sandi baru minimal 6 karakter');
+      return;
+    }
+    if (newPass !== confirmPass) {
+      toast.error('Konfirmasi kata sandi tidak cocok');
+      return;
+    }
+
+    setIsChangingPass(true);
+    try {
+      await updateTeacher(currentUser.id, {
+        password: newPass.trim()
+      });
+      toast.success('Alhamdulillah, kata sandi Anda berhasil diperbarui!');
+      setNewPass('');
+      setConfirmPass('');
+    } catch (err) {
+      console.error('Failed to update password:', err);
+      toast.error('Gagal memperbarui kata sandi');
+    } finally {
+      setIsChangingPass(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
       <div className="bg-white dark:bg-[#121f1a] w-full max-w-lg rounded-2xl border border-slate-200 dark:border-emerald-800/40 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -401,6 +442,85 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                   <p className="text-[10px] text-slate-400 dark:text-emerald-400/60 mt-1">
                     Digunakan untuk koordinasi jadwal KBM & informasi penting pesantren.
                   </p>
+                </div>
+
+                {/* Reset Password Section (Self-Service) */}
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0e1814] border border-slate-100 dark:border-emerald-900/30 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+                      <KeyRound className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-emerald-100">
+                        Ganti Kata Sandi Akun
+                      </h4>
+                      <p className="text-[10px] text-slate-500 dark:text-emerald-400/60">
+                        Atur kata sandi mandiri Anda untuk masuk ke sistem HRIS
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-600 dark:text-emerald-300/80 mb-1">
+                        Kata Sandi Baru
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showNewPass ? 'text' : 'password'}
+                          value={newPass}
+                          onChange={(e) => setNewPass(e.target.value)}
+                          placeholder="Min. 6 karakter"
+                          className="w-full px-2.5 py-1.5 pr-8 text-xs rounded-lg bg-white dark:bg-[#121f1a] text-slate-900 dark:text-emerald-50 border border-slate-200 dark:border-emerald-800/50 focus:outline-none focus:border-emerald-600 font-mono"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPass(!showNewPass)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-emerald-300 cursor-pointer"
+                        >
+                          {showNewPass ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-600 dark:text-emerald-300/80 mb-1">
+                        Konfirmasi Sandi Baru
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showConfirmPass ? 'text' : 'password'}
+                          value={confirmPass}
+                          onChange={(e) => setConfirmPass(e.target.value)}
+                          placeholder="Ulangi sandi baru"
+                          className="w-full px-2.5 py-1.5 pr-8 text-xs rounded-lg bg-white dark:bg-[#121f1a] text-slate-900 dark:text-emerald-50 border border-slate-200 dark:border-emerald-800/50 focus:outline-none focus:border-emerald-600 font-mono"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPass(!showConfirmPass)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-emerald-300 cursor-pointer"
+                        >
+                          {showConfirmPass ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-1">
+                    <button
+                      type="button"
+                      onClick={handleResetSelfPassword}
+                      disabled={isChangingPass || !newPass.trim()}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#163832] hover:bg-[#0B2B26] text-[#DAF1DE] transition-all cursor-pointer disabled:opacity-40"
+                    >
+                      {isChangingPass ? (
+                        <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <Lock className="w-3 h-3" />
+                      )}
+                      <span>Simpan Sandi Baru</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </>

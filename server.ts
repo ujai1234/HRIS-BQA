@@ -976,8 +976,8 @@ async function startServer() {
 
   app.post('/api/teachers', async (req, res) => {
     try {
-      if (req.body.password && req.body.password.length < 8) {
-        return res.status(400).json({ error: 'Password minimal 8 karakter.' });
+      if (req.body.password && req.body.password.length < 6) {
+        return res.status(400).json({ error: 'Password minimal 6 karakter.' });
       }
 
       let cleanUsername: string | null = null;
@@ -1105,7 +1105,7 @@ async function startServer() {
         avatarUrl: item.avatarUrl || null,
         isActive: item.isActive !== undefined ? Boolean(item.isActive) : true,
         username: typeof item.username === 'string' && item.username.trim() ? item.username.trim().toLowerCase() : null,
-        password: item.password || null,
+        password: (item.password && String(item.password).trim()) ? String(item.password).trim() : 'guru1234',
       }));
 
       const result = await db.insert(schema.teachers).values(sanitizedList).returning();
@@ -1126,8 +1126,8 @@ async function startServer() {
       // Only validate password if a non-empty new password is provided and different from existing
       if (req.body.password !== undefined && req.body.password !== null) {
         const trimmedPass = String(req.body.password).trim();
-        if (trimmedPass !== '' && trimmedPass !== existingTeacher.password && trimmedPass.length < 8) {
-          return res.status(400).json({ error: 'Password baru minimal 8 karakter.' });
+        if (trimmedPass !== '' && trimmedPass !== existingTeacher.password && trimmedPass.length < 6) {
+          return res.status(400).json({ error: 'Password baru minimal 6 karakter.' });
         }
       }
 

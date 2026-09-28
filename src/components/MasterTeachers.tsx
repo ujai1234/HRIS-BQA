@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Search, Plus, Edit3, Trash2, UploadCloud, RotateCcw } from 'lucide-react';
+import { Search, Plus, Edit3, Trash2, UploadCloud, RotateCcw, Eye, EyeOff } from 'lucide-react';
+import { toast } from 'sonner';
 import { useHRIS } from '../context/HRISContext';
 import { Teacher } from '../types';
 import { formatRupiah, formatCurrencyInput, parseCurrencyInput, validateCurrencyRate, terbilang } from '../utils/formatters';
@@ -18,6 +19,7 @@ export const MasterTeachers: React.FC = () => {
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [isAddingTeacher, setIsAddingTeacher] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState<Omit<Teacher, 'id'>>({
@@ -69,6 +71,7 @@ export const MasterTeachers: React.FC = () => {
 
   const handleOpenEdit = (teacher: Teacher) => {
     setEditingTeacher(teacher);
+    setShowPassword(false);
     setFormData({
       nip: teacher.nip,
       name: teacher.name,
@@ -82,7 +85,7 @@ export const MasterTeachers: React.FC = () => {
       avatarColor: teacher.avatarColor || 'bg-emerald-700',
       isActive: teacher.isActive,
       username: teacher.username || '',
-      password: '', // Kept empty so editing other fields does not trigger password length revalidation
+      password: teacher.password || 'guru1234', // Tampilkan password tersimpan dari CSV / database
     });
     setBaseSalaryInput(formatCurrencyInput(teacher.baseSalary));
     setHourlyRateInput(formatCurrencyInput(teacher.hourlyRate));
@@ -94,6 +97,7 @@ export const MasterTeachers: React.FC = () => {
   const handleOpenAdd = () => {
     setIsAddingTeacher(true);
     setEditingTeacher(null);
+    setShowPassword(false);
     setFormData({
       nip: `PBQ-2026-${String(teachers.length + 1).padStart(3, '0')}`,
       name: '',
@@ -107,7 +111,7 @@ export const MasterTeachers: React.FC = () => {
       avatarColor: 'bg-teal-700',
       isActive: true,
       username: '',
-      password: '',
+      password: 'guru1234', // Default password staf baru
     });
     setBaseSalaryInput('800.000');
     setHourlyRateInput('40.000');
@@ -118,10 +122,24 @@ export const MasterTeachers: React.FC = () => {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim()) return;
+    if (!formData.name.trim()) {
+      toast.error('Nama lengkap wajib diisi');
+      return;
+    }
+
+    const trimmedPassword = (formData.password || '').trim();
+    if (!trimmedPassword) {
+      toast.error('Password akun wajib diisi');
+      return;
+    }
+    if (trimmedPassword.length < 6) {
+      toast.error('Password akun minimal 6 karakter');
+      return;
+    }
 
     const finalPayload: any = {
       ...formData,
+      password: trimmedPassword,
       baseSalary: parseCurrencyInput(baseSalaryInput),
       hourlyRate: parseCurrencyInput(hourlyRateInput),
       dailyTransport: parseCurrencyInput(dailyTransportInput),
@@ -130,9 +148,6 @@ export const MasterTeachers: React.FC = () => {
     };
 
     if (editingTeacher) {
-      if (!formData.password || !formData.password.trim()) {
-        delete finalPayload.password;
-      }
       updateTeacher(editingTeacher.id, finalPayload);
       setEditingTeacher(null);
     } else {
@@ -155,7 +170,7 @@ export const MasterTeachers: React.FC = () => {
                 : 'text-[#8EB69B] hover:text-[#051F20]'
             }`}
           >
-            Data Pokok Guru
+            Data Pokok Staf & Guru
           </button>
 
           <button
@@ -172,7 +187,7 @@ export const MasterTeachers: React.FC = () => {
         </div>
 
         <span className="text-xs text-[#8EB69B] font-bold uppercase tracking-wider hidden sm:inline">
-          {teachers.length} Guru
+          {teachers.length} Staf / Guru
         </span>
       </div>
 
@@ -216,7 +231,7 @@ export const MasterTeachers: React.FC = () => {
               <button
                 onClick={handleReset}
                 className="inline-flex items-center justify-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-[10px] transition-colors cursor-pointer"
-                title="Hapus Semua Data Guru"
+                title="Hapus Semua Data Guru & Staf"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Reset Data</span>
@@ -236,7 +251,7 @@ export const MasterTeachers: React.FC = () => {
                 className="inline-flex items-center justify-center gap-1 bg-[#163832] hover:bg-[#0B2B26] text-[#DAF1DE] text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-[10px] transition-colors cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Tambah Guru</span>
+                <span>Tambah Staf</span>
               </button>
             </div>
           </div>
@@ -317,8 +332,8 @@ export const MasterTeachers: React.FC = () => {
                           <button
                             onClick={async () => {
                               const ok = await confirm({
-                                title: 'Hapus Data Guru',
-                                message: `Apakah Anda yakin ingin menghapus data "${t.name}" (NIP: ${t.nip})? Akses akun dan jadwal mengajar asatidz ini akan dihapus secara permanen.`,
+                                title: 'Hapus Data Staf',
+                                message: `Apakah Anda yakin ingin menghapus data "${t.name}" (NIP: ${t.nip})? Akses akun dan jadwal mengajar staf ini akan dihapus secara permanen.`,
                                 confirmText: 'Ya, Hapus Data',
                                 cancelText: 'Batal',
                                 variant: 'danger',
@@ -349,7 +364,7 @@ export const MasterTeachers: React.FC = () => {
           <div className="bg-white dark:bg-[#121f1a] rounded-xl shadow-lg max-w-md w-full overflow-hidden border border-slate-200 dark:border-emerald-900/40">
             <div className="px-5 py-3.5 border-b border-slate-100 dark:border-emerald-900/40 flex items-center justify-between">
               <h3 className="font-semibold text-sm text-slate-900 dark:text-emerald-50">
-                {editingTeacher ? 'Edit Data Guru' : 'Tambah Guru Baru'}
+                {editingTeacher ? 'Edit Data Staf' : 'Tambah Staf Baru'}
               </h3>
               <button
                 onClick={() => {
@@ -365,7 +380,7 @@ export const MasterTeachers: React.FC = () => {
             <form onSubmit={handleSave} className="p-5 space-y-3.5 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-slate-600 dark:text-emerald-400/70 font-medium block">NIP Guru</label>
+                  <label className="text-slate-600 dark:text-emerald-400/70 font-medium block">NIP / ID Staf</label>
                   <input
                     type="text"
                     value={formData.nip}
@@ -413,17 +428,40 @@ export const MasterTeachers: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-slate-600 dark:text-emerald-400/70 font-medium block">Password (Opsional)</label>
-                  <input
-                    type="text"
-                    value={formData.password || ''}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    placeholder={editingTeacher ? 'Biarkan kosong jika tidak diubah' : 'Min. 8 karakter (default: guru1234)'}
-                    className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 text-slate-900 dark:text-emerald-50"
-                  />
-                  {editingTeacher && (
-                    <p className="text-[10px] text-slate-400">Biarkan kosong jika tidak ingin mengubah password akun</p>
-                  )}
+                  <div className="flex items-center justify-between">
+                    <label className="text-slate-600 dark:text-emerald-400/70 font-medium block">
+                      Password Akun <span className="text-rose-500 font-bold">*</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, password: 'guru1234' })}
+                      className="text-[10px] text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer font-medium"
+                      title="Setel ke password standar guru1234"
+                    >
+                      Reset Default
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={formData.password || ''}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      placeholder="Minimal 6 karakter"
+                      required
+                      className="w-full pl-2.5 pr-8 py-1.5 bg-slate-50 dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 font-mono text-slate-900 dark:text-emerald-50 text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+                      title={showPassword ? 'Sembunyikan password' : 'Lihat password'}
+                    >
+                      {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-slate-400 dark:text-emerald-500/60">
+                    Wajib diisi (min. 6 karakter). Staf dapat mereset sandi mandiri di profil akun.
+                  </p>
                 </div>
               </div>
 
