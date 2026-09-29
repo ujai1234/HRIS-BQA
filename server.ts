@@ -4341,16 +4341,19 @@ async function startServer() {
       
       const newKeuangan = await db.query.user.findFirst({ where: eq(schema.user.email, keuanganEmail) });
       if (newKeuangan) {
-        const tIns = await db.insert(schema.teachers).values({
-          id: 'TCH-KEUANGAN',
-          nip: 'KEU-01',
-          name: 'Admin Keuangan',
-          position: 'Staff Keuangan',
-          unit: 'Manajemen',
-          baseSalary: 0,
-          role: 'KEUANGAN',
-          isActive: true
-        }).returning();
+        let tIns = await db.select().from(schema.teachers).where(eq(schema.teachers.id, 'TCH-KEUANGAN'));
+        if (tIns.length === 0) {
+          tIns = await db.insert(schema.teachers).values({
+            id: 'TCH-KEUANGAN',
+            nip: 'KEU-01',
+            name: 'Admin Keuangan',
+            position: 'Staff Keuangan',
+            unit: 'Manajemen',
+            baseSalary: 0,
+            role: 'KEUANGAN',
+            isActive: true
+          }).returning();
+        }
         await db.update(schema.user).set({ teacherId: tIns[0].id }).where(eq(schema.user.id, newKeuangan.id));
       }
       console.log('Admin Keuangan created.');
