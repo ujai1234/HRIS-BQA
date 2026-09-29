@@ -19,6 +19,7 @@ import {
 } from './src/data/initialData';
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./src/lib/auth";
+import { hashPassword } from "better-auth/crypto";
 
 
 async function startServer() {
@@ -956,6 +957,85 @@ async function startServer() {
     }
   });
 
+  // ==========================================
+  // BETTER AUTH & TEACHERS SYNCHRONIZER
+  // ==========================================
+  async function syncTeacherAuthAccount(teacher: { id: string; nip?: string | null; name: string; username?: string | null; password?: string | null }) {
+    const rawUsername = teacher.username ? teacher.username.trim() : '';
+    const email = rawUsername.includes('@') 
+      ? rawUsername.toLowerCase() 
+      : `${(rawUsername || teacher.nip || teacher.id).toLowerCase()}@bqa.local`;
+    const name = (teacher.name || '').trim();
+    const plainPassword = teacher.password ? String(teacher.password).trim() : '';
+
+    try {
+      // 1. Check if user already exists in `user` table by teacherId OR email
+      let existingUser = await db.query.user.findFirst({
+        where: or(
+          eq(schema.user.teacherId, teacher.id),
+          eq(schema.user.email, email)
+        )
+      });
+
+      const now = new Date();
+
+      if (existingUser) {
+        await db.update(schema.user).set({
+          teacherId: teacher.id,
+          email: email,
+          name: name || existingUser.name,
+          updatedAt: now
+        }).where(eq(schema.user.id, existingUser.id));
+      } else {
+        const newUserId = `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const insertedUsers = await db.insert(schema.user).values({
+          id: newUserId,
+          name: name || 'Asatidz',
+          email: email,
+          emailVerified: true,
+          teacherId: teacher.id,
+          createdAt: now,
+          updatedAt: now,
+        }).returning();
+        existingUser = insertedUsers[0];
+      }
+
+      // 2. If password is provided (min 6 chars), ensure credential account exists or is updated
+      if (plainPassword.length >= 6) {
+        const hashedPassword = await hashPassword(plainPassword);
+
+        const existingAccount = await db.query.account.findFirst({
+          where: and(
+            eq(schema.account.userId, existingUser.id),
+            eq(schema.account.providerId, 'credential')
+          )
+        });
+
+        if (existingAccount) {
+          await db.update(schema.account).set({
+            password: hashedPassword,
+            updatedAt: now
+          }).where(eq(schema.account.id, existingAccount.id));
+          console.log(`[AuthSync] Password updated for ${email} (teacher ${teacher.id})`);
+        } else {
+          const newAccountId = `acc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+          await db.insert(schema.account).values({
+            id: newAccountId,
+            accountId: existingUser.id,
+            providerId: 'credential',
+            userId: existingUser.id,
+            password: hashedPassword,
+            createdAt: now,
+            updatedAt: now,
+          });
+          console.log(`[AuthSync] Credential account created for ${email} (teacher ${teacher.id})`);
+        }
+      }
+    } catch (err) {
+      console.error(`[AuthSync] Error syncing auth for teacher ${teacher.id} (${email}):`, err);
+    }
+  }
+
   // Teachers
   app.get('/api/teachers', async (req, res) => {
     try {
@@ -1034,38 +1114,7 @@ async function startServer() {
       const result = await db.insert(schema.teachers).values(teacherPayload).returning();
       
       // 4. Sinkronisasi Better-Auth jika ada username & password
-      if (cleanUsername && req.body.password) {
-        try {
-          const email = cleanUsername.includes('@') ? cleanUsername : `${cleanUsername}@bqa.local`;
-          const existingAuthUser = await db.query.user.findFirst({
-            where: eq(schema.user.email, email)
-          });
-
-          if (existingAuthUser) {
-            await db.update(schema.user).set({
-              teacherId: result[0].id,
-              name: req.body.name
-            }).where(eq(schema.user.id, existingAuthUser.id));
-          } else {
-            await auth.api.signUpEmail({
-              body: {
-                email: email,
-                password: req.body.password,
-                name: req.body.name,
-                teacherId: result[0].id
-              },
-              headers: new Headers({
-                'host': req.headers.host || 'localhost:3000',
-                'origin': req.headers.origin || 'http://localhost:3000',
-                'x-forwarded-host': req.headers.host || 'localhost:3000'
-              }),
-              asResponse: true
-            });
-          }
-        } catch (authErr) {
-          console.error("Auto-register failed:", authErr);
-        }
-      }
+      await syncTeacherAuthAccount(result[0]);
 
       res.json(result[0]);
     } catch (error: any) {
@@ -1109,6 +1158,12 @@ async function startServer() {
       }));
 
       const result = await db.insert(schema.teachers).values(sanitizedList).returning();
+
+      // Sinkronisasi Better-Auth untuk seluruh guru yang diimpor
+      for (const t of result) {
+        await syncTeacherAuthAccount(t);
+      }
+
       res.json(result);
     } catch (error: any) {
       console.error('Bulk teacher insertion error:', error);
@@ -1187,34 +1242,9 @@ async function startServer() {
       const result = await db.update(schema.teachers).set(updateData).where(eq(schema.teachers.id, req.params.id)).returning();
       const updatedTeacher = result[0];
       
-      const newPasswordTrimmed = req.body.password !== undefined && req.body.password !== null ? String(req.body.password).trim() : '';
-      if (req.body.username || newPasswordTrimmed !== '' || req.body.name) {
-        try {
-          const existingUser = await db.query.user.findFirst({ where: eq(schema.user.teacherId, req.params.id) });
-          const newEmail = req.body.username ? (req.body.username.includes('@') ? req.body.username : `${req.body.username}@bqa.local`) : (existingUser?.email || `${updatedTeacher.username}@bqa.local`);
-          const newName = req.body.name || updatedTeacher.name;
-          const passwordChanged = req.body.password && req.body.password !== existingTeacher.password;
-          
-          if (passwordChanged) {
-            if (existingUser) {
-              await db.delete(schema.session).where(eq(schema.session.userId, existingUser.id));
-              await db.delete(schema.account).where(eq(schema.account.userId, existingUser.id));
-              await db.delete(schema.user).where(eq(schema.user.id, existingUser.id));
-            }
-            await auth.api.signUpEmail({
-              body: { email: newEmail, password: req.body.password, name: newName, teacherId: updatedTeacher.id },
-              headers: new Headers({ 'host': req.headers.host || 'localhost:3000', 'origin': req.headers.origin || 'http://localhost:3000', 'x-forwarded-host': req.headers.host || 'localhost:3000' }),
-              asResponse: true
-            });
-            console.log(`[Admin] Re-created Better Auth user for ${updatedTeacher.id} due to password change.`);
-          } else if (existingUser && (req.body.username || req.body.name)) {
-            await db.update(schema.user).set({ email: newEmail, name: newName }).where(eq(schema.user.id, existingUser.id));
-            console.log(`[Admin] Updated Better Auth email/name for ${updatedTeacher.id}.`);
-          }
-        } catch (authErr) {
-          console.error('Failed to sync teacher update with Better-Auth:', authErr);
-        }
-      }
+      // Sinkronisasi Better-Auth secara konsisten & aman
+      await syncTeacherAuthAccount(updatedTeacher);
+
       res.json(updatedTeacher);
     } catch (error: any) {
       console.error(error);
@@ -1222,6 +1252,100 @@ async function startServer() {
         return res.status(400).json({ error: 'Gagal memperbarui: NIP atau Username sudah digunakan guru lain.' });
       }
       res.status(500).json({ error: error?.message || 'Failed to update teacher' });
+    }
+  });
+
+  // Link Google Account to Teacher Record
+  app.post('/api/auth/link-google-teacher', async (req, res) => {
+    try {
+      const headersObj = new Headers();
+      for (const [key, value] of Object.entries(req.headers)) {
+        if (value !== undefined) {
+          headersObj.set(key, Array.isArray(value) ? value.join(', ') : (value as string));
+        }
+      }
+      const session = await auth.api.getSession({ headers: headersObj });
+      if (!session?.user) {
+        return res.status(401).json({ error: 'Sesi tidak valid' });
+      }
+
+      const userEmail = (session.user.email || '').toLowerCase().trim();
+      const userPrefix = userEmail.split('@')[0];
+      const googleName = (session.user.name || '').toLowerCase().trim();
+      const cleanGoogleName = googleName.replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
+
+      const allTeachers = await db.query.teachers.findMany();
+      const matched = allTeachers.find((t) => {
+        const tUser = (t.username || '').toLowerCase().trim();
+        const tNip = (t.nip || '').toLowerCase().trim();
+        const tId = (t.id || '').toLowerCase().trim();
+        
+        // 1. Exact match on username, nip, id
+        if (tUser && (tUser === userEmail || tUser === userPrefix)) return true;
+        if (tNip && (tNip === userPrefix || tNip === userEmail)) return true;
+        if (tId && tId === userPrefix) return true;
+
+        // 2. Fuzzy name match without religious / academic titles
+        const cleanTeacherName = (t.name || '')
+          .toLowerCase()
+          .replace(/^(ustadz|ustdz|ust|usth|kh\.|h\.|habib)\s+/i, '')
+          .replace(/,\s*(lc|m\.pd|s\.pd|s\.pd\.i|m\.ag|s\.ag|m\.si|b\.a)\.?/gi, '')
+          .replace(/[^a-z0-9]/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        if (cleanTeacherName && cleanGoogleName && (cleanTeacherName === cleanGoogleName || cleanGoogleName.includes(cleanTeacherName) || cleanTeacherName.includes(cleanGoogleName))) {
+          return true;
+        }
+        return false;
+      });
+
+      if (!matched) {
+        return res.status(404).json({
+          error: `Akun Google (${session.user.email}) belum terdaftar pada Master Data Asatidz HRIS. Silakan hubungi Administrator untuk mendaftarkan akun ini.`
+        });
+      }
+
+      // Link teacherId in user table
+      await db.update(schema.user).set({
+        teacherId: matched.id,
+        updatedAt: new Date()
+      }).where(eq(schema.user.id, session.user.id));
+
+      // Also ensure teacher username stores this email if it was missing or different
+      if (!matched.username || !matched.username.includes('@')) {
+        await db.update(schema.teachers).set({
+          username: userEmail
+        }).where(eq(schema.teachers.id, matched.id));
+      }
+
+      console.log(`[GoogleLink] Successfully linked ${userEmail} to teacher ${matched.name} (${matched.id})`);
+
+      res.json({
+        success: true,
+        teacherId: matched.id,
+        role: matched.role,
+        name: matched.name
+      });
+    } catch (err: any) {
+      console.error('Error linking Google teacher:', err);
+      res.status(500).json({ error: err.message || 'Gagal menghubungkan akun Google' });
+    }
+  });
+
+  // Batch Sync All Teachers to Better-Auth
+  app.post('/api/teachers/sync-auth', async (req, res) => {
+    try {
+      const allTeachers = await db.query.teachers.findMany();
+      let syncedCount = 0;
+      for (const t of allTeachers) {
+        await syncTeacherAuthAccount(t);
+        syncedCount++;
+      }
+      res.json({ success: true, syncedCount, totalTeachers: allTeachers.length });
+    } catch (err: any) {
+      console.error('Failed to batch sync teachers auth:', err);
+      res.status(500).json({ error: err.message || 'Gagal sinkronisasi data akun guru' });
     }
   });
 

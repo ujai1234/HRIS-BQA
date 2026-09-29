@@ -62,9 +62,32 @@ export const auth = betterAuth({
         user: {
             create: {
                 before: async (user) => {
+                    let teacherId = (user as any).teacherId;
+                    if (!teacherId && user.email) {
+                        try {
+                            const emailLower = user.email.toLowerCase().trim();
+                            const prefix = emailLower.split('@')[0];
+                            const allTeachers = await db.query.teachers.findMany();
+                            const matched = allTeachers.find((t: any) => {
+                                const tUser = (t.username || '').toLowerCase().trim();
+                                const tNip = (t.nip || '').toLowerCase().trim();
+                                const tId = (t.id || '').toLowerCase().trim();
+                                if (tUser && (tUser === emailLower || tUser === prefix)) return true;
+                                if (tNip && (tNip === prefix || tNip === emailLower)) return true;
+                                if (tId && tId === prefix) return true;
+                                return false;
+                            });
+                            if (matched) {
+                                teacherId = matched.id;
+                            }
+                        } catch (e) {
+                            console.error('[auth.ts] Error resolving teacherId in user create hook:', e);
+                        }
+                    }
                     return {
                         data: {
                             ...user,
+                            teacherId,
                             emailVerified: true
                         }
                     };

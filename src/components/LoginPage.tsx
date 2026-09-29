@@ -31,46 +31,89 @@ export const LoginPage: React.FC = () => {
   React.useEffect(() => {
     // @ts-ignore
     if (session?.user) {
-      // @ts-ignore - check if user has a teacherId linked
-      const teacherId = session.user.teacherId as string | undefined;
-      let role: any = 'GURU';
-      let finalTeacherId = teacherId;
-
-      if (teacherId) {
-        if (teachers.length === 0) return; // Wait for teachers to load
-
-        const targetTeacher = teachers.find((t: any) => t.id === teacherId);
-        if (targetTeacher) {
-          role = targetTeacher.role;
-        }
-      } else {
-        if (teachers.length === 0) return; // Wait for teachers to load
-
+      const handleGoogleAuthRedirect = async () => {
         // @ts-ignore
-        const email = session.user.email as string;
-        const targetByEmail = teachers.find((t: any) =>
-          t.id.toLowerCase() === email.split('@')[0].toLowerCase() ||
-          // @ts-ignore
-          t.name?.toLowerCase() === session.user?.name?.toLowerCase() ||
-          t.username?.toLowerCase() === email.toLowerCase()
-        );
+        const email = (session.user.email || '').toLowerCase().trim();
+        // @ts-ignore
+        let teacherId = session.user.teacherId as string | undefined;
 
-        if (targetByEmail) {
-          role = targetByEmail.role;
-          finalTeacherId = targetByEmail.id;
-        } else {
-          // Akun ini tidak terdaftar sebagai asatidz/staf HRIS (kemungkinan Wali Santri).
-          setError(`Akun ${email} terdaftar sebagai Wali Santri (Portal Santri), bukan Asatidz HRIS.`);
+        // 1. Coba hubungkan secara otomatis ke backend jika belum memiliki teacherId
+        if (!teacherId) {
+          try {
+            const linkRes = await fetch('/api/auth/link-google-teacher', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            if (linkRes.ok) {
+              const linkData = await linkRes.json();
+              if (linkData.teacherId) {
+                teacherId = linkData.teacherId;
+              }
+            }
+          } catch (e) {
+            console.error('Error linking Google account:', e);
+          }
+        }
+
+        // 2. Jika backend link belum selesai, cari kecocokan di data teachers lokal
+        if (!teacherId && teachers.length > 0) {
+          const emailPrefix = email.split('@')[0];
+          // @ts-ignore
+          const cleanGoogleName = (session.user?.name || '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+          const targetByEmail = teachers.find((t: any) => {
+            const tUser = (t.username || '').toLowerCase().trim();
+            const tNip = (t.nip || '').toLowerCase().trim();
+            const tId = (t.id || '').toLowerCase().trim();
+
+            if (tUser && (tUser === email || tUser === emailPrefix)) return true;
+            if (tNip && (tNip === emailPrefix || tNip === email)) return true;
+            if (tId && tId === emailPrefix) return true;
+
+            const cleanTeacherName = (t.name || '')
+              .toLowerCase()
+              .replace(/^(ustadz|ustdz|ust|usth|kh\.|h\.|habib)\s+/i, '')
+              .replace(/,\s*(lc|m\.pd|s\.pd|s\.pd\.i|m\.ag|s\.ag|m\.si|b\.a)\.?/gi, '')
+              .replace(/[^a-z0-9]/g, ' ')
+              .replace(/\s+/g, ' ')
+              .trim();
+
+            if (cleanTeacherName && cleanGoogleName && (cleanTeacherName === cleanGoogleName || cleanGoogleName.includes(cleanTeacherName) || cleanTeacherName.includes(cleanGoogleName))) {
+              return true;
+            }
+            return false;
+          });
+
+          if (targetByEmail) {
+            teacherId = targetByEmail.id;
+          }
+        }
+
+        // 3. Jika tetap tidak ditemukan di Master Data
+        if (!teacherId) {
+          if (teachers.length === 0) return; // Tunggu data guru termuat
+          await authClient.signOut({ fetchOptions: {} });
+          setError(`Akun Google (${email}) belum terdaftar pada Master Data Asatidz HRIS. Silakan hubungi Administrator untuk mendaftarkan akun ini.`);
           return;
         }
-      }
 
-      if (role === 'KEUANGAN') {
-        setError(`Akun Anda adalah Staff Keuangan. Silakan login melalui Aplikasi Keuangan khusus Bendahara.`);
-        return;
-      }
+        const targetTeacher = teachers.find((t: any) => t.id === teacherId);
+        const role = targetTeacher?.role || 'GURU';
 
-      login(role, finalTeacherId);
+        if (role === 'KEUANGAN') {
+          await authClient.signOut({ fetchOptions: {} });
+          setError(`Akun Anda adalah Staff Keuangan. Silakan login melalui Aplikasi Keuangan khusus Bendahara.`);
+          return;
+        }
+
+        login(role, teacherId);
+      };
+
+      handleGoogleAuthRedirect();
     }
   }, [session, teachers, login]);
 
@@ -80,23 +123,56 @@ export const LoginPage: React.FC = () => {
     setError(null);
 
     try {
-      const email = username.includes('@') ? username : `${username}@bqa.local`;
-      const { data, error: authError } = await authClient.signIn.email({ email, password });
+      let loginEmail = username.trim().toLowerCase();
+      let matchedTeacherId: string | undefined = undefined;
+
+      // Dukungan login fleksibel: jika pengguna menginput NIP atau Username (tanpa @)
+      if (!loginEmail.includes('@')) {
+        const matched = teachers.find((t: any) =>
+          t.nip?.toLowerCase() === loginEmail ||
+          t.username?.toLowerCase() === loginEmail ||
+          t.id?.toLowerCase() === loginEmail
+        );
+        if (matched) {
+          matchedTeacherId = matched.id;
+          if (matched.username && matched.username.includes('@')) {
+            loginEmail = matched.username.toLowerCase();
+          } else {
+            loginEmail = `${(matched.username || matched.nip || loginEmail).toLowerCase()}@bqa.local`;
+          }
+        } else {
+          loginEmail = `${loginEmail}@bqa.local`;
+        }
+      }
+
+      const { data, error: authError } = await authClient.signIn.email({ email: loginEmail, password });
 
       if (authError) {
         setError(authError.message || 'Identitas asatidz atau kata sandi salah');
       } else if (data?.user) {
         // @ts-ignore - teacherId is an additional field
-        const teacherId = data.user.teacherId as string | undefined;
+        let teacherId = (data.user.teacherId as string | undefined) || matchedTeacherId;
         
-        // Validasi: pastikan akun ini terdaftar di Master Data HRIS sebagai asatidz/staf
+        // Validasi & Auto-link jika teacherId belum ada di sesi Better Auth
         if (!teacherId) {
-          // Akun Better Auth tidak memiliki teacherId — kemungkinan akun Wali Santri
+          const userEmail = (data.user.email || '').toLowerCase().trim();
+          const target = teachers.find((t: any) =>
+            t.username?.toLowerCase() === userEmail ||
+            t.username?.toLowerCase() === userEmail.split('@')[0] ||
+            t.nip?.toLowerCase() === userEmail.split('@')[0]
+          );
+          if (target) {
+            teacherId = target.id;
+            fetch('/api/auth/link-google-teacher', { method: 'POST' }).catch(() => {});
+          }
+        }
+
+        if (!teacherId) {
           const userEmail = data.user.email || '';
           const isWaliAccount = userEmail.startsWith('ortu') || userEmail.startsWith('wali') || userEmail === 'walidemo@bqa.local';
           const errorMsg = isWaliAccount
             ? `Akun ${userEmail} adalah akun Wali Santri (Portal Santri), bukan akun HRIS Asatidz. Gunakan username/NIP Asatidz untuk login ke HRIS.`
-            : `Akun ${userEmail} tidak memiliki data asatidz yang terhubung. Hubungi Administrator HRIS.`;
+            : `Akun ${userEmail} tidak memiliki data asatidz yang terhubung di Master Data. Hubungi Administrator HRIS.`;
           await authClient.signOut({ fetchOptions: {} });
           setError(errorMsg);
           return;
@@ -104,7 +180,6 @@ export const LoginPage: React.FC = () => {
 
         const targetTeacher = teachers.find((t: any) => t.id === teacherId);
         if (!targetTeacher) {
-          // teacherId ada tapi tidak ditemukan di Master Data HRIS
           await authClient.signOut({ fetchOptions: {} });
           setError(`Akun ini (ID: ${teacherId}) tidak ditemukan di Master Data HRIS. Data mungkin telah dihapus. Hubungi Administrator.`);
           return;
