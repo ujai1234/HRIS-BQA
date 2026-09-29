@@ -117,43 +117,64 @@ export const LoginPage: React.FC = () => {
     setError(null);
 
     try {
-      let loginEmail = username.trim().toLowerCase();
+      let loginEmail = '';
       let matchedTeacherId: string | undefined = undefined;
+      const inputVal = username.trim().toLowerCase();
+      const inputPrefix = inputVal.includes('@') ? inputVal.split('@')[0] : inputVal;
 
-      // Dukungan login fleksibel: jika pengguna menginput NIP atau Username (tanpa @)
-      if (!loginEmail.includes('@')) {
-        let currentTeachers = teachers;
-        if (!currentTeachers || currentTeachers.length === 0) {
-          try {
-            const tRes = await fetch('/api/teachers');
-            if (tRes.ok) {
-              currentTeachers = await tRes.json();
-            }
-          } catch (e) {}
-        }
-
-        const matched = (currentTeachers || []).find((t: any) =>
-          t.nip?.toLowerCase() === loginEmail ||
-          t.username?.toLowerCase() === loginEmail ||
-          t.id?.toLowerCase() === loginEmail
-        );
-
-        if (matched) {
-          matchedTeacherId = matched.id;
-          if (matched.username && matched.username.includes('@')) {
-            loginEmail = matched.username.toLowerCase();
-          } else {
-            loginEmail = `${(matched.username || matched.nip || loginEmail).toLowerCase()}@bqa.local`;
+      let currentTeachers = teachers;
+      if (!currentTeachers || currentTeachers.length === 0) {
+        try {
+          const tRes = await fetch('/api/teachers');
+          if (tRes.ok) {
+            currentTeachers = await tRes.json();
           }
+        } catch (e) {}
+      }
+
+      // Dukungan login cerdas & fleksibel:
+      // Cocokkan apakah input berupa NIP, Username, ID, atau Email Guru
+      const matched = (currentTeachers || []).find((t: any) => {
+        const u = (t.username || '').toLowerCase().trim();
+        const nip = (t.nip || '').toLowerCase().trim();
+        const id = (t.id || '').toLowerCase().trim();
+
+        // 1. Kecocokan persis
+        if (u === inputVal || nip === inputVal || id === inputVal) return true;
+        // 2. Jika input menyertakan domain (@gmail.com, dll), cek prefix terhadap username atau NIP
+        if (inputVal.includes('@')) {
+          if (u === inputPrefix || nip === inputPrefix) return true;
+        }
+        // 3. Jika username guru di database adalah email lengkap, cek apakah prefix cocok dengan input
+        if (u.includes('@') && u.split('@')[0] === inputVal) return true;
+
+        return false;
+      });
+
+      if (matched) {
+        matchedTeacherId = matched.id;
+        const u = (matched.username || '').toLowerCase().trim();
+        if (u.includes('@')) {
+          loginEmail = u;
         } else {
-          loginEmail = `${loginEmail}@bqa.local`;
+          loginEmail = `${(u || matched.nip || matched.id).toLowerCase().trim()}@bqa.local`;
+        }
+      } else {
+        if (!inputVal.includes('@')) {
+          loginEmail = `${inputVal}@bqa.local`;
+        } else {
+          loginEmail = inputVal;
         }
       }
 
       const { data, error: authError } = await authClient.signIn.email({ email: loginEmail, password });
 
       if (authError) {
-        setError(authError.message || 'Identitas asatidz atau kata sandi salah');
+        let msg = authError.message || 'Identitas asatidz atau kata sandi salah';
+        if (msg.toLowerCase().includes('invalid email or password')) {
+          msg = 'Email/Username atau Kata Sandi salah. Pastikan akun sudah disinkronkan oleh Administrator atau gunakan kata sandi default (misal: guru1234 / admin123).';
+        }
+        setError(msg);
       } else if (data?.user) {
         // @ts-ignore - teacherId is an additional field
         let teacherId = (data.user.teacherId as string | undefined) || matchedTeacherId;

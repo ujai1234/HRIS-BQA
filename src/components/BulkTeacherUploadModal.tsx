@@ -56,6 +56,7 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
     const headers = [
       'NIP',
       'Nama Lengkap',
+      'Email / Akun Login',
       'Jabatan',
       'Unit',
       'Gaji Pokok',
@@ -63,7 +64,6 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
       'Uang Transport per Hari',
       'Role',
       'Nomor HP WA',
-      'Username',
       'Password'
     ];
 
@@ -71,6 +71,7 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
       [
         'PBQ-2026-030',
         'Ust. Ahmad Fathoni, M.Pd.',
+        'ahmad.fathoni@gmail.com',
         'Guru Bahasa Arab & Tahfidz',
         'SMP',
         '850000',
@@ -78,12 +79,12 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
         '10000',
         'GURU',
         '081234567890',
-        'ahmad.fathoni',
         'guru1234'
       ],
       [
         'PBQ-2026-031',
         'Usth. Siti Khodijah, S.Pd.I.',
+        'siti.khodijah@gmail.com',
         'Guru Fiqih & Akhlaq',
         'MA',
         '800000',
@@ -91,12 +92,12 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
         '10000',
         'GURU',
         '082198765432',
-        'siti.khodijah',
         'guru1234'
       ],
       [
         'PBQ-2026-032',
         'Ust. Muhammad Ridwan',
+        'ridwan.musyrif@gmail.com',
         'Musyrif Asrama & Al-Qur\'an',
         'PESANTREN',
         '950000',
@@ -104,7 +105,6 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
         '15000',
         'GURU',
         '085612345678',
-        'ridwan.musyrif',
         'guru1234'
       ]
     ];
@@ -171,6 +171,26 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
         const headerLine = lines[0];
         const delimiter = headerLine.includes(';') && !headerLine.includes(',') ? ';' : ',';
 
+        // Parse header row dynamically
+        const headerCols = parseCSVLine(headerLine, delimiter).map(c => c.trim().toLowerCase());
+
+        const findColIdx = (pattern: RegExp, fallback: number): number => {
+          const idx = headerCols.findIndex(c => pattern.test(c));
+          return idx !== -1 ? idx : fallback;
+        };
+
+        const nipIdx = findColIdx(/^nip/i, 0);
+        const nameIdx = findColIdx(/nama/i, 1);
+        const usernameIdx = findColIdx(/email|surel|username|akun|login/i, 2);
+        const positionIdx = findColIdx(/jabatan|posisi/i, 3);
+        const unitIdx = findColIdx(/unit|jenjang/i, 4);
+        const baseSalaryIdx = findColIdx(/gaji/i, 5);
+        const hourlyRateIdx = findColIdx(/kafa.*ah|honor|tarif|jam/i, 6);
+        const dailyTransportIdx = findColIdx(/transport/i, 7);
+        const roleIdx = findColIdx(/role|peran|hak.*akses/i, 8);
+        const phoneIdx = findColIdx(/hp|telepon|wa|phone/i, 9);
+        const passwordIdx = findColIdx(/pass|sandi/i, 10);
+
         const parsedData: ParsedTeacherRow[] = [];
 
         // Parse each row starting from row 1 (skip header)
@@ -181,29 +201,27 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
           const rowNum = i + 1;
           const errors: string[] = [];
 
-          // Column mappings:
-          // 0: NIP, 1: Name, 2: Position, 3: Unit, 4: BaseSalary, 5: HourlyRate, 6: DailyTransport, 7: Role, 8: Phone, 9: Username, 10: Password
-          const rawNip = rawCols[0] || `PBQ-2026-${String(Date.now()).slice(-4)}`;
-          const rawName = rawCols[1] || '';
-          const rawPosition = rawCols[2] || 'Guru Pesantren';
-          let rawUnit = (rawCols[3] || 'PESANTREN').toUpperCase().trim();
+          const rawNip = (rawCols[nipIdx] || '').trim() || `PBQ-2026-${String(Date.now()).slice(-4)}`;
+          const rawName = (rawCols[nameIdx] || '').trim();
+          const rawPosition = (rawCols[positionIdx] || '').trim() || 'Guru Pesantren';
+          let rawUnit = (rawCols[unitIdx] || 'PESANTREN').toUpperCase().trim();
           
           // Clean & Parse Numbers
-          const parseNum = (val: string, defaultVal: number) => {
+          const parseNum = (val: string | undefined, defaultVal: number) => {
             if (!val) return defaultVal;
             const cleaned = val.replace(/[^0-9]/g, '');
             const parsed = parseInt(cleaned, 10);
             return isNaN(parsed) ? defaultVal : parsed;
           };
 
-          const baseSalary = parseNum(rawCols[4], 700000);
-          const hourlyRate = parseNum(rawCols[5], 40000);
-          const dailyTransport = parseNum(rawCols[6], 10000);
+          const baseSalary = parseNum(rawCols[baseSalaryIdx], 700000);
+          const hourlyRate = parseNum(rawCols[hourlyRateIdx], 40000);
+          const dailyTransport = parseNum(rawCols[dailyTransportIdx], 10000);
 
-          let rawRole = (rawCols[7] || 'GURU').toUpperCase().trim();
-          const rawPhone = rawCols[8] || '';
-          const rawUsername = rawCols[9] || '';
-          const rawPassword = (rawCols[10] || '').trim() || 'guru1234';
+          let rawRole = (rawCols[roleIdx] || 'GURU').toUpperCase().trim();
+          const rawPhone = (rawCols[phoneIdx] || '').trim();
+          let rawUsername = (rawCols[usernameIdx] || '').trim().toLowerCase();
+          let rawPassword = (rawCols[passwordIdx] || '').trim();
 
           // Validations
           if (!rawName) {
@@ -212,7 +230,6 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
 
           const validUnits: UnitType[] = ['SMP', 'MA', 'PESANTREN', 'UMUM'];
           if (!validUnits.includes(rawUnit as UnitType)) {
-            // Attempt smart mapping
             if (rawUnit.includes('&') || rawUnit.includes('/') || rawUnit.includes('SEMUA') || rawUnit.includes('GABUNGAN') || rawUnit.includes('UMUM')) {
               rawUnit = 'UMUM';
             } else if (rawUnit.includes('SMP') || rawUnit.includes('TSANAWIYAH')) {
@@ -226,11 +243,37 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
             }
           }
 
-          const validRoles: UserRole[] = ['ADMIN', 'GURU', 'KEPALA_PESANTREN'];
+          const validRoles: UserRole[] = [
+            'ADMIN',
+            'GURU',
+            'KEPALA_SMP',
+            'KEPALA_MA',
+            'KEPALA_PESANTREN',
+            'STAFF',
+            'KEUANGAN'
+          ];
           if (!validRoles.includes(rawRole as UserRole)) {
             if (rawRole.includes('ADMIN')) rawRole = 'ADMIN';
-            else if (rawRole.includes('KEP') || rawRole.includes('MUDIR')) rawRole = 'KEPALA_PESANTREN';
+            else if (rawRole.includes('BENDAHARA') || rawRole.includes('KEUANGAN')) rawRole = 'KEUANGAN';
+            else if (rawRole.includes('SMP')) rawRole = 'KEPALA_SMP';
+            else if (rawRole.includes('MA') || rawRole.includes('ALIYAH')) rawRole = 'KEPALA_MA';
+            else if (rawRole.includes('KEP') || rawRole.includes('MUDIR') || rawRole.includes('PESANTREN')) rawRole = 'KEPALA_PESANTREN';
+            else if (rawRole.includes('STAF') || rawRole.includes('STAFF')) rawRole = 'STAFF';
             else rawRole = 'GURU';
+          }
+
+          // Otomatis username jika kosong
+          if (!rawUsername) {
+            rawUsername = rawNip.toLowerCase();
+          }
+
+          // Otomatis password jika kosong atau kurang dari 6 karakter
+          if (!rawPassword || rawPassword.length < 6) {
+            if (rawRole === 'ADMIN') rawPassword = 'admin123';
+            else if (rawRole === 'KEUANGAN') rawPassword = 'keuangan123';
+            else if (rawRole === 'STAFF') rawPassword = 'staff123';
+            else if (rawRole.startsWith('KEPALA')) rawPassword = 'kepsek123';
+            else rawPassword = 'guru1234';
           }
 
           parsedData.push({
@@ -459,7 +502,9 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
                       <th className="py-2 px-3 w-10 text-center">Baris</th>
                       <th className="py-2 px-3">NIP</th>
                       <th className="py-2 px-3">Nama Asatidz</th>
-                      <th className="py-2 px-3">Unit & Jabatan</th>
+                      <th className="py-2 px-3">Akun Login (Email/User)</th>
+                      <th className="py-2 px-3">Password</th>
+                      <th className="py-2 px-3">Unit & Role</th>
                       <th className="py-2 px-3 text-right">Gaji Pokok</th>
                       <th className="py-2 px-3 text-right">Kafa'ah/JP</th>
                       <th className="py-2 px-3 text-center">Status</th>
@@ -477,8 +522,14 @@ export const BulkTeacherUploadModal: React.FC<BulkTeacherUploadModalProps> = ({ 
                         <td className="py-2 px-3 font-medium text-slate-900">
                           {row.name || <span className="text-rose-500 italic">Kosong</span>}
                         </td>
+                        <td className="py-2 px-3 font-mono text-emerald-800 text-[11px]">
+                          {row.username || row.nip.toLowerCase()}
+                        </td>
+                        <td className="py-2 px-3 font-mono text-slate-600 text-[11px]">
+                          {row.password}
+                        </td>
                         <td className="py-2 px-3">
-                          <span className="font-semibold text-slate-800">{row.unit}</span> - <span className="text-slate-500">{row.position}</span>
+                          <span className="font-semibold text-slate-800">{row.unit}</span> - <span className="text-slate-500">{row.role}</span>
                         </td>
                         <td className="py-2 px-3 text-right font-mono">
                           {formatRupiah(row.baseSalary)}

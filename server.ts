@@ -980,6 +980,7 @@ async function startServer() {
       if (r === 'ADMIN') plainPassword = 'admin123';
       else if (r === 'KEPALA_SMP' || r === 'KEPALA_MA' || r === 'KEPALA_PESANTREN') plainPassword = 'kepsek123';
       else if (r === 'STAFF') plainPassword = 'staff123';
+      else if (r === 'KEUANGAN') plainPassword = 'keuangan123';
       else plainPassword = 'guru1234';
 
       try {
@@ -988,24 +989,41 @@ async function startServer() {
     }
 
     try {
-      // 1. Check if user already exists in `user` table by teacherId OR email
-      let existingUser = await db.query.user.findFirst({
-        where: or(
-          eq(schema.user.teacherId, teacher.id),
-          eq(schema.user.email, email)
-        )
+      const now = new Date();
+      // 1. Cek apakah user sudah terdaftar berdasarkan teacherId atau email
+      const userByTeacher = await db.query.user.findFirst({
+        where: eq(schema.user.teacherId, teacher.id)
+      });
+      const userByEmail = await db.query.user.findFirst({
+        where: eq(schema.user.email, email)
       });
 
-      const now = new Date();
+      let targetUser: any;
 
-      if (existingUser) {
+      if (userByEmail) {
+        targetUser = userByEmail;
         await db.update(schema.user).set({
           teacherId: teacher.id,
-          email: email,
-          name: name || existingUser.name,
+          name: name || userByEmail.name,
           emailVerified: true,
           updatedAt: now
-        }).where(eq(schema.user.id, existingUser.id));
+        }).where(eq(schema.user.id, userByEmail.id));
+
+        // Bersihkan data user lama yang menggantung jika berbeda
+        if (userByTeacher && userByTeacher.id !== userByEmail.id) {
+          try {
+            await db.delete(schema.account).where(eq(schema.account.userId, userByTeacher.id));
+            await db.delete(schema.user).where(eq(schema.user.id, userByTeacher.id));
+          } catch (e) {}
+        }
+      } else if (userByTeacher) {
+        targetUser = userByTeacher;
+        await db.update(schema.user).set({
+          email: email,
+          name: name || userByTeacher.name,
+          emailVerified: true,
+          updatedAt: now
+        }).where(eq(schema.user.id, userByTeacher.id));
       } else {
         const newUserId = `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
         const insertedUsers = await db.insert(schema.user).values({
@@ -1017,15 +1035,15 @@ async function startServer() {
           createdAt: now,
           updatedAt: now,
         }).returning();
-        existingUser = insertedUsers[0];
+        targetUser = insertedUsers[0];
       }
 
-      // 2. Hash password and insert or update account
+      // 2. Hash password dan simpan/update ke tabel account
       const hashedPassword = await hashPassword(plainPassword);
 
       const existingAccount = await db.query.account.findFirst({
         where: and(
-          eq(schema.account.userId, existingUser.id),
+          eq(schema.account.userId, targetUser.id),
           eq(schema.account.providerId, 'credential')
         )
       });
@@ -1034,7 +1052,7 @@ async function startServer() {
         await db.update(schema.account).set({
           password: hashedPassword,
           issuer: 'local:credential',
-          accountId: existingUser.id,
+          accountId: targetUser.id,
           updatedAt: now
         }).where(eq(schema.account.id, existingAccount.id));
         console.log(`[AuthSync] Password updated for ${email} (teacher ${teacher.id})`);
@@ -1042,9 +1060,9 @@ async function startServer() {
         const newAccountId = `acc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
         await db.insert(schema.account).values({
           id: newAccountId,
-          accountId: existingUser.id,
+          accountId: targetUser.id,
           providerId: 'credential',
-          userId: existingUser.id,
+          userId: targetUser.id,
           password: hashedPassword,
           issuer: 'local:credential',
           createdAt: now,
@@ -1160,32 +1178,77 @@ async function startServer() {
         return res.status(400).json({ error: 'Data guru kosong' });
       }
 
-      const sanitizedList = list.map((item: any, idx: number) => ({
-        id: item.id || `T-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`,
-        nip: item.nip ? String(item.nip).trim() : `PBQ-${Date.now()}-${idx}`,
-        name: String(item.name || '').trim(),
-        position: item.position ? String(item.position).trim() : 'Guru',
-        unit: item.unit || 'PESANTREN',
-        baseSalary: Number(item.baseSalary) || 0,
-        hourlyRate: Number(item.hourlyRate) || 0,
-        dailyTransport: Number(item.dailyTransport) || 0,
-        role: item.role || 'GURU',
-        phone: item.phone ? String(item.phone).trim() : null,
-        avatarColor: item.avatarColor || 'bg-teal-700',
-        avatarUrl: item.avatarUrl || null,
-        isActive: item.isActive !== undefined ? Boolean(item.isActive) : true,
-        username: typeof item.username === 'string' && item.username.trim() ? item.username.trim().toLowerCase() : null,
-        password: (item.password && String(item.password).trim()) ? String(item.password).trim() : 'guru1234',
-      }));
+      const results: any[] = [];
+      for (let idx = 0; idx < list.length; idx++) {
+        const item = list[idx];
+        const nip = item.nip ? String(item.nip).trim() : `PBQ-${Date.now()}-${idx}`;
+        const name = String(item.name || '').trim();
+        const username = typeof item.username === 'string' && item.username.trim() 
+          ? item.username.trim().toLowerCase() 
+          : nip.toLowerCase();
+        const rawRole = item.role || 'GURU';
+        let password = (item.password && String(item.password).trim()) ? String(item.password).trim() : '';
+        if (!password || password.length < 6) {
+          if (rawRole === 'ADMIN') password = 'admin123';
+          else if (rawRole === 'KEUANGAN') password = 'keuangan123';
+          else if (rawRole === 'STAFF') password = 'staff123';
+          else if (String(rawRole).startsWith('KEPALA')) password = 'kepsek123';
+          else password = 'guru1234';
+        }
 
-      const result = await db.insert(schema.teachers).values(sanitizedList).returning();
+        // Cek apakah guru sudah terdaftar berdasarkan NIP, ID, atau Username
+        const existing = await db.query.teachers.findFirst({
+          where: or(
+            eq(schema.teachers.nip, nip),
+            item.id ? eq(schema.teachers.id, item.id) : undefined,
+            username ? eq(schema.teachers.username, username) : undefined
+          )
+        });
 
-      // Sinkronisasi Better-Auth untuk seluruh guru yang diimpor
-      for (const t of result) {
-        await syncTeacherAuthAccount(t);
+        let savedTeacher: any;
+        if (existing) {
+          const updated = await db.update(schema.teachers).set({
+            nip: nip || existing.nip,
+            name: name || existing.name,
+            position: item.position ? String(item.position).trim() : existing.position,
+            unit: item.unit || existing.unit,
+            baseSalary: Number(item.baseSalary) || existing.baseSalary,
+            hourlyRate: Number(item.hourlyRate) || existing.hourlyRate,
+            dailyTransport: Number(item.dailyTransport) || existing.dailyTransport,
+            role: rawRole,
+            phone: item.phone ? String(item.phone).trim() : existing.phone,
+            username: username,
+            password: password,
+            isActive: item.isActive !== undefined ? Boolean(item.isActive) : existing.isActive,
+          }).where(eq(schema.teachers.id, existing.id)).returning();
+          savedTeacher = updated[0];
+        } else {
+          const newId = item.id || `T-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`;
+          const inserted = await db.insert(schema.teachers).values({
+            id: newId,
+            nip: nip,
+            name: name,
+            position: item.position ? String(item.position).trim() : 'Guru',
+            unit: item.unit || 'PESANTREN',
+            baseSalary: Number(item.baseSalary) || 0,
+            hourlyRate: Number(item.hourlyRate) || 0,
+            dailyTransport: Number(item.dailyTransport) || 0,
+            role: rawRole,
+            phone: item.phone ? String(item.phone).trim() : null,
+            avatarColor: item.avatarColor || 'bg-teal-700',
+            avatarUrl: item.avatarUrl || null,
+            isActive: item.isActive !== undefined ? Boolean(item.isActive) : true,
+            username: username,
+            password: password,
+          }).returning();
+          savedTeacher = inserted[0];
+        }
+
+        results.push(savedTeacher);
+        await syncTeacherAuthAccount(savedTeacher);
       }
 
-      res.json(result);
+      res.json(results);
     } catch (error: any) {
       console.error('Bulk teacher insertion error:', error);
       res.status(500).json({ error: error?.message || 'Failed to bulk insert teachers' });
@@ -1295,8 +1358,8 @@ async function startServer() {
       const googleName = (session.user.name || '').toLowerCase().trim();
       const cleanGoogleName = googleName.replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
 
-      const allTeachers = await db.query.teachers.findMany();
-      const matched = allTeachers.find((t) => {
+      const allTeachers = (await db.query.teachers.findMany()) as any[];
+      const matched = allTeachers.find((t: any) => {
         const tUser = (t.username || '').toLowerCase().trim();
         const tNip = (t.nip || '').toLowerCase().trim();
         const tId = (t.id || '').toLowerCase().trim();
@@ -1329,7 +1392,7 @@ async function startServer() {
 
       // Link teacherId in user table
       await db.update(schema.user).set({
-        teacherId: matched.id,
+        teacherId: String(matched.id),
         updatedAt: new Date()
       }).where(eq(schema.user.id, session.user.id));
 
@@ -1337,7 +1400,7 @@ async function startServer() {
       if (!matched.username || !matched.username.includes('@')) {
         await db.update(schema.teachers).set({
           username: userEmail
-        }).where(eq(schema.teachers.id, matched.id));
+        }).where(eq(schema.teachers.id, String(matched.id)));
       }
 
       console.log(`[GoogleLink] Successfully linked ${userEmail} to teacher ${matched.name} (${matched.id})`);
@@ -1354,10 +1417,10 @@ async function startServer() {
     }
   });
 
-  // Batch Sync All Teachers to Better-Auth
-  app.post('/api/teachers/sync-auth', async (req, res) => {
+  // Batch Sync All Teachers to Better-Auth (Supports GET & POST)
+  app.all('/api/teachers/sync-auth', async (req, res) => {
     try {
-      const allTeachers = await db.query.teachers.findMany();
+      const allTeachers = (await db.query.teachers.findMany()) as any[];
       let syncedCount = 0;
       for (const t of allTeachers) {
         await syncTeacherAuthAccount(t);
@@ -4587,7 +4650,7 @@ async function startServer() {
       // Automatically synchronize ALL teachers to Better-Auth accounts & ensure hashed credentials exist
       try {
         console.log('[AutoSync] Synchronizing all teachers in database with Better-Auth...');
-        const allTeachersToSync = await db.query.teachers.findMany();
+        const allTeachersToSync = (await db.query.teachers.findMany()) as any[];
         let syncedCount = 0;
         for (const t of allTeachersToSync) {
           await syncTeacherAuthAccount(t);

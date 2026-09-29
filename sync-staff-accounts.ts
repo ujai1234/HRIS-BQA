@@ -44,7 +44,7 @@ async function syncStaffAccounts() {
   }
 
   // 2. Sync Better-Auth user & credential account for all teachers
-  const allTeachers = await db.query.teachers.findMany();
+  const allTeachers = (await db.query.teachers.findMany()) as any[];
   console.log(`Found ${allTeachers.length} teachers to sync...`);
 
   let count = 0;
