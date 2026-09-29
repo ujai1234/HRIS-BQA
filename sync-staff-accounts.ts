@@ -99,6 +99,8 @@ async function syncStaffAccounts() {
         if (existingAccount) {
           await db.update(schema.account).set({
             password: hashedPassword,
+            issuer: 'local:credential',
+            accountId: existingUser.id,
             updatedAt: now
           }).where(eq(schema.account.id, existingAccount.id));
         } else {
@@ -109,6 +111,7 @@ async function syncStaffAccounts() {
             providerId: 'credential',
             userId: existingUser.id,
             password: hashedPassword,
+            issuer: 'local:credential',
             createdAt: now,
             updatedAt: now,
           });

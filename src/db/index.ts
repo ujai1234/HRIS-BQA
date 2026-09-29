@@ -334,5 +334,11 @@ try { sqliteDb.exec("ALTER TABLE account ADD COLUMN issuer TEXT;"); } catch(e) {
 try { sqliteDb.exec("ALTER TABLE session ADD COLUMN ip_address TEXT;"); } catch(e) {}
 try { sqliteDb.exec("ALTER TABLE session ADD COLUMN user_agent TEXT;"); } catch(e) {}
 
+// Ensure all Better-Auth credential accounts have the required local:credential issuer and account_id
+try {
+  sqliteDb.exec("UPDATE account SET issuer = 'local:credential' WHERE provider_id = 'credential' AND (issuer IS NULL OR issuer = '');");
+  sqliteDb.exec("UPDATE account SET account_id = user_id WHERE provider_id = 'credential' AND (account_id IS NULL OR account_id = '');");
+} catch(e) {}
+
 export const db = drizzle(sqliteDb, { schema });
 

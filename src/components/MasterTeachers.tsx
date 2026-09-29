@@ -320,6 +320,9 @@ export const MasterTeachers: React.FC = () => {
                                   {t.username}
                                 </span>
                               )}
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-slate-800/80 px-1 py-0.2 rounded" title="Password Akun Login">
+                                🔑 {t.password || 'guru1234'}
+                              </span>
                             </div>
                           </div>
                         </div>

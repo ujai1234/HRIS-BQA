@@ -1033,6 +1033,8 @@ async function startServer() {
       if (existingAccount) {
         await db.update(schema.account).set({
           password: hashedPassword,
+          issuer: 'local:credential',
+          accountId: existingUser.id,
           updatedAt: now
         }).where(eq(schema.account.id, existingAccount.id));
         console.log(`[AuthSync] Password updated for ${email} (teacher ${teacher.id})`);
@@ -1044,6 +1046,7 @@ async function startServer() {
           providerId: 'credential',
           userId: existingUser.id,
           password: hashedPassword,
+          issuer: 'local:credential',
           createdAt: now,
           updatedAt: now,
         });
