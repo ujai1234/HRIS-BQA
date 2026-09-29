@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, Edit3, Trash2, UploadCloud, RotateCcw, Eye, EyeOff } from 'lucide-react';
+import { Search, Plus, Edit3, Trash2, UploadCloud, RotateCcw, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useHRIS } from '../context/HRISContext';
 import { Teacher } from '../types';
@@ -20,6 +20,25 @@ export const MasterTeachers: React.FC = () => {
   const [isAddingTeacher, setIsAddingTeacher] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSyncAuth = async () => {
+    setIsSyncing(true);
+    const toastId = toast.loading('Sedang mensinkronkan seluruh akun staf & guru ke sistem login...');
+    try {
+      const res = await fetch('/api/teachers/sync-auth', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(`Berhasil! ${data.syncedCount} akun asatidz & staf siap digunakan untuk login sesuai role masing-masing.`, { id: toastId });
+      } else {
+        toast.error(data.error || 'Gagal sinkronisasi akun', { id: toastId });
+      }
+    } catch (err: any) {
+      toast.error('Gagal terhubung ke server', { id: toastId });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   // Form State
   const [formData, setFormData] = useState<Omit<Teacher, 'id'>>({
@@ -238,6 +257,16 @@ export const MasterTeachers: React.FC = () => {
               </button>
 
               <button
+                onClick={handleSyncAuth}
+                disabled={isSyncing}
+                className="inline-flex items-center justify-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-[10px] border border-emerald-200 transition-colors cursor-pointer disabled:opacity-50"
+                title="Sinkronkan semua akun ke sistem login Better-Auth"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+                <span>{isSyncing ? 'Menyinkronkan...' : 'Sinkron Akun Login'}</span>
+              </button>
+
+              <button
                 id="bulk-upload-teacher-btn"
                 onClick={() => setIsBulkUploadOpen(true)}
                 className="inline-flex items-center justify-center gap-1.5 bg-slate-50 hover:bg-slate-100 text-[#051F20] text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-[10px] border border-slate-200 transition-colors cursor-pointer"
@@ -284,7 +313,14 @@ export const MasterTeachers: React.FC = () => {
                           <TeacherAvatar teacher={t} size="sm" />
                           <div>
                             <p className="font-bold text-[#051F20]">{t.name || '-'}</p>
-                            <p className="text-[11px] text-[#8EB69B] font-mono font-semibold">{t.nip || '-'}</p>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="text-[11px] text-[#8EB69B] font-mono font-semibold">{t.nip || '-'}</span>
+                              {t.username && (
+                                <span className="text-[10px] text-emerald-800 dark:text-emerald-300 font-mono bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/50 px-1 py-0.2 rounded" title="Username / Email Login">
+                                  {t.username}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </td>

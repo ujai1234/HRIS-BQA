@@ -960,13 +960,32 @@ async function startServer() {
   // ==========================================
   // BETTER AUTH & TEACHERS SYNCHRONIZER
   // ==========================================
-  async function syncTeacherAuthAccount(teacher: { id: string; nip?: string | null; name: string; username?: string | null; password?: string | null }) {
-    const rawUsername = teacher.username ? teacher.username.trim() : '';
+  async function syncTeacherAuthAccount(teacher: { id: string; nip?: string | null; name: string; username?: string | null; password?: string | null; role?: string | null }) {
+    let rawUsername = teacher.username ? teacher.username.trim() : '';
+    if (!rawUsername) {
+      rawUsername = (teacher.nip || teacher.id).trim().toLowerCase();
+      try {
+        await db.update(schema.teachers).set({ username: rawUsername }).where(eq(schema.teachers.id, teacher.id));
+      } catch (e) {}
+    }
+
     const email = rawUsername.includes('@') 
       ? rawUsername.toLowerCase() 
-      : `${(rawUsername || teacher.nip || teacher.id).toLowerCase()}@bqa.local`;
+      : `${rawUsername.toLowerCase()}@bqa.local`;
     const name = (teacher.name || '').trim();
-    const plainPassword = teacher.password ? String(teacher.password).trim() : '';
+
+    let plainPassword = teacher.password ? String(teacher.password).trim() : '';
+    if (!plainPassword || plainPassword.length < 6) {
+      const r = (teacher as any).role;
+      if (r === 'ADMIN') plainPassword = 'admin123';
+      else if (r === 'KEPALA_SMP' || r === 'KEPALA_MA' || r === 'KEPALA_PESANTREN') plainPassword = 'kepsek123';
+      else if (r === 'STAFF') plainPassword = 'staff123';
+      else plainPassword = 'guru1234';
+
+      try {
+        await db.update(schema.teachers).set({ password: plainPassword }).where(eq(schema.teachers.id, teacher.id));
+      } catch (e) {}
+    }
 
     try {
       // 1. Check if user already exists in `user` table by teacherId OR email
@@ -984,6 +1003,7 @@ async function startServer() {
           teacherId: teacher.id,
           email: email,
           name: name || existingUser.name,
+          emailVerified: true,
           updatedAt: now
         }).where(eq(schema.user.id, existingUser.id));
       } else {
@@ -1000,36 +1020,34 @@ async function startServer() {
         existingUser = insertedUsers[0];
       }
 
-      // 2. If password is provided (min 6 chars), ensure credential account exists or is updated
-      if (plainPassword.length >= 6) {
-        const hashedPassword = await hashPassword(plainPassword);
+      // 2. Hash password and insert or update account
+      const hashedPassword = await hashPassword(plainPassword);
 
-        const existingAccount = await db.query.account.findFirst({
-          where: and(
-            eq(schema.account.userId, existingUser.id),
-            eq(schema.account.providerId, 'credential')
-          )
+      const existingAccount = await db.query.account.findFirst({
+        where: and(
+          eq(schema.account.userId, existingUser.id),
+          eq(schema.account.providerId, 'credential')
+        )
+      });
+
+      if (existingAccount) {
+        await db.update(schema.account).set({
+          password: hashedPassword,
+          updatedAt: now
+        }).where(eq(schema.account.id, existingAccount.id));
+        console.log(`[AuthSync] Password updated for ${email} (teacher ${teacher.id})`);
+      } else {
+        const newAccountId = `acc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        await db.insert(schema.account).values({
+          id: newAccountId,
+          accountId: existingUser.id,
+          providerId: 'credential',
+          userId: existingUser.id,
+          password: hashedPassword,
+          createdAt: now,
+          updatedAt: now,
         });
-
-        if (existingAccount) {
-          await db.update(schema.account).set({
-            password: hashedPassword,
-            updatedAt: now
-          }).where(eq(schema.account.id, existingAccount.id));
-          console.log(`[AuthSync] Password updated for ${email} (teacher ${teacher.id})`);
-        } else {
-          const newAccountId = `acc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-          await db.insert(schema.account).values({
-            id: newAccountId,
-            accountId: existingUser.id,
-            providerId: 'credential',
-            userId: existingUser.id,
-            password: hashedPassword,
-            createdAt: now,
-            updatedAt: now,
-          });
-          console.log(`[AuthSync] Credential account created for ${email} (teacher ${teacher.id})`);
-        }
+        console.log(`[AuthSync] Credential account created for ${email} (teacher ${teacher.id})`);
       }
     } catch (err) {
       console.error(`[AuthSync] Error syncing auth for teacher ${teacher.id} (${email}):`, err);
@@ -4561,6 +4579,20 @@ async function startServer() {
         console.log('Ensured all user accounts have email_verified = 1 for seamless OAuth linking.');
       } catch (err) {
         console.error('Failed to update email_verified:', err);
+      }
+
+      // Automatically synchronize ALL teachers to Better-Auth accounts & ensure hashed credentials exist
+      try {
+        console.log('[AutoSync] Synchronizing all teachers in database with Better-Auth...');
+        const allTeachersToSync = await db.query.teachers.findMany();
+        let syncedCount = 0;
+        for (const t of allTeachersToSync) {
+          await syncTeacherAuthAccount(t);
+          syncedCount++;
+        }
+        console.log(`[AutoSync] Successfully synced ${syncedCount}/${allTeachersToSync.length} teachers to Better-Auth.`);
+      } catch (err) {
+        console.error('[AutoSync] Startup teacher sync failed:', err);
       }
 
       console.log('All required demo accounts (kepseksmp, kepsekma, kepsekpesantren, dapur, sarpras) are present and integrated.');

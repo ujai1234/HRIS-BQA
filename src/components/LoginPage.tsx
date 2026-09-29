@@ -104,12 +104,6 @@ export const LoginPage: React.FC = () => {
         const targetTeacher = teachers.find((t: any) => t.id === teacherId);
         const role = targetTeacher?.role || 'GURU';
 
-        if (role === 'KEUANGAN') {
-          await authClient.signOut({ fetchOptions: {} });
-          setError(`Akun Anda adalah Staff Keuangan. Silakan login melalui Aplikasi Keuangan khusus Bendahara.`);
-          return;
-        }
-
         login(role, teacherId);
       };
 
@@ -128,11 +122,22 @@ export const LoginPage: React.FC = () => {
 
       // Dukungan login fleksibel: jika pengguna menginput NIP atau Username (tanpa @)
       if (!loginEmail.includes('@')) {
-        const matched = teachers.find((t: any) =>
+        let currentTeachers = teachers;
+        if (!currentTeachers || currentTeachers.length === 0) {
+          try {
+            const tRes = await fetch('/api/teachers');
+            if (tRes.ok) {
+              currentTeachers = await tRes.json();
+            }
+          } catch (e) {}
+        }
+
+        const matched = (currentTeachers || []).find((t: any) =>
           t.nip?.toLowerCase() === loginEmail ||
           t.username?.toLowerCase() === loginEmail ||
           t.id?.toLowerCase() === loginEmail
         );
+
         if (matched) {
           matchedTeacherId = matched.id;
           if (matched.username && matched.username.includes('@')) {
@@ -156,7 +161,15 @@ export const LoginPage: React.FC = () => {
         // Validasi & Auto-link jika teacherId belum ada di sesi Better Auth
         if (!teacherId) {
           const userEmail = (data.user.email || '').toLowerCase().trim();
-          const target = teachers.find((t: any) =>
+          let currentTeachers = teachers;
+          if (!currentTeachers || currentTeachers.length === 0) {
+            try {
+              const tRes = await fetch('/api/teachers');
+              if (tRes.ok) currentTeachers = await tRes.json();
+            } catch (e) {}
+          }
+
+          const target = (currentTeachers || []).find((t: any) =>
             t.username?.toLowerCase() === userEmail ||
             t.username?.toLowerCase() === userEmail.split('@')[0] ||
             t.nip?.toLowerCase() === userEmail.split('@')[0]
@@ -178,7 +191,17 @@ export const LoginPage: React.FC = () => {
           return;
         }
 
-        const targetTeacher = teachers.find((t: any) => t.id === teacherId);
+        let targetTeacher = teachers.find((t: any) => t.id === teacherId);
+        if (!targetTeacher) {
+          try {
+            const tRes = await fetch('/api/teachers');
+            if (tRes.ok) {
+              const allT = await tRes.json();
+              targetTeacher = allT.find((t: any) => t.id === teacherId);
+            }
+          } catch (e) {}
+        }
+
         if (!targetTeacher) {
           await authClient.signOut({ fetchOptions: {} });
           setError(`Akun ini (ID: ${teacherId}) tidak ditemukan di Master Data HRIS. Data mungkin telah dihapus. Hubungi Administrator.`);
@@ -186,13 +209,6 @@ export const LoginPage: React.FC = () => {
         }
 
         const role = targetTeacher.role || 'GURU';
-        
-        if (role === 'KEUANGAN') {
-          await authClient.signOut({ fetchOptions: {} });
-          setError(`Akun Anda adalah Staff Keuangan. Silakan login melalui Aplikasi Keuangan khusus Bendahara.`);
-          return;
-        }
-
         login(role, teacherId);
       } else {
         setError('Login gagal. Terjadi kesalahan internal.');
