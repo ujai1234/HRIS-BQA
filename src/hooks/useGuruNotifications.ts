@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { useHRIS } from '../context/HRISContext';
 import { deviceNotificationService } from '../utils/deviceNotificationService';
+import { isKepsekRole } from '../types';
 
 export type GuruNotifType = 'BADAL' | 'ATTENDANCE_OPEN' | 'JOURNAL_PENDING' | 'REQUEST_UPDATE';
 
@@ -81,7 +82,7 @@ export const useGuruNotifications = () => {
   };
 
   const notifications = useMemo<GuruNotificationItem[]>(() => {
-    if (currentRole !== 'GURU' || !currentUser?.id) return [];
+    if ((currentRole !== 'GURU' && !isKepsekRole(currentRole)) || !currentUser?.id) return [];
 
     const items: GuruNotificationItem[] = [];
     const todayStr = new Date().toISOString().split('T')[0];

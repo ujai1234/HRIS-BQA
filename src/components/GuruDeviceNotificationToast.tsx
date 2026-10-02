@@ -2,6 +2,7 @@ import React from 'react';
 import { X, ChevronRight, Bell } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
 import { useGuruNotifications, GuruNotificationItem } from '../hooks/useGuruNotifications';
+import { isKepsekRole } from '../types';
 
 export const GuruDeviceNotificationToast: React.FC = () => {
   const { currentRole, setCurrentPath } = useHRIS();
@@ -13,7 +14,7 @@ export const GuruDeviceNotificationToast: React.FC = () => {
     requestDevicePermission 
   } = useGuruNotifications();
 
-  if (currentRole !== 'GURU' || activeDeviceAlerts.length === 0) {
+  if ((currentRole !== 'GURU' && !isKepsekRole(currentRole)) || activeDeviceAlerts.length === 0) {
     return null;
   }
 

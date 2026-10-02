@@ -18,6 +18,7 @@ export const LearningNeedManagement: React.FC = () => {
     learningNeedRequests, 
     currentUser, 
     currentRole, 
+    currentPath,
     addLearningNeedRequest, 
     updateLearningNeedRequestStatus,
     deleteLearningNeedRequest,
@@ -76,11 +77,12 @@ export const LearningNeedManagement: React.FC = () => {
     return roleUnit === 'ALL' ? 'SMP' : roleUnit as UnitType;
   }, [currentRole, currentUser?.unit]);
 
-  const isKepsek = isKepsekRole(currentRole);
+  const isTeacherMode = currentRole === 'GURU' || currentPath.startsWith('/dashboard/guru');
+  const isKepsek = isKepsekRole(currentRole) && !isTeacherMode;
 
   // Role-based filtered baseline requests
   const baseRequests = useMemo(() => {
-    if (currentRole === 'GURU') {
+    if (isTeacherMode) {
       return requests.filter(r => r.teacherId === currentUser?.id);
     } 
     
@@ -92,7 +94,7 @@ export const LearningNeedManagement: React.FC = () => {
     }
 
     return requests;
-  }, [requests, currentRole, currentUser?.id, teacherMap, isKepsek, kepsekUnit]);
+  }, [requests, isTeacherMode, currentUser?.id, teacherMap, isKepsek, kepsekUnit]);
 
   // Metrics
   const metrics = useMemo(() => {
@@ -279,21 +281,21 @@ export const LearningNeedManagement: React.FC = () => {
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-[#DAF1DE] tracking-tight font-sans">
             {isKepsek 
               ? `Persetujuan Kebutuhan (${kepsekUnit})` 
-              : currentRole === 'GURU' 
+              : isTeacherMode 
                 ? 'Pengajuan Kebutuhan' 
                 : 'Persetujuan Kebutuhan Sarana'}
           </h1>
           <p className="text-xs text-slate-500 dark:text-[#8EB69B] font-semibold">
             {isKepsek 
               ? `Verifikasi dan persetujuan pengadaan kebutuhan guru unit ${kepsekUnit}.`
-              : currentRole === 'GURU'
+              : isTeacherMode
                 ? 'Daftar pengajuan kebutuhan sarana pembelajaran.'
                 : 'Rekapitulasi pengajuan sarana pembelajaran seluruh unit.'}
           </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          {currentRole === 'GURU' ? (
+          {isTeacherMode ? (
             <button
               onClick={() => setShowAddForm(true)}
               className="inline-flex items-center justify-center gap-1.5 bg-[#163832] hover:bg-[#0B2B26] dark:bg-[#8EB69B] dark:hover:bg-[#DAF1DE] text-white dark:text-[#051F20] px-4 py-2.5 rounded-[12px] text-xs font-bold shadow-xs transition-all cursor-pointer uppercase tracking-wider"

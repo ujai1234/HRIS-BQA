@@ -157,6 +157,8 @@ export const Header: React.FC<HeaderProps> = ({
       crumbs.push({ label: 'Guru', path: '/dashboard/guru' });
       if (currentPath === '/dashboard/guru/slip') crumbs.push({ label: 'Slip Kafa\'ah', path: currentPath });
       else if (currentPath === '/dashboard/guru/kebutuhan') crumbs.push({ label: 'Ajuan Fasilitas', path: currentPath });
+      else if (currentPath === '/dashboard/guru/akademik') crumbs.push({ label: 'Akademik & Nilai', path: currentPath });
+      else if (currentPath === '/dashboard/guru/catatan') crumbs.push({ label: 'Buku Penghubung', path: currentPath });
       else crumbs.push({ label: 'Absen & Jurnal', path: currentPath });
     } else if (currentRole === 'ADMIN' || currentPath.startsWith('/dashboard/admin')) {
       crumbs.push({ label: 'Panel Admin', path: '/dashboard/admin' });
@@ -264,8 +266,11 @@ export const Header: React.FC<HeaderProps> = ({
         {
           title: 'PORTAL MENGAJAR (GURU)',
           items: [
-            { path: '/dashboard/guru', label: 'Jadwal & Absen Saya', icon: CheckCircle2 },
+            { path: '/dashboard/guru', label: 'Absen & Jurnal KBM', icon: CheckCircle2 },
+            { path: '/dashboard/guru/akademik', label: 'Akademik & Nilai', icon: BookOpen },
+            { path: '/dashboard/guru/catatan', label: 'Buku Penghubung', icon: Book },
             { path: '/dashboard/guru/slip', label: "Slip Kafa'ah Saya", icon: CreditCard },
+            { path: '/dashboard/guru/kebutuhan', label: 'Ajuan Fasilitas KBM', icon: ClipboardList },
           ]
         }
       ];
@@ -534,8 +539,8 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )}
 
-            {/* Notification Bell (Guru Only) */}
-            {currentRole === 'GURU' && (
+            {/* Notification Bell (Guru & Kepsek Pengajar) */}
+            {(currentRole === 'GURU' || isKepsekRole(currentRole)) && (
               <div className="relative" ref={notifRef}>
                 <button
                   onClick={() => setShowNotifPopover(!showNotifPopover)}
