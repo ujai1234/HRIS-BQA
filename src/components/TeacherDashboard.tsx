@@ -123,19 +123,7 @@ export const TeacherDashboard: React.FC = () => {
 
   // Pre-check GPS and Time Window verification step when clicking "Absen"
   const handleInitiateClockIn = async (schedule: ClassSchedule) => {
-    // Validate 1x per day limit for non-Tahfidz schedules
-    const isTahfidz = schedule.subject.toLowerCase().includes('tahfidz');
-    if (!isTahfidz) {
-      const existingDaily = attendances.find(a => 
-        (a.actualTeacherId === currentUser.id || a.teacherId === currentUser.id) && 
-        a.date === todayStr && 
-        a.scheduleId !== schedule.id
-      );
-      if (existingDaily) {
-        toast.error('Anda sudah melakukan absensi hari ini. Absensi hanya diperbolehkan 1x dalam 1 hari.');
-        return;
-      }
-    }
+    // Allow clock in per schedule (validation per schedule time window)
 
     const timeValidation = validateScheduleTimeWindow(schedule);
     if (!timeValidation.canClockIn) {

@@ -1736,21 +1736,6 @@ async function startServer() {
             .returning();
           return res.json(updated[0]);
         }
-
-        // 1x per day limit logic for non-Tahfidz schedules
-        const isTahfidz = sched && sched.subject.toLowerCase().includes('tahfidz');
-
-        if (!isTahfidz && targetTeacherId) {
-          const existingDaily = await db.query.attendances.findFirst({
-            where: and(
-              eq(schema.attendances.actualTeacherId, targetTeacherId),
-              eq(schema.attendances.date, date)
-            )
-          });
-          if (existingDaily) {
-            return res.status(400).json({ error: 'Anda sudah melakukan absensi hari ini. Absensi hanya diperbolehkan 1x dalam 1 hari.' });
-          }
-        }
       }
       const result = await db.insert(schema.attendances).values(dataToSave).returning();
       res.json(result[0]);

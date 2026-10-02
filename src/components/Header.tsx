@@ -260,6 +260,13 @@ export const Header: React.FC<HeaderProps> = ({
         {
           title: `MANAJEMEN ${unit}`,
           items: items
+        },
+        {
+          title: 'PORTAL MENGAJAR (GURU)',
+          items: [
+            { path: '/dashboard/guru', label: 'Jadwal & Absen Saya', icon: CheckCircle2 },
+            { path: '/dashboard/guru/slip', label: "Slip Kafa'ah Saya", icon: CreditCard },
+          ]
         }
       ];
     } else if (currentRole === 'STAFF') {
@@ -609,6 +616,37 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             )}
 
+            {/* Quick Switch to Portal Mengajar for Kepsek */}
+            {isKepsekRole(currentRole) && (
+              <button
+                onClick={() => {
+                  if (currentPath.startsWith('/dashboard/guru')) {
+                    setCurrentPath('/dashboard/kepsek');
+                  } else {
+                    setCurrentPath('/dashboard/guru');
+                  }
+                }}
+                className={`hidden sm:flex items-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs border ${
+                  currentPath.startsWith('/dashboard/guru')
+                    ? 'bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/40'
+                    : 'bg-[#DAF1DE] hover:bg-[#8EB69B]/30 text-[#163832] border-[#8EB69B]/40 dark:bg-[#163832] dark:text-[#DAF1DE] dark:border-emerald-800/40'
+                }`}
+                title={currentPath.startsWith('/dashboard/guru') ? 'Kembali ke Panel Manajemen Kepsek' : 'Buka Halaman Presensi & Jurnal Mengajar Saya'}
+              >
+                {currentPath.startsWith('/dashboard/guru') ? (
+                  <>
+                    <LayoutDashboard className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
+                    <span>Mode Kepsek</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#163832] dark:text-[#DAF1DE]" />
+                    <span>Absen Mengajar Saya</span>
+                  </>
+                )}
+              </button>
+            )}
+
             {/* Dark Mode Toggle */}
             <button
               onClick={toggleDarkMode}
@@ -654,6 +692,32 @@ export const Header: React.FC<HeaderProps> = ({
                       <Camera className="w-4 h-4 text-[#163832]" />
                       <span>Pengaturan Foto & Profil</span>
                     </button>
+
+                    {isKepsekRole(currentRole) && (
+                      <button
+                        onClick={() => {
+                          setShowUserDropdown(false);
+                          if (currentPath.startsWith('/dashboard/guru')) {
+                            setCurrentPath('/dashboard/kepsek');
+                          } else {
+                            setCurrentPath('/dashboard/guru');
+                          }
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 text-xs font-bold text-[#163832] bg-[#DAF1DE]/60 hover:bg-[#DAF1DE] rounded-xl transition-colors text-left cursor-pointer"
+                      >
+                        {currentPath.startsWith('/dashboard/guru') ? (
+                          <>
+                            <LayoutDashboard className="w-4 h-4 text-[#163832]" />
+                            <span>Kembali ke Panel Kepsek</span>
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="w-4 h-4 text-[#163832]" />
+                            <span>Buka Jadwal & Absen Mengajar</span>
+                          </>
+                        )}
+                      </button>
+                    )}
 
                     <button
                       onClick={() => {
