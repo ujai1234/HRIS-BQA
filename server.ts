@@ -4229,6 +4229,30 @@ async function startServer() {
         db.query.attendances.findMany()
       ]);
 
+      const parts = period.trim().split(/\s+/);
+      const monthNamesIndo: Record<string, string> = {
+        januari: '01',
+        februari: '02',
+        maret: '03',
+        april: '04',
+        mei: '05',
+        juni: '06',
+        juli: '07',
+        agustus: '08',
+        september: '09',
+        oktober: '10',
+        november: '11',
+        desember: '12',
+      };
+      const monthStr = monthNamesIndo[parts[0]?.toLowerCase()] || '08';
+      const yearStr = parts[1] || '2026';
+      const periodPrefix = `${yearStr}-${monthStr}`;
+
+      // Filter attendances strictly for this selected month and year (YYYY-MM)
+      const monthAttendances = attendances.filter(
+        (a: any) => typeof a.date === 'string' && a.date.startsWith(periodPrefix)
+      );
+
       const targetTeachers = singleTeacherId 
         ? teachers.filter(t => t.id === singleTeacherId)
         : (unitFilter !== 'ALL' ? teachers.filter(t => t.unit === unitFilter) : teachers);
@@ -4238,7 +4262,7 @@ async function startServer() {
         const weeklyHours = teacherSchedules.reduce((sum, s) => sum + Number(s.hours || 0), 0);
         const baseMonthlyScheduledHours = (weeklyHours * 4) || 16; 
 
-        const actualTeachingRecords = attendances.filter(
+        const actualTeachingRecords = monthAttendances.filter(
           (a: any) => a.actualTeacherId === teacher.id && (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG')
         );
 
@@ -4265,13 +4289,13 @@ async function startServer() {
         let teachingHonorarium = totalTaughtHours * Number(teacher.hourlyRate || 0);
         let totalTransport = totalPresentDays * Number(teacher.dailyTransport || 0);
 
-        const lateRecords = attendances.filter((a: any) => a.actualTeacherId === teacher.id && Number(a.latePenalty || 0) > 0);
+        const lateRecords = monthAttendances.filter((a: any) => a.actualTeacherId === teacher.id && Number(a.latePenalty || 0) > 0);
         const latePenaltyTotal = lateRecords.reduce((sum, a: any) => sum + Number(a.latePenalty || 0), 0);
         const lateCountLight = lateRecords.filter((a: any) => a.lateCategory === 'TERLAMBAT_RINGAN').length;
         const lateCountMedium = lateRecords.filter((a: any) => a.lateCategory === 'TERLAMBAT_SEDANG').length;
         const lateCountHeavy = lateRecords.filter((a: any) => a.lateCategory === 'TERLAMBAT_BERAT').length;
 
-        const emptyJournalRecords = attendances.filter((a: any) => a.actualTeacherId === teacher.id && a.status === 'HADIR_JURNAL_KOSONG');
+        const emptyJournalRecords = monthAttendances.filter((a: any) => a.actualTeacherId === teacher.id && a.status === 'HADIR_JURNAL_KOSONG');
         const emptyJournalCount = emptyJournalRecords.length;
         const emptyJournalPenalty = emptyJournalRecords.reduce((sum, a: any) => {
           const sched = schedules.find((s: any) => s.id === a.scheduleId);
@@ -4279,7 +4303,7 @@ async function startServer() {
           return sum + (0.5 * hours * Number(teacher.hourlyRate || 0));
         }, 0);
 
-        const alphaRecords = attendances.filter((a: any) => a.teacherId === teacher.id && a.status === 'ALPA');
+        const alphaRecords = monthAttendances.filter((a: any) => a.teacherId === teacher.id && a.status === 'ALPA');
         const alphaDays = alphaRecords.length;
         const alphaPenalty = alphaRecords.reduce((sum, a: any) => {
           const sched = schedules.find((s: any) => s.id === a.scheduleId);
@@ -4287,7 +4311,7 @@ async function startServer() {
           return sum + Number(teacher.dailyTransport || 0) + (hours * Number(teacher.hourlyRate || 0)) + (0.05 * Number(teacher.baseSalary || 0));
         }, 0);
 
-        const izinRecords = attendances.filter((a: any) => a.teacherId === teacher.id && a.status === 'IZIN');
+        const izinRecords = monthAttendances.filter((a: any) => a.teacherId === teacher.id && a.status === 'IZIN');
         const izinDays = izinRecords.length;
         const izinPenalty = izinRecords.reduce((sum, a: any) => {
           const sched = schedules.find((s: any) => s.id === a.scheduleId);

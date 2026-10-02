@@ -14,13 +14,59 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { toast } from 'sonner';
 
+const MONTH_OPTIONS = [
+  { value: 1, label: 'Januari' },
+  { value: 2, label: 'Februari' },
+  { value: 3, label: 'Maret' },
+  { value: 4, label: 'April' },
+  { value: 5, label: 'Mei' },
+  { value: 6, label: 'Juni' },
+  { value: 7, label: 'Juli' },
+  { value: 8, label: 'Agustus' },
+  { value: 9, label: 'September' },
+  { value: 10, label: 'Oktober' },
+  { value: 11, label: 'November' },
+  { value: 12, label: 'Desember' }
+];
+
+const YEAR_OPTIONS = [2024, 2025, 2026, 2027, 2028];
+
 export const TahfidzPayrollView: React.FC = () => {
-  const { fetchTahfidzPayroll, tahfidzPayroll, checkTahfidzConnection } = useHRIS();
+  const { fetchTahfidzPayroll, tahfidzPayroll, checkTahfidzConnection, selectedPeriod, setSelectedPeriod } = useHRIS();
   
-  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const periodParts = selectedPeriod ? selectedPeriod.trim().split(/\s+/) : [];
+  const initMonth = MONTH_OPTIONS.find((m) => m.label.toLowerCase() === periodParts[0]?.toLowerCase())?.value || 9;
+  const initYear = parseInt(periodParts[1]) || 2026;
+
+  const [selectedMonth, setSelectedMonth] = useState<number>(initMonth);
+  const [selectedYear, setSelectedYear] = useState<number>(initYear);
   const [isFetching, setIsFetching] = useState(false);
   const [isConnected, setIsConnected] = useState(true);
+
+  // Sync state if selectedPeriod in context changes externally
+  useEffect(() => {
+    if (!selectedPeriod) return;
+    const parts = selectedPeriod.trim().split(/\s+/);
+    const m = MONTH_OPTIONS.find((opt) => opt.label.toLowerCase() === parts[0]?.toLowerCase());
+    if (m && m.value !== selectedMonth) setSelectedMonth(m.value);
+    const y = parseInt(parts[1]);
+    if (y && y !== selectedYear) setSelectedYear(y);
+  }, [selectedPeriod]);
+
+  const handleMonthChange = (newMonth: number) => {
+    setSelectedMonth(newMonth);
+    const mObj = MONTH_OPTIONS.find((m) => m.value === newMonth);
+    if (mObj) {
+      setSelectedPeriod(`${mObj.label} ${selectedYear}`);
+    }
+  };
+
+  const handleYearChange = (newYear: number) => {
+    setSelectedYear(newYear);
+    const mObj = MONTH_OPTIONS.find((m) => m.value === selectedMonth);
+    const mLabel = mObj ? mObj.label : 'September';
+    setSelectedPeriod(`${mLabel} ${newYear}`);
+  };
 
   const loadData = async () => {
     setIsFetching(true);
@@ -115,21 +161,9 @@ export const TahfidzPayrollView: React.FC = () => {
     doc.save(`Payroll_Tahfidz_${tahfidzPayroll.period.replace(' ', '_')}.pdf`);
   };
 
-  const months = [
-    { value: 1, label: 'Januari' }, { value: 2, label: 'Februari' },
-    { value: 3, label: 'Maret' }, { value: 4, label: 'April' },
-    { value: 5, label: 'Mei' }, { value: 6, label: 'Juni' },
-    { value: 7, label: 'Juli' }, { value: 8, label: 'Agustus' },
-    { value: 9, label: 'September' }, { value: 10, label: 'Oktober' },
-    { value: 11, label: 'November' }, { value: 12, label: 'Desember' }
-  ];
-
-  const currentYear = new Date().getFullYear();
-  const years = [currentYear - 1, currentYear, currentYear + 1];
-
   return (
     <div className="space-y-5">
-      {/* Minimal Header Controls */}
+      {/* Minimal Header Controls with Month & Year Filter */}
       <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-[12px] bg-slate-50 border border-slate-200 flex items-center justify-center text-[#163832] font-bold">
@@ -143,35 +177,41 @@ export const TahfidzPayrollView: React.FC = () => {
                 {isConnected ? 'Terhubung API' : 'Mode Sinkron'}
               </span>
             </div>
-            <p className="text-[11px] font-semibold text-[#8EB69B] mt-0.5">Rp 40.000 / JP (Subuh & Maghrib)</p>
+            <p className="text-[11px] font-semibold text-[#8EB69B] mt-0.5">Rp 40.000 / JP (Subuh & Maghrib) • Periode {selectedPeriod}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(Number(e.target.value))}
-            className="px-3 py-2 bg-white border border-slate-200 rounded-[12px] text-xs font-bold text-[#051F20] focus:outline-none focus:ring-2 focus:ring-[#163832]"
-          >
-            {months.map(m => (
-              <option key={m.value} value={m.value}>{m.label}</option>
-            ))}
-          </select>
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-[12px]">
+            <span className="text-[10px] font-bold text-[#8EB69B] uppercase tracking-wider">Bulan:</span>
+            <select
+              value={selectedMonth}
+              onChange={(e) => handleMonthChange(Number(e.target.value))}
+              className="bg-transparent text-xs font-bold text-[#051F20] focus:outline-none cursor-pointer"
+            >
+              {MONTH_OPTIONS.map((m) => (
+                <option key={m.value} value={m.value}>{m.label}</option>
+              ))}
+            </select>
+          </div>
 
-          <select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="px-3 py-2 bg-white border border-slate-200 rounded-[12px] text-xs font-bold text-[#051F20] focus:outline-none focus:ring-2 focus:ring-[#163832]"
-          >
-            {years.map(y => (
-              <option key={y} value={y}>{y}</option>
-            ))}
-          </select>
+          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-[12px]">
+            <span className="text-[10px] font-bold text-[#8EB69B] uppercase tracking-wider">Tahun:</span>
+            <select
+              value={selectedYear}
+              onChange={(e) => handleYearChange(Number(e.target.value))}
+              className="bg-transparent text-xs font-bold text-[#051F20] focus:outline-none cursor-pointer"
+            >
+              {YEAR_OPTIONS.map((y) => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+          </div>
 
           <button 
             onClick={loadData}
             disabled={isFetching}
-            className="p-2.5 text-[#051F20] hover:bg-slate-100 rounded-[12px] border border-slate-200 shadow-xs transition-colors cursor-pointer"
+            className="p-2 text-[#051F20] hover:bg-slate-100 rounded-[12px] border border-slate-200 shadow-xs transition-colors cursor-pointer"
             title="Sinkronkan Data"
           >
             <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />

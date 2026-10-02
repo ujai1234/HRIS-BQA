@@ -334,6 +334,14 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     fetchAllData();
+    const parts = selectedPeriod.trim().split(/\s+/);
+    const monthNamesIndo: Record<string, number> = {
+      januari: 1, februari: 2, maret: 3, april: 4, mei: 5, juni: 6,
+      juli: 7, agustus: 8, september: 9, oktober: 10, november: 11, desember: 12
+    };
+    const bNum = monthNamesIndo[parts[0]?.toLowerCase()] || 8;
+    const yNum = parseInt(parts[1]) || 2026;
+    fetchTahfidzPayroll(bNum, yNum);
   }, [currentUserId, currentRole, selectedPeriod]);
 
   // Sync to local storage for auth/path only

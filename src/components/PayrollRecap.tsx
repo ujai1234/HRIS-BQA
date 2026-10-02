@@ -1,9 +1,26 @@
 import React, { useState } from 'react';
-import { Download, Printer, Search } from 'lucide-react';
+import { Calendar, Download, Printer, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { useHRIS } from '../context/HRISContext';
 import { formatRupiah, exportToCSV } from '../utils/formatters';
 import { AdminOfficialReportModal } from './AdminOfficialReportModal';
+
+const MONTH_OPTIONS = [
+  { value: 1, label: 'Januari' },
+  { value: 2, label: 'Februari' },
+  { value: 3, label: 'Maret' },
+  { value: 4, label: 'April' },
+  { value: 5, label: 'Mei' },
+  { value: 6, label: 'Juni' },
+  { value: 7, label: 'Juli' },
+  { value: 8, label: 'Agustus' },
+  { value: 9, label: 'September' },
+  { value: 10, label: 'Oktober' },
+  { value: 11, label: 'November' },
+  { value: 12, label: 'Desember' }
+];
+
+const YEAR_OPTIONS = [2024, 2025, 2026, 2027, 2028];
 
 export const PayrollRecap: React.FC = () => {
   const { 
@@ -15,6 +32,26 @@ export const PayrollRecap: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [unitFilter, setUnitFilter] = useState<string>('ALL');
   const [showOfficialPdfModal, setShowOfficialPdfModal] = useState(false);
+
+  // Parse current selected month & year from selectedPeriod (e.g. "September 2026")
+  const periodParts = selectedPeriod.trim().split(/\s+/);
+  const currentMonthNum = MONTH_OPTIONS.find(
+    (m) => m.label.toLowerCase() === periodParts[0]?.toLowerCase()
+  )?.value || 9;
+  const currentYearNum = parseInt(periodParts[1]) || 2026;
+
+  const handleMonthChange = (newMonthNum: number) => {
+    const m = MONTH_OPTIONS.find((opt) => opt.value === newMonthNum);
+    if (m) {
+      setSelectedPeriod(`${m.label} ${currentYearNum}`);
+    }
+  };
+
+  const handleYearChange = (newYearNum: number) => {
+    const m = MONTH_OPTIONS.find((opt) => opt.value === currentMonthNum);
+    const label = m ? m.label : 'September';
+    setSelectedPeriod(`${label} ${newYearNum}`);
+  };
 
   const payrollSummary = calculateAllPayroll(selectedPeriod);
 
@@ -104,6 +141,55 @@ export const PayrollRecap: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      {/* Top Banner with Period Filter */}
+      <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-[12px] bg-slate-50 border border-slate-200 flex items-center justify-center text-[#163832] font-bold">
+            <Calendar className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-bold text-[#051F20] tracking-tight">Generate Payroll & Kafa'ah</h1>
+              <span className="bg-[#DAF1DE] text-[#051F20] font-bold px-2.5 py-0.5 rounded-md text-[10px] uppercase tracking-wider">
+                Periode {selectedPeriod}
+              </span>
+            </div>
+            <p className="text-[11px] font-semibold text-[#8EB69B] mt-0.5">
+              Kalkulasi otomatis per bulan dari jam KBM, presensi, badal & honor tahfidz
+            </p>
+          </div>
+        </div>
+
+        {/* Filter Bulan & Tahun Controls */}
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-[12px]">
+            <span className="text-[10px] font-bold text-[#8EB69B] uppercase tracking-wider">Bulan:</span>
+            <select
+              value={currentMonthNum}
+              onChange={(e) => handleMonthChange(Number(e.target.value))}
+              className="bg-transparent text-xs font-bold text-[#051F20] focus:outline-none cursor-pointer"
+            >
+              {MONTH_OPTIONS.map((m) => (
+                <option key={m.value} value={m.value}>{m.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-[12px]">
+            <span className="text-[10px] font-bold text-[#8EB69B] uppercase tracking-wider">Tahun:</span>
+            <select
+              value={currentYearNum}
+              onChange={(e) => handleYearChange(Number(e.target.value))}
+              className="bg-transparent text-xs font-bold text-[#051F20] focus:outline-none cursor-pointer"
+            >
+              {YEAR_OPTIONS.map((y) => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
       {/* Aggregate Payroll Metrics */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
         <div className="bg-white p-4 rounded-[16px] border border-slate-200 shadow-xs">

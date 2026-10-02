@@ -495,6 +495,8 @@ export const Header: React.FC<HeaderProps> = ({
                 onChange={(e) => setSelectedPeriod(e.target.value)}
                 className="bg-slate-50 border border-slate-200 text-xs font-semibold text-[#051F20] py-1.5 pl-3 pr-8 rounded-lg appearance-none cursor-pointer focus:outline-none focus:border-[#163832] shadow-xs"
               >
+                <option value="Oktober 2026">Oktober 2026</option>
+                <option value="September 2026">September 2026</option>
                 <option value="Agustus 2026">Agustus 2026</option>
                 <option value="Juli 2026">Juli 2026</option>
                 <option value="Juni 2026">Juni 2026</option>
