@@ -1141,6 +1141,8 @@ async function startServer() {
         baseSalary: Number(req.body.baseSalary) || 0,
         hourlyRate: Number(req.body.hourlyRate) || 0,
         dailyTransport: Number(req.body.dailyTransport) || 0,
+        monthlyTransport: req.body.monthlyTransport !== undefined && req.body.monthlyTransport !== null ? Number(req.body.monthlyTransport) : 250000,
+        monthlyMealAllowance: req.body.monthlyMealAllowance !== undefined && req.body.monthlyMealAllowance !== null ? Number(req.body.monthlyMealAllowance) : 375000,
         role: req.body.role || 'GURU',
         phone: req.body.phone ? String(req.body.phone).trim() : null,
         avatarColor: req.body.avatarColor || 'bg-teal-700',
@@ -1215,6 +1217,8 @@ async function startServer() {
             baseSalary: Number(item.baseSalary) || existing.baseSalary,
             hourlyRate: Number(item.hourlyRate) || existing.hourlyRate,
             dailyTransport: Number(item.dailyTransport) || existing.dailyTransport,
+            monthlyTransport: item.monthlyTransport !== undefined && item.monthlyTransport !== null ? Number(item.monthlyTransport) : (existing.monthlyTransport !== undefined && existing.monthlyTransport !== null ? existing.monthlyTransport : 250000),
+            monthlyMealAllowance: item.monthlyMealAllowance !== undefined && item.monthlyMealAllowance !== null ? Number(item.monthlyMealAllowance) : (existing.monthlyMealAllowance !== undefined && existing.monthlyMealAllowance !== null ? existing.monthlyMealAllowance : 375000),
             role: rawRole,
             phone: item.phone ? String(item.phone).trim() : existing.phone,
             username: username,
@@ -1233,6 +1237,8 @@ async function startServer() {
             baseSalary: Number(item.baseSalary) || 0,
             hourlyRate: Number(item.hourlyRate) || 0,
             dailyTransport: Number(item.dailyTransport) || 0,
+            monthlyTransport: item.monthlyTransport !== undefined && item.monthlyTransport !== null ? Number(item.monthlyTransport) : 250000,
+            monthlyMealAllowance: item.monthlyMealAllowance !== undefined && item.monthlyMealAllowance !== null ? Number(item.monthlyMealAllowance) : 375000,
             role: rawRole,
             phone: item.phone ? String(item.phone).trim() : null,
             avatarColor: item.avatarColor || 'bg-teal-700',
@@ -1313,6 +1319,12 @@ async function startServer() {
       if (req.body.baseSalary !== undefined) updateData.baseSalary = Number(req.body.baseSalary) || 0;
       if (req.body.hourlyRate !== undefined) updateData.hourlyRate = Number(req.body.hourlyRate) || 0;
       if (req.body.dailyTransport !== undefined) updateData.dailyTransport = Number(req.body.dailyTransport) || 0;
+      if (req.body.monthlyTransport !== undefined && req.body.monthlyTransport !== null) {
+        updateData.monthlyTransport = Number(req.body.monthlyTransport) || 0;
+      }
+      if (req.body.monthlyMealAllowance !== undefined && req.body.monthlyMealAllowance !== null) {
+        updateData.monthlyMealAllowance = Number(req.body.monthlyMealAllowance) || 0;
+      }
       if (req.body.role !== undefined) updateData.role = req.body.role;
       if (req.body.phone !== undefined) updateData.phone = req.body.phone ? String(req.body.phone).trim() : null;
       if (req.body.avatarColor !== undefined) updateData.avatarColor = req.body.avatarColor;
@@ -4360,8 +4372,8 @@ async function startServer() {
         let mealAllowance = 0;
 
         if (teacher.role === 'STAFF') {
-          const staffTransport = Number(teacher.monthlyTransport || 250000);
-          mealAllowance = Number(teacher.monthlyMealAllowance || 375000);
+          const staffTransport = Number(teacher.monthlyTransport !== undefined && teacher.monthlyTransport !== null ? teacher.monthlyTransport : 250000);
+          mealAllowance = Number(teacher.monthlyMealAllowance !== undefined && teacher.monthlyMealAllowance !== null ? teacher.monthlyMealAllowance : 375000);
           
           grossSalary = Number(teacher.baseSalary || 0) + staffTransport + mealAllowance;
           totalDeductions = 0; 

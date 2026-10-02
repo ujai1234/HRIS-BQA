@@ -49,6 +49,8 @@ export const MasterTeachers: React.FC = () => {
     baseSalary: 700000,
     hourlyRate: 40000,
     dailyTransport: 10000,
+    monthlyTransport: 250000,
+    monthlyMealAllowance: 375000,
     role: 'GURU',
     phone: '',
     avatarColor: 'bg-emerald-700',
@@ -99,6 +101,8 @@ export const MasterTeachers: React.FC = () => {
       baseSalary: teacher.baseSalary,
       hourlyRate: teacher.hourlyRate,
       dailyTransport: teacher.dailyTransport,
+      monthlyTransport: teacher.monthlyTransport !== undefined && teacher.monthlyTransport !== null ? teacher.monthlyTransport : 250000,
+      monthlyMealAllowance: teacher.monthlyMealAllowance !== undefined && teacher.monthlyMealAllowance !== null ? teacher.monthlyMealAllowance : 375000,
       role: teacher.role,
       phone: teacher.phone || '',
       avatarColor: teacher.avatarColor || 'bg-emerald-700',
@@ -109,8 +113,8 @@ export const MasterTeachers: React.FC = () => {
     setBaseSalaryInput(formatCurrencyInput(teacher.baseSalary));
     setHourlyRateInput(formatCurrencyInput(teacher.hourlyRate));
     setDailyTransportInput(formatCurrencyInput(teacher.dailyTransport));
-    setMonthlyTransportInput(formatCurrencyInput(teacher.monthlyTransport || 250000));
-    setMonthlyMealInput(formatCurrencyInput(teacher.monthlyMealAllowance || 375000));
+    setMonthlyTransportInput(formatCurrencyInput(teacher.monthlyTransport !== undefined && teacher.monthlyTransport !== null ? teacher.monthlyTransport : 250000));
+    setMonthlyMealInput(formatCurrencyInput(teacher.monthlyMealAllowance !== undefined && teacher.monthlyMealAllowance !== null ? teacher.monthlyMealAllowance : 375000));
   };
 
   const handleOpenAdd = () => {
@@ -339,10 +343,22 @@ export const MasterTeachers: React.FC = () => {
                         {formatRupiah(t.baseSalary)}
                       </td>
                       <td className="py-3 px-4 text-right font-mono text-[#163832] font-bold">
-                        {formatRupiah(t.hourlyRate)}
+                        {t.role === 'STAFF' ? (
+                          <span className="text-[10px] text-amber-800 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-300 px-2 py-0.5 rounded font-mono font-bold" title="Uang Makan Bulanan">
+                            Mkn: {formatRupiah(t.monthlyMealAllowance !== undefined && t.monthlyMealAllowance !== null ? t.monthlyMealAllowance : 375000)}
+                          </span>
+                        ) : (
+                          formatRupiah(t.hourlyRate)
+                        )}
                       </td>
                       <td className="py-3 px-4 text-right font-mono text-[#8EB69B] font-bold">
-                        {formatRupiah(t.dailyTransport)}
+                        {t.role === 'STAFF' ? (
+                          <span className="text-[10px] text-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-300 px-2 py-0.5 rounded font-mono font-bold" title="Transport Bulanan">
+                            Bln: {formatRupiah(t.monthlyTransport !== undefined && t.monthlyTransport !== null ? t.monthlyTransport : 250000)}
+                          </span>
+                        ) : (
+                          formatRupiah(t.dailyTransport)
+                        )}
                       </td>
                       <td className="py-3 px-4 text-center">
                         <span className={`inline-block px-2.5 py-1 rounded-[8px] text-[10px] font-bold uppercase tracking-wider ${

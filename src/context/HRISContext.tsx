@@ -991,10 +991,10 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       fetchAllData();
     });
 
-    const isFinancial = 'baseSalary' in updates || 'hourlyRate' in updates || 'dailyTransport' in updates;
+    const isFinancial = 'baseSalary' in updates || 'hourlyRate' in updates || 'dailyTransport' in updates || 'monthlyTransport' in updates || 'monthlyMealAllowance' in updates;
     const details = isFinancial 
-      ? `Perubahan data kafa'ah guru ${origTeacher?.name || id}: ${updates.baseSalary !== undefined ? `Gaji Pokok -> Rp ${updates.baseSalary.toLocaleString('id-ID')}; ` : ''}${updates.hourlyRate !== undefined ? `Tarif/JP -> Rp ${updates.hourlyRate.toLocaleString('id-ID')}; ` : ''}${updates.dailyTransport !== undefined ? `Transport -> Rp ${updates.dailyTransport.toLocaleString('id-ID')}` : ''}`
-      : `Pembaruan profil guru ${origTeacher?.name || id}: ${Object.keys(updates).join(', ')}`;
+      ? `Perubahan data kafa'ah ${origTeacher?.name || id}: ${updates.baseSalary !== undefined ? `Gaji Pokok -> Rp ${updates.baseSalary.toLocaleString('id-ID')}; ` : ''}${updates.hourlyRate !== undefined ? `Tarif/JP -> Rp ${updates.hourlyRate.toLocaleString('id-ID')}; ` : ''}${updates.dailyTransport !== undefined ? `Transport/Hari -> Rp ${updates.dailyTransport.toLocaleString('id-ID')}; ` : ''}${updates.monthlyTransport !== undefined ? `Transport Bulanan -> Rp ${updates.monthlyTransport.toLocaleString('id-ID')}; ` : ''}${updates.monthlyMealAllowance !== undefined ? `Uang Makan -> Rp ${updates.monthlyMealAllowance.toLocaleString('id-ID')}` : ''}`
+      : `Pembaruan profil ${origTeacher?.name || id}: ${Object.keys(updates).join(', ')}`;
 
     logActivity(
       isFinancial ? 'UPDATE_TEACHER_RATE' : 'UPDATE_TEACHER',
@@ -1167,9 +1167,9 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       alphaPenalty: 0,
       otherDeductions: 0,
       totalDeductions: 0,
-      grossSalary: teacher.role === 'STAFF' ? (teacher.baseSalary + (teacher.monthlyTransport || 250000) + (teacher.monthlyMealAllowance || 375000)) : teacher.baseSalary,
-      netSalary: teacher.role === 'STAFF' ? (teacher.baseSalary + (teacher.monthlyTransport || 250000) + (teacher.monthlyMealAllowance || 375000)) : teacher.baseSalary,
-      monthlyMealAllowance: teacher.role === 'STAFF' ? (teacher.monthlyMealAllowance || 375000) : 0,
+      grossSalary: teacher.role === 'STAFF' ? (teacher.baseSalary + (teacher.monthlyTransport !== undefined && teacher.monthlyTransport !== null ? teacher.monthlyTransport : 250000) + (teacher.monthlyMealAllowance !== undefined && teacher.monthlyMealAllowance !== null ? teacher.monthlyMealAllowance : 375000)) : teacher.baseSalary,
+      netSalary: teacher.role === 'STAFF' ? (teacher.baseSalary + (teacher.monthlyTransport !== undefined && teacher.monthlyTransport !== null ? teacher.monthlyTransport : 250000) + (teacher.monthlyMealAllowance !== undefined && teacher.monthlyMealAllowance !== null ? teacher.monthlyMealAllowance : 375000)) : teacher.baseSalary,
+      monthlyMealAllowance: teacher.role === 'STAFF' ? (teacher.monthlyMealAllowance !== undefined && teacher.monthlyMealAllowance !== null ? teacher.monthlyMealAllowance : 375000) : 0,
     };
   };
 

@@ -16,6 +16,8 @@ export const teachers = sqliteTable('teachers', {
   isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true as any),
   username: text('username').unique(),
   password: text('password'),
+  monthlyTransport: integer('monthly_transport').default(250000),
+  monthlyMealAllowance: integer('monthly_meal_allowance').default(375000),
 });
 
 export const schedules = sqliteTable('schedules', {

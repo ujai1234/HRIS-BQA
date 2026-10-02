@@ -36,7 +36,9 @@ sqliteDb.exec(`
     avatar_url TEXT,
     is_active INTEGER NOT NULL DEFAULT 1,
     username TEXT UNIQUE,
-    password TEXT
+    password TEXT,
+    monthly_transport INTEGER DEFAULT 250000,
+    monthly_meal_allowance INTEGER DEFAULT 375000
   );
 
   CREATE TABLE IF NOT EXISTS schedules (
@@ -326,6 +328,8 @@ try { sqliteDb.exec("ALTER TABLE teachers ADD COLUMN avatar_url TEXT;"); } catch
 try { sqliteDb.exec("ALTER TABLE teachers ADD COLUMN username TEXT UNIQUE;"); } catch(e) {}
 try { sqliteDb.exec("ALTER TABLE teachers ADD COLUMN password TEXT;"); } catch(e) {}
 try { sqliteDb.exec("ALTER TABLE teachers ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1;"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE teachers ADD COLUMN monthly_transport INTEGER DEFAULT 250000;"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE teachers ADD COLUMN monthly_meal_allowance INTEGER DEFAULT 375000;"); } catch(e) {}
 
 try { sqliteDb.exec("ALTER TABLE staff_tasks ADD COLUMN photo_url TEXT;"); } catch(e) {}
 try { sqliteDb.exec("ALTER TABLE staff_expenses ADD COLUMN receipt_url TEXT;"); } catch(e) {}
