@@ -4231,10 +4231,11 @@ async function startServer() {
       const unitFilter = (req.query.unitFilter as string) || 'ALL';
       const singleTeacherId = req.query.teacherId as string | undefined;
 
-      const [teachers, schedules, attendances] = await Promise.all([
+      const [teachers, schedules, attendances, staffTasksList] = await Promise.all([
         db.query.teachers.findMany(),
         db.query.schedules.findMany(),
-        db.query.attendances.findMany()
+        db.query.attendances.findMany(),
+        db.query.staffTasks.findMany()
       ]);
 
       const parts = period.trim().split(/\s+/);
@@ -4260,6 +4261,9 @@ async function startServer() {
       const monthAttendances = attendances.filter(
         (a: any) => typeof a.date === 'string' && a.date.startsWith(periodPrefix)
       );
+      const monthStaffTasks = staffTasksList.filter(
+        (st: any) => typeof st.date === 'string' && st.date.startsWith(periodPrefix)
+      );
 
       const targetTeachers = singleTeacherId 
         ? teachers.filter(t => t.id === singleTeacherId)
@@ -4271,7 +4275,7 @@ async function startServer() {
         const customSchedules = teacherSchedules.filter((s: any) => s.customRate && Number(s.customRate) > 0);
 
         const weeklyRegularHours = regularSchedules.reduce((sum: number, s: any) => sum + Number(s.hours || 0), 0);
-        const baseMonthlyScheduledHours = (weeklyRegularHours * 4) || (customSchedules.length > 0 ? 0 : 16);
+        const baseMonthlyScheduledHours = weeklyRegularHours * 4;
         const baseMonthlyCustomHonorarium = customSchedules.reduce((sum: number, s: any) => sum + (Number(s.customRate) * 4), 0);
 
         const actualTeachingRecords = monthAttendances.filter(
@@ -4299,16 +4303,14 @@ async function startServer() {
           return sum + Number(sched ? sched.hours : 2);
         }, 0);
 
-        const totalTaughtHours = Math.max(actualRegularHoursCount, baseMonthlyScheduledHours);
+        // Strict calculation: actual taught hours from verified attendance (0 if no attendance)
+        const totalTaughtHours = actualRegularHoursCount;
 
         const presentDates = new Set(actualTeachingRecords.map((a: any) => a.date));
-        
-        // Tahfidz fallback (frontend merges this later if needed, or we keep it 0 here)
-        const defaultMonthlyDays = Math.min(22, Math.max(16, weeklyRegularHours > 0 ? weeklyRegularHours * 2 : 18));
-        const totalPresentDays = Math.max(presentDates.size, defaultMonthlyDays);
+        let totalPresentDays = presentDates.size;
 
         const regularHonorarium = totalTaughtHours * Number(teacher.hourlyRate || 0);
-        const customRateHonorarium = actualTeachingRecords.length > 0 ? actualCustomHonorarium : baseMonthlyCustomHonorarium;
+        const customRateHonorarium = actualCustomHonorarium;
         let teachingHonorarium = regularHonorarium + customRateHonorarium;
         let totalTransport = totalPresentDays * Number(teacher.dailyTransport || 0);
 
@@ -4357,13 +4359,25 @@ async function startServer() {
         let mealAllowance = 0;
 
         if (teacher.role === 'STAFF') {
-          const staffTransport = Number(teacher.monthlyTransport !== undefined && teacher.monthlyTransport !== null ? teacher.monthlyTransport : 250000);
-          mealAllowance = Number(teacher.monthlyMealAllowance !== undefined && teacher.monthlyMealAllowance !== null ? teacher.monthlyMealAllowance : 375000);
-          
-          grossSalary = Number(teacher.baseSalary || 0) + staffTransport + mealAllowance;
-          totalDeductions = 0; 
+          const teacherStaffTasks = monthStaffTasks.filter((st: any) => st.staffId === teacher.id);
+          const staffTaskDates = new Set(teacherStaffTasks.map((st: any) => st.date));
+          const combinedStaffPresentDays = Math.max(totalPresentDays, staffTaskDates.size);
+          totalPresentDays = combinedStaffPresentDays;
+
+          // If staff has no attendance/tasks recorded yet this month (system hasn't run yet), allowances = 0
+          if (combinedStaffPresentDays > 0) {
+            const staffTransport = Number(teacher.monthlyTransport !== undefined && teacher.monthlyTransport !== null ? teacher.monthlyTransport : 250000);
+            mealAllowance = Number(teacher.monthlyMealAllowance !== undefined && teacher.monthlyMealAllowance !== null ? teacher.monthlyMealAllowance : 375000);
+            totalTransport = staffTransport;
+            grossSalary = Number(teacher.baseSalary || 0) + staffTransport + mealAllowance;
+          } else {
+            totalTransport = 0;
+            mealAllowance = 0;
+            grossSalary = Number(teacher.baseSalary || 0);
+          }
+
+          totalDeductions = 0;
           netSalary = grossSalary;
-          totalTransport = staffTransport;
           teachingHonorarium = 0;
         }
 

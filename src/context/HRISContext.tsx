@@ -1167,9 +1167,9 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       alphaPenalty: 0,
       otherDeductions: 0,
       totalDeductions: 0,
-      grossSalary: teacher.role === 'STAFF' ? (teacher.baseSalary + (teacher.monthlyTransport !== undefined && teacher.monthlyTransport !== null ? teacher.monthlyTransport : 250000) + (teacher.monthlyMealAllowance !== undefined && teacher.monthlyMealAllowance !== null ? teacher.monthlyMealAllowance : 375000)) : teacher.baseSalary,
-      netSalary: teacher.role === 'STAFF' ? (teacher.baseSalary + (teacher.monthlyTransport !== undefined && teacher.monthlyTransport !== null ? teacher.monthlyTransport : 250000) + (teacher.monthlyMealAllowance !== undefined && teacher.monthlyMealAllowance !== null ? teacher.monthlyMealAllowance : 375000)) : teacher.baseSalary,
-      monthlyMealAllowance: teacher.role === 'STAFF' ? (teacher.monthlyMealAllowance !== undefined && teacher.monthlyMealAllowance !== null ? teacher.monthlyMealAllowance : 375000) : 0,
+      grossSalary: teacher.baseSalary,
+      netSalary: teacher.baseSalary,
+      monthlyMealAllowance: 0,
     };
   };
 
