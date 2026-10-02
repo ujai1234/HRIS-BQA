@@ -86,6 +86,7 @@ export interface ClassSchedule {
   endTime: string; // "08:50"
   hours: number; // JP (Jam Pelajaran, e.g. 2 JP)
   room: string;
+  customRate?: number | null;
 }
 
 export type AttendanceStatus = 
@@ -161,7 +162,9 @@ export interface TeacherPayrollItem {
   totalTaughtHours: number; // Actual hours taught including badal
   totalBadalHours: number; // Hours taught as substitute
   hourlyRate: number;
-  teachingHonorarium: number; // totalTaughtHours * hourlyRate
+  teachingHonorarium: number; // totalTaughtHours * hourlyRate + customRateHonorarium
+  customRateHonorarium?: number; // Honorarium khusus per sesi (misal: Ekskul Silat Rp 100.000/sesi)
+  customSessionsCount?: number; // Total sesi bertarif khusus yang dihadiri
   tahfidzHonorarium?: number; // total honor dari API Tahfidz
   totalPresentDays: number;
   dailyTransport: number;

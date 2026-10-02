@@ -49,7 +49,8 @@ sqliteDb.exec(`
     start_time TEXT NOT NULL,
     end_time TEXT NOT NULL,
     hours INTEGER NOT NULL,
-    room TEXT NOT NULL
+    room TEXT NOT NULL,
+    custom_rate INTEGER
   );
 
   CREATE TABLE IF NOT EXISTS attendances (
@@ -333,6 +334,7 @@ try { sqliteDb.exec("ALTER TABLE account ADD COLUMN password TEXT;"); } catch(e)
 try { sqliteDb.exec("ALTER TABLE account ADD COLUMN issuer TEXT;"); } catch(e) {}
 try { sqliteDb.exec("ALTER TABLE session ADD COLUMN ip_address TEXT;"); } catch(e) {}
 try { sqliteDb.exec("ALTER TABLE session ADD COLUMN user_agent TEXT;"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE schedules ADD COLUMN custom_rate INTEGER;"); } catch(e) {}
 
 // Ensure all Better-Auth credential accounts have the required local:credential issuer and account_id
 try {

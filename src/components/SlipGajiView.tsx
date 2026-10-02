@@ -199,13 +199,29 @@ export const SlipGajiView: React.FC = () => {
 
               <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-[#163832] text-slate-700 dark:text-[#8EB69B]">
                 <div>
-                  <span>2. Honor Mengajar</span>
+                  <span>2. Honor Mengajar Reguler</span>
                   <span className="text-[10px] text-slate-400 dark:text-[#163832] block font-mono">
                     {payrollItem.totalTaughtHours} JP × {formatRupiah(targetTeacher?.hourlyRate || 40000)}
                   </span>
                 </div>
-                <span className="font-mono text-slate-900 dark:text-[#DAF1DE]">{formatRupiah(payrollItem.teachingHonorarium)}</span>
+                <span className="font-mono text-slate-900 dark:text-[#DAF1DE]">
+                  {formatRupiah(payrollItem.teachingHonorarium - (payrollItem.customRateHonorarium || 0))}
+                </span>
               </div>
+
+              {payrollItem.customRateHonorarium && payrollItem.customRateHonorarium > 0 ? (
+                <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-[#163832] text-slate-700 dark:text-[#8EB69B]">
+                  <div>
+                    <span>2b. Honor Sesi Khusus / Ekskul</span>
+                    <span className="text-[10px] text-amber-600 dark:text-amber-400 block font-mono">
+                      {payrollItem.customSessionsCount || 0} Sesi Pertemuan (Tarif Flat)
+                    </span>
+                  </div>
+                  <span className="font-mono text-slate-900 dark:text-[#DAF1DE]">
+                    {formatRupiah(payrollItem.customRateHonorarium)}
+                  </span>
+                </div>
+              ) : null}
 
               <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-[#163832] text-slate-700 dark:text-[#8EB69B]">
                 <div>

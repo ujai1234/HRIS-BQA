@@ -29,6 +29,7 @@ export const schedules = sqliteTable('schedules', {
   endTime: text('end_time').notNull(),
   hours: integer('hours').notNull(),
   room: text('room').notNull(),
+  customRate: integer('custom_rate'),
 });
 
 export const attendances = sqliteTable('attendances', {

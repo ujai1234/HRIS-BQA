@@ -1150,6 +1150,8 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       totalBadalHours: 0,
       hourlyRate: teacher.hourlyRate,
       teachingHonorarium: 0,
+      customRateHonorarium: 0,
+      customSessionsCount: 0,
       totalPresentDays: 0,
       dailyTransport: teacher.dailyTransport,
       totalTransport: 0,

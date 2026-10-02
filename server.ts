@@ -1514,7 +1514,10 @@ async function startServer() {
     try {
       const scheduleData = {
         ...req.body,
-        id: req.body.id || `SCH-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`
+        id: req.body.id || `SCH-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        customRate: req.body.customRate !== undefined && req.body.customRate !== null && req.body.customRate !== ''
+          ? Number(req.body.customRate)
+          : null
       };
       const result = await db.insert(schema.schedules).values(scheduleData).returning();
       res.json(result[0]);
@@ -1541,6 +1544,9 @@ async function startServer() {
         endTime: item.endTime || '08:50',
         hours: Number(item.hours) || 2,
         room: item.room || '-',
+        customRate: item.customRate !== undefined && item.customRate !== null && item.customRate !== ''
+          ? Number(item.customRate)
+          : null,
       }));
       const result = await db.insert(schema.schedules).values(sanitizedList).returning();
       res.json(result);
@@ -1569,6 +1575,11 @@ async function startServer() {
       if (req.body.endTime !== undefined) updateData.endTime = req.body.endTime;
       if (req.body.hours !== undefined) updateData.hours = Number(req.body.hours) || 2;
       if (req.body.room !== undefined) updateData.room = req.body.room;
+      if (req.body.customRate !== undefined) {
+        updateData.customRate = (req.body.customRate === null || req.body.customRate === '' || isNaN(Number(req.body.customRate)))
+          ? null
+          : Number(req.body.customRate);
+      }
 
       const result = await db.update(schema.schedules)
         .set(updateData)
@@ -4259,8 +4270,12 @@ async function startServer() {
 
       const items = targetTeachers.map((teacher: any) => {
         const teacherSchedules = schedules.filter((s: any) => s.teacherId === teacher.id);
-        const weeklyHours = teacherSchedules.reduce((sum, s) => sum + Number(s.hours || 0), 0);
-        const baseMonthlyScheduledHours = (weeklyHours * 4) || 16; 
+        const regularSchedules = teacherSchedules.filter((s: any) => !s.customRate || Number(s.customRate) <= 0);
+        const customSchedules = teacherSchedules.filter((s: any) => s.customRate && Number(s.customRate) > 0);
+
+        const weeklyRegularHours = regularSchedules.reduce((sum: number, s: any) => sum + Number(s.hours || 0), 0);
+        const baseMonthlyScheduledHours = (weeklyRegularHours * 4) || (customSchedules.length > 0 ? 0 : 16);
+        const baseMonthlyCustomHonorarium = customSchedules.reduce((sum: number, s: any) => sum + (Number(s.customRate) * 4), 0);
 
         const actualTeachingRecords = monthAttendances.filter(
           (a: any) => a.actualTeacherId === teacher.id && (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG')
@@ -4268,53 +4283,73 @@ async function startServer() {
 
         const badalSessions = actualTeachingRecords.filter((a: any) => a.isBadal);
 
-        const actualTaughtHoursCount = actualTeachingRecords.reduce((sum, a: any) => {
+        let actualRegularHoursCount = 0;
+        let actualCustomHonorarium = 0;
+        let customSessionsCount = 0;
+
+        for (const a of actualTeachingRecords) {
+          const sched = schedules.find((s: any) => s.id === a.scheduleId);
+          if (sched && sched.customRate && Number(sched.customRate) > 0) {
+            actualCustomHonorarium += Number(sched.customRate);
+            customSessionsCount += 1;
+          } else {
+            actualRegularHoursCount += Number(sched ? sched.hours : 2);
+          }
+        }
+
+        const badalHoursCount = badalSessions.reduce((sum: number, a: any) => {
           const sched = schedules.find((s: any) => s.id === a.scheduleId);
           return sum + Number(sched ? sched.hours : 2);
         }, 0);
 
-        const badalHoursCount = badalSessions.reduce((sum, a: any) => {
-          const sched = schedules.find((s: any) => s.id === a.scheduleId);
-          return sum + Number(sched ? sched.hours : 2);
-        }, 0);
-
-        const totalTaughtHours = Math.max(actualTaughtHoursCount, baseMonthlyScheduledHours);
+        const totalTaughtHours = Math.max(actualRegularHoursCount, baseMonthlyScheduledHours);
 
         const presentDates = new Set(actualTeachingRecords.map((a: any) => a.date));
         
         // Tahfidz fallback (frontend merges this later if needed, or we keep it 0 here)
-        const defaultMonthlyDays = Math.min(22, Math.max(16, weeklyHours > 0 ? weeklyHours * 2 : 18));
+        const defaultMonthlyDays = Math.min(22, Math.max(16, weeklyRegularHours > 0 ? weeklyRegularHours * 2 : 18));
         const totalPresentDays = Math.max(presentDates.size, defaultMonthlyDays);
 
-        let teachingHonorarium = totalTaughtHours * Number(teacher.hourlyRate || 0);
+        const regularHonorarium = totalTaughtHours * Number(teacher.hourlyRate || 0);
+        const customRateHonorarium = actualTeachingRecords.length > 0 ? actualCustomHonorarium : baseMonthlyCustomHonorarium;
+        let teachingHonorarium = regularHonorarium + customRateHonorarium;
         let totalTransport = totalPresentDays * Number(teacher.dailyTransport || 0);
 
         const lateRecords = monthAttendances.filter((a: any) => a.actualTeacherId === teacher.id && Number(a.latePenalty || 0) > 0);
-        const latePenaltyTotal = lateRecords.reduce((sum, a: any) => sum + Number(a.latePenalty || 0), 0);
+        const latePenaltyTotal = lateRecords.reduce((sum: number, a: any) => sum + Number(a.latePenalty || 0), 0);
         const lateCountLight = lateRecords.filter((a: any) => a.lateCategory === 'TERLAMBAT_RINGAN').length;
         const lateCountMedium = lateRecords.filter((a: any) => a.lateCategory === 'TERLAMBAT_SEDANG').length;
         const lateCountHeavy = lateRecords.filter((a: any) => a.lateCategory === 'TERLAMBAT_BERAT').length;
 
         const emptyJournalRecords = monthAttendances.filter((a: any) => a.actualTeacherId === teacher.id && a.status === 'HADIR_JURNAL_KOSONG');
         const emptyJournalCount = emptyJournalRecords.length;
-        const emptyJournalPenalty = emptyJournalRecords.reduce((sum, a: any) => {
+        const emptyJournalPenalty = emptyJournalRecords.reduce((sum: number, a: any) => {
           const sched = schedules.find((s: any) => s.id === a.scheduleId);
+          if (sched && sched.customRate && Number(sched.customRate) > 0) {
+            return sum + (0.5 * Number(sched.customRate));
+          }
           const hours = sched ? Number(sched.hours) : 2;
           return sum + (0.5 * hours * Number(teacher.hourlyRate || 0));
         }, 0);
 
         const alphaRecords = monthAttendances.filter((a: any) => a.teacherId === teacher.id && a.status === 'ALPA');
         const alphaDays = alphaRecords.length;
-        const alphaPenalty = alphaRecords.reduce((sum, a: any) => {
+        const alphaPenalty = alphaRecords.reduce((sum: number, a: any) => {
           const sched = schedules.find((s: any) => s.id === a.scheduleId);
+          if (sched && sched.customRate && Number(sched.customRate) > 0) {
+            return sum + Number(teacher.dailyTransport || 0) + Number(sched.customRate) + (0.05 * Number(teacher.baseSalary || 0));
+          }
           const hours = sched ? Number(sched.hours) : 2;
           return sum + Number(teacher.dailyTransport || 0) + (hours * Number(teacher.hourlyRate || 0)) + (0.05 * Number(teacher.baseSalary || 0));
         }, 0);
 
         const izinRecords = monthAttendances.filter((a: any) => a.teacherId === teacher.id && a.status === 'IZIN');
         const izinDays = izinRecords.length;
-        const izinPenalty = izinRecords.reduce((sum, a: any) => {
+        const izinPenalty = izinRecords.reduce((sum: number, a: any) => {
           const sched = schedules.find((s: any) => s.id === a.scheduleId);
+          if (sched && sched.customRate && Number(sched.customRate) > 0) {
+            return sum + Number(teacher.dailyTransport || 0) + Number(sched.customRate);
+          }
           const hours = sched ? Number(sched.hours) : 2;
           return sum + Number(teacher.dailyTransport || 0) + (hours * Number(teacher.hourlyRate || 0));
         }, 0);
@@ -4344,6 +4379,8 @@ async function startServer() {
           totalBadalHours: badalHoursCount,
           hourlyRate: teacher.hourlyRate,
           teachingHonorarium,
+          customRateHonorarium,
+          customSessionsCount,
           totalPresentDays,
           dailyTransport: teacher.dailyTransport,
           totalTransport,

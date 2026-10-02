@@ -39,6 +39,7 @@ export const MasterSchedules: React.FC = () => {
     endTime: '08:50',
     hours: 2,
     room: 'Kelas 7A',
+    customRate: null,
   });
 
   const handleReset = async () => {
@@ -79,6 +80,7 @@ export const MasterSchedules: React.FC = () => {
       endTime: sched.endTime,
       hours: sched.hours,
       room: sched.room,
+      customRate: sched.customRate ?? null,
     });
   };
 
@@ -95,6 +97,7 @@ export const MasterSchedules: React.FC = () => {
       endTime: '08:50',
       hours: 2,
       room: 'Kelas 7A',
+      customRate: null,
     });
   };
 
@@ -292,7 +295,14 @@ export const MasterSchedules: React.FC = () => {
                         </span>
                       </td>
                       <td className="py-3.5 px-4 font-bold text-[#051F20]">
-                        {s.subject}
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span>{s.subject}</span>
+                          {s.customRate && s.customRate > 0 ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                              ⚡ Rp {Number(s.customRate).toLocaleString('id-ID')} / Sesi
+                            </span>
+                          ) : null}
+                        </div>
                       </td>
                       <td className="py-3.5 px-4">
                         <span className={`text-[10px] font-bold px-2.5 py-1 rounded-[8px] uppercase tracking-wider text-[#163832] bg-[#DAF1DE]`}>
@@ -490,6 +500,30 @@ export const MasterSchedules: React.FC = () => {
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 focus:outline-none focus:border-[#1B4332] text-slate-900 dark:text-emerald-50 focus:bg-white font-medium"
                   />
                 </div>
+              </div>
+
+              <div className="p-3 bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-xl space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-[10px] font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wider">
+                    Honor Per Sesi / Ekskul (Rp)
+                  </label>
+                  <span className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">Opsional (Khusus Ekskul / Flat)</span>
+                </div>
+                <input
+                  type="number"
+                  min="0"
+                  step="5000"
+                  placeholder="Kosongkan jika mengikuti tarif JP reguler asatidz"
+                  value={formData.customRate !== null && formData.customRate !== undefined ? formData.customRate : ''}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    customRate: e.target.value === '' ? null : parseInt(e.target.value) || 0 
+                  })}
+                  className="w-full px-3 py-2 bg-white dark:bg-[#121f1a] rounded-lg border border-amber-300 dark:border-amber-800 focus:outline-none focus:border-amber-600 text-slate-900 dark:text-emerald-50 font-mono font-bold"
+                />
+                <p className="text-[10px] text-amber-800/80 dark:text-amber-400/80 leading-relaxed">
+                  💡 Contoh: <strong>Rp 100.000</strong> untuk Ekskul Pencak Silat. Jika diisi, guru akan menerima honor flat per kehadiran pertemuan ini, bukan per JP reguler.
+                </p>
               </div>
 
               {/* Action Buttons */}

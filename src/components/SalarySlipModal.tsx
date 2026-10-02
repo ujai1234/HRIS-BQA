@@ -228,13 +228,25 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({ payroll, onClo
 
                 <div className="flex justify-between py-1 border-b border-slate-100 text-slate-700">
                   <div>
-                    <span>2. Honor Mengajar</span>
+                    <span>2. Honor Mengajar Reguler</span>
                     <span className="text-[10px] text-slate-400 block font-mono">
                       {payroll.totalTaughtHours} JP × {formatRupiah(teacher.hourlyRate || 40000)}
                     </span>
                   </div>
-                  <span className="font-mono font-medium text-slate-900">{maskNumber(payroll.teachingHonorarium)}</span>
+                  <span className="font-mono font-medium text-slate-900">{maskNumber(payroll.teachingHonorarium - (payroll.customRateHonorarium || 0))}</span>
                 </div>
+
+                {payroll.customRateHonorarium && payroll.customRateHonorarium > 0 ? (
+                  <div className="flex justify-between py-1 border-b border-slate-100 text-slate-700">
+                    <div>
+                      <span>2b. Honor Sesi Khusus / Ekskul</span>
+                      <span className="text-[10px] text-amber-700 block font-mono">
+                        {payroll.customSessionsCount || 0} Sesi Pertemuan (Tarif Flat)
+                      </span>
+                    </div>
+                    <span className="font-mono font-medium text-slate-900">{maskNumber(payroll.customRateHonorarium)}</span>
+                  </div>
+                ) : null}
 
                 <div className="flex justify-between py-1 border-b border-slate-100 text-slate-700">
                   <div>

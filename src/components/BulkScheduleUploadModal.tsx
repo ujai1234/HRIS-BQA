@@ -30,6 +30,7 @@ interface ParsedScheduleRow {
   endTime: string;
   hours: number;
   room: string;
+  customRate?: number | null;
   isValid: boolean;
   errors: string[];
 }
@@ -59,7 +60,8 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
       'Jam Mulai (HH:mm)',
       'Jam Selesai (HH:mm)',
       'Jumlah JP',
-      'Ruangan'
+      'Ruangan',
+      'Honor Per Sesi / Ekskul (Opsional)'
     ];
 
     const sampleRows = [
@@ -175,6 +177,7 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
           const rawEnd = rawCols[6] || '08:50';
           const rawHours = parseInt(rawCols[7] || '2', 10);
           const rawRoom = rawCols[8] || '-';
+          const rawRate = rawCols[9] ? parseInt(rawCols[9].replace(/[^0-9]/g, ''), 10) : null;
 
           // Validations
           if (!rawNip) errors.push('NIP Guru wajib diisi');
@@ -227,6 +230,7 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
             endTime: rawEnd,
             hours: isNaN(rawHours) ? 2 : rawHours,
             room: rawRoom,
+            customRate: rawRate && !isNaN(rawRate) ? rawRate : null,
             isValid: errors.length === 0,
             errors
           });
@@ -280,7 +284,8 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
         startTime: r.startTime,
         endTime: r.endTime,
         hours: r.hours,
-        room: r.room
+        room: r.room,
+        customRate: r.customRate || null
       }));
 
       await addSchedulesBulk(payload);
