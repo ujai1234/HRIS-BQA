@@ -11,6 +11,34 @@ import {
 } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
 import { ClassSchedule, UnitType, DayOfWeek } from '../types';
+import * as XLSX from 'xlsx';
+
+// Teacher initials / code mapping from timetable
+const TEACHER_CODE_MAP: Record<string, string> = {
+  'THM': 'PBQ-2018-002', // Ust. Tofan
+  'AMY': 'PBQ-2020-007', // Ust. Akmal
+  'FAM': 'PBQ-2020-008', // Ust. Fuad
+  'MNH': 'PBQ-2022-019', // Ust. Masyitah
+  'SAM': 'PBQ-2021-010', // Ust. Saif
+  'MTH': 'PBQ-2021-014', // Ustz. Mu'minah
+  'AYU': 'PBQ-2026-026', // Ustz. Ayu
+};
+
+const formatTimeValue = (val: any, fallback: string): string => {
+  if (val === null || val === undefined || val === '') return fallback;
+  if (typeof val === 'number') {
+    const totalMinutes = Math.round(val * 24 * 60);
+    const hours = Math.floor(totalMinutes / 60) % 24;
+    const mins = totalMinutes % 60;
+    return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+  }
+  const str = String(val).trim();
+  if (/^\d{1,2}:\d{2}/.test(str)) {
+    const [h, m] = str.split(':');
+    return `${h.padStart(2, '0')}:${m.slice(0, 2)}`;
+  }
+  return str || fallback;
+};
 
 interface BulkScheduleUploadModalProps {
   isOpen: boolean;
@@ -136,117 +164,149 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
     return result;
   };
 
+  const processRawMatrix = (rows: any[][]) => {
+    if (rows.length <= 1) {
+      setErrorMessage('Berkas tidak memuat data jadwal selain baris judul/header.');
+      return;
+    }
+
+    const parsedData: ParsedScheduleRow[] = [];
+
+    for (let i = 1; i < rows.length; i++) {
+      const rawCols = (rows[i] || []).map((c: any) => (c !== null && c !== undefined ? String(c).trim() : ''));
+      if (rawCols.length === 0 || rawCols.every((c: string) => c === '')) continue;
+
+      const rowNum = i + 1;
+      const errors: string[] = [];
+
+      const rawNip = rawCols[0] || '';
+      const rawSubject = rawCols[1] || '';
+      const rawClassName = rawCols[2] || '';
+      let rawUnit = (rawCols[3] || 'MA').toUpperCase().trim();
+      let rawDay = rawCols[4] || 'Senin';
+      const rawStart = formatTimeValue(rows[i][5], '07:30');
+      const rawEnd = formatTimeValue(rows[i][6], '08:50');
+      const rawHours = parseInt(rawCols[7] || '2', 10);
+      const rawRoom = rawCols[8] || '-';
+      const rawRate = rawCols[9] ? parseInt(rawCols[9].replace(/[^0-9]/g, ''), 10) : null;
+
+      // Validations
+      if (!rawNip) errors.push('NIP Guru wajib diisi');
+      if (!rawSubject) errors.push('Mata pelajaran wajib diisi');
+      if (!rawDay) errors.push('Hari wajib diisi');
+
+      // Find teacher by NIP (case-insensitive & trimmed), code, or name
+      const cleanNip = rawNip.trim().toUpperCase();
+      const cleanName = rawNip.trim().toLowerCase();
+      const mappedNip = TEACHER_CODE_MAP[cleanNip] || cleanNip;
+
+      const teacher = teachers.find(t => 
+        (t.nip && t.nip.trim().toUpperCase() === mappedNip) ||
+        (t.nip && t.nip.trim().toUpperCase() === cleanNip) ||
+        (t.name && t.name.trim().toLowerCase() === cleanName) ||
+        (cleanName.length > 3 && t.name && t.name.trim().toLowerCase().includes(cleanName)) ||
+        (t.name && cleanName.length > 3 && cleanName.includes(t.name.trim().toLowerCase()))
+      );
+      if (rawNip && !teacher) {
+        errors.push(`Guru dengan NIP/Nama/Kode "${rawNip}" tidak ditemukan di data asatidz`);
+      }
+
+      const validUnits: UnitType[] = ['SMP', 'MA', 'PESANTREN', 'UMUM'];
+      if (!validUnits.includes(rawUnit as UnitType)) {
+         if (rawUnit.includes('SMP') || rawUnit.includes('TSANAWIYAH')) rawUnit = 'SMP';
+         else if (rawUnit.includes('MA') || rawUnit.includes('ALIYAH') || rawUnit.includes('SMA') || rawUnit.includes('SMK')) rawUnit = 'MA';
+         else if (rawUnit.includes('PESANTREN') || rawUnit.includes('PONPES') || rawUnit.includes('SANTRI')) rawUnit = 'PESANTREN';
+         else rawUnit = 'MA';
+      }
+
+      // Normalize Day (supports Jum'at, Minggu, lowercase, etc.)
+      let normalizedDay = rawDay.replace(/['’`]/g, '').trim().toLowerCase();
+      if (normalizedDay === 'jumat') rawDay = 'Jumat';
+      else if (normalizedDay === 'senin') rawDay = 'Senin';
+      else if (normalizedDay === 'selasa') rawDay = 'Selasa';
+      else if (normalizedDay === 'rabu') rawDay = 'Rabu';
+      else if (normalizedDay === 'kamis') rawDay = 'Kamis';
+      else if (normalizedDay === 'sabtu') rawDay = 'Sabtu';
+      else if (normalizedDay === 'ahad' || normalizedDay === 'minggu') rawDay = 'Ahad';
+      else {
+        rawDay = 'Senin';
+      }
+
+      parsedData.push({
+        rowNum,
+        nip: rawNip,
+        teacherName: teacher?.name,
+        teacherId: teacher?.id,
+        subject: rawSubject,
+        className: rawClassName,
+        unit: rawUnit as UnitType,
+        dayOfWeek: rawDay as DayOfWeek,
+        startTime: rawStart,
+        endTime: rawEnd,
+        hours: isNaN(rawHours) ? 2 : rawHours,
+        room: rawRoom,
+        customRate: rawRate && !isNaN(rawRate) ? rawRate : null,
+        isValid: errors.length === 0,
+        errors
+      });
+    }
+
+    if (parsedData.length === 0) {
+      setErrorMessage('Tidak ditemukan baris data yang valid dalam berkas.');
+    } else {
+      setParsedRows(parsedData);
+    }
+  };
+
   const processFile = (file: File) => {
     setErrorMessage(null);
     setSuccessCount(null);
     setFileName(file.name);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const text = e.target?.result as string;
-        if (!text) {
-          setErrorMessage('Berkas kosong atau tidak dapat dibaca.');
-          return;
+    const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+
+    if (isExcel) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const buffer = e.target?.result as ArrayBuffer;
+          const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const sheetData: any[][] = XLSX.utils.sheet_to_json(firstSheet, { header: 1, raw: false });
+          processRawMatrix(sheetData);
+        } catch (err) {
+          console.error('Error parsing Excel:', err);
+          setErrorMessage('Format berkas Excel tidak valid atau rusak.');
         }
-
-        const lines = text.split(/\r\n|\n|\r/).filter(line => line.trim().length > 0);
-        if (lines.length <= 1) {
-          setErrorMessage('Berkas tidak memuat data jadwal selain baris judul/header.');
-          return;
-        }
-
-        const headerLine = lines[0];
-        const delimiter = headerLine.includes(';') && !headerLine.includes(',') ? ';' : ',';
-
-        const parsedData: ParsedScheduleRow[] = [];
-
-        for (let i = 1; i < lines.length; i++) {
-          const rawCols = parseCSVLine(lines[i], delimiter);
-          if (rawCols.length === 0 || rawCols.every(c => c === '')) continue;
-
-          const rowNum = i + 1;
-          const errors: string[] = [];
-
-          const rawNip = rawCols[0] || '';
-          const rawSubject = rawCols[1] || '';
-          const rawClassName = rawCols[2] || '';
-          let rawUnit = (rawCols[3] || 'SMP').toUpperCase().trim();
-          let rawDay = rawCols[4] || 'Senin';
-          const rawStart = rawCols[5] || '07:30';
-          const rawEnd = rawCols[6] || '08:50';
-          const rawHours = parseInt(rawCols[7] || '2', 10);
-          const rawRoom = rawCols[8] || '-';
-          const rawRate = rawCols[9] ? parseInt(rawCols[9].replace(/[^0-9]/g, ''), 10) : null;
-
-          // Validations
-          if (!rawNip) errors.push('NIP Guru wajib diisi');
-          if (!rawSubject) errors.push('Mata pelajaran wajib diisi');
-          if (!rawDay) errors.push('Hari wajib diisi');
-
-          // Find teacher by NIP (case-insensitive & trimmed) or name
-          const cleanNip = rawNip.trim().toUpperCase();
-          const cleanName = rawNip.trim().toLowerCase();
-          const teacher = teachers.find(t => 
-            (t.nip && t.nip.trim().toUpperCase() === cleanNip) ||
-            (t.name && t.name.trim().toLowerCase() === cleanName) ||
-            (cleanName.length > 3 && t.name && t.name.trim().toLowerCase().includes(cleanName))
-          );
-          if (rawNip && !teacher) {
-            errors.push(`Guru dengan NIP/Nama "${rawNip}" tidak ditemukan di data asatidz`);
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const text = e.target?.result as string;
+          if (!text) {
+            setErrorMessage('Berkas kosong atau tidak dapat dibaca.');
+            return;
           }
 
-          const validUnits: UnitType[] = ['SMP', 'MA', 'PESANTREN', 'UMUM'];
-          if (!validUnits.includes(rawUnit as UnitType)) {
-             if (rawUnit.includes('SMP') || rawUnit.includes('TSANAWIYAH')) rawUnit = 'SMP';
-             else if (rawUnit.includes('MA') || rawUnit.includes('ALIYAH')) rawUnit = 'MA';
-             else if (rawUnit.includes('PESANTREN') || rawUnit.includes('PONPES') || rawUnit.includes('SANTRI')) rawUnit = 'PESANTREN';
-             else rawUnit = 'SMP';
+          const lines = text.split(/\r\n|\n|\r/).filter(line => line.trim().length > 0);
+          if (lines.length <= 1) {
+            setErrorMessage('Berkas tidak memuat data jadwal selain baris judul/header.');
+            return;
           }
 
-          // Normalize Day (supports Jum'at, Minggu, lowercase, etc.)
-          let normalizedDay = rawDay.replace(/['’`]/g, '').trim().toLowerCase();
-          if (normalizedDay === 'jumat') rawDay = 'Jumat';
-          else if (normalizedDay === 'senin') rawDay = 'Senin';
-          else if (normalizedDay === 'selasa') rawDay = 'Selasa';
-          else if (normalizedDay === 'rabu') rawDay = 'Rabu';
-          else if (normalizedDay === 'kamis') rawDay = 'Kamis';
-          else if (normalizedDay === 'sabtu') rawDay = 'Sabtu';
-          else if (normalizedDay === 'ahad' || normalizedDay === 'minggu') rawDay = 'Ahad';
-          else {
-            rawDay = 'Senin';
-          }
-
-          parsedData.push({
-            rowNum,
-            nip: rawNip,
-            teacherName: teacher?.name,
-            teacherId: teacher?.id,
-            subject: rawSubject,
-            className: rawClassName,
-            unit: rawUnit as UnitType,
-            dayOfWeek: rawDay as DayOfWeek,
-            startTime: rawStart,
-            endTime: rawEnd,
-            hours: isNaN(rawHours) ? 2 : rawHours,
-            room: rawRoom,
-            customRate: rawRate && !isNaN(rawRate) ? rawRate : null,
-            isValid: errors.length === 0,
-            errors
-          });
+          const headerLine = lines[0];
+          const delimiter = headerLine.includes(';') && !headerLine.includes(',') ? ';' : ',';
+          const matrix = lines.map(line => parseCSVLine(line, delimiter));
+          processRawMatrix(matrix);
+        } catch (err) {
+          console.error('Error parsing CSV:', err);
+          setErrorMessage('Format berkas tidak valid atau rusak. Gunakan berkas CSV sesuai template.');
         }
-
-        if (parsedData.length === 0) {
-          setErrorMessage('Tidak ditemukan baris data yang valid dalam berkas.');
-        } else {
-          setParsedRows(parsedData);
-        }
-      } catch (err) {
-        console.error('Error parsing file:', err);
-        setErrorMessage('Format berkas tidak valid atau rusak. Gunakan berkas CSV sesuai template.');
-      }
-    };
-    reader.readAsText(file);
+      };
+      reader.readAsText(file);
+    }
   };
 
   const handleDrag = (e: React.DragEvent) => {
@@ -374,7 +434,7 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".csv,.txt"
+                accept=".csv,.txt,.xlsx,.xls"
                 onChange={handleFileInput}
                 className="hidden"
               />
