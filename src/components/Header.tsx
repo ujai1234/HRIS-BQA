@@ -184,6 +184,12 @@ export const Header: React.FC<HeaderProps> = ({
     } else if (currentRole === 'STAFF' || currentPath.startsWith('/dashboard/staff')) {
       crumbs.push({ label: 'Portal Staff', path: '/dashboard/staff' });
       crumbs.push({ label: 'Tugas Hari Ini', path: currentPath });
+    } else if (currentRole === 'KETUA_SARPRAS' || currentPath.startsWith('/dashboard/sarpras')) {
+      crumbs.push({ label: 'Sarpras & Non-Akademik', path: '/dashboard/sarpras' });
+      if (currentPath === '/dashboard/sarpras/absensi') crumbs.push({ label: 'Presensi Staf (Bypass)', path: currentPath });
+      else if (currentPath === '/dashboard/sarpras/penugasan') crumbs.push({ label: 'Delegasi Tugas Staf', path: currentPath });
+      else if (currentPath === '/dashboard/sarpras/jurnal') crumbs.push({ label: 'Jurnal Staf', path: currentPath });
+      else crumbs.push({ label: 'Approval Ajuan Belanja', path: currentPath });
     }
 
     return crumbs;
@@ -292,6 +298,18 @@ export const Header: React.FC<HeaderProps> = ({
               label: isDapur ? 'Jurnal & Belanja Dapur' : isSarpras ? 'Jurnal & Belanja Sarpras' : 'Jurnal & Pengajuan Belanja', 
               icon: Receipt 
             },
+          ]
+        }
+      ];
+    } else if (currentRole === 'KETUA_SARPRAS' || currentPath.startsWith('/dashboard/sarpras')) {
+      sections = [
+        {
+          title: 'SARPRAS & NON-AKADEMIK',
+          items: [
+            { path: '/dashboard/sarpras', label: '1. Approval Ajuan Belanja', icon: Receipt },
+            { path: '/dashboard/sarpras/absensi', label: '2. Presensi Staf (Bypass)', icon: UserCheck },
+            { path: '/dashboard/sarpras/penugasan', label: '3. Delegasi Tugas Staf', icon: ClipboardList },
+            { path: '/dashboard/sarpras/jurnal', label: '4. Jurnal Harian Staf', icon: CheckCircle2 },
           ]
         }
       ];

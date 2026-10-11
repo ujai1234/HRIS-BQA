@@ -549,6 +549,7 @@ export const MasterTeachers: React.FC = () => {
                     formData.role === 'STAFF' 
                       ? (formData.position?.toLowerCase().includes('dapur') ? 'STAFF_DAPUR' : (formData.position?.toLowerCase().includes('sarpras') || formData.position?.toLowerCase().includes('inventaris')) ? 'STAFF_SARPRAS' : 'STAFF') 
                       : formData.role === 'KEUANGAN' ? 'KEUANGAN' 
+                      : formData.role === 'KETUA_SARPRAS' ? 'KETUA_SARPRAS'
                       : formData.role
                   }
                   onChange={(e) => {
@@ -557,6 +558,8 @@ export const MasterTeachers: React.FC = () => {
                       setFormData({ ...formData, role: 'STAFF', position: 'Staff Dapur' as any });
                     } else if (val === 'STAFF_SARPRAS') {
                       setFormData({ ...formData, role: 'STAFF', position: 'Staff Sarpras' as any });
+                    } else if (val === 'KETUA_SARPRAS') {
+                      setFormData({ ...formData, role: 'KETUA_SARPRAS', position: 'Ketua Sarpras' as any });
                     } else if (val === 'KEUANGAN') {
                       setFormData({ ...formData, role: 'KEUANGAN', position: 'Bendahara' as any });
                     } else {
@@ -567,6 +570,7 @@ export const MasterTeachers: React.FC = () => {
                 >
                   <option value="GURU">Guru Pengajar</option>
                   <option value="ADMIN">Administrator TU</option>
+                  <option value="KETUA_SARPRAS">Ketua Sarpras &amp; Non-Akademik</option>
                   <option value="KEUANGAN">Bendahara</option>
                   <option value="KEPALA_SMP">Kepala Sekolah SMP</option>
                   <option value="KEPALA_MA">Kepala Madrasah Aliyah</option>

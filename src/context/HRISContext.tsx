@@ -18,9 +18,11 @@ import {
   GeofenceSettings,
   DEFAULT_GEOFENCE_SETTINGS,
   isKepsekRole,
+  isKetuaSarprasRole,
   getRoleUnit,
   getRoleDisplayName,
-  UnitType
+  UnitType,
+  StaffAssignedTask
 } from '../types';
 import { 
   INITIAL_TEACHERS, 
@@ -109,6 +111,15 @@ interface HRISContextType {
   staffJournals: import('../types').StaffJournalRecord[];
   addStaffJournal: (record: Omit<import('../types').StaffJournalRecord, 'id' | 'createdAt'>) => void;
 
+  // Staff Assignments (Ketua Sarpras Task Delegation)
+  staffAssignments: StaffAssignedTask[];
+  addStaffAssignment: (task: Omit<StaffAssignedTask, 'id' | 'createdAt'>) => Promise<boolean>;
+  updateStaffAssignmentStatus: (id: string, status: StaffAssignedTask['status'], completionNotes?: string) => Promise<boolean>;
+  deleteStaffAssignment: (id: string) => Promise<boolean>;
+
+  // Staff Attendance Direct (Bypass tanpa batasan)
+  markStaffAttendanceDirect: (staffId: string, status: AttendanceRecord['status'], date?: string, clockInTime?: string, notes?: string) => Promise<boolean>;
+
   // Geofence & Location Settings
   geofenceSettings: GeofenceSettings;
   updateGeofenceSettings: (settings: Partial<GeofenceSettings>) => Promise<boolean>;
@@ -144,6 +155,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [learningNeedRequests, setLearningNeedRequests] = useState<LearningNeedRequest[]>([]);
   const [expenses, setExpenses] = useState<import('../types').ExpenseRecord[]>([]);
   const [staffJournals, setStaffJournals] = useState<import('../types').StaffJournalRecord[]>([]);
+  const [staffAssignments, setStaffAssignments] = useState<StaffAssignedTask[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
   const [geofenceSettings, setGeofenceSettings] = useState<GeofenceSettings>(DEFAULT_GEOFENCE_SETTINGS);
   const [payrollSummary, setPayrollSummary] = useState<MonthlyPayrollSummary | null>(null);
@@ -205,7 +217,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchAllData = async () => {
     setIsLoading(true);
     try {
-      const [tRes, sRes, aRes, bRes, lRes, lnRes, gRes, stRes, seRes, pRes] = await Promise.all([
+      const [tRes, sRes, aRes, bRes, lRes, lnRes, gRes, stRes, seRes, saRes, pRes] = await Promise.all([
         fetch('/api/teachers'),
         fetch('/api/schedules'),
         fetch('/api/attendances'),
@@ -215,10 +227,11 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         fetch('/api/settings/geofence'),
         fetch('/api/staff-tasks'),
         fetch('/api/staff-expenses'),
+        fetch('/api/staff-assignments'),
         fetch(`/api/payroll?period=${selectedPeriod}`)
       ]);
 
-      const [t, s, a, b, l, ln, g, st, se, p] = await Promise.all([
+      const [t, s, a, b, l, ln, g, st, se, sa, p] = await Promise.all([
         tRes.json(),
         sRes.json(),
         aRes.json(),
@@ -228,11 +241,13 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         gRes.ok ? gRes.json() : null,
         stRes.ok ? stRes.json() : [],
         seRes.ok ? seRes.json() : [],
+        saRes.ok ? saRes.json() : [],
         pRes.ok ? pRes.json() : null
       ]);
 
       setStaffJournals(Array.isArray(st) ? st : []);
       setExpenses(Array.isArray(se) ? se : []);
+      setStaffAssignments(Array.isArray(sa) ? sa : []);
       if (p) setPayrollSummary(p);
 
       if (t.length === 0) {
@@ -317,6 +332,106 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }).catch(err => console.error('Failed to save staff journal', err));
     
     logActivity('ADD_JOURNAL', 'SYSTEM', `Pengisian jurnal: ${record.staffName}`);
+  };
+
+  // ====== STAFF ASSIGNMENTS (KETUA SARPRAS) ======
+  const addStaffAssignment = async (task: Omit<StaffAssignedTask, 'id' | 'createdAt'>): Promise<boolean> => {
+    try {
+      const newRecord: StaffAssignedTask = {
+        ...task,
+        id: `TSK-${Date.now()}`,
+        status: task.status || 'PENDING',
+        createdAt: new Date().toISOString()
+      };
+
+      setStaffAssignments(prev => [newRecord, ...prev]);
+
+      const res = await fetch('/api/staff-assignments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newRecord)
+      });
+
+      logActivity('ADD_STAFF_TASK', 'SYSTEM', `Penugasan staf [${task.category}]: ${task.title} untuk ${task.staffName}`);
+      toast.success(`Tugas berhasil didelegasikan ke ${task.staffName}`);
+      return res.ok;
+    } catch (err) {
+      console.error('Failed to add staff assignment:', err);
+      toast.error('Gagal menambahkan tugas untuk staf');
+      return false;
+    }
+  };
+
+  const updateStaffAssignmentStatus = async (id: string, status: StaffAssignedTask['status'], completionNotes?: string): Promise<boolean> => {
+    try {
+      const patchData: Partial<StaffAssignedTask> = {
+        status,
+        ...(completionNotes !== undefined ? { completionNotes } : {}),
+        ...(status === 'COMPLETED' ? { completedAt: new Date().toISOString() } : {})
+      };
+
+      setStaffAssignments(prev => prev.map(t => t.id === id ? { ...t, ...patchData } : t));
+
+      const res = await fetch(`/api/staff-assignments/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patchData)
+      });
+
+      const statusLabels = { PENDING: 'Tertunda', IN_PROGRESS: 'Sedang Dikerjakan', COMPLETED: 'Selesai' };
+      toast.success(`Status tugas diubah menjadi ${statusLabels[status]}`);
+      return res.ok;
+    } catch (err) {
+      console.error('Failed to update staff assignment status:', err);
+      toast.error('Gagal memperbarui status tugas');
+      return false;
+    }
+  };
+
+  const deleteStaffAssignment = async (id: string): Promise<boolean> => {
+    try {
+      setStaffAssignments(prev => prev.filter(t => t.id !== id));
+      const res = await fetch(`/api/staff-assignments/${id}`, { method: 'DELETE' });
+      toast.success('Tugas staf berhasil dihapus');
+      return res.ok;
+    } catch (err) {
+      console.error('Failed to delete staff assignment:', err);
+      toast.error('Gagal menghapus tugas staf');
+      return false;
+    }
+  };
+
+  // ====== STAFF ATTENDANCE DIRECT (BYPASS) ======
+  const markStaffAttendanceDirect = async (
+    staffId: string, 
+    status: AttendanceRecord['status'], 
+    date?: string, 
+    clockInTime?: string, 
+    notes?: string
+  ): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/staff-attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ staffId, status, date, clockInTime, notes })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const staff = teachers.find(t => t.id === staffId);
+        toast.success(`Presensi ${staff?.name || 'staf'} berhasil dicatat (${status})`);
+        fetchAllData();
+        logActivity('STAFF_ATTENDANCE_OVERRIDE', 'SYSTEM', `Presensi staf ${staff?.name || staffId} diatur ke ${status} oleh Ketua Sarpras`);
+        return true;
+      } else {
+        toast.error('Gagal mencatat presensi staf');
+        return false;
+      }
+    } catch (err) {
+      console.error('Error marking staff attendance:', err);
+      toast.error('Koneksi terputus saat mencatat presensi');
+      return false;
+    }
   };
 
   const refreshData = async () => {
@@ -446,6 +561,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     else if (role === 'ADMIN') setCurrentPath('/dashboard/admin');
     else if (isKepsekRole(role)) setCurrentPath('/dashboard/kepsek/audit');
     else if (role === 'STAFF') setCurrentPath('/dashboard/staff');
+    else if (role === 'KETUA_SARPRAS') setCurrentPath('/dashboard/sarpras');
 
     toast.success(`Selamat datang, ${targetUser.name}!`);
   };
@@ -1471,6 +1587,11 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addExpenseRecord,
         updateExpenseStatus,
         addStaffJournal,
+        staffAssignments,
+        addStaffAssignment,
+        updateStaffAssignmentStatus,
+        deleteStaffAssignment,
+        markStaffAttendanceDirect,
         refreshData,
         isLoading,
         resetToDefault,

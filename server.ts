@@ -957,6 +957,138 @@ async function startServer() {
     }
   });
 
+  // Staff Assignments (Delegasi Pekerjaan dari Ketua Sarpras)
+  app.get('/api/staff-assignments', async (req, res) => {
+    try {
+      const assignments = await db.query.staffAssignments.findMany({
+        orderBy: (sa, { desc }) => [desc(sa.createdAt)]
+      });
+      res.json(assignments);
+    } catch (error) {
+      console.error('Failed to fetch staff assignments:', error);
+      res.status(500).json({ error: 'Failed to fetch staff assignments' });
+    }
+  });
+
+  app.post('/api/staff-assignments', async (req, res) => {
+    try {
+      const data = { ...req.body };
+      delete data.createdAt;
+      if (!data.id) {
+        data.id = `TSK-${Date.now()}`;
+      }
+      const result = await db.insert(schema.staffAssignments).values(data).returning();
+      res.json(result[0]);
+    } catch (error) {
+      console.error('Failed to create staff assignment:', error);
+      res.status(500).json({ error: 'Failed to create staff assignment' });
+    }
+  });
+
+  app.patch('/api/staff-assignments/:id', async (req, res) => {
+    try {
+      const result = await db.update(schema.staffAssignments)
+        .set(req.body)
+        .where(eq(schema.staffAssignments.id, req.params.id))
+        .returning();
+      res.json(result[0]);
+    } catch (error) {
+      console.error('Failed to update staff assignment:', error);
+      res.status(500).json({ error: 'Failed to update staff assignment' });
+    }
+  });
+
+  app.delete('/api/staff-assignments/:id', async (req, res) => {
+    try {
+      await db.delete(schema.staffAssignments).where(eq(schema.staffAssignments.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Failed to delete staff assignment:', error);
+      res.status(500).json({ error: 'Failed to delete staff assignment' });
+    }
+  });
+
+  // Staff Attendance Direct / Bypass (Presensi Langsung Staf Tanpa Batasan)
+  app.post('/api/staff-attendance', async (req, res) => {
+    try {
+      const { staffId, status = 'SELESAI', date, clockInTime, notes } = req.body;
+      if (!staffId) {
+        return res.status(400).json({ error: 'staffId is required' });
+      }
+
+      const staff = await db.query.teachers.findFirst({
+        where: eq(schema.teachers.id, staffId)
+      });
+      if (!staff) {
+        return res.status(404).json({ error: 'Staff member not found' });
+      }
+
+      const todayStr = date || new Date().toISOString().split('T')[0];
+      const timeStr = clockInTime || `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`;
+      const schedId = `SCHED-STAFF-${staffId}`;
+
+      // Pastikan jadwal operasional staff terdaftar agar foreign key tidak error
+      const existingSched = await db.query.schedules.findFirst({
+        where: eq(schema.schedules.id, schedId)
+      });
+      if (!existingSched) {
+        await db.insert(schema.schedules).values({
+          id: schedId,
+          teacherId: staffId,
+          subject: `Tugas ${staff.position || 'Staff'}`,
+          className: 'Staff Operasional',
+          unit: 'UMUM',
+          dayOfWeek: 'Senin',
+          startTime: '07:00',
+          endTime: '16:00',
+          hours: 8,
+          room: 'Area Pesantren',
+          customRate: 0,
+        });
+      }
+
+      // Cek apakah sudah ada presensi hari ini
+      const existingAtt = await db.query.attendances.findFirst({
+        where: and(
+          eq(schema.attendances.teacherId, staffId),
+          eq(schema.attendances.date, todayStr)
+        )
+      });
+
+      const attData = {
+        scheduleId: schedId,
+        teacherId: staffId,
+        actualTeacherId: staffId,
+        isBadal: false,
+        date: todayStr,
+        clockInTime: (status === 'SELESAI' || status === 'HADIR_JURNAL_KOSONG') ? timeStr : null,
+        lateMinutes: 0,
+        lateCategory: 'TEPAT_WAKTU',
+        latePenalty: 0,
+        status: status,
+        notes: notes || 'Presensi langsung oleh Ketua Sarpras (Bypass tanpa batasan)',
+      };
+
+      let result;
+      if (existingAtt) {
+        result = await db.update(schema.attendances)
+          .set(attData)
+          .where(eq(schema.attendances.id, existingAtt.id))
+          .returning();
+      } else {
+        result = await db.insert(schema.attendances).values({
+          id: `ATT-STAFF-${Date.now()}`,
+          ...attData
+        }).returning();
+      }
+
+      res.json({ success: true, attendance: result[0] });
+    } catch (error) {
+      console.error('Failed to record staff attendance:', error);
+      res.status(500).json({ error: 'Failed to record staff attendance' });
+    }
+  });
+
   // ==========================================
   // BETTER AUTH & TEACHERS SYNCHRONIZER
   // ==========================================
@@ -981,6 +1113,7 @@ async function startServer() {
       else if (r === 'KEPALA_SMP' || r === 'KEPALA_MA' || r === 'KEPALA_PESANTREN') plainPassword = 'kepsek123';
       else if (r === 'STAFF') plainPassword = 'staff123';
       else if (r === 'KEUANGAN') plainPassword = 'keuangan123';
+      else if (r === 'KETUA_SARPRAS') plainPassword = 'sarpras123';
       else plainPassword = 'guru1234';
 
       try {

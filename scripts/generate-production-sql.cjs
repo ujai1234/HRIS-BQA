@@ -21,13 +21,24 @@ UPDATE user SET name = 'Ust. Masyitah' WHERE teacher_id = 'T-19';
 UPDATE user SET name = 'Ust. Saif' WHERE teacher_id = 'T-10';
 UPDATE user SET name = 'Ustz. Mu''minah' WHERE teacher_id = 'T-14';
 
--- 2. Penambahan Data Guru Baru: Ustz. Ayu (AYU)
-INSERT OR IGNORE INTO teachers (
+-- 2. Penambahan/Update Akun Ketua Sarpras: Ust Rusli RZ (PBQ-2026-026)
+INSERT OR REPLACE INTO teachers (
   id, nip, name, position, unit, base_salary, hourly_rate, 
   daily_transport, role, phone, avatar_color, avatar_url, 
   is_active, username, password, monthly_transport, monthly_meal_allowance
 ) VALUES (
-  'T-26', 'PBQ-2026-026', 'Ustz. Ayu', 'Guru SMK (Perbankan)', 'SMK', 700000, 40000,
+  'T-26', 'PBQ-2026-026', 'Ust Rusli RZ', 'Ketua Sarpras', 'UMUM', 2500000, 40000,
+  10000, 'KETUA_SARPRAS', '081234567890', 'bg-emerald-700', NULL,
+  1, 'daeng.rusli79@gmail.com', 'sarpras123', 250000, 375000
+);
+
+-- 3. Data Guru Pengajar: Ustz. Ayu (AYU)
+INSERT OR REPLACE INTO teachers (
+  id, nip, name, position, unit, base_salary, hourly_rate, 
+  daily_transport, role, phone, avatar_color, avatar_url, 
+  is_active, username, password, monthly_transport, monthly_meal_allowance
+) VALUES (
+  'T-27', 'PBQ-2026-027', 'Ustz. Ayu', 'Guru SMK (Perbankan)', 'SMK', 700000, 40000,
   10000, 'GURU', NULL, 'bg-teal-700', NULL,
   1, 'ustz.ayu', 'guru123', 250000, 375000
 );

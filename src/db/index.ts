@@ -163,6 +163,23 @@ sqliteDb.exec(`
     created_at INTEGER NOT NULL
   );
 
+  CREATE TABLE IF NOT EXISTS staff_assignments (
+    id TEXT PRIMARY KEY,
+    staff_id TEXT NOT NULL REFERENCES teachers(id),
+    staff_name TEXT NOT NULL,
+    category TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    priority TEXT NOT NULL DEFAULT 'NORMAL',
+    assigned_by TEXT NOT NULL DEFAULT 'Ketua Sarpras',
+    assigned_date TEXT NOT NULL,
+    due_date TEXT,
+    status TEXT NOT NULL DEFAULT 'PENDING',
+    completion_notes TEXT,
+    completed_at TEXT,
+    created_at INTEGER NOT NULL
+  );
+
     CREATE TABLE IF NOT EXISTS finance_categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,

@@ -9,6 +9,7 @@ import { GuruView } from './components/GuruView';
 import { AdminView } from './components/AdminView';
 import { KepsekView } from './components/KepsekView';
 import { StaffView } from './components/StaffView';
+import { KetuaSarprasView } from './components/KetuaSarprasView';
 import { SessionTimeoutManager } from './components/SessionTimeoutManager';
 import { LearningNeedManagement } from './components/LearningNeedManagement';
 import { BadalManagement } from './components/BadalManagement';
@@ -138,6 +139,19 @@ const MainContent: React.FC = () => {
         return <StaffView initialTab="laporan" key="staff-laporan" />;
       }
       return <StaffView initialTab="presensi" key="staff-presensi" />;
+    }
+
+    if (currentRole === 'KETUA_SARPRAS' || currentPath.startsWith('/dashboard/sarpras')) {
+      if (currentPath === '/dashboard/sarpras/absensi') {
+        return <KetuaSarprasView initialTab="absensi" key="sarpras-absensi" />;
+      }
+      if (currentPath === '/dashboard/sarpras/penugasan') {
+        return <KetuaSarprasView initialTab="penugasan" key="sarpras-penugasan" />;
+      }
+      if (currentPath === '/dashboard/sarpras/jurnal') {
+        return <KetuaSarprasView initialTab="jurnal" key="sarpras-jurnal" />;
+      }
+      return <KetuaSarprasView initialTab="approval" key="sarpras-approval" />;
     }
 
     // Default route check

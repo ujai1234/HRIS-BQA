@@ -21,7 +21,8 @@ const TEACHER_CODE_MAP: Record<string, string> = {
   'MNH': 'PBQ-2022-019', // Ust. Masyitah
   'SAM': 'PBQ-2021-010', // Ust. Saif
   'MTH': 'PBQ-2021-014', // Ustz. Mu'minah
-  'AYU': 'PBQ-2026-026', // Ustz. Ayu
+  'AYU': 'PBQ-2026-027', // Ustz. Ayu
+  'RUS': 'PBQ-2026-026', // Ust Rusli RZ (Ketua Sarpras)
 };
 
 const formatTimeValue = (val: any, fallback: string): string => {

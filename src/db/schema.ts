@@ -142,6 +142,23 @@ export const staffExpenses = sqliteTable('staff_expenses', {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
 
+export const staffAssignments = sqliteTable('staff_assignments', {
+  id: text('id').primaryKey(),
+  staffId: text('staff_id').references(() => teachers.id).notNull(),
+  staffName: text('staff_name').notNull(),
+  category: text('category').notNull(), // 'DAPUR' | 'SARPRAS'
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  priority: text('priority').notNull().default('NORMAL'), // 'NORMAL' | 'URGENT' | 'HIGH'
+  assignedBy: text('assigned_by').notNull().default('Ketua Sarpras'),
+  assignedDate: text('assigned_date').notNull(),
+  dueDate: text('due_date'),
+  status: text('status').notNull().default('PENDING'), // 'PENDING' | 'IN_PROGRESS' | 'COMPLETED'
+  completionNotes: text('completion_notes'),
+  completedAt: text('completed_at'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+
 // ==========================================
 // PORTAL SANTRI (SIS) TABLES
 // ==========================================

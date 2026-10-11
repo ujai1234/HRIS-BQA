@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { useHRIS } from '../context/HRISContext';
 import { formatRupiah } from '../utils/formatters';
-import { Receipt, CheckCircle, XCircle, Clock, Search, Filter, Image as ImageIcon, X } from 'lucide-react';
+import { Receipt, CheckCircle, XCircle, Clock, Search, Filter, Image as ImageIcon, X, Shield, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 
-export const AdminStaffReportView: React.FC = () => {
+interface AdminStaffReportViewProps {
+  readOnly?: boolean;
+}
+
+export const AdminStaffReportView: React.FC<AdminStaffReportViewProps> = ({ readOnly = true }) => {
   const { expenses, updateExpenseStatus, staffJournals, attendances, teachers } = useHRIS();
   
   const [activeTab, setActiveTab] = useState<'BELANJA' | 'JURNAL'>('BELANJA');
@@ -20,6 +24,10 @@ export const AdminStaffReportView: React.FC = () => {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const handleStatusUpdate = (id: string, status: 'APPROVED' | 'REJECTED') => {
+    if (readOnly) {
+      toast.error('Akun Admin hanya memiliki akses Read-Only. Wewenang approval dikelola oleh Ketua Sarpras.');
+      return;
+    }
     updateExpenseStatus(id, status);
     toast.success(`Status belanja berhasil diubah menjadi ${status === 'APPROVED' ? 'Disetujui' : 'Ditolak'}`);
   };
@@ -29,8 +37,19 @@ export const AdminStaffReportView: React.FC = () => {
       {/* Header and Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-[16px] border border-slate-200 shadow-xs">
         <div>
-          <h2 className="text-xl font-bold text-[#051F20] tracking-tight">Laporan Staff Non-Akademik</h2>
-          <p className="text-xs font-semibold text-[#8EB69B] mt-0.5">Monitoring pengajuan belanja dapur dan inventaris</p>
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-xl font-bold text-[#051F20] tracking-tight">Laporan Staff Non-Akademik</h2>
+            {readOnly && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                <Lock className="w-3 h-3 text-amber-600" /> Read-Only
+              </span>
+            )}
+          </div>
+          <p className="text-xs font-semibold text-[#8EB69B] mt-0.5">
+            {readOnly 
+              ? 'Monitoring pengajuan belanja dapur dan inventaris (Mode Read-Only · Approval dikelola oleh Ketua Sarpras)'
+              : 'Monitoring pengajuan belanja dapur dan inventaris'}
+          </p>
         </div>
         
         <div className="flex p-1 bg-slate-50 rounded-[12px] border border-slate-200 shrink-0">
@@ -87,7 +106,7 @@ export const AdminStaffReportView: React.FC = () => {
                   <th className="py-3 px-4 text-right">Nominal</th>
                   <th className="py-3 px-4 text-center">Status</th>
                   <th className="py-3 px-4 text-center">Bukti Nota</th>
-                  <th className="py-3 px-4 text-center">Aksi</th>
+                  <th className="py-3 px-4 text-center">{readOnly ? 'Wewenang Approval' : 'Aksi'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-[#051F20]">
@@ -141,23 +160,30 @@ export const AdminStaffReportView: React.FC = () => {
                         )}
                       </td>
                       <td className="py-3.5 px-4 text-center">
-                        {expense.status === 'PENDING' && (
-                          <div className="flex items-center justify-center gap-2">
-                            <button
-                              onClick={() => handleStatusUpdate(expense.id, 'APPROVED')}
-                              className="p-1.5 text-[#163832] bg-[#DAF1DE] hover:bg-[#8EB69B] rounded-[8px] transition-colors cursor-pointer"
-                              title="Setujui"
-                            >
-                              <CheckCircle className="w-4 h-4" strokeWidth={2} />
-                            </button>
-                            <button
-                              onClick={() => handleStatusUpdate(expense.id, 'REJECTED')}
-                              className="p-1.5 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-[8px] transition-colors cursor-pointer"
-                              title="Tolak"
-                            >
-                              <XCircle className="w-4 h-4" strokeWidth={2} />
-                            </button>
-                          </div>
+                        {readOnly ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200">
+                            <Lock className="w-3 h-3 text-slate-400" />
+                            {expense.status === 'PENDING' ? 'Wewenang Sarpras' : 'Arsip Read-Only'}
+                          </span>
+                        ) : (
+                          expense.status === 'PENDING' && (
+                            <div className="flex items-center justify-center gap-2">
+                              <button
+                                onClick={() => handleStatusUpdate(expense.id, 'APPROVED')}
+                                className="p-1.5 text-[#163832] bg-[#DAF1DE] hover:bg-[#8EB69B] rounded-[8px] transition-colors cursor-pointer"
+                                title="Setujui"
+                              >
+                                <CheckCircle className="w-4 h-4" strokeWidth={2} />
+                              </button>
+                              <button
+                                onClick={() => handleStatusUpdate(expense.id, 'REJECTED')}
+                                className="p-1.5 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-[8px] transition-colors cursor-pointer"
+                                title="Tolak"
+                              >
+                                <XCircle className="w-4 h-4" strokeWidth={2} />
+                              </button>
+                            </div>
+                          )
                         )}
                       </td>
                     </tr>

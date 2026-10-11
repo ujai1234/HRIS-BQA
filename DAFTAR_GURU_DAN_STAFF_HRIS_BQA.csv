@@ -1,0 +1,34 @@
+No,ID Sistem,NIP HRIS,Nama Lengkap,Nama Alias / Tampilan KBM,Kategori,Jabatan,Unit,Role Akses,Username Login,Email Akun,No. HP,Status,Gaji Pokok (Rp),Honor Per Jam (Rp),Transport Harian (Rp),Transport Bulanan (Rp),Uang Makan Bulanan (Rp)
+1,T-01,PBQ-2018-001,Ust Idwan Rizqi R,Ust Idwan Rizqi R,Pimpinan / Manajemen Sekolah,Kepsek SMP,SMP,KEPALA_SMP,kepseksmp,kepseksmp@bqa.local,0812-3456-7801,Aktif,1000000,40000,10000,250000,375000
+2,T-02,PBQ-2018-002,Ust Tofan Hasan M,Ust. Tofan,Pimpinan / Manajemen Sekolah,Kepsek MA,MA,KEPALA_MA,kepsekma,kepsekma@bqa.local,0812-3456-7802,Aktif,1100000,40000,10000,250000,375000
+3,T-03,PBQ-2018-003,Ust Cahyono,Ust Cahyono,Pimpinan / Manajemen Sekolah,Kepsek Pesantren,PESANTREN,KEPALA_PESANTREN,kepsekpesantren,kepsekpesantren@bqa.local,0812-3456-7803,Aktif,800000,40000,10000,250000,375000
+4,T-04,PBQ-2019-004,Ust Syuhada AA,Ust Syuhada AA,Pimpinan / Manajemen Sekolah,Wakasek SMP,SMP,GURU,syuhada,syuhada@bqa.local,0812-3456-7804,Aktif,900000,40000,10000,250000,375000
+5,T-05,PBQ-2019-005,Ust Sudarsono,Ust Sudarsono,Pimpinan / Manajemen Sekolah,Wakasek Pesantren,PESANTREN,GURU,sudarsono,sudarsono@bqa.local,0812-3456-7805,Aktif,600000,40000,10000,250000,375000
+6,T-06,PBQ-2026-005,Ust Ahadiat Iqomatuddin,Ust Ahadiat Iqomatuddin,Guru Pengajar,Wakil Kepesantrenan,PESANTREN,KEPALA_PESANTREN,iqomatuddin12@gmail.com,iqomatuddin12@gmail.com,-,Aktif,800000,40000,10000,250000,375000
+7,T-07,PBQ-2020-007,Ust Akmal Yaqien,Ust. Akmal,Administrator,Operator Sekolah & Guru,UMUM,ADMIN,admin,admin@bqa.local,0812-3456-7807,Aktif,950000,40000,10000,250000,375000
+8,T-08,PBQ-2020-008,Ust Fuad Arqom M,Ust. Fuad,Guru Pengajar,Guru (Ust Muqim),PESANTREN,GURU,ustfuadaroqomm,ustfuadaroqomm@bqa.local,0812-3456-7808,Aktif,850000,40000,10000,250000,375000
+9,T-09,PBQ-2020-009,Ust A Rosyid,Ust A Rosyid,Guru Pengajar,Guru (Ust Muqim),PESANTREN,GURU,rosyid,rosyid@bqa.local,0812-3456-7809,Aktif,850000,40000,10000,250000,375000
+10,T-10,PBQ-2021-010,Ust A Saif Mufid,Ust. Saif,Guru Pengajar,Guru (Ust Muqim),PESANTREN,GURU,saifmufid,saifmufid@bqa.local,0812-3456-7810,Aktif,750000,40000,10000,250000,375000
+11,T-11,PBQ-2021-011,Ust Fauzan Ali A,Ust Fauzan Ali A,Guru Pengajar,Guru (Ust Muqim),PESANTREN,GURU,fauzanali,fauzanali@bqa.local,0812-3456-7811,Aktif,750000,40000,10000,250000,375000
+12,T-12,PBQ-2021-012,Ust Hasbiyallah Tamamul Kholqi,Ust Hasbiyallah Tamamul Kholqi,Guru Pengajar,Guru (Ust Muqim),PESANTREN,GURU,hasbiyallah,hasbiyallah@bqa.local,0812-3456-7812,Aktif,500000,40000,10000,250000,375000
+13,T-13,PBQ-2021-013,Ust Abdul Mufid I,Ust Abdul Mufid I,Guru Pengajar,Guru Mukim,PESANTREN,GURU,abdulmufid,abdulmufid@bqa.local,0812-3456-7813,Aktif,500000,40000,10000,250000,375000
+14,T-14,PBQ-2021-014,Ustz Mu'minatul Haq,Ustz. Mu'minah,Guru Pengajar,Guru (Ustadzah Muqim),PESANTREN,GURU,muminatul,muminatul@bqa.local,0812-3456-7814,Aktif,850000,40000,10000,250000,375000
+15,T-15,PBQ-2022-015,Ustz Aisyah NM,Ustz Aisyah NM,Guru Pengajar,Guru (Ustadzah Muqim),PESANTREN,GURU,aisyahnmg,aisyahnmg@bqa.local,0812-3456-7815,Aktif,750000,40000,10000,250000,375000
+16,T-16,PBQ-2022-016,Ustz Dara Zahara,Ustz Dara Zahara,Guru Pengajar,Guru (Ustadzah Muqim),PESANTREN,GURU,darazahara,darazahara@bqa.local,0812-3456-7816,Aktif,650000,40000,10000,250000,375000
+17,T-17,PBQ-2022-017,Ustz Inayah,Ustz Inayah,Guru Pengajar,Guru (Ustadzah Muqim),PESANTREN,GURU,inayah,inayah@bqa.local,0812-3456-7817,Aktif,650000,40000,10000,250000,375000
+18,T-1789814852334,123,Staf Keuangan Node,Staf Keuangan Node,Staf Keuangan,Staf,UMUM,ADMIN_KEUANGAN,123,123@bqa.local,-,Aktif,1000000,0,0,250000,375000
+19,T-1789819389268,456,Staf Extra Fields,Staf Extra Fields,Staf Keuangan,Staf,UMUM,ADMIN_KEUANGAN,456,456@bqa.local,-,Aktif,1000000,0,0,250000,375000
+20,T-18,PBQ-2022-018,Ust Farhan,Ust Farhan,Guru Pengajar,Guru SMP,SMP,GURU,farhan,farhan@bqa.local,0812-3456-7818,Aktif,700000,40000,10000,250000,375000
+21,T-19,PBQ-2022-019,Ustz Masyithoh NH,Ust. Masyitah,Guru Pengajar,Guru MA & SMK,MA,GURU,masyithoh,masyithoh@bqa.local,0812-3456-7819,Aktif,700000,40000,10000,250000,375000
+22,T-20,PBQ-2023-020,Ust Ahmad Furqon,Ust Ahmad Furqon,Guru Pengajar,Guru Pesantren,PESANTREN,GURU,ahmadfurqon,ahmadfurqon@bqa.local,0812-3456-7820,Aktif,700000,40000,10000,250000,375000
+23,T-21,PBQ-2023-021,Ust M Jihdafi,Ust M Jihdafi,Guru Pengajar,Guru Pesantren,PESANTREN,GURU,jihdafi,jihdafi@bqa.local,0812-3456-7821,Aktif,650000,40000,10000,250000,375000
+24,T-22,PBQ-2023-022,Ustz Qonita Inda R,Ustz Qonita Inda R,Guru Pengajar,Guru Pesantren,PESANTREN,GURU,qonita,qonita@bqa.local,0812-3456-7822,Aktif,700000,40000,10000,250000,375000
+25,T-23,PBQ-2023-023,Ustz Firly Septiani,Ustz Firly Septiani,Guru Pengajar,Guru Pesantren,PESANTREN,GURU,firly,firly@bqa.local,0812-3456-7823,Aktif,500000,40000,10000,250000,375000
+26,T-24,PBQ-STAFF-001,Mang Ujang (Dapur),Mang Ujang (Dapur),Staf Operasional / Sarpras / Dapur,Staff Dapur,PESANTREN,STAFF,dapur,dapur@bqa.local,0812-3456-7824,Aktif,850000,0,0,300000,400000
+27,T-25,PBQ-STAFF-002,Pak Kang Edi (Inventaris),Pak Kang Edi (Inventaris),Staf Operasional / Sarpras / Dapur,Staff Inventaris,PESANTREN,STAFF,inventaris,inventaris@bqa.local,0812-3456-7825,Aktif,800000,0,0,250000,375000
+28,T-26,PBQ-2026-026,Ust Rusli RZ,Ust Rusli RZ,Ketua Sarpras & Non-Akademik,Ketua Sarpras,UMUM,KETUA_SARPRAS,daeng.rusli79@gmail.com,daeng.rusli79@gmail.com,081234567890,Aktif,2500000,40000,10000,250000,375000
+29,T-27,PBQ-2026-027,Ustz. Ayu,Ustz. Ayu,Guru Pengajar,Guru SMK (Perbankan),SMK,GURU,ustz.ayu,ustz.ayu@bqa.local,-,Aktif,700000,40000,10000,250000,375000
+30,T-ADMIN-SUPER,ADMIN-00,Super Admin Ujai,Super Admin Ujai,Administrator,Administrator,Pesantren,ADMIN,ujai757@gmail.com,ujai757@gmail.com,-,Aktif,7000000,40000,20000,250000,375000
+31,T-KEPALA-SMP,ADMIN-00,Kepala Sekolah SMP,Kepala Sekolah SMP,Guru Pengajar,Administrator,SMP,KEPALA_SMP,kepala.smp@bqa.local,kepala.smp@bqa.local,-,Aktif,7000000,40000,20000,250000,375000
+32,T-KEUANGAN-TEST,112233,Admin Keuangan Test,Admin Keuangan Test,Staf Keuangan,Admin Keuangan,UMUM,ADMIN_KEUANGAN,112233,112233@bqa.local,-,Aktif,1000000,0,0,250000,375000
+33,TCH-KEUANGAN,KEU-01,Admin Keuangan,Admin Keuangan,Staf Keuangan,Staff Keuangan,Manajemen,KEUANGAN,keu-01,keu-01@bqa.local,-,Aktif,0,40000,10000,250000,375000

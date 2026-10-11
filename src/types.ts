@@ -6,10 +6,15 @@ export type UserRole =
   | 'KEPALA_PESANTREN' 
   | 'SYSTEM'
   | 'STAFF'
-  | 'KEUANGAN';
+  | 'KEUANGAN'
+  | 'KETUA_SARPRAS';
 
 export const isKepsekRole = (role?: UserRole): boolean => {
   return role === 'KEPALA_SMP' || role === 'KEPALA_MA' || role === 'KEPALA_PESANTREN';
+};
+
+export const isKetuaSarprasRole = (role?: UserRole): boolean => {
+  return role === 'KETUA_SARPRAS';
 };
 
 export const getRoleUnit = (role?: UserRole, userUnit?: UnitType): UnitType | 'ALL' => {
@@ -25,8 +30,10 @@ export const getRoleDisplayName = (role?: UserRole, position?: string): string =
   if (role === 'KEPALA_SMP') return 'Kepala Sekolah SMP';
   if (role === 'KEPALA_MA') return 'Kepala Madrasah Aliyah';
   if (role === 'KEPALA_PESANTREN') return 'Mudir / Kepala Pesantren';
+  if (role === 'KETUA_SARPRAS') return 'Ketua Sarpras & Non-Akademik';
   if (role === 'GURU') return 'Guru / Asatidz';
   if (role === 'STAFF') return 'Staff Pesantren';
+  if (role === 'KEUANGAN') return 'Bendahara';
   return position || 'Pengguna';
 };
 
@@ -49,6 +56,7 @@ export type PositionCategory =
   | 'Staff Dapur'
   | 'Staff Inventaris'
   | 'Staff Sarpras'
+  | 'Ketua Sarpras'
   | 'Super Administrator';
 
 export type UnitType = 'SMP' | 'MA' | 'PESANTREN' | 'UMUM';
@@ -330,5 +338,23 @@ export interface StaffJournalRecord {
   taskToday: string; // Pekerjaan hari ini / Menu saat ini
   taskTomorrow: string; // Pekerjaan selanjutnya / Menu selanjutnya
   photoUrl?: string; // base64 or URL
+  createdAt: string;
+}
+
+// ====== STAFF ASSIGNED TASKS (KETUA SARPRAS DELEGATION) ======
+export interface StaffAssignedTask {
+  id: string;
+  staffId: string;
+  staffName: string;
+  category: 'SARPRAS' | 'DAPUR';
+  title: string;
+  description: string;
+  priority: 'NORMAL' | 'URGENT' | 'HIGH';
+  assignedBy: string; // e.g. "Ketua Sarpras"
+  assignedDate: string; // YYYY-MM-DD
+  dueDate?: string; // YYYY-MM-DD
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+  completionNotes?: string;
+  completedAt?: string;
   createdAt: string;
 }

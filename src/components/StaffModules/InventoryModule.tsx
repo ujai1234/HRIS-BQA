@@ -11,12 +11,23 @@ interface InventoryModuleProps {
 }
 
 export const InventoryModule: React.FC<InventoryModuleProps> = ({ showJournalAndExpense = true }) => {
-  const { currentUser, geofenceSettings } = useHRIS();
+  const { currentUser, geofenceSettings, attendances, markStaffAttendanceDirect } = useHRIS();
+  const todayStr = new Date().toISOString().split('T')[0];
+  const existingTodayAttendance = attendances.find(a => a.teacherId === currentUser?.id && a.date === todayStr);
+
   const [isPresent, setIsPresent] = useState(false);
   const [hasClockedInToday, setHasClockedInToday] = useState(false);
   const [taskToday, setTaskToday] = useState('');
   const [taskTomorrow, setTaskTomorrow] = useState('');
   const [isSaved, setIsSaved] = useState(false);
+
+  // Sync with attendances from server / Ketua Sarpras
+  useEffect(() => {
+    if (existingTodayAttendance && (existingTodayAttendance.status === 'SELESAI' || existingTodayAttendance.status.includes('HADIR'))) {
+      setIsPresent(true);
+      setHasClockedInToday(true);
+    }
+  }, [existingTodayAttendance]);
 
   // GPS state
   const [userLat, setUserLat] = useState<number | null>(null);
@@ -61,7 +72,7 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({ showJournalAnd
   const isGpsRequiredMissing = !hasGps || isLocating;
   const isOutsideRadius = hasGps && !locationValidation.isValid;
 
-  const handleAbsenMasuk = () => {
+  const handleAbsenMasuk = async () => {
     if (hasClockedInToday) {
       toast.warning("Anda sudah melakukan absensi hari ini!");
       return;
@@ -73,6 +84,11 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({ showJournalAnd
     if (isOutsideRadius) {
       toast.error("Tidak dapat absen. Anda berada di luar wilayah pesantren.");
       return;
+    }
+
+    const nowTime = `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`;
+    if (currentUser?.id) {
+      await markStaffAttendanceDirect(currentUser.id, 'SELESAI', todayStr, nowTime, 'Absen Masuk Mandiri (Staff Sarpras)');
     }
 
     setIsPresent(true);
@@ -152,6 +168,16 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({ showJournalAnd
                 <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-[#8EB69B]" />
               </div>
               <h4 className="font-bold text-xs text-emerald-900 dark:text-[#DAF1DE]">Hadir Berdinas</h4>
+              {existingTodayAttendance?.clockInTime && (
+                <p className="text-[11px] font-mono font-bold text-emerald-700 dark:text-[#8EB69B] mt-0.5">
+                  Masuk: {existingTodayAttendance.clockInTime} WIB
+                </p>
+              )}
+              {existingTodayAttendance?.notes && (
+                <p className="text-[10px] text-slate-500 dark:text-[#8EB69B]/80 mt-1 italic">
+                  {existingTodayAttendance.notes}
+                </p>
+              )}
               <button 
                 onClick={handleAbsenPulang}
                 className="mt-3 w-full py-1.5 bg-white dark:bg-[#0B2B26] border border-emerald-300 dark:border-[#163832] text-emerald-800 dark:text-[#8EB69B] font-semibold rounded-lg text-xs transition-colors hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:text-rose-700 dark:hover:text-rose-300 hover:border-rose-300 cursor-pointer"
