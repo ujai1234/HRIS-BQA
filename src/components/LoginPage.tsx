@@ -148,8 +148,8 @@ export const LoginPage: React.FC = () => {
         // 3. Jika username guru di database adalah email lengkap, cek apakah prefix cocok dengan input
         if (u.includes('@') && u.split('@')[0] === inputVal) return true;
 
-        // 4. Alias cepat untuk Ketua Sarpras: sarpras
-        if (inputVal === 'sarpras' && (t.role === 'KETUA_SARPRAS' || t.position?.toLowerCase().includes('sarpras'))) return true;
+        // 4. Alias cepat untuk Ketua Sarpras: sarpras / rusli / daeng.rusli
+        if ((inputVal === 'sarpras' || inputVal === 'rusli' || inputVal === 'daeng.rusli') && (t.role === 'KETUA_SARPRAS' || t.position?.toLowerCase() === 'ketua sarpras' || t.name?.toLowerCase().includes('rusli'))) return true;
 
         return false;
       });
