@@ -185,11 +185,11 @@ export const Header: React.FC<HeaderProps> = ({
       crumbs.push({ label: 'Portal Staff', path: '/dashboard/staff' });
       crumbs.push({ label: 'Tugas Hari Ini', path: currentPath });
     } else if (currentRole === 'KETUA_SARPRAS' || currentPath.startsWith('/dashboard/sarpras')) {
-      crumbs.push({ label: 'Sarpras & Non-Akademik', path: '/dashboard/sarpras' });
-      if (currentPath === '/dashboard/sarpras/absensi') crumbs.push({ label: 'Presensi Staf (Bypass)', path: currentPath });
-      else if (currentPath === '/dashboard/sarpras/penugasan') crumbs.push({ label: 'Delegasi Tugas Staf', path: currentPath });
-      else if (currentPath === '/dashboard/sarpras/jurnal') crumbs.push({ label: 'Jurnal Staf', path: currentPath });
-      else crumbs.push({ label: 'Approval Ajuan Belanja', path: currentPath });
+      crumbs.push({ label: 'Sarpras', path: '/dashboard/sarpras' });
+      if (currentPath === '/dashboard/sarpras/absensi') crumbs.push({ label: 'Presensi Staf', path: currentPath });
+      else if (currentPath === '/dashboard/sarpras/penugasan') crumbs.push({ label: 'Penugasan', path: currentPath });
+      else if (currentPath === '/dashboard/sarpras/jurnal') crumbs.push({ label: 'Jurnal Harian', path: currentPath });
+      else crumbs.push({ label: 'Ajuan Belanja', path: currentPath });
     }
 
     return crumbs;
@@ -304,12 +304,12 @@ export const Header: React.FC<HeaderProps> = ({
     } else if (currentRole === 'KETUA_SARPRAS' || currentPath.startsWith('/dashboard/sarpras')) {
       sections = [
         {
-          title: 'SARPRAS & NON-AKADEMIK',
+          title: 'SARPRAS',
           items: [
-            { path: '/dashboard/sarpras', label: '1. Approval Ajuan Belanja', icon: Receipt },
-            { path: '/dashboard/sarpras/absensi', label: '2. Presensi Staf (Bypass)', icon: UserCheck },
-            { path: '/dashboard/sarpras/penugasan', label: '3. Delegasi Tugas Staf', icon: ClipboardList },
-            { path: '/dashboard/sarpras/jurnal', label: '4. Jurnal Harian Staf', icon: CheckCircle2 },
+            { path: '/dashboard/sarpras', label: 'Ajuan Belanja', icon: Receipt },
+            { path: '/dashboard/sarpras/absensi', label: 'Presensi Staf', icon: UserCheck },
+            { path: '/dashboard/sarpras/penugasan', label: 'Penugasan', icon: ClipboardList },
+            { path: '/dashboard/sarpras/jurnal', label: 'Jurnal Harian', icon: CheckCircle2 },
           ]
         }
       ];
