@@ -40,3 +40,7 @@ INSERT OR REPLACE INTO teachers (
   10000, 'GURU', NULL, 'bg-teal-700', NULL,
   1, 'ustz.ayu', 'guru123', 250000, 375000
 );
+
+-- 4. Penyesuaian Role Staf Non-Sarpras:
+-- Ustdz Mahkamah (Pj Keuangan) -> Role KEUANGAN (bukan Sarpras)
+UPDATE teachers SET role = 'KEUANGAN' WHERE nip = 'PBQ-2026-027' OR name LIKE '%Mahkamah%';

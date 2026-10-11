@@ -30,15 +30,50 @@ export const KetuaSarprasView: React.FC<KetuaSarprasViewProps> = ({ initialTab =
   const [searchExpense, setSearchExpense] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // Staf non akademik (Dapur & Sarpras/Inventaris)
-  const staffMembers = teachers.filter(t => 
-    t.role === 'STAFF' || 
-    t.position?.toLowerCase().includes('dapur') || 
-    t.position?.toLowerCase().includes('sarpras') || 
-    t.position?.toLowerCase().includes('inventaris')
-  );
-
   const todayStr = new Date().toISOString().split('T')[0];
+  const dayNames = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const currentDayIndex = new Date().getDay();
+  const currentDayName = dayNames[currentDayIndex];
+  const isTodaySunday = currentDayIndex === 0;
+
+  // Staf yang menjadi tanggung jawab langsung Ketua Sarpras (Sarpras, Inventaris, Dapur)
+  // Ustdzh Mahkamah, Ust Hariyanto, PPSU, dan Kasinah BUKAN tanggung jawab Ketua Sarpras
+  const isSarprasStaff = (t: any) => {
+    if (t.role === 'KETUA_SARPRAS' || t.id === currentUser?.id) return false;
+    const name = (t.name || '').toLowerCase();
+    const pos = (t.position || '').toLowerCase();
+    
+    // Eksklusi khusus sesuai arahan pimpinan:
+    if (name.includes('mahkamah') || pos.includes('keuangan')) return false;
+    if (name.includes('hariyanto') || pos.includes('tabligh')) return false;
+    if (name.includes('ppsu') || name.includes('kasinah') || pos.includes('kebersihan')) return false;
+
+    // Hanya divisi Dapur, Sarpras, dan Inventaris
+    return pos.includes('dapur') || pos.includes('sarpras') || pos.includes('inventaris');
+  };
+
+  const staffMembers = teachers.filter(isSarprasStaff);
+
+  // Presensi Mandiri Ketua Sarpras Hari Ini
+  const myTodayAttendance = attendances.find(
+    a => (a.teacherId === currentUser?.id || a.actualTeacherId === currentUser?.id) && a.date === todayStr
+  );
+  const isMyClockedIn = !!myTodayAttendance && (myTodayAttendance.status === 'SELESAI' || myTodayAttendance.status.includes('HADIR'));
+
+  const handleMySelfAttendance = async () => {
+    if (!currentUser?.id) return;
+    const nowTime = `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`;
+    const success = await markStaffAttendanceDirect(
+      currentUser.id,
+      'SELESAI',
+      todayStr,
+      nowTime,
+      `Presensi Mandiri Ketua Sarpras (${currentDayName}, Senin–Sabtu)`
+    );
+    if (success) {
+      toast.success(`Presensi hadir Anda (${currentUser?.name || 'Ketua Sarpras'}) tercatat jam ${nowTime}`);
+    }
+  };
 
   // ==========================================
   // TAB 1: APPROVAL AJUAN BELANJA
@@ -94,7 +129,7 @@ export const KetuaSarprasView: React.FC<KetuaSarprasViewProps> = ({ initialTab =
       'SELESAI',
       todayStr,
       nowTime,
-      `Presensi langsung oleh Ketua Sarpras`
+      `Presensi dinas oleh Ketua Sarpras (Jadwal: Senin–Sabtu)`
     );
     if (success) {
       toast.success(`${staff?.name || 'Staf'} diabsenkan hadir`);
@@ -116,7 +151,7 @@ export const KetuaSarprasView: React.FC<KetuaSarprasViewProps> = ({ initialTab =
         absenStatus,
         absenDate,
         absenTime,
-        absenNotes || `Presensi oleh Ketua Sarpras`
+        absenNotes || `Presensi dinas oleh Ketua Sarpras`
       );
       if (success) {
         toast.success(`Presensi ${staff?.name} tersimpan`);
@@ -129,7 +164,7 @@ export const KetuaSarprasView: React.FC<KetuaSarprasViewProps> = ({ initialTab =
   };
 
   const staffAttendances = attendances
-    .filter(a => staffMembers.some(sm => sm.id === a.teacherId))
+    .filter(a => staffMembers.some(sm => sm.id === a.teacherId) || a.teacherId === currentUser?.id)
     .filter(a => !filterAbsenDate || a.date === filterAbsenDate)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
@@ -193,10 +228,14 @@ export const KetuaSarprasView: React.FC<KetuaSarprasViewProps> = ({ initialTab =
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200 dark:border-[#163832]">
         <div>
           <h1 className="text-xl font-bold text-slate-900 dark:text-[#DAF1DE]">Sarpras & Operasional</h1>
-          <p className="text-xs text-slate-500 dark:text-[#8EB69B]">Portal persetujuan belanja, kehadiran, dan penugasan staf</p>
+          <p className="text-xs text-slate-500 dark:text-[#8EB69B]">
+            Pusat persetujuan belanja, kehadiran, dan penugasan staf non-akademik (Jadwal: Senin – Sabtu)
+          </p>
         </div>
         <div className="flex items-center gap-3 text-xs">
-          <span className="font-mono text-slate-500 dark:text-[#8EB69B]">{todayStr}</span>
+          <span className="font-mono text-slate-500 dark:text-[#8EB69B]">
+            {currentDayName}, {todayStr}
+          </span>
           {pendingExpensesCount > 0 && (
             <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300">
               {pendingExpensesCount} ajuan perlu tindakan
@@ -398,188 +437,243 @@ export const KetuaSarprasView: React.FC<KetuaSarprasViewProps> = ({ initialTab =
       {/* TAB 2: PRESENSI STAF                                      */}
       {/* ========================================================= */}
       {activeTab === 'absensi' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {/* Form Presensi */}
-          <div className="lg:col-span-1 bg-white dark:bg-[#0B2B26] p-4 rounded-xl border border-slate-200 dark:border-[#163832] space-y-3">
-            <h3 className="text-sm font-bold text-slate-800 dark:text-[#DAF1DE]">Input Presensi Staf</h3>
-
-            <form onSubmit={handleCustomAbsenSubmit} className="space-y-3">
-              <div>
-                <label className="block text-[11px] text-slate-500 dark:text-[#8EB69B] mb-1">Pilih Staf</label>
-                <select
-                  value={selectedStaffIdForAbsen}
-                  onChange={(e) => setSelectedStaffIdForAbsen(e.target.value)}
-                  required
-                  className="w-full p-2 text-xs bg-slate-50 dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded-lg text-slate-800 dark:text-[#DAF1DE]"
-                >
-                  <option value="">-- Pilih Staf --</option>
-                  {staffMembers.map(st => (
-                    <option key={st.id} value={st.id}>
-                      {st.name} ({st.position || 'Staff'})
-                    </option>
-                  ))}
-                </select>
+        <div className="space-y-4">
+          {/* Card Presensi Mandiri Ketua Sarpras (Wajib Absen Senin - Sabtu) */}
+          <div className="bg-white dark:bg-[#0B2B26] p-4 rounded-xl border border-slate-200/90 dark:border-[#163832] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-bold text-slate-900 dark:text-[#DAF1DE]">
+                  Presensi Mandiri: {currentUser?.name || 'Ust Rusli RZ'} (Ketua Sarpras)
+                </span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-[#163832] text-emerald-800 dark:text-[#8EB69B] border border-emerald-200/50">
+                  Jadwal Kerja: Senin – Sabtu
+                </span>
               </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-[11px] text-slate-500 dark:text-[#8EB69B] mb-1">Tanggal</label>
-                  <input
-                    type="date"
-                    value={absenDate}
-                    onChange={(e) => setAbsenDate(e.target.value)}
-                    required
-                    className="w-full p-2 text-xs bg-slate-50 dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded-lg text-slate-800 dark:text-[#DAF1DE]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] text-slate-500 dark:text-[#8EB69B] mb-1">Jam</label>
-                  <input
-                    type="time"
-                    value={absenTime}
-                    onChange={(e) => setAbsenTime(e.target.value)}
-                    required
-                    className="w-full p-2 text-xs bg-slate-50 dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded-lg text-slate-800 dark:text-[#DAF1DE]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] text-slate-500 dark:text-[#8EB69B] mb-1">Status Kehadiran</label>
-                <select
-                  value={absenStatus}
-                  onChange={(e) => setAbsenStatus(e.target.value as any)}
-                  className="w-full p-2 text-xs bg-slate-50 dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded-lg text-slate-800 dark:text-[#DAF1DE]"
-                >
-                  <option value="SELESAI">Hadir (Selesai)</option>
-                  <option value="HADIR_JURNAL_KOSONG">Hadir (Masuk)</option>
-                  <option value="IZIN">Izin</option>
-                  <option value="SAKIT">Sakit</option>
-                  <option value="ALPA">Alpa</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[11px] text-slate-500 dark:text-[#8EB69B] mb-1">Keterangan (Opsional)</label>
-                <input
-                  type="text"
-                  value={absenNotes}
-                  onChange={(e) => setAbsenNotes(e.target.value)}
-                  placeholder="Catatan kehadiran..."
-                  className="w-full p-2 text-xs bg-slate-50 dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded-lg text-slate-800 dark:text-[#DAF1DE]"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmittingAbsen}
-                className="w-full py-2 bg-[#163832] hover:bg-[#0B2B26] dark:bg-[#8EB69B] dark:hover:bg-[#DAF1DE] text-white dark:text-[#051F20] font-semibold text-xs rounded-lg transition-colors cursor-pointer disabled:opacity-50"
-              >
-                {isSubmittingAbsen ? 'Menyimpan...' : 'Simpan Presensi'}
-              </button>
-            </form>
-          </div>
-
-          {/* Quick Presensi & Riwayat */}
-          <div className="lg:col-span-2 space-y-4">
-            {/* Quick Status Hari Ini */}
-            <div className="bg-white dark:bg-[#0B2B26] p-4 rounded-xl border border-slate-200 dark:border-[#163832] space-y-3">
-              <h3 className="text-sm font-bold text-slate-800 dark:text-[#DAF1DE]">Kehadiran Staf Hari Ini ({todayStr})</h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {staffMembers.map(staff => {
-                  const todayAtt = attendances.find(a => a.teacherId === staff.id && a.date === todayStr);
-                  const isClockedIn = !!todayAtt && (todayAtt.status === 'SELESAI' || todayAtt.status.includes('HADIR'));
-
-                  return (
-                    <div 
-                      key={staff.id}
-                      className="bg-slate-50 dark:bg-[#163832]/40 border border-slate-200/70 dark:border-[#163832] p-3 rounded-lg flex items-center justify-between gap-3"
-                    >
-                      <div className="min-w-0">
-                        <p className="font-semibold text-xs text-slate-800 dark:text-[#DAF1DE] truncate">{staff.name}</p>
-                        <p className="text-[11px] text-slate-500 dark:text-[#8EB69B] truncate">{staff.position || 'Staff'}</p>
-                        <p className="text-[10px] text-slate-400 font-mono mt-0.5">
-                          {todayAtt ? `Jam ${todayAtt.clockInTime || '-'} (${todayAtt.status})` : 'Belum hadir'}
-                        </p>
-                      </div>
-
-                      <button
-                        onClick={() => handleQuickClockIn(staff.id)}
-                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors shrink-0 cursor-pointer ${
-                          isClockedIn
-                            ? 'bg-slate-200 dark:bg-[#163832] text-slate-700 dark:text-[#DAF1DE]'
-                            : 'bg-[#163832] hover:bg-[#0B2B26] text-white dark:bg-[#8EB69B] dark:text-[#051F20]'
-                        }`}
-                      >
-                        {isClockedIn ? 'Perbarui' : 'Hadirkan'}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
+              <p className="text-[11px] text-slate-500 dark:text-[#8EB69B]">
+                Hari ini: <strong className="text-slate-700 dark:text-[#DAF1DE]">{currentDayName}, {todayStr}</strong>
+                {isTodaySunday && <span className="ml-2 text-amber-600 font-semibold">(Hari Ahad / Libur Operasional)</span>}
+              </p>
             </div>
 
-            {/* Riwayat Presensi Singkat */}
-            <div className="bg-white dark:bg-[#0B2B26] rounded-xl border border-slate-200 dark:border-[#163832] p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-slate-800 dark:text-[#DAF1DE]">Riwayat Presensi</h3>
+            <div className="flex items-center gap-2 shrink-0">
+              {isMyClockedIn ? (
                 <div className="flex items-center gap-2">
-                  <input
-                    type="date"
-                    value={filterAbsenDate}
-                    onChange={(e) => setFilterAbsenDate(e.target.value)}
-                    className="p-1 text-xs bg-slate-50 dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded text-slate-800 dark:text-[#DAF1DE]"
-                  />
-                  {filterAbsenDate && (
-                    <button 
-                      onClick={() => setFilterAbsenDate('')} 
-                      className="text-[11px] text-blue-600 hover:underline cursor-pointer"
-                    >
-                      Semua
-                    </button>
-                  )}
+                  <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                    ✓ Sudah Hadir ({myTodayAttendance?.clockInTime || '-'} WIB)
+                  </span>
+                  <button
+                    onClick={handleMySelfAttendance}
+                    className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-[#DAF1DE] underline cursor-pointer"
+                    title="Perbarui jam hadir"
+                  >
+                    Perbarui
+                  </button>
                 </div>
+              ) : (
+                <button
+                  onClick={handleMySelfAttendance}
+                  className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-[#163832] hover:bg-[#0B2B26] text-white dark:bg-[#8EB69B] dark:text-[#051F20] transition-colors cursor-pointer"
+                >
+                  Absen Hadir Sekarang
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            {/* Form Presensi Manual Staf */}
+            <div className="lg:col-span-1 bg-white dark:bg-[#0B2B26] p-4 rounded-xl border border-slate-200 dark:border-[#163832] space-y-3">
+              <h3 className="text-sm font-bold text-slate-800 dark:text-[#DAF1DE]">Input Presensi Staf</h3>
+
+              <form onSubmit={handleCustomAbsenSubmit} className="space-y-3">
+                <div>
+                  <label className="block text-[11px] text-slate-500 dark:text-[#8EB69B] mb-1">Pilih Staf Sarpras/Dapur</label>
+                  <select
+                    value={selectedStaffIdForAbsen}
+                    onChange={(e) => setSelectedStaffIdForAbsen(e.target.value)}
+                    required
+                    className="w-full p-2 text-xs bg-slate-50 dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded-lg text-slate-800 dark:text-[#DAF1DE]"
+                  >
+                    <option value="">-- Pilih Staf Sarpras / Dapur --</option>
+                    {staffMembers.map(st => (
+                      <option key={st.id} value={st.id}>
+                        {st.name} ({st.position || 'Staff'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] text-slate-500 dark:text-[#8EB69B] mb-1">Tanggal</label>
+                    <input
+                      type="date"
+                      value={absenDate}
+                      onChange={(e) => setAbsenDate(e.target.value)}
+                      required
+                      className="w-full p-2 text-xs bg-slate-50 dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded-lg text-slate-800 dark:text-[#DAF1DE]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] text-slate-500 dark:text-[#8EB69B] mb-1">Jam</label>
+                    <input
+                      type="time"
+                      value={absenTime}
+                      onChange={(e) => setAbsenTime(e.target.value)}
+                      required
+                      className="w-full p-2 text-xs bg-slate-50 dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded-lg text-slate-800 dark:text-[#DAF1DE]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] text-slate-500 dark:text-[#8EB69B] mb-1">Status Kehadiran</label>
+                  <select
+                    value={absenStatus}
+                    onChange={(e) => setAbsenStatus(e.target.value as any)}
+                    className="w-full p-2 text-xs bg-slate-50 dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded-lg text-slate-800 dark:text-[#DAF1DE]"
+                  >
+                    <option value="SELESAI">Hadir (Selesai)</option>
+                    <option value="HADIR_JURNAL_KOSONG">Hadir (Masuk)</option>
+                    <option value="IZIN">Izin</option>
+                    <option value="SAKIT">Sakit</option>
+                    <option value="ALPA">Alpa</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] text-slate-500 dark:text-[#8EB69B] mb-1">Keterangan (Opsional)</label>
+                  <input
+                    type="text"
+                    value={absenNotes}
+                    onChange={(e) => setAbsenNotes(e.target.value)}
+                    placeholder="Catatan dinas..."
+                    className="w-full p-2 text-xs bg-slate-50 dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded-lg text-slate-800 dark:text-[#DAF1DE]"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmittingAbsen}
+                  className="w-full py-2 bg-[#163832] hover:bg-[#0B2B26] dark:bg-[#8EB69B] dark:hover:bg-[#DAF1DE] text-white dark:text-[#051F20] font-semibold text-xs rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmittingAbsen ? 'Menyimpan...' : 'Simpan Presensi Staf'}
+                </button>
+              </form>
+            </div>
+
+            {/* Quick Presensi & Riwayat Staf */}
+            <div className="lg:col-span-2 space-y-4">
+              {/* Quick Status Hari Ini */}
+              <div className="bg-white dark:bg-[#0B2B26] p-4 rounded-xl border border-slate-200 dark:border-[#163832] space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <h3 className="text-sm font-bold text-slate-800 dark:text-[#DAF1DE]">
+                    Kehadiran Staf Sarpras & Dapur ({currentDayName}, {todayStr})
+                  </h3>
+                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-[#8EB69B]">
+                    Masuk: Senin – Sabtu
+                  </span>
+                </div>
+
+                {staffMembers.length === 0 ? (
+                  <p className="text-xs text-slate-400 py-3 text-center">Belum ada staf Sarpras/Dapur terdaftar.</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {staffMembers.map(staff => {
+                      const todayAtt = attendances.find(a => a.teacherId === staff.id && a.date === todayStr);
+                      const isClockedIn = !!todayAtt && (todayAtt.status === 'SELESAI' || todayAtt.status.includes('HADIR'));
+
+                      return (
+                        <div 
+                          key={staff.id}
+                          className="bg-slate-50 dark:bg-[#163832]/40 border border-slate-200/70 dark:border-[#163832] p-3 rounded-lg flex items-center justify-between gap-3"
+                        >
+                          <div className="min-w-0">
+                            <p className="font-semibold text-xs text-slate-800 dark:text-[#DAF1DE] truncate">{staff.name}</p>
+                            <p className="text-[11px] text-slate-500 dark:text-[#8EB69B] truncate">{staff.position || 'Staff'}</p>
+                            <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                              {todayAtt ? `Jam ${todayAtt.clockInTime || '-'} (${todayAtt.status})` : 'Belum hadir'}
+                            </p>
+                          </div>
+
+                          <button
+                            onClick={() => handleQuickClockIn(staff.id)}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors shrink-0 cursor-pointer ${
+                              isClockedIn
+                                ? 'bg-slate-200 dark:bg-[#163832] text-slate-700 dark:text-[#DAF1DE]'
+                                : 'bg-[#163832] hover:bg-[#0B2B26] text-white dark:bg-[#8EB69B] dark:text-[#051F20]'
+                            }`}
+                          >
+                            {isClockedIn ? 'Perbarui' : 'Hadirkan'}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="bg-slate-50 dark:bg-[#163832]/60 text-slate-600 dark:text-[#8EB69B] font-semibold border-b border-slate-200 dark:border-[#163832] text-[11px]">
-                      <th className="py-2 px-3">Tanggal</th>
-                      <th className="py-2 px-3">Staf</th>
-                      <th className="py-2 px-3">Jam</th>
-                      <th className="py-2 px-3">Status</th>
-                      <th className="py-2 px-3">Keterangan</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-[#163832]">
-                    {staffAttendances.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="py-4 text-center text-slate-400">
-                          Tidak ada catatan presensi.
-                        </td>
-                      </tr>
-                    ) : (
-                      staffAttendances.slice(0, 10).map(att => {
-                        const staff = teachers.find(t => t.id === att.teacherId);
-                        return (
-                          <tr key={att.id} className="hover:bg-slate-50 dark:hover:bg-[#163832]/30">
-                            <td className="py-2 px-3 font-mono text-slate-600 dark:text-[#8EB69B]">{att.date}</td>
-                            <td className="py-2 px-3 font-medium text-slate-800 dark:text-[#DAF1DE]">{staff?.name}</td>
-                            <td className="py-2 px-3 font-mono">{att.clockInTime || '-'}</td>
-                            <td className="py-2 px-3">
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-[#163832]">
-                                {att.status}
-                              </span>
-                            </td>
-                            <td className="py-2 px-3 text-slate-500 text-[11px] truncate max-w-xs">{att.notes || '-'}</td>
-                          </tr>
-                        );
-                      })
+              {/* Riwayat Presensi Singkat */}
+              <div className="bg-white dark:bg-[#0B2B26] rounded-xl border border-slate-200 dark:border-[#163832] p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-slate-800 dark:text-[#DAF1DE]">Riwayat Presensi Sarpras</h3>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="date"
+                      value={filterAbsenDate}
+                      onChange={(e) => setFilterAbsenDate(e.target.value)}
+                      className="p-1 text-xs bg-slate-50 dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded text-slate-800 dark:text-[#DAF1DE]"
+                    />
+                    {filterAbsenDate && (
+                      <button 
+                        onClick={() => setFilterAbsenDate('')} 
+                        className="text-[11px] text-blue-600 hover:underline cursor-pointer"
+                      >
+                        Semua
+                      </button>
                     )}
-                  </tbody>
-                </table>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="bg-slate-50 dark:bg-[#163832]/60 text-slate-600 dark:text-[#8EB69B] font-semibold border-b border-slate-200 dark:border-[#163832] text-[11px]">
+                        <th className="py-2 px-3">Tanggal</th>
+                        <th className="py-2 px-3">Nama</th>
+                        <th className="py-2 px-3">Jam</th>
+                        <th className="py-2 px-3">Status</th>
+                        <th className="py-2 px-3">Keterangan</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-[#163832]">
+                      {staffAttendances.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="py-4 text-center text-slate-400">
+                            Tidak ada catatan presensi.
+                          </td>
+                        </tr>
+                      ) : (
+                        staffAttendances.slice(0, 10).map(att => {
+                          const staff = teachers.find(t => t.id === att.teacherId);
+                          return (
+                            <tr key={att.id} className="hover:bg-slate-50 dark:hover:bg-[#163832]/30">
+                              <td className="py-2 px-3 font-mono text-slate-600 dark:text-[#8EB69B]">{att.date}</td>
+                              <td className="py-2 px-3 font-medium text-slate-800 dark:text-[#DAF1DE]">{staff?.name}</td>
+                              <td className="py-2 px-3 font-mono">{att.clockInTime || '-'}</td>
+                              <td className="py-2 px-3">
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-[#163832]">
+                                  {att.status}
+                                </span>
+                              </td>
+                              <td className="py-2 px-3 text-slate-500 text-[11px] truncate max-w-xs">{att.notes || '-'}</td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -604,7 +698,7 @@ export const KetuaSarprasView: React.FC<KetuaSarprasViewProps> = ({ initialTab =
                   required
                   className="w-full p-2 text-xs bg-slate-50 dark:bg-[#163832] border border-slate-200 dark:border-[#0B2B26] rounded-lg text-slate-800 dark:text-[#DAF1DE]"
                 >
-                  <option value="">-- Pilih Staf --</option>
+                  <option value="">-- Pilih Staf Sarpras / Dapur --</option>
                   {staffMembers.map(st => (
                     <option key={st.id} value={st.id}>
                       {st.name} — {st.position || 'Staff'}
@@ -675,7 +769,7 @@ export const KetuaSarprasView: React.FC<KetuaSarprasViewProps> = ({ initialTab =
           <div className="lg:col-span-2 space-y-3">
             <div className="bg-white dark:bg-[#0B2B26] rounded-xl border border-slate-200 dark:border-[#163832] p-4 space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <h3 className="text-sm font-bold text-slate-800 dark:text-[#DAF1DE]">Daftar Penugasan</h3>
+                <h3 className="text-sm font-bold text-slate-800 dark:text-[#DAF1DE]">Daftar Penugasan Staf</h3>
 
                 <div className="flex gap-1">
                   {(['ALL', 'PENDING', 'IN_PROGRESS', 'COMPLETED'] as const).map(st => (
@@ -770,7 +864,10 @@ export const KetuaSarprasView: React.FC<KetuaSarprasViewProps> = ({ initialTab =
       {/* ========================================================= */}
       {activeTab === 'jurnal' && (
         <div className="bg-white dark:bg-[#0B2B26] rounded-xl border border-slate-200 dark:border-[#163832] p-4 space-y-3">
-          <h3 className="text-sm font-bold text-slate-800 dark:text-[#DAF1DE]">Jurnal Harian Staf</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-[#DAF1DE]">Jurnal Harian Staf Sarpras & Dapur</h3>
+            <span className="text-[11px] text-slate-500 dark:text-[#8EB69B]">Jadwal Kerja: Senin – Sabtu</span>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {(staffJournals || [])

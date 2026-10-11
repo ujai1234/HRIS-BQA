@@ -4412,7 +4412,7 @@ async function startServer() {
         const baseMonthlyCustomHonorarium = customSchedules.reduce((sum: number, s: any) => sum + (Number(s.customRate) * 4), 0);
 
         const actualTeachingRecords = monthAttendances.filter(
-          (a: any) => a.actualTeacherId === teacher.id && (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG')
+          (a: any) => (a.actualTeacherId === teacher.id || a.teacherId === teacher.id) && (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG')
         );
 
         const badalSessions = actualTeachingRecords.filter((a: any) => a.isBadal);
@@ -4447,13 +4447,13 @@ async function startServer() {
         let teachingHonorarium = regularHonorarium + customRateHonorarium;
         let totalTransport = totalPresentDays * Number(teacher.dailyTransport || 0);
 
-        const lateRecords = monthAttendances.filter((a: any) => a.actualTeacherId === teacher.id && Number(a.latePenalty || 0) > 0);
+        const lateRecords = monthAttendances.filter((a: any) => (a.actualTeacherId === teacher.id || a.teacherId === teacher.id) && Number(a.latePenalty || 0) > 0);
         const latePenaltyTotal = lateRecords.reduce((sum: number, a: any) => sum + Number(a.latePenalty || 0), 0);
         const lateCountLight = lateRecords.filter((a: any) => a.lateCategory === 'TERLAMBAT_RINGAN').length;
         const lateCountMedium = lateRecords.filter((a: any) => a.lateCategory === 'TERLAMBAT_SEDANG').length;
         const lateCountHeavy = lateRecords.filter((a: any) => a.lateCategory === 'TERLAMBAT_BERAT').length;
 
-        const emptyJournalRecords = monthAttendances.filter((a: any) => a.actualTeacherId === teacher.id && a.status === 'HADIR_JURNAL_KOSONG');
+        const emptyJournalRecords = monthAttendances.filter((a: any) => (a.actualTeacherId === teacher.id || a.teacherId === teacher.id) && a.status === 'HADIR_JURNAL_KOSONG');
         const emptyJournalCount = emptyJournalRecords.length;
         const emptyJournalPenalty = emptyJournalRecords.reduce((sum: number, a: any) => {
           const sched = schedules.find((s: any) => s.id === a.scheduleId);
@@ -4491,7 +4491,7 @@ async function startServer() {
         let netSalary = Math.max(0, grossSalary - totalDeductions);
         let mealAllowance = 0;
 
-        if (teacher.role === 'STAFF') {
+        if (teacher.role === 'STAFF' || teacher.role === 'KETUA_SARPRAS') {
           const teacherStaffTasks = monthStaffTasks.filter((st: any) => st.staffId === teacher.id);
           const staffTaskDates = new Set(teacherStaffTasks.map((st: any) => st.date));
           const combinedStaffPresentDays = Math.max(totalPresentDays, staffTaskDates.size);
