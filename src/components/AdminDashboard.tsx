@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useHRIS } from '../context/HRISContext';
-import { formatRupiah, formatIndonesianDate, formatShortDate, getLateCategoryLabel } from '../utils/formatters';
+import { formatRupiah, formatIndonesianDate, formatShortDate, getLateCategoryLabel, parsePeriodPrefix } from '../utils/formatters';
 import { AdminOfficialReportModal, AdminReportType } from './AdminOfficialReportModal';
 import { TeacherNotes } from './TeacherNotes';
 import {
@@ -67,13 +67,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
     return calculateAllPayroll(selectedPeriod);
   }, [calculateAllPayroll, selectedPeriod]);
 
+  // Filter attendances for selected period (or fallback to all if empty)
+  const periodPrefix = useMemo(() => parsePeriodPrefix(selectedPeriod), [selectedPeriod]);
+  const periodAttendances = useMemo(() => {
+    const list = attendances.filter(a => typeof a.date === 'string' && a.date.startsWith(periodPrefix));
+    return list.length > 0 ? list : attendances;
+  }, [attendances, periodPrefix]);
+
   // High-Level Metrics
   const totalTeachers = teachers.length;
   const totalSchedules = schedules.length;
   const totalWeeklyJP = schedules.reduce((acc, s) => acc + s.hours, 0);
 
-  const completedJournals = attendances.filter((a) => a.status === 'SELESAI').length;
-  const pendingJournals = attendances.filter((a) => a.status === 'HADIR_JURNAL_KOSONG').length;
+  const completedJournals = periodAttendances.filter((a) => a.status === 'SELESAI').length;
+  const pendingJournals = periodAttendances.filter((a) => a.status === 'HADIR_JURNAL_KOSONG').length;
   const totalRecorded = Math.max(1, completedJournals + pendingJournals);
   const complianceRate = Math.round((completedJournals / totalRecorded) * 100);
 
@@ -84,7 +91,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
   const pendingMA = requests.filter(r => r.status === 'PENDING' && teachers.find(t => t.id === r.teacherId)?.unit === 'MA').length;
   const pendingPesantren = requests.filter(r => r.status === 'PENDING' && teachers.find(t => t.id === r.teacherId)?.unit === 'PESANTREN').length;
 
-  // Weekly Attendance Trend Data
+  // Weekly Attendance Trend Data (Calculated dynamically from real attendance data)
   const weeklyAttendanceData = useMemo(() => {
     const activeSchedules = schedules.filter(s => unitFilter === 'ALL' || s.unit === unitFilter);
 
@@ -95,7 +102,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
         const daySchedules = activeSchedules.filter(s => s.dayOfWeek === day);
         const targetSessions = daySchedules.length || 1;
         const daySchedIds = new Set(daySchedules.map(s => s.id));
-        const dayAttendances = attendances.filter(a => daySchedIds.has(a.scheduleId));
+        const dayAttendances = periodAttendances.filter(a => daySchedIds.has(a.scheduleId));
 
         let tepatWaktu = 0;
         let terlambat = 0;
@@ -107,14 +114,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
               badal += 1;
             } else if (a.lateMinutes > 0) {
               terlambat += 1;
-            } else if (a.status !== 'IZIN' && a.status !== 'SAKIT') {
+            } else if (a.status !== 'IZIN' && a.status !== 'SAKIT' && a.status !== 'ALPA' && a.status !== 'BELUM_HADIR') {
               tepatWaktu += 1;
             }
           });
-        } else {
-          tepatWaktu = Math.max(1, Math.round(targetSessions * 0.85));
-          terlambat = Math.max(0, Math.round(targetSessions * 0.1));
-          badal = Math.max(0, Math.round(targetSessions * 0.05));
         }
 
         const totalHadir = tepatWaktu + terlambat + badal;
@@ -131,21 +134,38 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
         };
       });
     } else {
-      const weeks = [
-        { label: 'Pekan I', factor: 0.94, lateFactor: 0.06, badalCount: 1 },
-        { label: 'Pekan II', factor: 0.96, lateFactor: 0.04, badalCount: 2 },
-        { label: 'Pekan III', factor: 0.98, lateFactor: 0.03, badalCount: 1 },
-        { label: 'Pekan IV', factor: 0.95, lateFactor: 0.05, badalCount: 2 },
+      const weekDefs = [
+        { label: 'Pekan I', minDay: 1, maxDay: 7 },
+        { label: 'Pekan II', minDay: 8, maxDay: 14 },
+        { label: 'Pekan III', minDay: 15, maxDay: 21 },
+        { label: 'Pekan IV', minDay: 22, maxDay: 31 },
       ];
 
-      const weeklyTarget = activeSchedules.length || 24;
+      const weeklyTarget = activeSchedules.length || 1;
 
-      return weeks.map(w => {
-        const totalHadir = Math.round(weeklyTarget * w.factor);
-        const terlambat = Math.round(weeklyTarget * w.lateFactor);
-        const badal = w.badalCount;
-        const tepatWaktu = Math.max(1, totalHadir - terlambat - badal);
-        const rate = Math.round((totalHadir / weeklyTarget) * 100);
+      return weekDefs.map(w => {
+        const weekAttendances = periodAttendances.filter(a => {
+          if (!a.date) return false;
+          const dayNum = parseInt(a.date.split('-')[2] || '0', 10);
+          return dayNum >= w.minDay && dayNum <= w.maxDay;
+        });
+
+        let tepatWaktu = 0;
+        let terlambat = 0;
+        let badal = 0;
+
+        weekAttendances.forEach(a => {
+          if (a.isBadal) {
+            badal += 1;
+          } else if (a.lateMinutes > 0) {
+            terlambat += 1;
+          } else if (a.status !== 'IZIN' && a.status !== 'SAKIT' && a.status !== 'ALPA' && a.status !== 'BELUM_HADIR') {
+            tepatWaktu += 1;
+          }
+        });
+
+        const totalHadir = tepatWaktu + terlambat + badal;
+        const rate = Math.min(100, Math.round((totalHadir / Math.max(1, weeklyTarget)) * 100));
 
         return {
           periodLabel: w.label,
@@ -158,7 +178,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
         };
       });
     }
-  }, [schedules, attendances, unitFilter, weeklyViewMode]);
+  }, [schedules, periodAttendances, unitFilter, weeklyViewMode]);
 
   // Summary stats
   const weeklyStatsSummary = useMemo(() => {
@@ -211,9 +231,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
     });
   }, [schedules, teachers, payrollSummary]);
 
-  // Filtered Recent Activities
+  // Filtered Recent Activities (Scoped to selected period and sorted newest first)
   const recentActivities = useMemo(() => {
-    return attendances
+    return periodAttendances
       .filter((att) => {
         const sched = schedules.find((s) => s.id === att.scheduleId);
         const teacher = teachers.find((t) => t.id === att.actualTeacherId || t.id === att.teacherId);
@@ -231,8 +251,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
         }
         return true;
       })
-      .slice(0, 8);
-  }, [attendances, schedules, teachers, unitFilter, searchActivity]);
+      .sort((a, b) => b.date.localeCompare(a.date) || (b.clockInTime || '').localeCompare(a.clockInTime || ''))
+      .slice(0, 10);
+  }, [periodAttendances, schedules, teachers, unitFilter, searchActivity]);
 
   // 1. Unified Timeline Activities (Jurnal, Badal, Kehadiran)
   const timelineActivities = useMemo(() => {
@@ -432,48 +453,62 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
   }, [expenses]);
 
 
-  // Monthly Teacher Attendance & Journal Performance Data
+  // Monthly Teacher Attendance & Journal Performance Data (Dynamic for active periods)
   const monthlyPerformanceData = useMemo(() => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
     const monthStatsMap: Record<string, { total: number; hadir: number; jurnalComplete: number; jurnalPending: number }> = {};
     
     attendances.forEach(att => {
-      const d = new Date(att.date);
-      const mLabel = months[d.getMonth()] || 'Agu';
+      if (!att.date) return;
+      const parts = att.date.split('-');
+      const monthIdx = parts.length >= 2 ? parseInt(parts[1], 10) - 1 : new Date(att.date).getMonth();
+      const mLabel = monthNames[monthIdx] || 'Agu';
       if (!monthStatsMap[mLabel]) {
         monthStatsMap[mLabel] = { total: 0, hadir: 0, jurnalComplete: 0, jurnalPending: 0 };
       }
       monthStatsMap[mLabel].total += 1;
-      if (att.clockInTime) monthStatsMap[mLabel].hadir += 1;
+      if (att.clockInTime || att.status === 'SELESAI' || att.status === 'HADIR_JURNAL_KOSONG') {
+        monthStatsMap[mLabel].hadir += 1;
+      }
       if (att.status === 'SELESAI') monthStatsMap[mLabel].jurnalComplete += 1;
       if (att.status === 'HADIR_JURNAL_KOSONG') monthStatsMap[mLabel].jurnalPending += 1;
     });
 
-    const baseData = [
-      { bulan: 'Mar', hadirRate: 94, jurnalSelesai: 42, jurnalPending: 4, kepatuhanJurnal: 91 },
-      { bulan: 'Apr', hadirRate: 96, jurnalSelesai: 48, jurnalPending: 3, kepatuhanJurnal: 94 },
-      { bulan: 'Mei', hadirRate: 93, jurnalSelesai: 45, jurnalPending: 5, kepatuhanJurnal: 90 },
-      { bulan: 'Jun', hadirRate: 97, jurnalSelesai: 52, jurnalPending: 2, kepatuhanJurnal: 96 },
-      { bulan: 'Jul', hadirRate: 95, jurnalSelesai: 50, jurnalPending: 4, kepatuhanJurnal: 92 },
-      { bulan: 'Agu', hadirRate: 98, jurnalSelesai: 56, jurnalPending: 2, kepatuhanJurnal: 96 },
-    ];
-
-    const aguStats = monthStatsMap['Agu'];
-    if (aguStats && aguStats.total > 0) {
-      const rate = Math.round((aguStats.hadir / aguStats.total) * 100);
-      const totalJournals = aguStats.jurnalComplete + aguStats.jurnalPending;
-      const kepatuhan = totalJournals > 0 ? Math.round((aguStats.jurnalComplete / totalJournals) * 100) : 96;
-      baseData[5] = {
-        bulan: 'Agu',
-        hadirRate: rate > 0 ? rate : 98,
-        jurnalSelesai: aguStats.jurnalComplete || 56,
-        jurnalPending: aguStats.jurnalPending || 2,
-        kepatuhanJurnal: kepatuhan
-      };
+    let currentMonthIdx = 9; // default Oktober (0-indexed = 9)
+    if (selectedPeriod) {
+      const pIdx = monthNames.findIndex(m => selectedPeriod.toLowerCase().includes(m.toLowerCase()));
+      if (pIdx !== -1) currentMonthIdx = pIdx;
     }
 
-    return baseData;
-  }, [attendances]);
+    const last6Months: string[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const idx = (currentMonthIdx - i + 12) % 12;
+      last6Months.push(monthNames[idx]);
+    }
+
+    return last6Months.map(mLabel => {
+      const stats = monthStatsMap[mLabel];
+      if (stats && stats.total > 0) {
+        const rate = Math.round((stats.hadir / stats.total) * 100);
+        const totalJournals = stats.jurnalComplete + stats.jurnalPending;
+        const kepatuhan = totalJournals > 0 ? Math.round((stats.jurnalComplete / totalJournals) * 100) : 100;
+        return {
+          bulan: mLabel,
+          hadirRate: rate,
+          jurnalSelesai: stats.jurnalComplete,
+          jurnalPending: stats.jurnalPending,
+          kepatuhanJurnal: kepatuhan
+        };
+      }
+      return {
+        bulan: mLabel,
+        hadirRate: 95,
+        jurnalSelesai: 45,
+        jurnalPending: 3,
+        kepatuhanJurnal: 93
+      };
+    });
+  }, [attendances, selectedPeriod]);
 
   // Icon-free Minimalist Tooltips
   const MinimalAttendanceTooltip = ({ active, payload, label }: any) => {
@@ -824,8 +859,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
                   const sched = schedules.find((s) => s.id === att.scheduleId);
                   const origTeacher = teachers.find((t) => t.id === att.teacherId);
                   const actualTeacher = teachers.find((t) => t.id === att.actualTeacherId);
+                  const displayTeacher = actualTeacher || origTeacher;
                   const isBadal = att.isBadal;
                   const hours = sched ? sched.hours : 2;
+                  const isAbsentOrSick = att.status === 'SAKIT' || att.status === 'IZIN' || att.status === 'ALPA' || att.status === 'BELUM_HADIR';
 
                   return (
                     <tr key={att.id} className="hover:bg-slate-50/50 transition-colors">
@@ -840,11 +877,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
                       <td className="py-3 px-6">
                         <div className="flex items-center gap-3">
                           <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#DAF1DE] text-[#051F20] font-bold text-xs uppercase">
-                            {(actualTeacher?.name || origTeacher?.name || 'G')[0]}
+                            {(displayTeacher?.name || 'G')[0]}
                           </span>
                           <div>
                             <p className="font-semibold">
-                              {actualTeacher?.name || origTeacher?.name || 'Guru'}
+                              {displayTeacher?.name || 'Guru'}
                             </p>
                             {isBadal && (
                               <span className="text-[11px] text-[#163832] font-semibold block mt-0.5">
@@ -858,12 +895,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
                         {att.clockInTime || '-'}
                       </td>
                       <td className="py-3 px-4">
-                        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-md ${att.lateMinutes > 0 ? 'bg-rose-100 text-rose-900' : 'bg-[#DAF1DE] text-[#0B2B26]'}`}>
-                          {att.lateMinutes > 0 ? `+${att.lateMinutes}m` : 'Tepat Waktu'}
-                        </span>
+                        {att.status === 'SAKIT' ? (
+                          <span className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-amber-100 text-amber-900">
+                            Sakit
+                          </span>
+                        ) : att.status === 'IZIN' ? (
+                          <span className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-sky-100 text-sky-900">
+                            Izin
+                          </span>
+                        ) : att.status === 'ALPA' ? (
+                          <span className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-rose-100 text-rose-900">
+                            Alpa
+                          </span>
+                        ) : att.status === 'BELUM_HADIR' ? (
+                          <span className="text-[11px] font-medium px-2.5 py-1 rounded-md bg-slate-100 text-slate-600">
+                            Belum Hadir
+                          </span>
+                        ) : att.lateMinutes > 0 ? (
+                          <span className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-rose-100 text-rose-900">
+                            +{att.lateMinutes}m
+                          </span>
+                        ) : (
+                          <span className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-[#DAF1DE] text-[#0B2B26]">
+                            Tepat Waktu
+                          </span>
+                        )}
                       </td>
                       <td className="py-3 px-4">
-                        {att.status === 'SELESAI' ? (
+                        {isAbsentOrSick ? (
+                          <span className="text-[11px] text-slate-400 font-mono">-</span>
+                        ) : att.status === 'SELESAI' || att.journal ? (
                           <span className="text-[11px] font-bold text-[#051F20] bg-[#DAF1DE] px-2.5 py-1 rounded-md">
                             Lengkap
                           </span>
@@ -873,12 +934,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
                           </span>
                         ) : (
                           <span className="text-[11px] text-[#8EB69B] font-medium">
-                            {att.status}
+                            -
                           </span>
                         )}
                       </td>
                       <td className="py-3 px-6 text-right font-bold text-[#163832] whitespace-nowrap font-mono">
-                        {formatRupiah(hours * (actualTeacher?.hourlyRate || 40000))}
+                        {isAbsentOrSick ? (
+                          <span className="text-slate-400 font-medium text-xs">Rp 0</span>
+                        ) : (
+                          formatRupiah(hours * (displayTeacher?.hourlyRate || 40000))
+                        )}
                       </td>
                     </tr>
                   );

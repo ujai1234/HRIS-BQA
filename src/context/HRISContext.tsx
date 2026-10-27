@@ -33,7 +33,7 @@ import {
   INITIAL_EXPENSES,
   INITIAL_STAFF_JOURNALS
 } from '../data/initialData';
-import { calculateLatePenalty, validateScheduleTimeWindow } from '../utils/formatters';
+import { calculateLatePenalty, validateScheduleTimeWindow, getCurrentIndonesianPeriod, parsePeriodPrefix } from '../utils/formatters';
 import { authClient } from '../lib/auth-client';
 
 interface HRISContextType {
@@ -195,7 +195,9 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [selectedPeriod, setSelectedPeriod] = useState<string>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.PERIOD);
-    return saved || 'Agustus 2026';
+    const current = getCurrentIndonesianPeriod();
+    if (!saved || saved === 'Agustus 2026') return current;
+    return saved;
   });
 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -1250,85 +1252,201 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Payroll Calculation Engine for a specific teacher
   const calculateTeacherPayroll = (teacherId: string, _period = selectedPeriod): TeacherPayrollItem => {
+    // If backend payrollSummary exists for this exact period, use its verified item if present
     if (payrollSummary && payrollSummary.period === _period) {
       const item = payrollSummary.items.find((i) => i.teacher.id === teacherId);
-      if (item) return item;
-    }
-    
-    // Fallback zeroed state while loading
-    const teacher = teachers.find((t) => t.id === teacherId) || teachers[0] || INITIAL_TEACHERS[0];
-    return {
-      teacher,
-      period: _period,
-      baseSalary: teacher.baseSalary,
-      totalScheduledHours: 0,
-      totalTaughtHours: 0,
-      totalBadalHours: 0,
-      hourlyRate: teacher.hourlyRate,
-      teachingHonorarium: 0,
-      customRateHonorarium: 0,
-      customSessionsCount: 0,
-      totalPresentDays: 0,
-      dailyTransport: teacher.dailyTransport,
-      totalTransport: 0,
-      lateCountLight: 0,
-      lateCountMedium: 0,
-      lateCountHeavy: 0,
-      latePenaltyTotal: 0,
-      emptyJournalCount: 0,
-      emptyJournalPenalty: 0,
-      izinDays: 0,
-      izinPenalty: 0,
-      alphaDays: 0,
-      alphaPenalty: 0,
-      otherDeductions: 0,
-      totalDeductions: 0,
-      grossSalary: teacher.baseSalary,
-      netSalary: teacher.baseSalary,
-      monthlyMealAllowance: 0,
-    };
-  };
-
-  // Calculate full payroll table for all teachers or filtered by unit
-  const calculateAllPayroll = (period = selectedPeriod, unitFilter?: UnitType | 'ALL'): MonthlyPayrollSummary => {
-    if (payrollSummary && payrollSummary.period === period) {
-      // Merge tahfidz honorarium dynamically
-      const mergedItems = payrollSummary.items.map(item => {
-        let tahfidzHonor = 0;
-        if (tahfidzPayroll && tahfidzPayroll.period === period) {
-          const tItem = tahfidzPayroll.items.find(ti => ti.teacherId === item.teacher.id);
+      if (item) {
+        // Ensure Tahfidz honor is also merged if available
+        let tahfidzHonor = item.tahfidzHonorarium || 0;
+        if (tahfidzPayroll && tahfidzPayroll.period === _period) {
+          const tItem = tahfidzPayroll.items.find((ti) => ti.teacherId === teacherId);
           if (tItem) tahfidzHonor = tItem.totalHonor;
         }
         return {
           ...item,
           tahfidzHonorarium: tahfidzHonor,
-          grossSalary: item.grossSalary + tahfidzHonor,
-          netSalary: item.netSalary + tahfidzHonor,
-        };
-      });
-
-      if (!unitFilter || unitFilter === 'ALL') {
-        return {
-          ...payrollSummary,
-          items: mergedItems,
-          totalGross: mergedItems.reduce((sum, i) => sum + i.grossSalary, 0),
-          totalNet: mergedItems.reduce((sum, i) => sum + i.netSalary, 0),
+          grossSalary: item.grossSalary + (tahfidzHonor > (item.tahfidzHonorarium || 0) ? tahfidzHonor - (item.tahfidzHonorarium || 0) : 0),
+          netSalary: item.netSalary + (tahfidzHonor > (item.tahfidzHonorarium || 0) ? tahfidzHonor - (item.tahfidzHonorarium || 0) : 0),
         };
       }
-      
-      const filteredItems = mergedItems.filter((i) => i.teacher.unit === unitFilter);
-      return {
-        ...payrollSummary,
-        totalGross: filteredItems.reduce((sum, i) => sum + i.grossSalary, 0),
-        totalDeductions: filteredItems.reduce((sum, i) => sum + i.totalDeductions, 0),
-        totalNet: filteredItems.reduce((sum, i) => sum + i.netSalary, 0),
-        totalTeachingHours: filteredItems.reduce((sum, i) => sum + i.totalTaughtHours, 0),
-        totalTeachers: filteredItems.length,
-        items: filteredItems,
-      };
+    }
+    
+    // Dynamic client-side calculation directly from verified attendance records in state
+    const teacher = teachers.find((t) => t.id === teacherId) || teachers[0] || INITIAL_TEACHERS[0];
+    const periodPrefix = parsePeriodPrefix(_period);
+
+    const teacherSchedules = schedules.filter((s) => s.teacherId === teacher.id);
+    const regularSchedules = teacherSchedules.filter((s) => !s.customRate || Number(s.customRate) <= 0);
+    const customSchedules = teacherSchedules.filter((s) => s.customRate && Number(s.customRate) > 0);
+
+    const weeklyRegularHours = regularSchedules.reduce((sum, s) => sum + Number(s.hours || 0), 0);
+    const baseMonthlyScheduledHours = weeklyRegularHours * 4;
+    const baseMonthlyCustomHonorarium = customSchedules.reduce((sum, s) => sum + (Number(s.customRate) * 4), 0);
+
+    // Filter attendances strictly for this selected month and year (YYYY-MM)
+    const monthAttendances = attendances.filter(
+      (a) => typeof a.date === 'string' && a.date.startsWith(periodPrefix)
+    );
+
+    // Actual teaching records:
+    // If it's a badal session, only the actual substitute teacher gets credited!
+    const actualTeachingRecords = monthAttendances.filter((a) => {
+      if (a.isBadal) {
+        return a.actualTeacherId === teacher.id && (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG');
+      }
+      return (a.actualTeacherId === teacher.id || (!a.actualTeacherId && a.teacherId === teacher.id)) &&
+             (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG');
+    });
+
+    const badalSessions = actualTeachingRecords.filter((a) => a.isBadal);
+
+    let actualRegularHoursCount = 0;
+    let actualCustomHonorarium = 0;
+    let customSessionsCount = 0;
+
+    for (const a of actualTeachingRecords) {
+      const sched = schedules.find((s) => s.id === a.scheduleId);
+      if (sched && sched.customRate && Number(sched.customRate) > 0) {
+        actualCustomHonorarium += Number(sched.customRate);
+        customSessionsCount += 1;
+      } else {
+        actualRegularHoursCount += Number(sched ? sched.hours : 2);
+      }
     }
 
-    // Fallback zeroed state while loading
+    const badalHoursCount = badalSessions.reduce((sum, a) => {
+      const sched = schedules.find((s) => s.id === a.scheduleId);
+      return sum + Number(sched ? sched.hours : 2);
+    }, 0);
+
+    const totalTaughtHours = actualRegularHoursCount;
+    const presentDates = new Set(actualTeachingRecords.map((a) => a.date));
+    let totalPresentDays = presentDates.size;
+
+    const regularHonorarium = totalTaughtHours * Number(teacher.hourlyRate || 0);
+    const customRateHonorarium = actualCustomHonorarium;
+    let teachingHonorarium = regularHonorarium + customRateHonorarium;
+    let totalTransport = totalPresentDays * Number(teacher.dailyTransport || 0);
+
+    // Penalties
+    const lateRecords = monthAttendances.filter((a) => {
+      const isTarget = a.isBadal ? a.actualTeacherId === teacher.id : (a.actualTeacherId === teacher.id || a.teacherId === teacher.id);
+      return isTarget && Number(a.latePenalty || 0) > 0;
+    });
+    const latePenaltyTotal = lateRecords.reduce((sum, a) => sum + Number(a.latePenalty || 0), 0);
+    const lateCountLight = lateRecords.filter((a) => a.lateCategory === 'TERLAMBAT_RINGAN').length;
+    const lateCountMedium = lateRecords.filter((a) => a.lateCategory === 'TERLAMBAT_SEDANG').length;
+    const lateCountHeavy = lateRecords.filter((a) => a.lateCategory === 'TERLAMBAT_BERAT').length;
+
+    const emptyJournalRecords = monthAttendances.filter((a) => {
+      const isTarget = a.isBadal ? a.actualTeacherId === teacher.id : (a.actualTeacherId === teacher.id || a.teacherId === teacher.id);
+      return isTarget && a.status === 'HADIR_JURNAL_KOSONG' && !a.journal;
+    });
+    const emptyJournalCount = emptyJournalRecords.length;
+    const emptyJournalPenalty = emptyJournalRecords.reduce((sum, a) => {
+      const sched = schedules.find((s) => s.id === a.scheduleId);
+      if (sched && sched.customRate && Number(sched.customRate) > 0) {
+        return sum + (0.5 * Number(sched.customRate));
+      }
+      const hours = sched ? Number(sched.hours) : 2;
+      return sum + (0.5 * hours * Number(teacher.hourlyRate || 0));
+    }, 0);
+
+    const alphaRecords = monthAttendances.filter((a) => a.teacherId === teacher.id && a.status === 'ALPA');
+    const alphaDays = alphaRecords.length;
+    const alphaPenalty = alphaRecords.reduce((sum, a) => {
+      const sched = schedules.find((s) => s.id === a.scheduleId);
+      if (sched && sched.customRate && Number(sched.customRate) > 0) {
+        return sum + Number(teacher.dailyTransport || 0) + Number(sched.customRate) + (0.05 * Number(teacher.baseSalary || 0));
+      }
+      const hours = sched ? Number(sched.hours) : 2;
+      return sum + Number(teacher.dailyTransport || 0) + (hours * Number(teacher.hourlyRate || 0)) + (0.05 * Number(teacher.baseSalary || 0));
+    }, 0);
+
+    const izinRecords = monthAttendances.filter((a) => a.teacherId === teacher.id && a.status === 'IZIN');
+    const izinDays = izinRecords.length;
+    const izinPenalty = izinRecords.reduce((sum, a) => {
+      const sched = schedules.find((s) => s.id === a.scheduleId);
+      if (sched && sched.customRate && Number(sched.customRate) > 0) {
+        return sum + Number(teacher.dailyTransport || 0) + Number(sched.customRate);
+      }
+      const hours = sched ? Number(sched.hours) : 2;
+      return sum + Number(teacher.dailyTransport || 0) + (hours * Number(teacher.hourlyRate || 0));
+    }, 0);
+
+    let totalDeductions = latePenaltyTotal + emptyJournalPenalty + alphaPenalty + izinPenalty;
+    let grossSalary = Number(teacher.baseSalary || 0) + teachingHonorarium + totalTransport;
+    let netSalary = Math.max(0, grossSalary - totalDeductions);
+    let mealAllowance = 0;
+
+    if (teacher.role === 'STAFF' || teacher.role === 'KETUA_SARPRAS') {
+      const teacherStaffTasks = (staffJournals || []).filter(
+        (st) => st.staffId === teacher.id && typeof st.date === 'string' && st.date.startsWith(periodPrefix)
+      );
+      const staffTaskDates = new Set(teacherStaffTasks.map((st) => st.date));
+      const combinedStaffPresentDays = Math.max(totalPresentDays, staffTaskDates.size);
+      totalPresentDays = combinedStaffPresentDays;
+
+      if (combinedStaffPresentDays > 0) {
+        const staffTransport = Number(teacher.monthlyTransport !== undefined && teacher.monthlyTransport !== null ? teacher.monthlyTransport : 250000);
+        mealAllowance = Number(teacher.monthlyMealAllowance !== undefined && teacher.monthlyMealAllowance !== null ? teacher.monthlyMealAllowance : 375000);
+        totalTransport = staffTransport;
+        grossSalary = Number(teacher.baseSalary || 0) + staffTransport + mealAllowance;
+      } else {
+        totalTransport = 0;
+        mealAllowance = 0;
+        grossSalary = Number(teacher.baseSalary || 0);
+      }
+
+      totalDeductions = 0;
+      netSalary = grossSalary;
+      teachingHonorarium = 0;
+    }
+
+    // Merge tahfidz honorarium dynamically
+    let tahfidzHonor = 0;
+    if (tahfidzPayroll && tahfidzPayroll.period === _period) {
+      const tItem = tahfidzPayroll.items.find((ti) => ti.teacherId === teacher.id);
+      if (tItem) tahfidzHonor = tItem.totalHonor;
+    }
+    grossSalary += tahfidzHonor;
+    netSalary += tahfidzHonor;
+
+    return {
+      teacher,
+      period: _period,
+      baseSalary: teacher.baseSalary,
+      totalScheduledHours: baseMonthlyScheduledHours,
+      totalTaughtHours,
+      totalBadalHours: badalHoursCount,
+      hourlyRate: teacher.hourlyRate,
+      teachingHonorarium,
+      customRateHonorarium,
+      customSessionsCount,
+      totalPresentDays,
+      dailyTransport: teacher.dailyTransport,
+      totalTransport,
+      lateCountLight,
+      lateCountMedium,
+      lateCountHeavy,
+      latePenaltyTotal,
+      emptyJournalCount,
+      emptyJournalPenalty,
+      izinDays,
+      izinPenalty,
+      alphaDays,
+      alphaPenalty,
+      otherDeductions: 0,
+      totalDeductions,
+      grossSalary,
+      netSalary,
+      monthlyMealAllowance: mealAllowance,
+      tahfidzHonorarium: tahfidzHonor,
+    };
+  };
+
+  // Calculate full payroll table for all teachers or filtered by unit
+  const calculateAllPayroll = (period = selectedPeriod, unitFilter?: UnitType | 'ALL'): MonthlyPayrollSummary => {
     const targetTeachers = (unitFilter && unitFilter !== 'ALL') 
       ? teachers.filter(t => t.unit === unitFilter) 
       : teachers;
@@ -1339,7 +1457,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       totalGross: items.reduce((sum, i) => sum + i.grossSalary, 0),
       totalDeductions: items.reduce((sum, i) => sum + i.totalDeductions, 0),
       totalNet: items.reduce((sum, i) => sum + i.netSalary, 0),
-      totalTeachingHours: 0,
+      totalTeachingHours: items.reduce((sum, i) => sum + i.totalTaughtHours, 0),
       totalTeachers: targetTeachers.length,
       generatedDate: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
       items,

@@ -101,7 +101,10 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
   const liveSessions = useMemo(() => {
     return filteredSchedules.map((schedule, idx) => {
       const teacher = teachers.find(t => t.id === schedule.teacherId);
-      const att = attendances.find(a => a.scheduleId === schedule.id);
+      // Look for latest recorded attendance for this schedule
+      const att = attendances
+        .filter(a => a.scheduleId === schedule.id)
+        .sort((a, b) => (b.date || '').localeCompare(a.date || ''))[0];
       const badal = badalAssignments.find(b => b.scheduleId === schedule.id);
       const badalTeacher = badal ? teachers.find(t => t.id === badal.badalTeacherId) : null;
 
@@ -111,7 +114,9 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
       let lateMinutes = att?.lateMinutes || 0;
 
       if (att) {
-        if (att.lateCategory === 'TEPAT_WAKTU' || (att.lateMinutes || 0) === 0) {
+        if (att.status === 'SAKIT' || att.status === 'IZIN' || att.status === 'ALPA' || att.status === 'BELUM_HADIR') {
+          attendanceStatus = 'BELUM_HADIR';
+        } else if (att.lateCategory === 'TEPAT_WAKTU' || (att.lateMinutes || 0) === 0) {
           attendanceStatus = 'HADIR_TEPAT';
         } else {
           attendanceStatus = 'HADIR_TERLAMBAT';

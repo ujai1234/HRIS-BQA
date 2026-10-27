@@ -14,9 +14,42 @@ export function formatNumber(amount: number): string {
   return new Intl.NumberFormat('id-ID').format(amount);
 }
 
+export const INDONESIAN_MONTHS = [
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+
+export function getCurrentIndonesianPeriod(): string {
+  const now = new Date();
+  return `${INDONESIAN_MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+export function parsePeriodPrefix(period: string): string {
+  const parts = (period || '').trim().split(/\s+/);
+  const monthMap: Record<string, string> = {
+    januari: '01', februari: '02', maret: '03', april: '04',
+    mei: '05', juni: '06', juli: '07', agustus: '08',
+    september: '09', oktober: '10', november: '11', desember: '12'
+  };
+  const m = monthMap[parts[0]?.toLowerCase()] || String(new Date().getMonth() + 1).padStart(2, '0');
+  const y = parts[1] || String(new Date().getFullYear());
+  return `${y}-${m}`;
+}
+
 export function formatIndonesianDate(dateString: string): string {
   if (!dateString) return '-';
   try {
+    // Avoid UTC timezone shifts on "YYYY-MM-DD"
+    if (typeof dateString === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      const [y, m, d] = dateString.split('-').map(Number);
+      const localDate = new Date(y, m - 1, d);
+      return new Intl.DateTimeFormat('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }).format(localDate);
+    }
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('id-ID', {
       weekday: 'long',
@@ -32,6 +65,15 @@ export function formatIndonesianDate(dateString: string): string {
 export function formatShortDate(dateString: string): string {
   if (!dateString) return '-';
   try {
+    if (typeof dateString === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      const [y, m, d] = dateString.split('-').map(Number);
+      const localDate = new Date(y, m - 1, d);
+      return new Intl.DateTimeFormat('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      }).format(localDate);
+    }
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('id-ID', {
       day: '2-digit',

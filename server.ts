@@ -4360,16 +4360,35 @@ async function startServer() {
   // --- PAYROLL API (Migrated from Frontend) ---
   app.get('/api/payroll', async (req, res) => {
     try {
-      const period = (req.query.period as string) || 'Agustus 2026';
+      const monthNames = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      ];
+      const now = new Date();
+      const currentPeriod = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+      const period = (req.query.period as string) || currentPeriod;
       const unitFilter = (req.query.unitFilter as string) || 'ALL';
       const singleTeacherId = req.query.teacherId as string | undefined;
 
-      const [teachers, schedules, attendances, staffTasksList] = await Promise.all([
+      const [teachers, schedules, rawAttendances, staffTasksList, allJournals] = await Promise.all([
         db.query.teachers.findMany(),
         db.query.schedules.findMany(),
         db.query.attendances.findMany(),
-        db.query.staffTasks.findMany()
+        db.query.staffTasks.findMany(),
+        db.query.journals.findMany()
       ]);
+
+      const journalAttIds = new Set(allJournals.map((j: any) => j.attendanceId));
+      const journalSchedDates = new Set(allJournals.map((j: any) => `${j.scheduleId}-${j.date}`));
+
+      const attendances = rawAttendances.map((att: any) => {
+        const hasJournal = journalAttIds.has(att.id) || journalSchedDates.has(`${att.scheduleId}-${att.date}`);
+        return {
+          ...att,
+          status: hasJournal ? 'SELESAI' : att.status,
+          hasJournal
+        };
+      });
 
       const parts = period.trim().split(/\s+/);
       const monthNamesIndo: Record<string, string> = {
@@ -4386,8 +4405,8 @@ async function startServer() {
         november: '11',
         desember: '12',
       };
-      const monthStr = monthNamesIndo[parts[0]?.toLowerCase()] || '08';
-      const yearStr = parts[1] || '2026';
+      const monthStr = monthNamesIndo[parts[0]?.toLowerCase()] || String(now.getMonth() + 1).padStart(2, '0');
+      const yearStr = parts[1] || String(now.getFullYear());
       const periodPrefix = `${yearStr}-${monthStr}`;
 
       // Filter attendances strictly for this selected month and year (YYYY-MM)
@@ -4411,9 +4430,14 @@ async function startServer() {
         const baseMonthlyScheduledHours = weeklyRegularHours * 4;
         const baseMonthlyCustomHonorarium = customSchedules.reduce((sum: number, s: any) => sum + (Number(s.customRate) * 4), 0);
 
-        const actualTeachingRecords = monthAttendances.filter(
-          (a: any) => (a.actualTeacherId === teacher.id || a.teacherId === teacher.id) && (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG')
-        );
+        // Actual teaching records: If it's a badal session, only the actual substitute teacher gets credited!
+        const actualTeachingRecords = monthAttendances.filter((a: any) => {
+          if (a.isBadal) {
+            return a.actualTeacherId === teacher.id && (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG');
+          }
+          return (a.actualTeacherId === teacher.id || (!a.actualTeacherId && a.teacherId === teacher.id)) &&
+                 (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG');
+        });
 
         const badalSessions = actualTeachingRecords.filter((a: any) => a.isBadal);
 
@@ -4447,13 +4471,19 @@ async function startServer() {
         let teachingHonorarium = regularHonorarium + customRateHonorarium;
         let totalTransport = totalPresentDays * Number(teacher.dailyTransport || 0);
 
-        const lateRecords = monthAttendances.filter((a: any) => (a.actualTeacherId === teacher.id || a.teacherId === teacher.id) && Number(a.latePenalty || 0) > 0);
+        const lateRecords = monthAttendances.filter((a: any) => {
+          const isTarget = a.isBadal ? a.actualTeacherId === teacher.id : (a.actualTeacherId === teacher.id || a.teacherId === teacher.id);
+          return isTarget && Number(a.latePenalty || 0) > 0;
+        });
         const latePenaltyTotal = lateRecords.reduce((sum: number, a: any) => sum + Number(a.latePenalty || 0), 0);
         const lateCountLight = lateRecords.filter((a: any) => a.lateCategory === 'TERLAMBAT_RINGAN').length;
         const lateCountMedium = lateRecords.filter((a: any) => a.lateCategory === 'TERLAMBAT_SEDANG').length;
         const lateCountHeavy = lateRecords.filter((a: any) => a.lateCategory === 'TERLAMBAT_BERAT').length;
 
-        const emptyJournalRecords = monthAttendances.filter((a: any) => (a.actualTeacherId === teacher.id || a.teacherId === teacher.id) && a.status === 'HADIR_JURNAL_KOSONG');
+        const emptyJournalRecords = monthAttendances.filter((a: any) => {
+          const isTarget = a.isBadal ? a.actualTeacherId === teacher.id : (a.actualTeacherId === teacher.id || a.teacherId === teacher.id);
+          return isTarget && a.status === 'HADIR_JURNAL_KOSONG' && !a.hasJournal;
+        });
         const emptyJournalCount = emptyJournalRecords.length;
         const emptyJournalPenalty = emptyJournalRecords.reduce((sum: number, a: any) => {
           const sched = schedules.find((s: any) => s.id === a.scheduleId);

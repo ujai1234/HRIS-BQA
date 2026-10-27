@@ -63,7 +63,7 @@ export const KafaahManagementView: React.FC = () => {
 
     schedules.forEach(sched => {
       if (map[sched.teacherId]) {
-        map[sched.teacherId].totalHours += (sched.durationHours || 2);
+        map[sched.teacherId].totalHours += (sched.hours ?? 2);
         map[sched.teacherId].subjectCount += 1;
 
         if (!teacherDaysMap[sched.teacherId]) {
