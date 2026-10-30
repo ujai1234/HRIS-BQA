@@ -64,8 +64,11 @@ export const TeacherAcademics: React.FC = () => {
     try {
       const stuRes = await fetch('/api/students');
       const stuData = await stuRes.json();
-      const allStudents = stuData.data || [];
-      const filtered = allStudents.filter((s: any) => s.className === className);
+      const targetClass = (className || '').trim().toLowerCase();
+      const filtered = allStudents.filter((s: any) => 
+        (s.className && s.className.trim().toLowerCase() === targetClass) ||
+        (s.classPesantren && s.classPesantren.trim().toLowerCase() === targetClass)
+      );
       setStudents(filtered.length > 0 ? filtered : allStudents.slice(0, 10)); // fallback if no match
     } catch (err) {
       console.error('Failed to fetch students', err);

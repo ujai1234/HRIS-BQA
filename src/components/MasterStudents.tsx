@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { Search, Plus, UserPlus, CreditCard, FileText, ChevronRight, CheckCircle2, XCircle, Upload } from 'lucide-react';
+import { Search, Plus, UserPlus, CreditCard, FileText, ChevronRight, CheckCircle2, XCircle, Upload, Download, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 
@@ -17,6 +17,7 @@ export const MasterStudents: React.FC = () => {
     name: '',
     gender: 'L',
     className: '',
+    classPesantren: '',
     halqah: '',
     tingkatan: ''
   });
@@ -28,7 +29,7 @@ export const MasterStudents: React.FC = () => {
       const res = await fetch('/api/students');
       if (res.ok) {
         const data = await res.json();
-        setStudents(data);
+        setStudents(Array.isArray(data) ? data : (data.data || []));
       }
     } catch (error) {
       toast.error('Gagal memuat data santri');
@@ -50,6 +51,7 @@ export const MasterStudents: React.FC = () => {
 
       const payload = {
         ...formData,
+        classPesantren: formData.classPesantren || formData.className,
         tingkatan: formData.tingkatan ? parseInt(String(formData.tingkatan), 10) : null
       };
 
@@ -63,7 +65,7 @@ export const MasterStudents: React.FC = () => {
         setShowModal(false);
         setEditingId(null);
         fetchStudents();
-        setFormData({ nis: '', nik: '', kkNumber: '', name: '', gender: 'L', className: '', halqah: '', tingkatan: '' });
+        setFormData({ nis: '', nik: '', kkNumber: '', name: '', gender: 'L', className: '', classPesantren: '', halqah: '', tingkatan: '' });
       } else {
         toast.error('Gagal menyimpan data santri');
       }
@@ -74,7 +76,7 @@ export const MasterStudents: React.FC = () => {
 
   const openAddModal = () => {
     setEditingId(null);
-    setFormData({ nis: '', nik: '', kkNumber: '', name: '', gender: 'L', className: '', halqah: '', tingkatan: '' });
+    setFormData({ nis: '', nik: '', kkNumber: '', name: '', gender: 'L', className: '', classPesantren: '', halqah: '', tingkatan: '' });
     setShowModal(true);
   };
 
@@ -87,10 +89,138 @@ export const MasterStudents: React.FC = () => {
       name: student.name || '',
       gender: student.gender || 'L',
       className: student.className || '',
+      classPesantren: student.classPesantren || student.className || '',
       halqah: student.halqah || '',
       tingkatan: student.tingkatan || ''
     });
     setShowModal(true);
+  };
+
+  const handleDownloadTemplate = () => {
+    try {
+      const templateData = [
+        {
+          'NIS': '123456a',
+          'NISN': '0081234561',
+          'Nama': 'Muhammad Fahmi Pratama',
+          'Jenis Kelamin (L/P)': 'L',
+          'Kelas Umum': 'VII (SMP)',
+          'Kelas Pesantren': 'Santri Ula',
+          'Halqah Tahfidz': 'Halqah 1 (Ikhwan)',
+          'Tingkat Tahfidz': 1,
+          'NIK': '3201012345670001',
+          'No KK': '3201012345670000',
+          'Status': 'AKTIF'
+        },
+        {
+          'NIS': '123456b',
+          'NISN': '0081234562',
+          'Nama': 'Abizar Al-Ghifari',
+          'Jenis Kelamin (L/P)': 'L',
+          'Kelas Umum': 'VIII (SMP)',
+          'Kelas Pesantren': 'Santri Ula',
+          'Halqah Tahfidz': 'Halqah 1 (Ikhwan)',
+          'Tingkat Tahfidz': 1,
+          'NIK': '3201012345670002',
+          'No KK': '3201012345670000',
+          'Status': 'AKTIF'
+        },
+        {
+          'NIS': '123456c',
+          'NISN': '0081234563',
+          'Nama': 'Nada Humaira',
+          'Jenis Kelamin (L/P)': 'P',
+          'Kelas Umum': 'VII (SMP)',
+          'Kelas Pesantren': 'Santriwati Ula',
+          'Halqah Tahfidz': 'Halqah 1 (Akhwat)',
+          'Tingkat Tahfidz': 2,
+          'NIK': '3201012345670003',
+          'No KK': '3201012345670000',
+          'Status': 'AKTIF'
+        },
+        {
+          'NIS': '123456d',
+          'NISN': '0081234564',
+          'Nama': 'Guntur Wijaya',
+          'Jenis Kelamin (L/P)': 'L',
+          'Kelas Umum': 'X (MA)',
+          'Kelas Pesantren': 'Santri Wustha',
+          'Halqah Tahfidz': 'Halqah 2 (Ikhwan)',
+          'Tingkat Tahfidz': 2,
+          'NIK': '3201012345670004',
+          'No KK': '3201012345670000',
+          'Status': 'AKTIF'
+        }
+      ];
+
+      const ws = XLSX.utils.json_to_sheet(templateData);
+      ws['!cols'] = [
+        { wch: 12 }, // NIS
+        { wch: 14 }, // NISN
+        { wch: 28 }, // Nama
+        { wch: 20 }, // Jenis Kelamin
+        { wch: 16 }, // Kelas Umum
+        { wch: 18 }, // Kelas Pesantren
+        { wch: 22 }, // Halqah Tahfidz
+        { wch: 16 }, // Tingkat Tahfidz
+        { wch: 20 }, // NIK
+        { wch: 20 }, // No KK
+        { wch: 10 }  // Status
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Template Santri');
+      XLSX.writeFile(wb, 'Template_Import_Santri_BQA.xlsx');
+      toast.success('Template Excel berhasil diunduh');
+    } catch (err) {
+      toast.error('Gagal mengunduh template Excel');
+    }
+  };
+
+  const handleExportCurrentData = () => {
+    try {
+      if (students.length === 0) {
+        toast.error('Belum ada data santri untuk diekspor');
+        return;
+      }
+
+      const exportRows = students.map((s) => ({
+        'NIS': s.nis || '',
+        'NIS Baru (Opsional)': '',
+        'Nama Lengkap': s.name || '',
+        'Jenis Kelamin (L/P)': s.gender || 'L',
+        'Kelas Umum': s.className || '',
+        'Kelas Pesantren': s.classPesantren || s.className || '',
+        'Halqah Tahfidz': s.halqah || '',
+        'Tingkat Tahfidz': s.tingkatan || '',
+        'NIK': s.nik || '',
+        'No KK': s.kkNumber || '',
+        'Status': s.status || 'AKTIF'
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(exportRows);
+      ws['!cols'] = [
+        { wch: 14 }, // NIS
+        { wch: 20 }, // NIS Baru (Opsional)
+        { wch: 28 }, // Nama Lengkap
+        { wch: 18 }, // Jenis Kelamin
+        { wch: 16 }, // Kelas Umum
+        { wch: 18 }, // Kelas Pesantren
+        { wch: 22 }, // Halqah Tahfidz
+        { wch: 16 }, // Tingkat Tahfidz
+        { wch: 20 }, // NIK
+        { wch: 20 }, // No KK
+        { wch: 10 }  // Status
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Data Santri BQA');
+      const filename = `Data_Santri_BQA_Aktif_${new Date().toISOString().split('T')[0]}.xlsx`;
+      XLSX.writeFile(wb, filename);
+      toast.success(`Berhasil mengekspor ${students.length} data santri`);
+    } catch (err) {
+      toast.error('Gagal mengekspor data santri');
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,12 +238,19 @@ export const MasterStudents: React.FC = () => {
         
         // Map Excel columns to our schema
         const mappedData = data.map((row: any) => ({
-          nis: String(row.NIS || row.nis || ''),
-          nisn: String(row.NISN || row.nisn || ''),
-          name: String(row.Nama || row.NAMA || row.name || ''),
-          gender: String(row.L_P || row.Gender || row.gender || 'L').toUpperCase().startsWith('P') ? 'P' : 'L',
-          className: String(row.Kelas || row.kelas || row.className || '')
-        })).filter(s => s.name && s.nis);
+          nis: String(row.NIS || row.nis || row['No Induk'] || '').trim(),
+          newNis: String(row['NIS Baru (Opsional)'] || row['NIS Baru'] || row.newNis || '').trim(),
+          nisn: String(row.NISN || row.nisn || '').trim(),
+          name: String(row['Nama Lengkap'] || row.Nama || row.NAMA || row.name || '').trim(),
+          gender: String(row['Jenis Kelamin (L/P)'] || row['Jenis Kelamin'] || row.L_P || row.Gender || row.gender || 'L').toUpperCase().startsWith('P') ? 'P' : 'L',
+          className: String(row['Kelas Umum'] || row.Kelas || row.kelas || row.className || '').trim(),
+          classPesantren: String(row['Kelas Pesantren'] || row.classPesantren || row['Kelas Diniyyah'] || row['Kelas Umum'] || row.Kelas || '').trim(),
+          nik: String(row.NIK || row.nik || '').trim(),
+          kkNumber: String(row['No KK'] || row['No. KK'] || row.kkNumber || '').trim(),
+          halqah: String(row['Halqah Tahfidz'] || row.Halqah || row.halqah || '').trim(),
+          tingkatan: row['Tingkat Tahfidz'] || row.Tingkat || row.tingkatan || null,
+          status: String(row.Status || row.status || 'AKTIF').toUpperCase()
+        })).filter(s => s.name && (s.nis || s.newNis));
 
         if (mappedData.length === 0) {
           toast.error('Gagal membaca data. Pastikan kolom Excel memiliki judul NIS, Nama, Kelas.');
@@ -128,7 +265,7 @@ export const MasterStudents: React.FC = () => {
 
         if (res.ok) {
           const result = await res.json();
-          toast.success(`Berhasil mengimpor ${result.count} data santri`);
+          toast.success(`Berhasil memproses ${result.count} santri (${result.inserted || 0} baru, ${result.updated || 0} diperbarui)`);
           fetchStudents();
         } else {
           toast.error('Gagal menyimpan data import ke server');
@@ -144,9 +281,10 @@ export const MasterStudents: React.FC = () => {
   };
 
   const filteredStudents = students.filter(s => 
-    s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    s.nis.includes(searchTerm) ||
-    s.className.toLowerCase().includes(searchTerm.toLowerCase())
+    (s.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (s.nis || '').includes(searchTerm) ||
+    (s.className || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s.classPesantren || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -155,9 +293,25 @@ export const MasterStudents: React.FC = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bqa-card p-5">
         <div>
           <h2 className="text-xl font-bold text-slate-800 dark:text-emerald-50">Master Data Santri</h2>
-          <p className="text-sm text-slate-500 dark:text-emerald-400/70 mt-1">Kelola data santri aktif, NIK, dan kelas.</p>
+          <p className="text-sm text-slate-500 dark:text-emerald-400/70 mt-1">Kelola data santri aktif, NIK, kelas umum, dan kelas pesantren.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button 
+            onClick={handleExportCurrentData}
+            className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/70 text-emerald-800 dark:text-emerald-200 px-3.5 py-2.5 rounded-xl font-medium transition-colors shadow-sm text-sm border border-emerald-300 dark:border-emerald-700/60"
+            title="Download data santri yang ada saat ini untuk dilengkapi di Excel tanpa merusak absensi tahfidz"
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            Export Data Santri
+          </button>
+          <button 
+            onClick={handleDownloadTemplate}
+            className="flex items-center gap-2 bg-slate-100 dark:bg-emerald-950/40 hover:bg-slate-200 dark:hover:bg-emerald-900/50 text-slate-700 dark:text-emerald-300 px-3.5 py-2.5 rounded-xl font-medium transition-colors shadow-sm text-sm border border-slate-200 dark:border-emerald-800/40"
+            title="Unduh format file Excel kosong untuk santri baru"
+          >
+            <Download className="w-4 h-4" />
+            Download Template Excel
+          </button>
           <input 
             type="file" 
             accept=".xlsx, .xls" 
@@ -167,7 +321,7 @@ export const MasterStudents: React.FC = () => {
           />
           <button 
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 bg-slate-100 dark:bg-emerald-950/50 hover:bg-slate-200 dark:hover:bg-emerald-900/60 text-slate-700 dark:text-emerald-100 px-4 py-2.5 rounded-xl font-medium transition-colors shadow-sm text-sm border border-slate-200 dark:border-emerald-800/40"
+            className="flex items-center gap-2 bg-slate-100 dark:bg-emerald-950/50 hover:bg-slate-200 dark:hover:bg-emerald-900/60 text-slate-700 dark:text-emerald-100 px-3.5 py-2.5 rounded-xl font-medium transition-colors shadow-sm text-sm border border-slate-200 dark:border-emerald-800/40"
           >
             <Upload className="w-4 h-4" />
             Import Excel
@@ -188,7 +342,7 @@ export const MasterStudents: React.FC = () => {
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input 
             type="text" 
-            placeholder="Cari nama, NIS, atau kelas..." 
+            placeholder="Cari nama, NIS, kelas umum, atau kelas pesantren..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-[#121f1a] border border-slate-200 dark:border-emerald-900/40 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 dark:text-emerald-100 outline-none"
@@ -205,7 +359,8 @@ export const MasterStudents: React.FC = () => {
                 <th className="px-6 py-4 font-semibold">NIS</th>
                 <th className="px-6 py-4 font-semibold">Nama Lengkap</th>
                 <th className="px-6 py-4 font-semibold">Jenis Kelamin</th>
-                <th className="px-6 py-4 font-semibold">Kelas</th>
+                <th className="px-6 py-4 font-semibold">Kelas Umum</th>
+                <th className="px-6 py-4 font-semibold">Kelas Pesantren</th>
                 <th className="px-6 py-4 font-semibold">Halqah</th>
                 <th className="px-6 py-4 font-semibold">Tingkat</th>
                 <th className="px-6 py-4 font-semibold">Status</th>
@@ -215,11 +370,11 @@ export const MasterStudents: React.FC = () => {
             <tbody className="divide-y divide-slate-200 dark:divide-emerald-900/40">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500">Memuat data...</td>
+                  <td colSpan={9} className="px-6 py-8 text-center text-slate-500">Memuat data...</td>
                 </tr>
               ) : filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-slate-500">Tidak ada santri ditemukan.</td>
+                  <td colSpan={9} className="px-6 py-8 text-center text-slate-500">Tidak ada santri ditemukan.</td>
                 </tr>
               ) : (
                 filteredStudents.map((student) => (
@@ -231,7 +386,12 @@ export const MasterStudents: React.FC = () => {
                         {student.gender === 'L' ? 'Laki-laki' : 'Perempuan'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-emerald-100">{student.className}</td>
+                    <td className="px-6 py-4 font-medium text-slate-700 dark:text-emerald-100">{student.className}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-emerald-200">
+                      <span className="px-2 py-0.5 rounded-md text-xs bg-slate-100 dark:bg-emerald-950/60 border border-slate-200 dark:border-emerald-800/40">
+                        {student.classPesantren || student.className || '-'}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 text-slate-600 dark:text-emerald-100">{student.halqah || '-'}</td>
                     <td className="px-6 py-4 text-slate-600 dark:text-emerald-100">{student.tingkatan || '-'}</td>
                     <td className="px-6 py-4">
@@ -284,17 +444,21 @@ export const MasterStudents: React.FC = () => {
                 <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80 mb-1">Nama Lengkap</label>
                 <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500" />
               </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80 mb-1">Jenis Kelamin</label>
+                <select value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500">
+                  <option value="L">Laki-laki</option>
+                  <option value="P">Perempuan</option>
+                </select>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80 mb-1">Jenis Kelamin</label>
-                  <select value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500">
-                    <option value="L">Laki-laki</option>
-                    <option value="P">Perempuan</option>
-                  </select>
+                  <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80 mb-1">Kelas Formal / Umum</label>
+                  <input required type="text" placeholder="Misal: VII (SMP), 7A, X (MA)" value={formData.className} onChange={e => setFormData({...formData, className: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80 mb-1">Kelas Utama</label>
-                  <input required type="text" placeholder="Misal: 7A" value={formData.className} onChange={e => setFormData({...formData, className: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500" />
+                  <label className="block text-xs font-medium text-slate-600 dark:text-emerald-300/80 mb-1">Kelas Pesantren / Diniyyah</label>
+                  <input type="text" placeholder="Misal: Santri Ula, 1 Diniyyah" value={formData.classPesantren} onChange={e => setFormData({...formData, classPesantren: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1a15] border border-slate-200 dark:border-emerald-800/40 rounded-lg text-sm dark:text-white outline-none focus:border-emerald-500" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">

@@ -338,6 +338,8 @@ sqliteDb.exec(`
 
 try { sqliteDb.exec("ALTER TABLE students ADD COLUMN nik TEXT;"); } catch(e) {}
 try { sqliteDb.exec("ALTER TABLE students ADD COLUMN kk_number TEXT;"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE students ADD COLUMN class_pesantren TEXT;"); } catch(e) {}
+try { sqliteDb.exec("UPDATE students SET class_pesantren = class_name WHERE class_pesantren IS NULL OR class_pesantren = '';"); } catch(e) {}
 
 
 try { sqliteDb.exec("ALTER TABLE teachers ADD COLUMN avatar_color TEXT;"); } catch(e) {}

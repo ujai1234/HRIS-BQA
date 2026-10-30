@@ -78,9 +78,18 @@ export const JournalModal: React.FC<JournalModalProps> = ({
     fetch('/api/students')
       .then(res => res.json())
       .then(data => {
-        const filtered = data.filter((s: any) => s.className === schedule.className);
+        const rawList = Array.isArray(data) ? data : (data.data || []);
+        const schedClass = (schedule.className || '').trim().toLowerCase();
+        const filtered = rawList.filter((s: any) => {
+          const cName = (s.className || '').trim().toLowerCase();
+          const cPes = (s.classPesantren || '').trim().toLowerCase();
+          if (schedule.unit === 'PESANTREN') {
+            return cPes === schedClass || cName === schedClass;
+          }
+          return cName === schedClass || cPes === schedClass;
+        });
         // Fallback to all students if no match, just for demo robustness
-        const finalStudents = filtered.length > 0 ? filtered : data.slice(0, 15);
+        const finalStudents = filtered.length > 0 ? filtered : rawList.slice(0, 15);
         setStudents(finalStudents);
         
         if (!existingJournal) {

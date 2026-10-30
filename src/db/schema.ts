@@ -171,6 +171,7 @@ export const students = sqliteTable('students', {
   name: text('name').notNull(),
   gender: text('gender').notNull(), // 'L' | 'P'
   className: text('class_name').notNull(),
+  classPesantren: text('class_pesantren'), // For Pesantren / Diniyyah Integration
   halqah: text('halqah'), // For Tahfidz Integration
   tingkatan: integer('tingkatan'), // For Tahfidz Integration
   jalur: text('jalur').default('Reguler'), // For Tahfidz Integration

@@ -3746,10 +3746,10 @@ async function startServer() {
 
   app.post('/api/students', async (req, res) => {
     try {
-      const { nis, nik, kkNumber, name, gender, className, status, halqah, tingkatan } = req.body;
+      const { nis, nik, kkNumber, name, gender, className, classPesantren, status, halqah, tingkatan } = req.body;
       const id = require('crypto').randomUUID();
       const newStudent = await db.insert(schema.students).values({
-        id, nis, nik, kkNumber, name, gender, className, status: status || 'AKTIF', halqah, tingkatan
+        id, nis, nik, kkNumber, name, gender, className, classPesantren: classPesantren || className, status: status || 'AKTIF', halqah, tingkatan
       }).returning();
       res.json(newStudent[0]);
     } catch (error) {
@@ -3899,18 +3899,92 @@ async function startServer() {
       const list = req.body;
       if (!Array.isArray(list)) return res.status(400).json({ error: 'Invalid data' });
       
-      const insertData = list.map(s => ({
-        id: s.id || `STU-${Date.now()}-${Math.floor(Math.random()*1000)}`,
-        nis: s.nis,
-        nisn: s.nisn,
-        name: s.name,
-        gender: s.gender || 'L',
-        className: s.className || '1A',
-        status: s.status || 'AKTIF'
-      }));
+      // Load all existing students once for efficient in-memory matching
+      const allExisting = await db.query.students.findMany();
+
+      let insertedCount = 0;
+      let updatedCount = 0;
+
+      for (const s of list) {
+        if (!s.name) continue;
+        const cleanNis = String(s.nis || '').trim();
+        const cleanNewNis = String(s.newNis || '').trim();
+        const effectiveNis = cleanNewNis || cleanNis;
+        if (!effectiveNis) continue;
+
+        const cleanName = String(s.name).trim();
+        const cleanHalqah = String(s.halqah || '').trim();
+        const classPesantrenVal = s.classPesantren || s.className || '-';
+        const tingkatanVal = s.tingkatan !== undefined && s.tingkatan !== null && s.tingkatan !== '' 
+          ? parseInt(String(s.tingkatan), 10) 
+          : null;
+
+        // 1. First, try matching by cleanNis
+        let existing = cleanNis ? allExisting.find(e => e.nis === cleanNis) : null;
+
+        // 2. If newNis is specified and cleanNis didn't match, check if effectiveNis already exists
+        if (!existing && effectiveNis) {
+          existing = allExisting.find(e => e.nis === effectiveNis);
+        }
+
+        // 3. Smart Matching: match by Name + Halqah if halqah is provided
+        // This handles cases where user enters official NIS & full name, matching the nickname already in that halqah!
+        if (!existing && cleanHalqah) {
+          const halqahCandidates = allExisting.filter(e => 
+            e.halqah && e.halqah.trim().toLowerCase() === cleanHalqah.toLowerCase()
+          );
+          existing = halqahCandidates.find(e => {
+            const exName = (e.name || '').trim().toLowerCase();
+            const nName = cleanName.toLowerCase();
+            return nName.includes(exName) || exName.includes(nName);
+          }) || null;
+        }
+
+        if (existing) {
+          // Update existing student without touching their id, preserving all Tahfidz records!
+          await db.update(schema.students).set({
+            nis: effectiveNis,
+            name: cleanName,
+            gender: s.gender || existing.gender || 'L',
+            className: s.className || existing.className,
+            classPesantren: s.classPesantren || existing.classPesantren || s.className,
+            nik: s.nik || existing.nik,
+            kkNumber: s.kkNumber || existing.kkNumber,
+            halqah: s.halqah || existing.halqah,
+            tingkatan: tingkatanVal !== null ? tingkatanVal : existing.tingkatan,
+            status: s.status || existing.status || 'AKTIF'
+          }).where(eq(schema.students.id, existing.id));
+
+          existing.nis = effectiveNis;
+          existing.name = cleanName;
+          updatedCount++;
+        } else {
+          // Insert new student
+          const newId = s.id || `STU-${Date.now()}-${Math.floor(Math.random()*1000)}`;
+          await db.insert(schema.students).values({
+            id: newId,
+            nis: effectiveNis,
+            name: cleanName,
+            gender: s.gender || 'L',
+            className: s.className || '7',
+            classPesantren: classPesantrenVal,
+            nik: s.nik || null,
+            kkNumber: s.kkNumber || null,
+            halqah: s.halqah || null,
+            tingkatan: tingkatanVal,
+            status: s.status || 'AKTIF'
+          });
+          allExisting.push({
+            id: newId,
+            nis: effectiveNis,
+            name: cleanName,
+            halqah: s.halqah || null
+          } as any);
+          insertedCount++;
+        }
+      }
       
-      const result = await db.insert(schema.students).values(insertData).returning();
-      res.json({ success: true, count: result.length, data: result });
+      res.json({ success: true, count: insertedCount + updatedCount, inserted: insertedCount, updated: updatedCount });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Failed to bulk insert students', details: String(error) });
@@ -4026,6 +4100,7 @@ async function startServer() {
           name: req.body.name,
           gender: req.body.gender,
           className: req.body.className,
+          classPesantren: req.body.classPesantren,
           status: req.body.status,
           halqah: req.body.halqah,
           tingkatan: req.body.tingkatan
