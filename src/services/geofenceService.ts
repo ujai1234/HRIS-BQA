@@ -119,6 +119,153 @@ export async function fetchPesantrenGeofenceSettings(): Promise<GeofenceSettings
   }
 }
 
+export interface AccuratePositionOptions {
+  /** Target accuracy in meters to immediately accept (default: 25m) */
+  targetAccuracyMeters?: number;
+  /** Max time to wait for a better fix in ms before accepting best sample (default: 5000ms) */
+  maxWaitMs?: number;
+  /** Hard timeout before giving up if no GPS signal in ms (default: 10000ms) */
+  timeoutMs?: number;
+  /** Callback fired whenever a new satellite sample is received */
+  onProgress?: (coords: GeolocationCoordinates, currentAccuracy: number) => void;
+}
+
+/**
+ * High-precision GPS acquisition helper:
+ * Continuously watches GPS coordinates for a few seconds to let hardware satellite lock occur,
+ * automatically filtering out coarse cell tower/Wi-Fi triangulations.
+ */
+export function getAccurateCurrentPosition(
+  options: AccuratePositionOptions = {}
+): Promise<GeolocationCoordinates> {
+  const targetAccuracy = options.targetAccuracyMeters ?? 25;
+  const maxWaitMs = options.maxWaitMs ?? 5000;
+  const timeoutMs = options.timeoutMs ?? 10000;
+  const onProgress = options.onProgress;
+
+  return new Promise((resolve, reject) => {
+    if (typeof window === 'undefined' || !navigator || !navigator.geolocation) {
+      reject({
+        code: 0,
+        message: 'Browser atau perangkat tidak mendukung Geolocation API.',
+        type: 'UNSUPPORTED' as const,
+      });
+      return;
+    }
+
+    let bestCoords: GeolocationCoordinates | null = null;
+    let watchId: number | null = null;
+    let isSettled = false;
+    let settleTimer: any = null;
+    let hardTimeoutTimer: any = null;
+
+    const cleanup = () => {
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+      if (settleTimer) {
+        clearTimeout(settleTimer);
+        settleTimer = null;
+      }
+      if (hardTimeoutTimer) {
+        clearTimeout(hardTimeoutTimer);
+        hardTimeoutTimer = null;
+      }
+    };
+
+    const finishSuccess = (coords: GeolocationCoordinates) => {
+      if (isSettled) return;
+      isSettled = true;
+      cleanup();
+      resolve(coords);
+    };
+
+    const finishError = (error: any) => {
+      if (isSettled) return;
+      isSettled = true;
+      cleanup();
+      reject(error);
+    };
+
+    hardTimeoutTimer = setTimeout(() => {
+      if (bestCoords) {
+        finishSuccess(bestCoords);
+      } else {
+        finishError({
+          code: 3,
+          message: 'Waktu permintaan lokasi habis. Pastikan GPS aktif dan berada di area terbuka.',
+          type: 'TIMEOUT' as const,
+        });
+      }
+    }, timeoutMs);
+
+    try {
+      watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          const coords = pos.coords;
+          const accuracy = coords.accuracy ?? 999;
+
+          if (onProgress) {
+            onProgress(coords, accuracy);
+          }
+
+          if (!bestCoords || accuracy < (bestCoords.accuracy ?? 999)) {
+            bestCoords = coords;
+          }
+
+          if (accuracy <= targetAccuracy) {
+            finishSuccess(coords);
+            return;
+          }
+
+          if (!settleTimer) {
+            settleTimer = setTimeout(() => {
+              if (bestCoords) {
+                finishSuccess(bestCoords);
+              }
+            }, maxWaitMs);
+          }
+        },
+        (err) => {
+          if (bestCoords) {
+            finishSuccess(bestCoords);
+          } else {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => finishSuccess(pos.coords),
+              (fallbackErr) => {
+                let customMessage = 'Lokasi tidak dapat ditentukan. Pastikan GPS smartphone telah aktif.';
+                if (fallbackErr.code === fallbackErr.PERMISSION_DENIED) {
+                  customMessage = 'Izin akses lokasi ditolak. Harap izinkan akses lokasi (pilih Akurat/Tepat) pada browser Anda.';
+                } else if (fallbackErr.code === fallbackErr.TIMEOUT) {
+                  customMessage = 'Waktu permintaan lokasi habis. Silakan muat ulang sinyal GPS.';
+                }
+                finishError({
+                  code: fallbackErr.code,
+                  message: customMessage,
+                  type: fallbackErr.code === 1 ? 'PERMISSION_DENIED' : fallbackErr.code === 3 ? 'TIMEOUT' : 'POSITION_UNAVAILABLE'
+                });
+              },
+              { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
+          }
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: timeoutMs,
+          maximumAge: 0,
+        }
+      );
+    } catch {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => finishSuccess(pos.coords),
+        (err) => finishError(err),
+        { enableHighAccuracy: true, timeout: timeoutMs, maximumAge: 0 }
+      );
+    }
+  });
+}
+
 /**
  * Retrieves the user's current GPS position using the browser's Geolocation API.
  * Returns a Promise that resolves with GeolocationCoordinates or rejects with a descriptive error.
@@ -130,47 +277,8 @@ export function getBrowserCurrentPosition(
     maximumAge: 0,
   }
 ): Promise<GeolocationCoordinates> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === 'undefined' || !navigator || !navigator.geolocation) {
-      reject({
-        code: 0,
-        message: 'Browser atau perangkat tidak mendukung Geolocation API.',
-        type: 'UNSUPPORTED' as const,
-      });
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        resolve(position.coords);
-      },
-      (error) => {
-        let type: 'PERMISSION_DENIED' | 'POSITION_UNAVAILABLE' | 'TIMEOUT' | 'UNKNOWN' = 'UNKNOWN';
-        let customMessage = error.message;
-
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            type = 'PERMISSION_DENIED';
-            customMessage = 'Izin akses lokasi ditolak. Harap izinkan akses lokasi pada browser/smartphone Anda.';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            type = 'POSITION_UNAVAILABLE';
-            customMessage = 'Lokasi tidak dapat ditentukan. Pastikan GPS smartphone telah aktif.';
-            break;
-          case error.TIMEOUT:
-            type = 'TIMEOUT';
-            customMessage = 'Waktu permintaan lokasi habis. Silakan muat ulang sinyal GPS.';
-            break;
-        }
-
-        reject({
-          code: error.code,
-          message: customMessage,
-          type,
-        });
-      },
-      options
-    );
+  return getAccurateCurrentPosition({
+    timeoutMs: options.timeout,
   });
 }
 
@@ -337,9 +445,15 @@ export async function verifyUserLocationAgainstPesantren(
     settings.longitude
   );
 
-  // 4. Validate if within admin-configured radius
-  const isWithinRadius = distanceMeters <= settings.radiusMeters;
+  // 4. Validate if within admin-configured radius (with accuracy tolerance)
+  const MAX_ACCURACY_DISCOUNT = 60;
+  const accuracyDiscount = coords.accuracy ? Math.min(Math.round(coords.accuracy), MAX_ACCURACY_DISCOUNT) : 0;
+  const effectiveDistanceMeters = Math.max(0, distanceMeters - accuracyDiscount);
+
+  const isWithinRadius = effectiveDistanceMeters <= settings.radiusMeters;
   const isValid = isWithinRadius || (!settings.strictMode);
+
+  const accuracyNote = coords.accuracy ? ` (toleransi akurasi ±${Math.round(coords.accuracy)}m)` : '';
 
   return {
     ...baseResult,
@@ -353,7 +467,7 @@ export async function verifyUserLocationAgainstPesantren(
     },
     status: isWithinRadius ? 'IN_RANGE' : 'OUT_OF_RANGE',
     message: isWithinRadius
-      ? `Lokasi terverifikasi di wilayah pesantren (${distanceMeters}m dari titik pusat, radius maks ${settings.radiusMeters}m).`
+      ? `Lokasi terverifikasi di wilayah pesantren (${distanceMeters}m dari titik pusat, radius maks ${settings.radiusMeters}m)${accuracyNote}.`
       : `Di luar wilayah pesantren! Anda berjarak ${distanceMeters}m dari titik pusat (batas maksimal radius adalah ${settings.radiusMeters}m).`,
   };
 }

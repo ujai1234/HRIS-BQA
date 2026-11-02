@@ -3,50 +3,52 @@ import { MapPin, Save, RotateCcw, Crosshair, Check, Map } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
 import { GeofenceSettings, DEFAULT_GEOFENCE_SETTINGS } from '../types';
 import { InteractiveMapPreview } from './InteractiveMapPreview';
+import { getAccurateCurrentPosition } from '../utils/geoUtils';
 import { toast } from 'sonner';
 
-const RADIUS_OPTIONS = [50, 100, 150, 200, 300, 500];
+const RADIUS_OPTIONS = [50, 100, 150, 200, 250, 300, 500];
 
 export const AdminSettingsView: React.FC = () => {
   const { geofenceSettings, updateGeofenceSettings, logActivity } = useHRIS();
 
-  const [radiusMeters, setRadiusMeters] = useState<number>(geofenceSettings?.radiusMeters || 150);
-  const [latitude, setLatitude] = useState<number>(geofenceSettings?.latitude || -6.589250);
-  const [longitude, setLongitude] = useState<number>(geofenceSettings?.longitude || 106.792880);
+  const [radiusMeters, setRadiusMeters] = useState<number>(geofenceSettings?.radiusMeters || 200);
+  const [latitude, setLatitude] = useState<number>(geofenceSettings?.latitude || -6.1286195);
+  const [longitude, setLongitude] = useState<number>(geofenceSettings?.longitude || 106.9648116);
   const [showAdvancedCoords, setShowAdvancedCoords] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDetecting, setIsDetecting] = useState(false);
 
   useEffect(() => {
     if (geofenceSettings) {
-      setRadiusMeters(geofenceSettings.radiusMeters || 150);
-      setLatitude(geofenceSettings.latitude || -6.589250);
-      setLongitude(geofenceSettings.longitude || 106.792880);
+      setRadiusMeters(geofenceSettings.radiusMeters || 200);
+      setLatitude(geofenceSettings.latitude || -6.1286195);
+      setLongitude(geofenceSettings.longitude || 106.9648116);
     }
   }, [geofenceSettings]);
 
-  const handleDetectGPS = () => {
-    if (!navigator.geolocation) {
+  const handleDetectGPS = async () => {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
       toast.error('Browser tidak mendukung geolokasi GPS.');
       return;
     }
 
     setIsDetecting(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = parseFloat(pos.coords.latitude.toFixed(6));
-        const lng = parseFloat(pos.coords.longitude.toFixed(6));
-        setLatitude(lat);
-        setLongitude(lng);
-        setIsDetecting(false);
-        toast.success(`Koordinat pusat diperbarui: ${lat}, ${lng}`);
-      },
-      (err) => {
-        setIsDetecting(false);
-        toast.error(`Gagal mendeteksi GPS: ${err.message}`);
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
+    try {
+      const coords = await getAccurateCurrentPosition({
+        targetAccuracyMeters: 20,
+        maxWaitMs: 5000,
+        timeoutMs: 10000,
+      });
+      const lat = parseFloat(coords.latitude.toFixed(7));
+      const lng = parseFloat(coords.longitude.toFixed(7));
+      setLatitude(lat);
+      setLongitude(lng);
+      setIsDetecting(false);
+      toast.success(`Koordinat pusat diperbarui: ${lat}, ${lng} (akurasi ±${Math.round(coords.accuracy || 0)}m)`);
+    } catch (err: any) {
+      setIsDetecting(false);
+      toast.error(`Gagal mendeteksi GPS: ${err?.message || 'Pastikan GPS aktif'}`);
+    }
   };
 
   const handleSave = async () => {
@@ -78,7 +80,7 @@ export const AdminSettingsView: React.FC = () => {
     setRadiusMeters(DEFAULT_GEOFENCE_SETTINGS.radiusMeters);
     setLatitude(DEFAULT_GEOFENCE_SETTINGS.latitude);
     setLongitude(DEFAULT_GEOFENCE_SETTINGS.longitude);
-    toast.info('Radius dikembalikan ke standar (150 meter).');
+    toast.info(`Radius dikembalikan ke standar (${DEFAULT_GEOFENCE_SETTINGS.radiusMeters} meter).`);
   };
 
   return (
@@ -240,7 +242,7 @@ export const AdminSettingsView: React.FC = () => {
             className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Standar (150m)</span>
+            <span>Reset Standar ({DEFAULT_GEOFENCE_SETTINGS.radiusMeters}m)</span>
           </button>
 
           <button

@@ -3599,13 +3599,13 @@ async function startServer() {
           // Create default
           const created = await db.insert(schema.geofenceSettings).values({
             id: 'default_geofence',
-            name: "Baitul Qur'an Al-Ikhwan Central Campus",
-            latitude: -6.589250,
-            longitude: 106.792880,
-            radiusMeters: 150,
+            name: "Baitul Qur'an Al-Ikhwan",
+            latitude: -6.1286195,
+            longitude: 106.9648116,
+            radiusMeters: 200,
             strictMode: true as any,
-            enableMockBypass: true as any,
-            addressNotes: "Jl. KH. Al-Ikhwan No. 09, Gerbang Utama & Area Gedung KBM",
+            enableMockBypass: false as any,
+            addressNotes: "Jl. Marunda I, Kaliabang, Rorotan / Tarumajaya",
             updatedAt: new Date(),
             updatedBy: "Administrator"
           }).returning();

@@ -4,7 +4,7 @@ import { Utensils, CheckCircle, Clock, MapPin, RefreshCw, AlertCircle } from 'lu
 import { toast } from 'sonner';
 import { StaffExpenseForm } from './StaffExpenseForm';
 import { StaffJournalForm } from './StaffJournalForm';
-import { validateAttendanceLocation, LocationValidationResult } from '../../utils/geoUtils';
+import { validateAttendanceLocation, LocationValidationResult, getAccurateCurrentPosition } from '../../utils/geoUtils';
 
 interface KitchenModuleProps {
   showJournalAndExpense?: boolean;
@@ -32,29 +32,37 @@ export const KitchenModule: React.FC<KitchenModuleProps> = ({ showJournalAndExpe
   // GPS state
   const [userLat, setUserLat] = useState<number | null>(null);
   const [userLng, setUserLng] = useState<number | null>(null);
+  const [userAccuracy, setUserAccuracy] = useState<number | null>(null);
   const [isLocating, setIsLocating] = useState<boolean>(true);
   const [gpsError, setGpsError] = useState<string | null>(null);
 
-  const detectLocation = () => {
-    if (!navigator.geolocation) {
+  const detectLocation = async () => {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
       setGpsError('Browser atau perangkat ini tidak mendukung geolokasi GPS.');
       setIsLocating(false);
       return;
     }
     setIsLocating(true);
     setGpsError(null);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setUserLat(pos.coords.latitude);
-        setUserLng(pos.coords.longitude);
-        setIsLocating(false);
-      },
-      (err) => {
-        setGpsError('Izin lokasi tidak aktif atau tidak terdeteksi.');
-        setIsLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
+    try {
+      const coords = await getAccurateCurrentPosition({
+        targetAccuracyMeters: 25,
+        maxWaitMs: 5000,
+        timeoutMs: 12000,
+        onProgress: (liveCoords, acc) => {
+          setUserLat(liveCoords.latitude);
+          setUserLng(liveCoords.longitude);
+          setUserAccuracy(Math.round(acc));
+        },
+      });
+      setUserLat(coords.latitude);
+      setUserLng(coords.longitude);
+      setUserAccuracy(coords.accuracy ? Math.round(coords.accuracy) : null);
+      setIsLocating(false);
+    } catch (err: any) {
+      setGpsError(err?.message || 'Izin lokasi tidak aktif atau tidak terdeteksi.');
+      setIsLocating(false);
+    }
   };
 
   useEffect(() => {
@@ -66,7 +74,8 @@ export const KitchenModule: React.FC<KitchenModuleProps> = ({ showJournalAndExpe
     userLat,
     userLng,
     geofenceSettings,
-    false
+    false,
+    userAccuracy
   );
   
   const isGpsRequiredMissing = !hasGps || isLocating;

@@ -255,13 +255,13 @@ export interface GeofenceSettings {
 
 export const DEFAULT_GEOFENCE_SETTINGS: GeofenceSettings = {
   id: 'default_geofence',
-  name: "Baitul Qur'an Al-Ikhwan Central Campus",
-  latitude: -6.589250,
-  longitude: 106.792880,
-  radiusMeters: 150,
+  name: "Baitul Qur'an Al-Ikhwan",
+  latitude: -6.1286195,
+  longitude: 106.9648116,
+  radiusMeters: 200,
   strictMode: true,
-  enableMockBypass: true,
-  addressNotes: "Jl. KH. Al-Ikhwan No. 09, Gerbang Utama & Area Gedung KBM",
+  enableMockBypass: false,
+  addressNotes: "Jl. Marunda I, Kaliabang, Rorotan / Tarumajaya",
   updatedAt: new Date().toISOString(),
   updatedBy: "Administrator"
 };

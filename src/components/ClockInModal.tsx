@@ -12,7 +12,7 @@ import confetti from 'canvas-confetti';
 import { ClassSchedule, Teacher } from '../types';
 import { useHRIS } from '../context/HRISContext';
 import { calculateLatePenalty, getLateCategoryLabel, validateScheduleTimeWindow } from '../utils/formatters';
-import { validateAttendanceLocation, LocationValidationResult } from '../utils/geoUtils';
+import { validateAttendanceLocation, LocationValidationResult, getAccurateCurrentPosition } from '../utils/geoUtils';
 
 interface ClockInModalProps {
   schedule: ClassSchedule;
@@ -58,6 +58,7 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
   // GPS and Geofence state
   const [userLat, setUserLat] = useState<number | null>(null);
   const [userLng, setUserLng] = useState<number | null>(null);
+  const [userAccuracy, setUserAccuracy] = useState<number | null>(null);
   const [isLocating, setIsLocating] = useState<boolean>(true);
   const [gpsError, setGpsError] = useState<string | null>(null);
 
@@ -70,9 +71,9 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
     return () => clearInterval(timer);
   }, []);
 
-  // Detect GPS on component mount
-  const detectLocation = () => {
-    if (!navigator.geolocation) {
+  // Detect high-accuracy GPS with progressive satellite refinement
+  const detectLocation = async () => {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
       setGpsError('Browser atau perangkat ini tidak mendukung geolokasi GPS.');
       setIsLocating(false);
       return;
@@ -81,39 +82,48 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
     setIsLocating(true);
     setGpsError(null);
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setUserLat(pos.coords.latitude);
-        setUserLng(pos.coords.longitude);
-        setIsLocating(false);
-      },
-      (err) => {
-        let msg = 'Izin lokasi tidak aktif.';
-        if (err.code === 1) {
-          msg = 'Izin lokasi ditolak. Silakan izinkan akses lokasi pada browser/HP.';
-        } else if (err.code === 2) {
-          msg = 'Lokasi tidak terdeteksi. Pastikan GPS HP aktif.';
-        } else if (err.code === 3) {
-          msg = 'Waktu permintaan lokasi habis. Silakan muat ulang lokasi.';
-        }
-        setGpsError(msg);
-        setIsLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
+    try {
+      const coords = await getAccurateCurrentPosition({
+        targetAccuracyMeters: 25,
+        maxWaitMs: 5000,
+        timeoutMs: 12000,
+        onProgress: (liveCoords, acc) => {
+          setUserLat(liveCoords.latitude);
+          setUserLng(liveCoords.longitude);
+          setUserAccuracy(Math.round(acc));
+        },
+      });
+
+      setUserLat(coords.latitude);
+      setUserLng(coords.longitude);
+      setUserAccuracy(coords.accuracy ? Math.round(coords.accuracy) : null);
+      setIsLocating(false);
+    } catch (err: any) {
+      let msg = err?.message || 'Izin lokasi tidak aktif atau sinyal GPS tidak terdeteksi.';
+      if (err?.code === 1 || err?.type === 'PERMISSION_DENIED') {
+        msg = 'Izin lokasi ditolak. Silakan izinkan akses lokasi (pilih Akurat/Tepat) pada browser/HP Anda.';
+      } else if (err?.code === 2 || err?.type === 'POSITION_UNAVAILABLE') {
+        msg = 'Lokasi tidak terdeteksi. Pastikan GPS HP aktif dan sinyal satelit terbuka.';
+      } else if (err?.code === 3 || err?.type === 'TIMEOUT') {
+        msg = 'Waktu permintaan lokasi habis. Coba nyalakan Wi-Fi dan tekan Cek Ulang Lokasi.';
+      }
+      setGpsError(msg);
+      setIsLocating(false);
+    }
   };
 
   useEffect(() => {
     detectLocation();
   }, []);
 
-  // Compute location validation result
+  // Compute location validation result with accuracy discount
   const hasGps = userLat !== null && userLng !== null;
   const locationValidation: LocationValidationResult = validateAttendanceLocation(
     userLat,
     userLng,
     geofenceSettings,
-    false
+    false,
+    userAccuracy
   );
 
   const penaltyCalculation = calculateLatePenalty(
@@ -268,8 +278,14 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
 
             {/* GPS Status Box */}
             {isLocating ? (
-              <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 text-xs text-slate-500 text-center">
-                Mendeteksi koordinat GPS smartphone Anda...
+              <div className="p-3 rounded-lg border border-emerald-200/80 dark:border-emerald-800/80 bg-emerald-50/50 dark:bg-emerald-950/20 text-xs text-emerald-800 dark:text-emerald-300 text-center space-y-1">
+                <div className="flex items-center justify-center gap-2 font-medium">
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-600 dark:text-emerald-400" />
+                  Mengunci Satelit GPS Presisi...
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {userAccuracy ? `Sinyal satelit terhubung (akurasi ±${userAccuracy}m), memvalidasi radius...` : 'Menghubungkan ke satelit GPS smartphone Anda...'}
+                </p>
               </div>
             ) : gpsError || !hasGps ? (
               <div className="p-3 rounded-lg border border-rose-200 dark:border-rose-950 bg-rose-50/70 dark:bg-rose-950/30 space-y-2">
@@ -282,11 +298,17 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
                     </p>
                   </div>
                 </div>
+                <div className="p-2 bg-rose-100/60 dark:bg-rose-900/40 rounded text-[11px] text-rose-800 dark:text-rose-300 space-y-0.5">
+                  <p className="font-semibold">💡 Tips Cepat Presisi:</p>
+                  <p>1. Di HP: Pastikan izin lokasi browser diset ke <strong>"Akurat / Tepat" (Precise)</strong>.</p>
+                  <p>2. Nyalakan Wi-Fi (membantu sinyal GPS satelit indoor).</p>
+                </div>
                 <button
                   type="button"
                   onClick={detectLocation}
-                  className="w-full text-center py-1.5 text-xs font-medium bg-rose-600 hover:bg-rose-700 text-white rounded-md transition-colors cursor-pointer"
+                  className="w-full text-center py-2 text-xs font-medium bg-rose-600 hover:bg-rose-700 text-white rounded-md transition-colors cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
                 >
+                  <RefreshCw className="w-3.5 h-3.5" />
                   Cek Ulang Lokasi GPS
                 </button>
               </div>
@@ -297,16 +319,23 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
                   <div className="text-xs text-amber-900 dark:text-amber-200">
                     <p className="font-medium">Di Luar Wilayah Pesantren</p>
                     <p className="text-[11px] text-amber-700 dark:text-amber-300/80 mt-0.5">
-                      Jarak Anda {locationValidation.distanceMeters}m dari pusat pesantren (Maksimal {geofenceSettings?.radiusMeters || 150}m).
+                      Jarak terhitung: <strong>{locationValidation.distanceMeters}m</strong> dari pusat (Batas radius {geofenceSettings?.radiusMeters || 200}m).
+                      {userAccuracy ? ` Akurasi sinyal HP: ±${userAccuracy}m.` : ''}
                     </p>
                   </div>
+                </div>
+                <div className="p-2 bg-amber-100/60 dark:bg-amber-900/40 rounded text-[11px] text-amber-800 dark:text-amber-300 space-y-0.5">
+                  <p className="font-semibold">💡 Sudah berada di pesantren tapi masih terbaca di luar?</p>
+                  <p>• Buka Google Maps sebentar agar GPS satelit mengunci, lalu kembali ke sini dan tekan Segarkan.</p>
+                  <p>• Pastikan Wi-Fi aktif untuk membantu triangulasi ruangan kelas/masjid.</p>
                 </div>
                 <button
                   type="button"
                   onClick={detectLocation}
-                  className="w-full text-center py-1.5 text-xs font-medium bg-amber-600 hover:bg-amber-700 text-white rounded-md transition-colors cursor-pointer"
+                  className="w-full text-center py-2 text-xs font-medium bg-amber-600 hover:bg-amber-700 text-white rounded-md transition-colors cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
                 >
-                  Perbarui Lokasi GPS
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  Segarkan Lokasi GPS
                 </button>
               </div>
             ) : (
@@ -314,9 +343,9 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <div className="text-xs text-emerald-900 dark:text-emerald-200">
-                    <span className="font-medium">Di Wilayah Pesantren</span>
+                    <span className="font-medium">Lokasi Terverifikasi</span>
                     <span className="text-[11px] text-emerald-700 dark:text-emerald-300/80 ml-1.5">
-                      ({locationValidation.distanceMeters}m dari pusat)
+                      (~{locationValidation.distanceMeters}m dari pusat{userAccuracy ? `, akurasi ±${userAccuracy}m` : ''})
                     </span>
                   </div>
                 </div>
@@ -324,9 +353,10 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
                   type="button"
                   onClick={detectLocation}
                   title="Perbarui GPS"
-                  className="text-[11px] text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer"
+                  className="text-[11px] text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer flex items-center gap-1"
                 >
-                  Segarkan
+                  <RefreshCw className="w-3 h-3" />
+                  Perbarui
                 </button>
               </div>
             )}
