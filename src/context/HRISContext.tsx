@@ -63,8 +63,8 @@ interface HRISContextType {
   clockIn: (scheduleId: string, timeString?: string, notes?: string) => AttendanceRecord;
   submitJournal: (
     attendanceId: string, 
-    journalInput: Partial<TeachingJournal> & { topic: string; studentAttendance: StudentAttendance }
-  ) => Promise<void>;
+    journalInput: Partial<TeachingJournal> & { topic: string; studentAttendance: StudentAttendance; studentAttendancesList?: { studentId: string, status: string, notes?: string }[] }
+  ) => Promise<boolean>;
   markAttendanceDirect: (scheduleId: string, teacherId: string, status: AttendanceRecord['status'], notes?: string) => void;
   
   // Guru Badal
@@ -283,6 +283,20 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Failed to fetch data', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const refreshAttendances = async () => {
+    try {
+      const res = await fetch('/api/attendances');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setAttendances(data);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to refresh attendances:', err);
     }
   };
 
@@ -687,7 +701,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (savedAtt && savedAtt.id) {
         setAttendances((prev) => prev.map(a => (a.scheduleId === scheduleId && a.date === todayStr) ? { ...a, id: savedAtt.id } : a));
       }
-      fetchAllData();
+      refreshAttendances();
       toast.success(`Presensi Berhasil: ${schedule.subject} (${schedule.className})`);
     }).catch(err => {
       console.error('Error clocking in:', err);
@@ -785,24 +799,26 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (res.ok) {
-        await fetchAllData();
+        await refreshAttendances();
         toast.success('Jurnal KBM berhasil disimpan & terverifikasi selesai');
+        logActivity(
+          'SUBMIT_JOURNAL',
+          'KBM',
+          `Jurnal KBM terisi: "${journalInput.topic}" (Kehadiran: ${journalInput.studentAttendance?.presentCount ?? 27}/${journalInput.studentAttendance?.totalStudents ?? 28} santri)`,
+          'INFO'
+        );
+        return true;
       } else {
         const errJson = await res.json().catch(() => ({}));
         console.error('Failed to submit journal to server:', errJson);
         toast.error('Gagal menyimpan jurnal ke server');
+        return false;
       }
     } catch (err) {
       console.error('Error submitting journal:', err);
       toast.error('Koneksi terputus saat menyimpan jurnal');
+      return false;
     }
-
-    logActivity(
-      'SUBMIT_JOURNAL',
-      'KBM',
-      `Jurnal KBM terisi: "${journalInput.topic}" (Kehadiran: ${journalInput.studentAttendance.presentCount}/${journalInput.studentAttendance.totalStudents} santri)`,
-      'INFO'
-    );
   };
 
   // Direct status mark (e.g. Alpa, Izin, Sakit)
@@ -832,7 +848,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newRecord)
     }).then(res => res.json()).then(() => {
-      fetchAllData();
+      refreshAttendances();
       toast.success(`Status presensi diperbarui menjadi ${status}`);
     });
 

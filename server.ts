@@ -2188,8 +2188,10 @@ async function startServer() {
   // Audit Logs
   app.get('/api/audit-logs', async (req, res) => {
     try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
       const logs = await db.query.auditLogs.findMany({
         orderBy: (logs, { desc }) => [desc(logs.timestamp)],
+        limit: Math.min(Math.max(limit, 1), 300),
       });
       res.json(logs);
     } catch (error) {

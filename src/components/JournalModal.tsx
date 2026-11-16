@@ -167,7 +167,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isReadOnly) {
       onClose();
@@ -184,12 +184,11 @@ export const JournalModal: React.FC<JournalModalProps> = ({
       if (!targetAttId) {
         const now = new Date();
         const autoTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-        clockIn(schedule.id, autoTime, 'Auto-Presensi bersamaan dengan pengisian jurnal');
-        const newlyCreated = attendances.find((a) => a.scheduleId === schedule.id && a.date === todayStr);
-        targetAttId = newlyCreated?.id || `ATT-${Date.now()}`;
+        const newAtt = clockIn(schedule.id, autoTime, 'Auto-Presensi bersamaan dengan pengisian jurnal');
+        targetAttId = newAtt?.id || `ATT-${Date.now()}`;
       }
 
-      submitJournal(targetAttId, {
+      const success = await submitJournal(targetAttId, {
         scheduleId: schedule.id,
         date: resolvedAttendance?.date || todayStr,
         teacherId: teacher?.id || currentUser?.id || schedule.teacherId,
@@ -201,22 +200,26 @@ export const JournalModal: React.FC<JournalModalProps> = ({
         studentAttendancesList,
       });
 
-      try {
-        confetti({
-          particleCount: 50,
-          spread: 60,
-          origin: { y: 0.6 },
-          colors: ['#1B4332', '#2D6A4F', '#52B788', '#B08968'],
-        });
-      } catch (err) {
-        console.error(err);
-      }
+      if (success) {
+        try {
+          confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { y: 0.6 },
+            colors: ['#1B4332', '#2D6A4F', '#52B788', '#B08968'],
+          });
+        } catch (err) {
+          console.error(err);
+        }
 
-      setTimeout(() => {
+        setTimeout(() => {
+          setIsSubmitting(false);
+          onSuccess();
+          onClose();
+        }, 200);
+      } else {
         setIsSubmitting(false);
-        onSuccess();
-        onClose();
-      }, 200);
+      }
     } catch (err) {
       console.error(err);
       setIsSubmitting(false);

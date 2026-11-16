@@ -13,7 +13,8 @@ if (!fs.existsSync(dbDir)) {
 }
 
 console.log(`Connecting to SQLite database at: ${dbPath}`);
-export const sqliteDb = new Database(dbPath);
+export const sqliteDb = new Database(dbPath, { timeout: 10000 });
+sqliteDb.pragma('busy_timeout = 10000');
 sqliteDb.pragma('journal_mode = WAL');
 sqliteDb.pragma('cache_size = -64000'); // 64MB cache
 sqliteDb.pragma('synchronous = NORMAL');

@@ -46,6 +46,26 @@ apt update
 apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
+### Konfigurasi Swap Memory (Wajib untuk VPS 2 GB RAM)
+Karena VPS 2 GB RAM menjalankan 3 container bersamaan, SWAP memory 2 GB–4 GB wajib diaktifkan agar server tidak crash saat traffic jam sibuk (OOM Killer):
+```bash
+# Cek apakah swap sudah aktif
+free -h
+
+# Jika baris Swap nilainya 0B, buat 2GB swap file:
+fallocate -l 2G /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=2048
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+
+# Pastikan permanen setelah server reboot
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
+
+# Optimasi swappiness agar swap hanya digunakan saat RAM hampir habis
+sysctl vm.swappiness=20
+echo 'vm.swappiness=20' >> /etc/sysctl.conf
+```
+
 ## 2. Setup HRIS BQA
 
 ```bash
@@ -107,12 +127,14 @@ rm /etc/nginx/sites-enabled/default
 nano /etc/nginx/sites-available/bqa-apps
 ```
 
-Masukkan konfigurasi ini untuk melayani ke-3 service dengan subdomain berbeda:
+Masukkan konfigurasi ini untuk melayani ke-3 service dengan subdomain berbeda (sudah dilengkapi optimasi timeout dan batas upload file):
 ```nginx
 # 1. HRIS BQA
 server {
     listen 80;
     server_name hris.baitulquranalikhwan.cloud;
+
+    client_max_body_size 25M;
 
     location / {
         proxy_pass http://127.0.0.1:3000;
@@ -123,6 +145,10 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
     }
 }
 
@@ -130,6 +156,8 @@ server {
 server {
     listen 80;
     server_name tahfidz.baitulquranalikhwan.cloud;
+
+    client_max_body_size 25M;
 
     location / {
         proxy_pass http://127.0.0.1:3001;
@@ -140,6 +168,10 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
     }
 }
 
@@ -147,6 +179,8 @@ server {
 server {
     listen 80;
     server_name api.tahfidz.baitulquranalikhwan.cloud;
+
+    client_max_body_size 25M;
 
     location / {
         proxy_pass http://127.0.0.1:4000;
@@ -157,6 +191,10 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
     }
 }
 ```
