@@ -14,7 +14,6 @@ import { SessionTimeoutManager } from './components/SessionTimeoutManager';
 import { LearningNeedManagement } from './components/LearningNeedManagement';
 import { BadalManagement } from './components/BadalManagement';
 import { GuruDeviceNotificationToast } from './components/GuruDeviceNotificationToast';
-import { CoreUIChartsView } from './components/pages/CoreUIChartsView';
 import { Page404 } from './components/pages/Page404';
 import { Page500 } from './components/pages/Page500';
 import { isKepsekRole } from './types';
@@ -51,10 +50,7 @@ const MainContent: React.FC = () => {
 
   // Dynamic router based on role and path matching user flow
   const renderDashboardByRole = () => {
-    // CoreUI Showcase & Error Pages
-    if (currentPath === '/dashboard/charts' || currentPath === '/pages/charts') {
-      return <CoreUIChartsView key="coreui-charts" />;
-    }
+    // Error Pages
     if (currentPath === '/pages/404') {
       return <Page404 key="page-404" />;
     }

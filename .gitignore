@@ -6,3 +6,14 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# SQLite runtime & backup files
+*.db-shm
+*.db-wal
+*.db.bak
+*.db-journal
+
+# Temporary Office / Excel lock files
+~$*.xlsx
+~$*.docx
+~$*.csv

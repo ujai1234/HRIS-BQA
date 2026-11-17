@@ -64,6 +64,7 @@ export const TeacherAcademics: React.FC = () => {
     try {
       const stuRes = await fetch('/api/students');
       const stuData = await stuRes.json();
+      const allStudents = Array.isArray(stuData?.data) ? stuData.data : (Array.isArray(stuData) ? stuData : []);
       const targetClass = (className || '').trim().toLowerCase();
       const filtered = allStudents.filter((s: any) => 
         (s.className && s.className.trim().toLowerCase() === targetClass) ||

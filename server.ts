@@ -3902,7 +3902,7 @@ async function startServer() {
       if (!Array.isArray(list)) return res.status(400).json({ error: 'Invalid data' });
       
       // Load all existing students once for efficient in-memory matching
-      const allExisting = await db.query.students.findMany();
+      const allExisting: any[] = await db.query.students.findMany();
 
       let insertedCount = 0;
       let updatedCount = 0;
@@ -3953,9 +3953,9 @@ async function startServer() {
             nik: s.nik || existing.nik,
             kkNumber: s.kkNumber || existing.kkNumber,
             halqah: s.halqah || existing.halqah,
-            tingkatan: tingkatanVal !== null ? tingkatanVal : existing.tingkatan,
+            tingkatan: (tingkatanVal !== null ? tingkatanVal : existing.tingkatan) as any,
             status: s.status || existing.status || 'AKTIF'
-          }).where(eq(schema.students.id, existing.id));
+          }).where(eq(schema.students.id, String(existing.id)));
 
           existing.nis = effectiveNis;
           existing.name = cleanName;
