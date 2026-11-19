@@ -139,8 +139,8 @@ export function getAccurateCurrentPosition(
   options: AccuratePositionOptions = {}
 ): Promise<GeolocationCoordinates> {
   const targetAccuracy = options.targetAccuracyMeters ?? 25;
-  const maxWaitMs = options.maxWaitMs ?? 5000;
-  const timeoutMs = options.timeoutMs ?? 10000;
+  const maxWaitMs = options.maxWaitMs ?? 7000;
+  const timeoutMs = options.timeoutMs ?? 25000;
   const onProgress = options.onProgress;
 
   return new Promise((resolve, reject) => {
@@ -246,7 +246,7 @@ export function getAccurateCurrentPosition(
                   type: fallbackErr.code === 1 ? 'PERMISSION_DENIED' : fallbackErr.code === 3 ? 'TIMEOUT' : 'POSITION_UNAVAILABLE'
                 });
               },
-              { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+              { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
             );
           }
         },
@@ -355,7 +355,7 @@ export async function preCheckDeviceGps(): Promise<GpsPreCheckResult> {
           });
         }
       },
-      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   });
 }

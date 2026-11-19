@@ -55,13 +55,15 @@ export function validateAttendanceLocation(
   isMockBypassed: boolean = false,
   accuracyMeters?: number | null
 ): LocationValidationResult {
-  if (isMockBypassed && settings.enableMockBypass) {
+  const activeSettings = settings || DEFAULT_GEOFENCE_SETTINGS;
+
+  if (isMockBypassed && activeSettings.enableMockBypass) {
     return {
       isValid: true,
       distanceMeters: 0,
       effectiveDistanceMeters: 0,
-      allowedRadiusMeters: settings.radiusMeters,
-      targetLocationName: settings.name,
+      allowedRadiusMeters: activeSettings.radiusMeters,
+      targetLocationName: activeSettings.name,
       isMockBypass: true,
       message: 'Mode simulasi/bypass lokasi aktif untuk pengujian presensi.',
       statusType: 'BYPASS_ACTIVE',
@@ -71,11 +73,11 @@ export function validateAttendanceLocation(
 
   if (userLat === null || userLat === undefined || userLng === null || userLng === undefined) {
     return {
-      isValid: !settings.strictMode,
+      isValid: !activeSettings.strictMode,
       distanceMeters: 0,
       effectiveDistanceMeters: 0,
-      allowedRadiusMeters: settings.radiusMeters,
-      targetLocationName: settings.name,
+      allowedRadiusMeters: activeSettings.radiusMeters,
+      targetLocationName: activeSettings.name,
       isMockBypass: false,
       message: 'Sinyal GPS belum terdeteksi dari perangkat.',
       statusType: 'GPS_UNAVAILABLE',
@@ -85,8 +87,8 @@ export function validateAttendanceLocation(
   const rawDistanceMeters = calculateHaversineDistance(
     userLat,
     userLng,
-    settings.latitude,
-    settings.longitude
+    activeSettings.latitude,
+    activeSettings.longitude
   );
 
   // Accuracy-aware geofencing tolerance:
@@ -98,7 +100,7 @@ export function validateAttendanceLocation(
     : 0;
 
   const effectiveDistanceMeters = Math.max(0, rawDistanceMeters - accuracyDiscount);
-  const isWithinRadius = effectiveDistanceMeters <= settings.radiusMeters;
+  const isWithinRadius = effectiveDistanceMeters <= activeSettings.radiusMeters;
 
   const accuracyFormatted = accuracyMeters != null ? ` (sinyal ±${Math.round(accuracyMeters)}m)` : '';
 
@@ -107,24 +109,24 @@ export function validateAttendanceLocation(
       isValid: true,
       distanceMeters: rawDistanceMeters,
       effectiveDistanceMeters,
-      allowedRadiusMeters: settings.radiusMeters,
-      targetLocationName: settings.name,
+      allowedRadiusMeters: activeSettings.radiusMeters,
+      targetLocationName: activeSettings.name,
       isMockBypass: false,
       accuracyMeters: accuracyMeters != null ? Math.round(accuracyMeters) : undefined,
-      message: `Lokasi terverifikasi! Berada ${rawDistanceMeters}m dari titik pusat (${settings.name})${accuracyFormatted}.`,
+      message: `Lokasi terverifikasi! Berada ${rawDistanceMeters}m dari titik pusat (${activeSettings.name})${accuracyFormatted}.`,
       statusType: 'SUCCESS',
     };
   }
 
   return {
-    isValid: !settings.strictMode,
+    isValid: !activeSettings.strictMode,
     distanceMeters: rawDistanceMeters,
     effectiveDistanceMeters,
-    allowedRadiusMeters: settings.radiusMeters,
-    targetLocationName: settings.name,
+    allowedRadiusMeters: activeSettings.radiusMeters,
+    targetLocationName: activeSettings.name,
     isMockBypass: false,
     accuracyMeters: accuracyMeters != null ? Math.round(accuracyMeters) : undefined,
-    message: `Di luar radius! Anda berada ${rawDistanceMeters}m dari titik pusat (Maksimal ${settings.radiusMeters}m).`,
+    message: `Di luar radius! Anda berada ${rawDistanceMeters}m dari titik pusat (Maksimal ${activeSettings.radiusMeters}m).`,
     statusType: 'OUT_OF_RADIUS',
   };
 }

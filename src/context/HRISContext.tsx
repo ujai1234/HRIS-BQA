@@ -176,9 +176,9 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const saved = localStorage.getItem('hris_pbq_auth_v1');
     if (saved !== 'true') return false;
     
-    // Validasi apakah sesi 5 menit (300.000 ms) masih berlaku
+    // Validasi apakah sesi 10 menit (600.000 ms) masih berlaku
     const lastActivity = Number(localStorage.getItem('hris_pbq_session_last_activity') || 0);
-    if (!lastActivity || Date.now() - lastActivity > 5 * 60 * 1000) {
+    if (!lastActivity || Date.now() - lastActivity > 10 * 60 * 1000) {
       localStorage.removeItem('hris_pbq_session_last_activity');
       localStorage.setItem('hris_pbq_auth_v1', 'false');
       // Flag to clear better-auth session as well
@@ -436,7 +436,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const data = await res.json();
         const staff = teachers.find(t => t.id === staffId);
         toast.success(`Presensi ${staff?.name || 'staf'} berhasil dicatat (${status})`);
-        fetchAllData();
+        await refreshAttendances();
         logActivity('STAFF_ATTENDANCE_OVERRIDE', 'SYSTEM', `Presensi staf ${staff?.name || staffId} diatur ke ${status} oleh Ketua Sarpras`);
         return true;
       } else {
@@ -728,7 +728,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Prevent re-submission if already completed
     if (targetAtt && targetAtt.status === 'SELESAI' && targetAtt.journal) {
       toast.info('Jurnal KBM sesi ini telah dikunci & selesai.');
-      return;
+      return true;
     }
 
     const scheduleId = journalInput.scheduleId || targetAtt?.scheduleId || 'SCH-01';
@@ -1421,7 +1421,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Merge tahfidz honorarium dynamically
     let tahfidzHonor = 0;
-    if (tahfidzPayroll && tahfidzPayroll.period === _period) {
+    if (tahfidzPayroll && tahfidzPayroll.period === _period && Array.isArray(tahfidzPayroll.items)) {
       const tItem = tahfidzPayroll.items.find((ti) => ti.teacherId === teacher.id);
       if (tItem) tahfidzHonor = tItem.totalHonor;
     }

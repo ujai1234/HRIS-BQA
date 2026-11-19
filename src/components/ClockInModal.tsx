@@ -71,34 +71,51 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
     return () => clearInterval(timer);
   }, []);
 
+  const isMountedRef = React.useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   // Detect high-accuracy GPS with progressive satellite refinement
   const detectLocation = async () => {
     if (typeof window === 'undefined' || !navigator.geolocation) {
-      setGpsError('Browser atau perangkat ini tidak mendukung geolokasi GPS.');
-      setIsLocating(false);
+      if (isMountedRef.current) {
+        setGpsError('Browser atau perangkat ini tidak mendukung geolokasi GPS.');
+        setIsLocating(false);
+      }
       return;
     }
 
-    setIsLocating(true);
-    setGpsError(null);
+    if (isMountedRef.current) {
+      setIsLocating(true);
+      setGpsError(null);
+    }
 
     try {
       const coords = await getAccurateCurrentPosition({
         targetAccuracyMeters: 25,
-        maxWaitMs: 5000,
-        timeoutMs: 12000,
+        maxWaitMs: 7000,
+        timeoutMs: 25000,
         onProgress: (liveCoords, acc) => {
-          setUserLat(liveCoords.latitude);
-          setUserLng(liveCoords.longitude);
-          setUserAccuracy(Math.round(acc));
+          if (isMountedRef.current) {
+            setUserLat(liveCoords.latitude);
+            setUserLng(liveCoords.longitude);
+            setUserAccuracy(Math.round(acc));
+          }
         },
       });
 
-      setUserLat(coords.latitude);
-      setUserLng(coords.longitude);
-      setUserAccuracy(coords.accuracy ? Math.round(coords.accuracy) : null);
-      setIsLocating(false);
+      if (isMountedRef.current) {
+        setUserLat(coords.latitude);
+        setUserLng(coords.longitude);
+        setUserAccuracy(coords.accuracy ? Math.round(coords.accuracy) : null);
+        setIsLocating(false);
+      }
     } catch (err: any) {
+      if (!isMountedRef.current) return;
       let msg = err?.message || 'Izin lokasi tidak aktif atau sinyal GPS tidak terdeteksi.';
       if (err?.code === 1 || err?.type === 'PERMISSION_DENIED') {
         msg = 'Izin lokasi ditolak. Silakan izinkan akses lokasi (pilih Akurat/Tepat) pada browser/HP Anda.';

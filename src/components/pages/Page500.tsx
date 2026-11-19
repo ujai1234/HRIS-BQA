@@ -2,7 +2,12 @@ import React, { useState } from 'react';
 import { Search, RefreshCw, Home, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { useHRIS } from '../../context/HRISContext';
 
-export const Page500: React.FC = () => {
+interface Page500Props {
+  onReset?: () => void;
+  error?: Error;
+}
+
+export const Page500: React.FC<Page500Props> = ({ onReset, error }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -18,17 +23,23 @@ export const Page500: React.FC = () => {
   }
 
   const handleReturn = () => {
+    if (onReset) {
+      onReset();
+    }
     if (setCurrentPath) {
       if (currentRole === 'ADMIN') setCurrentPath('/dashboard/admin');
       else if (currentRole === 'GURU') setCurrentPath('/dashboard/guru');
       else setCurrentPath('/dashboard/kepsek');
-    } else {
-      window.location.href = '/';
     }
+    // Clean reload to ensure state is fresh
+    window.location.href = '/';
   };
 
   const handleRefresh = () => {
     setIsRefreshing(true);
+    if (onReset) {
+      onReset();
+    }
     window.location.reload();
   };
 

@@ -23,11 +23,15 @@ export class ErrorBoundary extends React.Component<Props, State> {
     console.error('Uncaught runtime error:', error, errorInfo);
   }
 
+  public handleReset = () => {
+    this.setState({ hasError: false, error: undefined });
+  };
+
   public render() {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-[#ebedef] dark:bg-[#131924] flex items-center justify-center p-4">
-          <Page500 />
+          <Page500 onReset={this.handleReset} error={this.state.error} />
         </div>
       );
     }

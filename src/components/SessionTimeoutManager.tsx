@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Clock, ShieldAlert, LogOut, RefreshCw } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
 
-// Sesi tepat 5 menit (300 detik), Peringatan muncul saat sisa 60 detik (1 menit)
-const SESSION_DURATION_SECONDS = 5 * 60; // 300 detik (5 menit)
+// Sesi tepat 10 menit (600 detik), Peringatan muncul saat sisa 60 detik (1 menit)
+const SESSION_DURATION_SECONDS = 10 * 60; // 600 detik (10 menit)
 const WARNING_BEFORE_EXPIRY_SECONDS = 60; // 60 detik (1 menit)
 
 export const SessionTimeoutManager: React.FC = () => {
@@ -117,7 +117,7 @@ export const SessionTimeoutManager: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Sesi Login Segera Berakhir</h3>
-                <p className="text-xs text-amber-900/80 dark:text-amber-300/80 mt-0.5">Batas sesi 5 menit demi privasi & keamanan data asatidz.</p>
+                <p className="text-xs text-amber-900/80 dark:text-amber-300/80 mt-0.5">Batas sesi 10 menit demi privasi & keamanan data asatidz.</p>
               </div>
             </div>
 
@@ -139,7 +139,7 @@ export const SessionTimeoutManager: React.FC = () => {
                 Tidak ada aktivitas baru. Sesi Anda akan otomatis ditutup dalam <strong>{secondsRemaining} detik</strong>.
               </p>
               <p className="text-slate-400 dark:text-slate-500 text-[11px] max-w-xs mx-auto mb-6">
-                Klik <strong>Perpanjang Sesi</strong> untuk melanjutkan pekerjaan Anda selama 5 menit ke depan.
+                Klik <strong>Perpanjang Sesi</strong> untuk melanjutkan pekerjaan Anda selama 10 menit ke depan.
               </p>
 
               {/* Action Buttons */}
