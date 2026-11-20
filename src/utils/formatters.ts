@@ -104,14 +104,14 @@ export function calculateLatePenalty(
 
   const diffMinutes = Math.max(0, actualTotalMinutes - schedTotalMinutes);
 
-  if (diffMinutes <= 4) {
+  if (diffMinutes <= 5) {
     return {
       lateMinutes: diffMinutes,
       category: 'TEPAT_WAKTU',
       penalty: 0,
     };
   } else if (diffMinutes <= 15) {
-    // Terlambat 5-15 menit: Potong Transport per hari
+    // Terlambat 6-15 menit: Potong Transport per hari
     return {
       lateMinutes: diffMinutes,
       category: 'TERLAMBAT_RINGAN',
@@ -137,9 +137,9 @@ export function calculateLatePenalty(
 export function getLateCategoryLabel(category: LateCategory): { label: string; color: string; badge: string } {
   switch (category) {
     case 'TEPAT_WAKTU':
-      return { label: 'Tepat Waktu (≤4 mnt)', color: 'text-emerald-700', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+      return { label: 'Tepat Waktu (≤5 mnt)', color: 'text-emerald-700', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
     case 'TERLAMBAT_RINGAN':
-      return { label: 'Terlambat Ringan (5-15 mnt)', color: 'text-amber-700', badge: 'bg-amber-50 text-amber-700 border-amber-200' };
+      return { label: 'Terlambat Ringan (6-15 mnt)', color: 'text-amber-700', badge: 'bg-amber-50 text-amber-700 border-amber-200' };
     case 'TERLAMBAT_SEDANG':
       return { label: 'Terlambat Sedang (16-30 mnt)', color: 'text-orange-700', badge: 'bg-orange-50 text-orange-700 border-orange-200' };
     case 'TERLAMBAT_BERAT':

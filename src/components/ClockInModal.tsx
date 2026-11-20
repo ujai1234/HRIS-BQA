@@ -391,11 +391,11 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
               Kedisiplinan:
             </span>
             <span className={`font-medium ${
-              penaltyCalculation.lateMinutes <= 4
+              penaltyCalculation.lateMinutes <= 5
                 ? 'text-emerald-700 dark:text-emerald-400'
                 : 'text-amber-700 dark:text-amber-400'
             }`}>
-              {penaltyCalculation.lateMinutes <= 4 ? 'Tepat Waktu' : `Terlambat ${penaltyCalculation.lateMinutes} mnt`}
+              <span>{penaltyCalculation.lateMinutes <= 5 ? 'Tepat Waktu (Bebas Potongan)' : `Terlambat ${penaltyCalculation.lateMinutes} mnt`}</span>
             </span>
           </div>
 
