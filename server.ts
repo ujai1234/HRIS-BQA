@@ -774,23 +774,33 @@ async function startServer() {
   });
 
   // ========================================================
-  // INTEGRASI PAYROLL TAHFIDZ
+  // INTEGRASI PAYROLL TAHFIDZ (DILENGKAPI FAST-TIMEOUT & RESILIENCE)
   // ========================================================
   const TAHFIDZ_BASE_URL = (process.env.TAHFIDZ_API_URL || 'https://tahfidz.baitulquranalikhwan.cloud').replace(/\/$/, '');
+  let lastTahfidzCheck = { status: false, timestamp: 0 };
 
   app.get('/api/tahfidz/status', async (_req, res) => {
+    // Fast cache 30 detik jika server tahfidz diketahui mati agar HRIS tidak lemot
+    const now = Date.now();
+    if (!lastTahfidzCheck.status && now - lastTahfidzCheck.timestamp < 30000) {
+      return res.status(503).json({ connected: false, error: 'Server Tahfidz sedang offline (cached)' });
+    }
+
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 4000);
+      const timeout = setTimeout(() => controller.abort(), 2500);
       const response = await fetch(`${TAHFIDZ_BASE_URL}/api/payroll/status`, { signal: controller.signal });
       clearTimeout(timeout);
       if (response.ok) {
         const data = await response.json() as Record<string, unknown>;
+        lastTahfidzCheck = { status: true, timestamp: now };
         res.json({ connected: true, ...data });
       } else {
+        lastTahfidzCheck = { status: false, timestamp: now };
         res.status(502).json({ connected: false, error: 'Server Tahfidz merespons dengan error' });
       }
     } catch (err: unknown) {
+      lastTahfidzCheck = { status: false, timestamp: now };
       const message = err instanceof Error ? err.message : String(err);
       res.status(503).json({ connected: false, error: `Tidak dapat menghubungi server Tahfidz: ${message}` });
     }
@@ -809,7 +819,7 @@ async function startServer() {
       }
 
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
+      const timeout = setTimeout(() => controller.abort(), 3000);
       const tahfidzRes = await fetch(
         `${TAHFIDZ_BASE_URL}/api/payroll?bulan=${bulan}&tahun=${tahun}`,
         { signal: controller.signal }
