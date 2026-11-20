@@ -119,6 +119,95 @@ export async function fetchPesantrenGeofenceSettings(): Promise<GeofenceSettings
   }
 }
 
+export interface TwoStepPositionOptions {
+  highAccuracyTimeout?: number;
+  highAccuracyMaxAge?: number;
+  fallbackTimeout?: number;
+  fallbackMaxAge?: number;
+  onProgress?: (coords: GeolocationCoordinates, accuracy: number) => void;
+}
+
+/**
+ * Two-step Geolocation acquisition with automatic graceful fallback:
+ * Step 1: Attempts high-accuracy GPS (satellite lock) with 8s timeout and 15s cache.
+ * Step 2: If timeout or position unavailable (common indoors), falls back to network/cell triangulation (10s timeout, 30s cache).
+ */
+export function getTwoStepGeolocationPosition(
+  options: TwoStepPositionOptions = {}
+): Promise<GeolocationCoordinates> {
+  const highTimeout = options.highAccuracyTimeout ?? 8000;
+  const highMaxAge = options.highAccuracyMaxAge ?? 15000;
+  const fallbackTimeout = options.fallbackTimeout ?? 10000;
+  const fallbackMaxAge = options.fallbackMaxAge ?? 30000;
+
+  return new Promise((resolve, reject) => {
+    if (typeof window === 'undefined' || !navigator?.geolocation) {
+      reject({
+        code: 0,
+        message: 'Browser atau perangkat tidak mendukung Geolocation API.',
+        type: 'UNSUPPORTED' as const,
+      });
+      return;
+    }
+
+    // Step 1: Try high accuracy first
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        if (options.onProgress) {
+          options.onProgress(pos.coords, pos.coords.accuracy ?? 999);
+        }
+        resolve(pos.coords);
+      },
+      (err1) => {
+        // If PERMISSION_DENIED (code 1), do not fallback, fail immediately
+        if (err1.code === 1) {
+          reject({
+            code: 1,
+            message: 'Izin akses lokasi ditolak. Harap izinkan akses lokasi (pilih Akurat/Tepat) pada browser Anda.',
+            type: 'PERMISSION_DENIED' as const,
+          });
+          return;
+        }
+
+        // Step 2: Fallback for indoor / satellite timeout (TIMEOUT = 3, POSITION_UNAVAILABLE = 2)
+        console.warn('[Geolocation] Step 1 (High Accuracy GPS) failed or timed out. Falling back to Step 2 (Coarse/Network location)...', err1);
+        
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            if (options.onProgress) {
+              options.onProgress(pos.coords, pos.coords.accuracy ?? 999);
+            }
+            resolve(pos.coords);
+          },
+          (err2) => {
+            let msg = 'Lokasi tidak dapat ditentukan. Pastikan GPS smartphone telah aktif.';
+            if (err2.code === 1) {
+              msg = 'Izin akses lokasi ditolak. Harap izinkan akses lokasi pada browser Anda.';
+            } else if (err2.code === 3) {
+              msg = 'Waktu permintaan lokasi habis. Coba pastikan GPS aktif lalu tekan Perbarui.';
+            }
+            reject({
+              code: err2.code,
+              message: msg,
+              type: err2.code === 1 ? 'PERMISSION_DENIED' : err2.code === 3 ? 'TIMEOUT' : 'POSITION_UNAVAILABLE'
+            });
+          },
+          {
+            enableHighAccuracy: false,
+            timeout: fallbackTimeout,
+            maximumAge: fallbackMaxAge,
+          }
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: highTimeout,
+        maximumAge: highMaxAge,
+      }
+    );
+  });
+}
+
 export interface AccuratePositionOptions {
   /** Target accuracy in meters to immediately accept (default: 25m) */
   targetAccuracyMeters?: number;
@@ -327,37 +416,37 @@ export async function preCheckDeviceGps(): Promise<GpsPreCheckResult> {
     }
   }
 
-  // Test fast GPS ping with a gentle timeout
-  return new Promise((resolve) => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        resolve({
-          state: 'READY',
-          message: 'Sinyal GPS aktif dan lokasi terverifikasi.',
-          coords: pos.coords,
-        });
-      },
-      (err) => {
-        if (err.code === 1) { // PERMISSION_DENIED
-          resolve({
-            state: 'PERMISSION_BLOCKED',
-            message: 'Izin lokasi belum diberikan atau diblokir di browser.',
-          });
-        } else if (err.code === 2) { // POSITION_UNAVAILABLE
-          resolve({
-            state: 'LOCATION_DISABLED',
-            message: 'GPS smartphone belum aktif atau sinyal satelit tidak terdeteksi.',
-          });
-        } else {
-          resolve({
-            state: 'LOCATION_DISABLED',
-            message: 'Waktu tunggu lokasi habis. Pastikan GPS aktif.',
-          });
-        }
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
-  });
+  // Test GPS using two-step fallback
+  try {
+    const coords = await getTwoStepGeolocationPosition({
+      highAccuracyTimeout: 8000,
+      highAccuracyMaxAge: 15000,
+      fallbackTimeout: 10000,
+      fallbackMaxAge: 30000,
+    });
+    return {
+      state: 'READY',
+      message: 'Alhamdulillah, sinyal GPS berhasil terdeteksi!',
+      coords,
+    };
+  } catch (err: any) {
+    if (err.code === 1 || err.type === 'PERMISSION_DENIED') {
+      return {
+        state: 'PERMISSION_BLOCKED',
+        message: 'Izin lokasi belum diberikan atau diblokir di browser.',
+      };
+    } else if (err.code === 2 || err.type === 'POSITION_UNAVAILABLE') {
+      return {
+        state: 'LOCATION_DISABLED',
+        message: 'GPS smartphone belum aktif atau sinyal satelit tidak terdeteksi.',
+      };
+    } else {
+      return {
+        state: 'LOCATION_DISABLED',
+        message: err.message || 'Waktu tunggu lokasi habis. Pastikan GPS aktif.',
+      };
+    }
+  }
 }
 
 

@@ -153,7 +153,12 @@ class DeviceNotificationService {
     urgency?: 'high' | 'medium' | 'info';
     requireInteraction?: boolean;
   }): Promise<boolean> {
-    // 1. Always play tactile feedback and chime
+    // Suppress OS-level notification if user is actively viewing the application
+    if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+      return false;
+    }
+
+    // 1. Play tactile feedback and chime when running in background
     this.triggerVibration(urgency === 'high' ? [200, 100, 200, 100, 200] : [150, 80, 150]);
     this.playChime();
 
@@ -165,9 +170,9 @@ class DeviceNotificationService {
       body,
       icon: '/logo.jpeg',
       badge: '/logo.jpeg',
-      tag: tag || `bqa_alert_${Date.now()}`,
-      renotify: true,
-      requireInteraction: requireInteraction || urgency === 'high',
+      tag: tag || 'bqa_alert_general',
+      renotify: false,
+      requireInteraction: false,
       data: {
         url,
         timestamp: Date.now()

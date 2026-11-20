@@ -30,7 +30,7 @@ export const GuruDeviceNotificationToast: React.FC = () => {
   };
 
   return (
-    <div className="fixed top-18 right-4 left-4 sm:left-auto sm:right-6 z-40 max-w-sm w-auto animate-in fade-in slide-in-from-top-3 duration-200 print:hidden pointer-events-auto">
+    <div className="fixed bottom-4 right-4 left-4 sm:bottom-auto sm:top-20 sm:left-auto sm:right-6 z-40 max-w-sm w-auto animate-in fade-in slide-in-from-bottom-3 sm:slide-in-from-top-3 duration-200 print:hidden pointer-events-auto">
       <div className={`rounded-2xl p-3.5 shadow-2xl border flex flex-col gap-2.5 transition-all bg-white dark:bg-[#131f1a] ${
         isBadal 
           ? 'border-l-4 border-l-amber-600 border-slate-200 dark:border-emerald-800/50' 

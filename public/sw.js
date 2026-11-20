@@ -7,6 +7,41 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
 
+// Handle incoming push events
+self.addEventListener('push', (event) => {
+  let data = {};
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch {
+      data = { title: "Baitul Qur'an Al-Ikhwan", body: event.data.text() };
+    }
+  }
+
+  const title = data.title || "Baitul Qur'an Al-Ikhwan";
+  const options = {
+    body: data.body || '',
+    icon: '/logo.jpeg',
+    badge: '/logo.jpeg',
+    tag: data.tag || 'bqa-notification',
+    renotify: false,
+    data: {
+      url: data.url || '/dashboard/guru'
+    }
+  };
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // If any client window is actively visible, suppress OS push notification to avoid spam
+      const isAnyVisible = clientList.some((c) => c.visibilityState === 'visible');
+      if (isAnyVisible) {
+        return;
+      }
+      return self.registration.showNotification(title, options);
+    })
+  );
+});
+
 // Handle incoming notification clicks on Phone / Tablet Lock Screen or Notification Shade
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();

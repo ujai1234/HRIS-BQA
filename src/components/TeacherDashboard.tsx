@@ -64,6 +64,7 @@ export const TeacherDashboard: React.FC = () => {
 
   // Modals state
   const [activeClockInSchedule, setActiveClockInSchedule] = useState<ClassSchedule | null>(null);
+  const [cachedGpsCoords, setCachedGpsCoords] = useState<{ latitude: number; longitude: number; accuracy?: number } | null>(null);
   const [gpsPromptSchedule, setGpsPromptSchedule] = useState<ClassSchedule | null>(null);
   const [gpsPromptState, setGpsPromptState] = useState<GpsPreCheckState>('PERMISSION_BLOCKED');
   const [isPreCheckingGps, setIsPreCheckingGps] = useState(false);
@@ -140,7 +141,14 @@ export const TeacherDashboard: React.FC = () => {
         setGpsPromptSchedule(schedule);
         setGpsPromptState(checkResult.state);
       } else {
-        // Ready or prompt supported
+        // Ready or prompt supported - cache coordinates so ClockInModal doesn't re-lock
+        if (checkResult.coords) {
+          setCachedGpsCoords({
+            latitude: checkResult.coords.latitude,
+            longitude: checkResult.coords.longitude,
+            accuracy: checkResult.coords.accuracy,
+          });
+        }
         setActiveClockInSchedule(schedule);
       }
     } catch {
@@ -601,8 +609,15 @@ export const TeacherDashboard: React.FC = () => {
         schedule={gpsPromptSchedule}
         initialState={gpsPromptState}
         onClose={() => setGpsPromptSchedule(null)}
-        onGpsGranted={(sched) => {
+        onGpsGranted={(sched, coords) => {
           setGpsPromptSchedule(null);
+          if (coords) {
+            setCachedGpsCoords({
+              latitude: coords.latitude,
+              longitude: coords.longitude,
+              accuracy: coords.accuracy,
+            });
+          }
           setActiveClockInSchedule(sched);
         }}
       />
@@ -612,6 +627,7 @@ export const TeacherDashboard: React.FC = () => {
         <ClockInModal
           schedule={activeClockInSchedule}
           teacher={currentUser}
+          initialCoordinates={cachedGpsCoords}
           onClose={() => setActiveClockInSchedule(null)}
           onSuccess={handleClockInSuccess}
         />

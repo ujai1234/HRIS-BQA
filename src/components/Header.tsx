@@ -475,43 +475,45 @@ export const Header: React.FC<HeaderProps> = ({
       }`}>
         
         {/* Main Navbar Row */}
-        <div className="h-16 px-4 sm:px-6 flex items-center justify-between gap-4">
+        <div className="h-16 px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
           
           {/* Left: Mobile Drawer Trigger & BQA Brand Status */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-2 text-[#051F20] dark:text-[#DAF1DE] hover:bg-slate-100 dark:hover:bg-[#163832]/50 rounded-lg transition-colors cursor-pointer"
+              className="lg:hidden p-1.5 sm:p-2 text-[#051F20] dark:text-[#DAF1DE] hover:bg-slate-100 dark:hover:bg-[#163832]/50 rounded-lg transition-colors cursor-pointer shrink-0"
               aria-label="Toggle Menu"
             >
               <Menu className="w-5 h-5" />
             </button>
 
             {/* BQA Islamic Brand Header */}
-            <div className="flex items-center gap-2.5">
-              <BrandLogo size="md" className="filter drop-shadow-sm" />
+            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+              <BrandLogo size="md" className="filter drop-shadow-sm shrink-0" />
 
-              <div className="leading-tight">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-display font-bold text-sm text-[#051F20] dark:text-[#DAF1DE]">Baitul Qur'an Al-Ikhwan</span>
-                  <span className="hidden md:inline-flex items-center px-2 py-0.5 text-[9px] font-bold bg-[#DAF1DE] text-[#163832] rounded border border-[#8EB69B]/30">
+              <div className="leading-tight min-w-0">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="font-display font-bold text-xs sm:text-sm text-[#051F20] dark:text-[#DAF1DE] truncate block">
+                    Baitul Qur'an Al-Ikhwan
+                  </span>
+                  <span className="hidden md:inline-flex items-center px-2 py-0.5 text-[9px] font-bold bg-[#DAF1DE] text-[#163832] rounded border border-[#8EB69B]/30 shrink-0">
                     HRIS Asatidz
                   </span>
                 </div>
-                <p className="text-[10px] text-[#8EB69B] font-medium hidden sm:block">Pondok Pesantren Tahfidz Qur'an</p>
+                <p className="text-[10px] text-[#8EB69B] font-medium hidden sm:block truncate">Pondok Pesantren Tahfidz Qur'an</p>
               </div>
             </div>
           </div>
 
           {/* Right: Actions, Filters, Notifications & Profile Controls */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             
             {/* Refresh Data Button */}
             <button
               id="btn-refresh-data"
               onClick={handleRefresh}
               disabled={isRefreshing || isLoading}
-              className="flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[#051F20] py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer disabled:opacity-50 active:scale-95 shadow-xs"
+              className="flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[#051F20] py-1.5 px-2.5 sm:px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer disabled:opacity-50 active:scale-95 shadow-xs"
               title="Segarkan Data dari Server"
             >
               <RefreshCw className={`w-3.5 h-3.5 text-[#163832] ${isRefreshing || isLoading ? 'animate-spin' : ''}`} />
@@ -523,7 +525,7 @@ export const Header: React.FC<HeaderProps> = ({
               <select
                 value={selectedPeriod}
                 onChange={(e) => setSelectedPeriod(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-xs font-semibold text-[#051F20] py-1.5 pl-3 pr-8 rounded-lg appearance-none cursor-pointer focus:outline-none focus:border-[#163832] shadow-xs max-w-[130px] sm:max-w-none"
+                className="bg-slate-50 border border-slate-200 text-xs font-semibold text-[#051F20] py-1.5 pl-2 pr-6 sm:pl-3 sm:pr-8 rounded-lg appearance-none cursor-pointer focus:outline-none focus:border-[#163832] shadow-xs max-w-[105px] xs:max-w-[125px] sm:max-w-none text-ellipsis"
               >
                 {Array.from(new Set([
                   selectedPeriod,

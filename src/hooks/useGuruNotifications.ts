@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect, useRef } from 'react';
 import { useHRIS } from '../context/HRISContext';
 import { deviceNotificationService } from '../utils/deviceNotificationService';
 import { isKepsekRole } from '../types';
+import { validateScheduleTimeWindow } from '../utils/formatters';
 
 export type GuruNotifType = 'BADAL' | 'ATTENDANCE_OPEN' | 'JOURNAL_PENDING' | 'REQUEST_UPDATE';
 
@@ -124,35 +125,45 @@ export const useGuruNotifications = () => {
       });
     });
 
-    // 2. WAKTU PRESENSI KBM SUDAH MULAI
+    // 2. WAKTU PRESENSI KBM SUDAH MULAI (Hanya jika jendela waktu absen aktif & belum diabsen)
     const myTodaySchedules = schedules.filter(
       s => s.teacherId === currentUser.id && s.dayOfWeek === activeDay
     );
 
     myTodaySchedules.forEach(sch => {
       const att = attendances.find(a => a.scheduleId === sch.id && a.date === todayStr);
-      const isClockedIn = att && (att.status === 'HADIR_LENGKAP' || att.status === 'HADIR_JURNAL_KOSONG' || att.status === 'SELESAI');
+      const isClockedIn = att && (
+        att.status === 'HADIR_LENGKAP' || 
+        att.status === 'HADIR_JURNAL_KOSONG' || 
+        att.status === 'SELESAI' || 
+        att.status === 'IZIN' || 
+        att.status === 'SAKIT'
+      );
 
       if (!isClockedIn) {
-        const notifId = `presensi_${sch.id}_${todayStr}`;
-        items.push({
-          id: notifId,
-          type: 'ATTENDANCE_OPEN',
-          title: `Waktu Presensi KBM Dimulai`,
-          subtitle: `${sch.subject} • ${sch.className} (${sch.startTime} - ${sch.endTime})`,
-          timeLabel: `${sch.startTime} WIB`,
-          urgency: 'high',
-          actionPath: '/dashboard/guru',
-          actionLabel: 'Presensi Masuk',
-          scheduleId: sch.id,
-          createdAt: todayStr,
-          isRead: readNotifIds.includes(notifId),
-          meta: {
-            subject: sch.subject,
-            className: sch.className,
-            time: `${sch.startTime} - ${sch.endTime}`
-          }
-        });
+        const timeVal = validateScheduleTimeWindow(sch);
+        // Only trigger toast banner if attendance window is currently open
+        if (timeVal.canClockIn) {
+          const notifId = `presensi_${sch.id}_${todayStr}`;
+          items.push({
+            id: notifId,
+            type: 'ATTENDANCE_OPEN',
+            title: `Waktu Presensi KBM Dimulai`,
+            subtitle: `${sch.subject} • ${sch.className} (${sch.startTime} - ${sch.endTime})`,
+            timeLabel: `${sch.startTime} WIB`,
+            urgency: 'high',
+            actionPath: '/dashboard/guru',
+            actionLabel: 'Presensi Masuk',
+            scheduleId: sch.id,
+            createdAt: todayStr,
+            isRead: readNotifIds.includes(notifId),
+            meta: {
+              subject: sch.subject,
+              className: sch.className,
+              time: `${sch.startTime} - ${sch.endTime}`
+            }
+          });
+        }
       }
     });
 
@@ -240,21 +251,17 @@ export const useGuruNotifications = () => {
     deviceNotificationService.getPermission()
   );
 
-  // Auto request permission on mobile/browser when opened if default
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
-      const timer = setTimeout(() => {
-        deviceNotificationService.requestPermission().then((perm) => {
-          setDevicePermission(perm);
-        }).catch(() => {});
-      }, 1200);
-      return () => clearTimeout(timer);
-    }
-  }, []);
+  // NOTE: Automatic requestPermission on page load is intentionally removed
+  // to strictly adhere to Chrome anti-spam policies. Permission is only requested upon explicit user click.
 
-  // Automatically trigger native OS notification on Phone / Tablet / Desktop
+  // Automatically trigger native OS notification on Phone / Tablet / Desktop ONLY when window is hidden/background
   useEffect(() => {
     if (activeDeviceAlerts.length > 0) {
+      // If user is actively looking at the page, do not send native OS notification (in-app toast is visible)
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        return;
+      }
+
       const topAlert = activeDeviceAlerts[0];
       if (!dispatchedPushIdsRef.current.has(topAlert.id)) {
         dispatchedPushIdsRef.current.add(topAlert.id);

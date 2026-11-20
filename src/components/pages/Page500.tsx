@@ -10,6 +10,19 @@ interface Page500Props {
 export const Page500: React.FC<Page500Props> = ({ onReset, error }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showErrorDetail, setShowErrorDetail] = useState(false);
+
+  const isClientError = Boolean(
+    error && (
+      error.name === 'NotFoundError' ||
+      error.message?.includes('removeChild') ||
+      error.message?.includes('insertBefore') ||
+      error.message?.includes('Node') ||
+      error.name === 'TypeError' ||
+      error.name === 'ReferenceError' ||
+      error.message?.includes('minified React error')
+    )
+  );
 
   let currentRole: string | undefined;
   let setCurrentPath: ((path: string) => void) | undefined;
@@ -49,20 +62,47 @@ export const Page500: React.FC<Page500Props> = ({ onReset, error }) => {
         <div className="flex flex-col items-center justify-center">
           {/* CoreUI Style Big Status Code */}
           <div className="flex items-baseline gap-4">
-            <h1 className="text-7xl sm:text-9xl font-black text-rose-600 dark:text-rose-500 tracking-tighter">
-              500
+            <h1 className={`text-6xl sm:text-8xl font-black tracking-tighter ${
+              isClientError 
+                ? 'text-amber-600 dark:text-amber-500' 
+                : 'text-rose-600 dark:text-rose-500'
+            }`}>
+              {isClientError ? 'APP' : '500'}
             </h1>
             <span className="text-3xl sm:text-4xl font-light text-slate-400">|</span>
             <div className="text-left">
               <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-200">
-                Houston, we have a problem!
+                {isClientError ? 'Kendala Tampilan Browser' : 'Houston, we have a problem!'}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                Server pusat sedang mengalami pemeliharaan berkala atau beban tinggi.
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                {isClientError 
+                  ? 'Terjadi kendala pada peramban/browser (biasanya akibat fitur terjemahan otomatis aktif). Data presensi Anda di server tetap aman.' 
+                  : 'Server pusat sedang mengalami pemeliharaan berkala atau beban tinggi.'}
               </p>
             </div>
           </div>
         </div>
+
+        {error && (
+          <div className="text-left bg-slate-100 dark:bg-slate-900/60 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-slate-700 dark:text-slate-300">Diagnostik Frontend:</span>
+              <button 
+                type="button" 
+                onClick={() => setShowErrorDetail(!showErrorDetail)}
+                className="text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer text-[11px]"
+              >
+                {showErrorDetail ? 'Sembunyikan' : 'Rincian Teknis'}
+              </button>
+            </div>
+            <p className="mt-1 font-mono text-rose-600 dark:text-rose-400 break-all text-[11px]">{error.message || String(error)}</p>
+            {showErrorDetail && error.stack && (
+              <pre className="mt-2 p-2 bg-black/5 dark:bg-black/30 rounded overflow-x-auto text-[10px] text-slate-500 dark:text-slate-400 max-h-40">
+                {error.stack}
+              </pre>
+            )}
+          </div>
+        )}
 
         {/* Search Input Bar (CoreUI Standard Form) */}
         <form onSubmit={(e) => { e.preventDefault(); handleReturn(); }} className="max-w-md mx-auto relative flex items-center shadow-xs">

@@ -18,7 +18,7 @@ interface GpsPermissionPromptModalProps {
   schedule: ClassSchedule | null;
   initialState?: GpsPreCheckState;
   onClose: () => void;
-  onGpsGranted: (schedule: ClassSchedule) => void;
+  onGpsGranted: (schedule: ClassSchedule, coords?: GeolocationCoordinates) => void;
 }
 
 export const GpsPermissionPromptModal: React.FC<GpsPermissionPromptModalProps> = ({
@@ -47,7 +47,7 @@ export const GpsPermissionPromptModal: React.FC<GpsPermissionPromptModalProps> =
         setStatusFeedback('Alhamdulillah, sinyal GPS berhasil terdeteksi!');
         setTimeout(() => {
           setIsChecking(false);
-          onGpsGranted(schedule);
+          onGpsGranted(schedule, result.coords);
         }, 500);
       } else {
         setStatusFeedback(result.message);
@@ -101,7 +101,7 @@ export const GpsPermissionPromptModal: React.FC<GpsPermissionPromptModalProps> =
               <span>Verifikasi Kehadiran Pesantren</span>
             </div>
             <p>
-              Assalamu'alaikum Warahmatullahi Wabarakatuh. Untuk memastikan kehadiran KBM berada di wilayah <strong>Pesantren Baitul Qur'an Al-Ikhwan</strong>, mohon aktifkan GPS pada smartphone dan izinkan akses lokasi pada browser Anda.
+              <span>Assalamu'alaikum Warahmatullahi Wabarakatuh. Untuk memastikan kehadiran KBM berada di wilayah <strong>Pesantren Baitul Qur'an Al-Ikhwan</strong>, mohon aktifkan GPS pada smartphone dan izinkan akses lokasi pada browser Anda.</span>
             </p>
           </div>
 

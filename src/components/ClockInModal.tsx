@@ -12,11 +12,12 @@ import confetti from 'canvas-confetti';
 import { ClassSchedule, Teacher } from '../types';
 import { useHRIS } from '../context/HRISContext';
 import { calculateLatePenalty, getLateCategoryLabel, validateScheduleTimeWindow } from '../utils/formatters';
-import { validateAttendanceLocation, LocationValidationResult, getAccurateCurrentPosition } from '../utils/geoUtils';
+import { validateAttendanceLocation, LocationValidationResult, getTwoStepGeolocationPosition } from '../utils/geoUtils';
 
 interface ClockInModalProps {
   schedule: ClassSchedule;
   teacher?: Teacher | null;
+  initialCoordinates?: { latitude: number; longitude: number; accuracy?: number } | null;
   onClose: () => void;
   onSuccess: (schedule: ClassSchedule) => void;
 }
@@ -24,6 +25,7 @@ interface ClockInModalProps {
 export const ClockInModal: React.FC<ClockInModalProps> = ({
   schedule,
   teacher,
+  initialCoordinates,
   onClose,
   onSuccess,
 }) => {
@@ -55,11 +57,11 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // GPS and Geofence state
-  const [userLat, setUserLat] = useState<number | null>(null);
-  const [userLng, setUserLng] = useState<number | null>(null);
-  const [userAccuracy, setUserAccuracy] = useState<number | null>(null);
-  const [isLocating, setIsLocating] = useState<boolean>(true);
+  // GPS and Geofence state - initialized with pre-checked coordinates if available
+  const [userLat, setUserLat] = useState<number | null>(initialCoordinates?.latitude ?? null);
+  const [userLng, setUserLng] = useState<number | null>(initialCoordinates?.longitude ?? null);
+  const [userAccuracy, setUserAccuracy] = useState<number | null>(initialCoordinates?.accuracy ? Math.round(initialCoordinates.accuracy) : null);
+  const [isLocating, setIsLocating] = useState<boolean>(!initialCoordinates);
   const [gpsError, setGpsError] = useState<string | null>(null);
 
   // Update live clock every second
@@ -79,7 +81,7 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
     };
   }, []);
 
-  // Detect high-accuracy GPS with progressive satellite refinement
+  // Detect location using two-step fallback (High accuracy GPS -> Network/Cell fallback)
   const detectLocation = async () => {
     if (typeof window === 'undefined' || !navigator.geolocation) {
       if (isMountedRef.current) {
@@ -95,10 +97,11 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
     }
 
     try {
-      const coords = await getAccurateCurrentPosition({
-        targetAccuracyMeters: 25,
-        maxWaitMs: 7000,
-        timeoutMs: 25000,
+      const coords = await getTwoStepGeolocationPosition({
+        highAccuracyTimeout: 8000,
+        highAccuracyMaxAge: 15000,
+        fallbackTimeout: 10000,
+        fallbackMaxAge: 30000,
         onProgress: (liveCoords, acc) => {
           if (isMountedRef.current) {
             setUserLat(liveCoords.latitude);
@@ -120,9 +123,9 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
       if (err?.code === 1 || err?.type === 'PERMISSION_DENIED') {
         msg = 'Izin lokasi ditolak. Silakan izinkan akses lokasi (pilih Akurat/Tepat) pada browser/HP Anda.';
       } else if (err?.code === 2 || err?.type === 'POSITION_UNAVAILABLE') {
-        msg = 'Lokasi tidak terdeteksi. Pastikan GPS HP aktif dan sinyal satelit terbuka.';
+        msg = 'Lokasi tidak terdeteksi. Pastikan GPS HP aktif dan coba di dekat jendela.';
       } else if (err?.code === 3 || err?.type === 'TIMEOUT') {
-        msg = 'Waktu permintaan lokasi habis. Coba nyalakan Wi-Fi dan tekan Cek Ulang Lokasi.';
+        msg = 'Waktu permintaan lokasi habis. Silakan tekan Segarkan Lokasi GPS.';
       }
       setGpsError(msg);
       setIsLocating(false);
@@ -130,7 +133,10 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
   };
 
   useEffect(() => {
-    detectLocation();
+    // If we do not have fresh initial coordinates, run location detection
+    if (!initialCoordinates) {
+      detectLocation();
+    }
   }, []);
 
   // Compute location validation result with accuracy discount
@@ -414,33 +420,38 @@ export const ClockInModal: React.FC<ClockInModalProps> = ({
               onClick={onClose}
               className="px-3.5 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
             >
-              Batal
+              <span>Batal</span>
             </button>
 
             <button
               type="submit"
-              disabled={isSubmitting || isBlocked}
-              className={`px-4 py-2 text-xs font-medium rounded-lg transition-colors cursor-pointer shadow-xs ${
-                isBlocked
+              disabled={isSubmitting || isBlocked || isLocating}
+              className={`px-4 py-2 text-xs font-medium rounded-lg transition-colors cursor-pointer shadow-xs flex items-center justify-center gap-1.5 ${
+                isBlocked || isLocating
                   ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'
                   : 'bg-emerald-700 hover:bg-emerald-800 text-white'
               }`}
             >
-              {isSubmitting 
-                ? 'Memproses...' 
-                : isAlreadyClockedIn
-                  ? 'Presensi Sudah Selesai'
-                  : !timeValidation.canClockIn
-                    ? timeValidation.status === 'TOO_EARLY'
-                      ? `Belum Waktunya (Buka ${timeValidation.allowedStartTime})`
-                      : timeValidation.status === 'EXPIRED'
-                        ? 'Waktu Absen Telah Berakhir'
-                        : `Jadwal Hari ${schedule.dayOfWeek}`
-                    : isGpsRequiredMissing 
-                      ? 'Nyalakan GPS HP' 
-                      : isOutsideRadius 
-                        ? 'Di Luar Wilayah Pesantren' 
-                        : 'Konfirmasi Absen'}
+              {isLocating && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+              <span>
+                {isSubmitting 
+                  ? 'Memproses...' 
+                  : isAlreadyClockedIn
+                    ? 'Presensi Sudah Selesai'
+                    : !timeValidation.canClockIn
+                      ? timeValidation.status === 'TOO_EARLY'
+                        ? `Belum Waktunya (Buka ${timeValidation.allowedStartTime})`
+                        : timeValidation.status === 'EXPIRED'
+                          ? 'Waktu Absen Telah Berakhir'
+                          : `Jadwal Hari ${schedule.dayOfWeek}`
+                      : isLocating 
+                        ? 'Mencari Lokasi...' 
+                        : (gpsError || !hasGps)
+                          ? 'Nyalakan GPS HP' 
+                          : isOutsideRadius 
+                            ? 'Di Luar Wilayah Pesantren' 
+                            : 'Konfirmasi Absen'}
+              </span>
             </button>
           </div>
         </form>
