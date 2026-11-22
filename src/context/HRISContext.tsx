@@ -17,6 +17,8 @@ import {
   LearningNeedStatus,
   GeofenceSettings,
   DEFAULT_GEOFENCE_SETTINGS,
+  AcademicSettings,
+  DEFAULT_ACADEMIC_SETTINGS,
   isKepsekRole,
   isKetuaSarprasRole,
   getRoleUnit,
@@ -124,6 +126,10 @@ interface HRISContextType {
   geofenceSettings: GeofenceSettings;
   updateGeofenceSettings: (settings: Partial<GeofenceSettings>) => Promise<boolean>;
 
+  // Academic Mode Settings (Peralihan KBM Reguler, UTS, UAS per Unit)
+  academicSettings: AcademicSettings;
+  updateAcademicSettings: (settings: Partial<AcademicSettings>) => Promise<boolean>;
+
   // ====== TAHFIDZ PAYROLL INTEGRATION ======
   tahfidzPayroll: import('../types').TahfidzPayrollSummary | null;
   fetchTahfidzPayroll: (bulan: number, tahun: number) => Promise<import('../types').TahfidzPayrollSummary>;
@@ -158,6 +164,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [staffAssignments, setStaffAssignments] = useState<StaffAssignedTask[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
   const [geofenceSettings, setGeofenceSettings] = useState<GeofenceSettings>(DEFAULT_GEOFENCE_SETTINGS);
+  const [academicSettings, setAcademicSettings] = useState<AcademicSettings>(DEFAULT_ACADEMIC_SETTINGS);
   const [payrollSummary, setPayrollSummary] = useState<MonthlyPayrollSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -219,7 +226,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchAllData = async () => {
     setIsLoading(true);
     try {
-      const [tRes, sRes, aRes, bRes, lRes, lnRes, gRes, stRes, seRes, saRes, pRes] = await Promise.all([
+      const [tRes, sRes, aRes, bRes, lRes, lnRes, gRes, acRes, stRes, seRes, saRes, pRes] = await Promise.all([
         fetch('/api/teachers'),
         fetch('/api/schedules'),
         fetch('/api/attendances'),
@@ -227,13 +234,14 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         fetch('/api/audit-logs'),
         fetch('/api/learning-needs'),
         fetch('/api/settings/geofence'),
+        fetch('/api/settings/academic'),
         fetch('/api/staff-tasks'),
         fetch('/api/staff-expenses'),
         fetch('/api/staff-assignments'),
         fetch(`/api/payroll?period=${selectedPeriod}`)
       ]);
 
-      const [t, s, a, b, l, ln, g, st, se, sa, p] = await Promise.all([
+      const [t, s, a, b, l, ln, g, ac, st, se, sa, p] = await Promise.all([
         tRes.json(),
         sRes.json(),
         aRes.json(),
@@ -241,6 +249,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         lRes.ok ? lRes.json() : [],
         lnRes.json(),
         gRes.ok ? gRes.json() : null,
+        acRes.ok ? acRes.json() : null,
         stRes.ok ? stRes.json() : [],
         seRes.ok ? seRes.json() : [],
         saRes.ok ? saRes.json() : [],
@@ -277,6 +286,16 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
           addressNotes: g.addressNotes || '',
           updatedAt: g.updatedAt || new Date().toISOString(),
           updatedBy: g.updatedBy || 'Administrator',
+        });
+      }
+      if (ac && (ac.pesantrenMode || ac.smpMode || ac.maMode)) {
+        setAcademicSettings({
+          id: ac.id || 'default_academic',
+          smpMode: ac.smpMode || 'REGULER',
+          maMode: ac.maMode || 'REGULER',
+          pesantrenMode: ac.pesantrenMode || 'REGULER',
+          updatedAt: ac.updatedAt || new Date().toISOString(),
+          updatedBy: ac.updatedBy || 'Administrator',
         });
       }
     } catch (error) {
@@ -1292,8 +1311,8 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const periodPrefix = parsePeriodPrefix(_period);
 
     const teacherSchedules = schedules.filter((s) => s.teacherId === teacher.id);
-    const regularSchedules = teacherSchedules.filter((s) => !s.customRate || Number(s.customRate) <= 0);
-    const customSchedules = teacherSchedules.filter((s) => s.customRate && Number(s.customRate) > 0);
+    const regularSchedules = teacherSchedules.filter((s) => (!s.customRate || Number(s.customRate) <= 0) && (!s.scheduleType || s.scheduleType === 'REGULER'));
+    const customSchedules = teacherSchedules.filter((s) => s.customRate && Number(s.customRate) > 0 && (!s.scheduleType || s.scheduleType === 'REGULER'));
 
     const weeklyRegularHours = regularSchedules.reduce((sum, s) => sum + Number(s.hours || 0), 0);
     const baseMonthlyScheduledHours = weeklyRegularHours * 4;
@@ -1612,6 +1631,47 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateAcademicSettings = async (settingsUpdate: Partial<AcademicSettings>): Promise<boolean> => {
+    const merged: AcademicSettings = {
+      ...academicSettings,
+      ...settingsUpdate,
+      updatedAt: new Date().toISOString(),
+      updatedBy: currentUser?.name || 'Administrator',
+    };
+
+    setAcademicSettings(merged);
+
+    try {
+      const res = await fetch('/api/settings/academic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(merged),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to save academic settings');
+      }
+
+      const saved = await res.json();
+      setAcademicSettings({
+        id: saved.id || 'default_academic',
+        smpMode: saved.smpMode || merged.smpMode,
+        maMode: saved.maMode || merged.maMode,
+        pesantrenMode: saved.pesantrenMode || merged.pesantrenMode,
+        updatedAt: saved.updatedAt || new Date().toISOString(),
+        updatedBy: saved.updatedBy || currentUser?.name || 'Administrator',
+      });
+
+      toast.success('Mode akademik unit (Reguler/Ujian) berhasil diperbarui!');
+      return true;
+    } catch (err) {
+      console.error('Failed to update academic settings:', err);
+      toast.error('Gagal menyimpan mode akademik ke database');
+      fetchAllData();
+      return false;
+    }
+  };
+
   // ====== TAHFIDZ PAYROLL INTEGRATION ======
   const [tahfidzPayroll, setTahfidzPayroll] = useState<import('../types').TahfidzPayrollSummary | null>(null);
 
@@ -1679,6 +1739,8 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         staffJournals,
         geofenceSettings,
         updateGeofenceSettings,
+        academicSettings,
+        updateAcademicSettings,
         currentUser,
         currentRole,
         selectedPeriod,

@@ -83,6 +83,24 @@ export interface Teacher {
 
 export type DayOfWeek = 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat' | 'Sabtu' | 'Ahad';
 
+export type ScheduleType = 'REGULER' | 'UTS' | 'UAS';
+
+export interface AcademicSettings {
+  id: string;
+  smpMode: ScheduleType;
+  maMode: ScheduleType;
+  pesantrenMode: ScheduleType;
+  updatedAt?: string;
+  updatedBy?: string;
+}
+
+export const DEFAULT_ACADEMIC_SETTINGS: AcademicSettings = {
+  id: 'default_academic',
+  smpMode: 'REGULER',
+  maMode: 'REGULER',
+  pesantrenMode: 'REGULER',
+};
+
 export interface ClassSchedule {
   id: string;
   teacherId: string;
@@ -95,6 +113,7 @@ export interface ClassSchedule {
   hours: number; // JP (Jam Pelajaran, e.g. 2 JP)
   room: string;
   customRate?: number | null;
+  scheduleType?: ScheduleType;
 }
 
 export type AttendanceStatus = 

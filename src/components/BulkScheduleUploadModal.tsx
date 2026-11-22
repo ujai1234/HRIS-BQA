@@ -10,7 +10,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
-import { ClassSchedule, UnitType, DayOfWeek } from '../types';
+import { ClassSchedule, UnitType, DayOfWeek, ScheduleType } from '../types';
 import * as XLSX from 'xlsx';
 
 // Teacher initials / code mapping from timetable
@@ -60,6 +60,7 @@ interface ParsedScheduleRow {
   hours: number;
   room: string;
   customRate?: number | null;
+  scheduleType?: ScheduleType;
   isValid: boolean;
   errors: string[];
 }
@@ -90,7 +91,8 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
       'Jam Selesai (HH:mm)',
       'Jumlah JP',
       'Ruangan',
-      'Honor Per Sesi / Ekskul (Opsional)'
+      'Honor Per Sesi / Ekskul (Opsional)',
+      'Tipe Jadwal (REGULER / UTS / UAS)'
     ];
 
     const sampleRows = [
@@ -103,18 +105,22 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
         '07:30',
         '08:50',
         '2',
-        'Kelas 7A'
+        'Kelas 7A',
+        '',
+        'REGULER'
       ],
       [
         'PBQ-2026-001',
-        'Ushul Fiqih',
+        '[UTS] Fiqih Ibadah',
         'X-MA',
         'MA',
         'Selasa',
         '09:10',
         '10:30',
         '2',
-        'Kelas 10 MA'
+        'Kelas 10 MA',
+        '',
+        'UTS'
       ],
       [
         'PBQ-2026-001',
@@ -125,7 +131,9 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
         '16:00',
         '17:20',
         '2',
-        'Masjid Utama'
+        'Masjid Utama',
+        '',
+        'REGULER'
       ]
     ];
 
@@ -190,6 +198,17 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
       const rawHours = parseInt(rawCols[7] || '2', 10);
       const rawRoom = rawCols[8] || '-';
       const rawRate = rawCols[9] ? parseInt(rawCols[9].replace(/[^0-9]/g, ''), 10) : null;
+      let rawType = (rawCols[10] || '').toUpperCase().trim();
+      if (rawType !== 'UTS' && rawType !== 'UAS' && rawType !== 'REGULER') {
+        const upperSubj = rawSubject.toUpperCase();
+        if (upperSubj.includes('UTS')) {
+          rawType = 'UTS';
+        } else if (upperSubj.includes('UAS')) {
+          rawType = 'UAS';
+        } else {
+          rawType = 'REGULER';
+        }
+      }
 
       // Validations
       if (!rawNip) errors.push('NIP Guru wajib diisi');
@@ -247,6 +266,7 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
         hours: isNaN(rawHours) ? 2 : rawHours,
         room: rawRoom,
         customRate: rawRate && !isNaN(rawRate) ? rawRate : null,
+        scheduleType: rawType as ScheduleType,
         isValid: errors.length === 0,
         errors
       });
@@ -346,7 +366,8 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
         endTime: r.endTime,
         hours: r.hours,
         room: r.room,
-        customRate: r.customRate || null
+        customRate: r.customRate || null,
+        scheduleType: r.scheduleType || 'REGULER'
       }));
 
       await addSchedulesBulk(payload);
@@ -510,7 +531,19 @@ export const BulkScheduleUploadModal: React.FC<BulkScheduleUploadModalProps> = (
                           <div className="text-[10px] font-mono text-slate-500">{row.nip}</div>
                         </td>
                         <td className="py-2 px-3 font-medium text-slate-800 dark:text-slate-300">
-                          {row.subject}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span>{row.subject}</span>
+                            {row.scheduleType === 'UTS' && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-300">
+                                UTS
+                              </span>
+                            )}
+                            {row.scheduleType === 'UAS' && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-300">
+                                UAS
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="py-2 px-3">
                           <span className="font-semibold">{row.className}</span> ({row.unit})

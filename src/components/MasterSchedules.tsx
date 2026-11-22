@@ -18,11 +18,21 @@ import { BulkScheduleUploadModal } from './BulkScheduleUploadModal';
 import { useConfirm } from '../context/ConfirmContext';
 
 export const MasterSchedules: React.FC = () => {
-  const { schedules, teachers, addSchedule, updateSchedule, deleteSchedule, resetSchedules } = useHRIS();
+  const { 
+    schedules, 
+    teachers, 
+    addSchedule, 
+    updateSchedule, 
+    deleteSchedule, 
+    resetSchedules,
+    academicSettings,
+    updateAcademicSettings
+  } = useHRIS();
   const { confirm } = useConfirm();
 
   const [selectedDayFilter, setSelectedDayFilter] = useState<string>('ALL');
   const [selectedUnitFilter, setSelectedUnitFilter] = useState<string>('ALL');
+  const [selectedTypeFilter, setSelectedTypeFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
   const [editingSchedule, setEditingSchedule] = useState<ClassSchedule | null>(null);
@@ -40,6 +50,7 @@ export const MasterSchedules: React.FC = () => {
     hours: 2,
     room: 'Kelas 7A',
     customRate: null,
+    scheduleType: 'REGULER',
   });
 
   const handleReset = async () => {
@@ -64,8 +75,10 @@ export const MasterSchedules: React.FC = () => {
 
     const matchesDay = selectedDayFilter === 'ALL' || s.dayOfWeek === selectedDayFilter;
     const matchesUnit = selectedUnitFilter === 'ALL' || s.unit === selectedUnitFilter;
+    const schedType = s.scheduleType || 'REGULER';
+    const matchesType = selectedTypeFilter === 'ALL' || schedType === selectedTypeFilter;
 
-    return matchesSearch && matchesDay && matchesUnit;
+    return matchesSearch && matchesDay && matchesUnit && matchesType;
   });
 
   const handleOpenEdit = (sched: ClassSchedule) => {
@@ -81,6 +94,7 @@ export const MasterSchedules: React.FC = () => {
       hours: sched.hours,
       room: sched.room,
       customRate: sched.customRate ?? null,
+      scheduleType: sched.scheduleType || 'REGULER',
     });
   };
 
@@ -98,6 +112,7 @@ export const MasterSchedules: React.FC = () => {
       hours: 2,
       room: 'Kelas 7A',
       customRate: null,
+      scheduleType: 'REGULER',
     });
   };
 
@@ -143,6 +158,85 @@ export const MasterSchedules: React.FC = () => {
         </span>
       </div>
 
+      {/* Mode Akademik Unit Control Bar (Solusi Tetap Peralihan UTS / UAS / Reguler) */}
+      <div className="bg-gradient-to-r from-emerald-950/20 via-emerald-900/10 to-amber-950/20 border border-emerald-800/30 rounded-2xl p-4 sm:p-5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-emerald-100">
+                Mode Akademik Unit (Peralihan KBM Reguler / Ujian)
+              </h3>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-emerald-400/80 mt-1 max-w-xl">
+              Atur status aktif per unit. Ketika unit dialihkan ke <strong>UTS</strong> atau <strong>UAS</strong>, asatidz di unit tersebut otomatis hanya melihat jadwal pengawasan ujian di dashboard, sedangkan jadwal belajar reguler tetap aman dan kafa'ah tetap terhitung.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {/* Pesantren Mode Switcher */}
+            <div className="bg-white dark:bg-[#0B2B26] border border-slate-200 dark:border-[#163832] p-2 rounded-xl shadow-xs">
+              <div className="text-[10px] font-bold text-[#8EB69B] uppercase mb-1">Unit Pesantren</div>
+              <div className="flex items-center gap-1">
+                {(['REGULER', 'UTS', 'UAS'] as const).map(mode => (
+                  <button
+                    key={mode}
+                    onClick={() => updateAcademicSettings({ pesantrenMode: mode })}
+                    className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                      (academicSettings?.pesantrenMode || 'REGULER') === mode
+                        ? mode === 'UTS' ? 'bg-amber-600 text-white shadow-xs' : mode === 'UAS' ? 'bg-purple-600 text-white shadow-xs' : 'bg-[#163832] text-white shadow-xs'
+                        : 'text-slate-500 hover:text-slate-900 dark:text-emerald-400/70 hover:bg-slate-100 dark:hover:bg-emerald-950/40'
+                    }`}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* SMP Mode Switcher */}
+            <div className="bg-white dark:bg-[#0B2B26] border border-slate-200 dark:border-[#163832] p-2 rounded-xl shadow-xs">
+              <div className="text-[10px] font-bold text-[#8EB69B] uppercase mb-1">Unit SMP</div>
+              <div className="flex items-center gap-1">
+                {(['REGULER', 'UTS', 'UAS'] as const).map(mode => (
+                  <button
+                    key={mode}
+                    onClick={() => updateAcademicSettings({ smpMode: mode })}
+                    className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                      (academicSettings?.smpMode || 'REGULER') === mode
+                        ? mode === 'UTS' ? 'bg-amber-600 text-white shadow-xs' : mode === 'UAS' ? 'bg-purple-600 text-white shadow-xs' : 'bg-[#163832] text-white shadow-xs'
+                        : 'text-slate-500 hover:text-slate-900 dark:text-emerald-400/70 hover:bg-slate-100 dark:hover:bg-emerald-950/40'
+                    }`}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* MA Mode Switcher */}
+            <div className="bg-white dark:bg-[#0B2B26] border border-slate-200 dark:border-[#163832] p-2 rounded-xl shadow-xs">
+              <div className="text-[10px] font-bold text-[#8EB69B] uppercase mb-1">Unit MA</div>
+              <div className="flex items-center gap-1">
+                {(['REGULER', 'UTS', 'UAS'] as const).map(mode => (
+                  <button
+                    key={mode}
+                    onClick={() => updateAcademicSettings({ maMode: mode })}
+                    className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                      (academicSettings?.maMode || 'REGULER') === mode
+                        ? mode === 'UTS' ? 'bg-amber-600 text-white shadow-xs' : mode === 'UAS' ? 'bg-purple-600 text-white shadow-xs' : 'bg-[#163832] text-white shadow-xs'
+                        : 'text-slate-500 hover:text-slate-900 dark:text-emerald-400/70 hover:bg-slate-100 dark:hover:bg-emerald-950/40'
+                    }`}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* 2. Advanced Search & Modern Filter Suite */}
       <div className="bqa-card p-4 sm:p-5 space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -161,6 +255,7 @@ export const MasterSchedules: React.FC = () => {
 
           {/* Top Row Right: Unit filter & Main operation buttons */}
           <div className="flex items-center gap-2.5 flex-wrap justify-end">
+            {/* Unit Filter */}
             <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 p-1.5 rounded-[12px]">
               {['ALL', 'SMP', 'MA', 'PESANTREN'].map((unit) => (
                 <button
@@ -173,6 +268,23 @@ export const MasterSchedules: React.FC = () => {
                   }`}
                 >
                   {unit === 'ALL' ? 'Semua Unit' : unit}
+                </button>
+              ))}
+            </div>
+
+            {/* Schedule Type Filter */}
+            <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 p-1.5 rounded-[12px]">
+              {['ALL', 'REGULER', 'UTS', 'UAS'].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setSelectedTypeFilter(type)}
+                  className={`px-2.5 py-1.5 rounded-[8px] text-[10px] font-bold transition-colors cursor-pointer uppercase tracking-wider ${
+                    selectedTypeFilter === type
+                      ? 'bg-[#163832] text-[#DAF1DE] shadow-xs'
+                      : 'text-[#8EB69B] hover:text-[#051F20]'
+                  }`}
+                >
+                  {type === 'ALL' ? 'Semua Tipe' : type}
                 </button>
               ))}
             </div>
@@ -297,6 +409,16 @@ export const MasterSchedules: React.FC = () => {
                       <td className="py-3.5 px-4 font-bold text-[#051F20]">
                         <div className="flex flex-wrap items-center gap-1.5">
                           <span>{s.subject}</span>
+                          {s.scheduleType === 'UTS' && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-300 dark:border-amber-800 uppercase">
+                              UTS
+                            </span>
+                          )}
+                          {s.scheduleType === 'UAS' && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-300 dark:border-purple-800 uppercase">
+                              UAS
+                            </span>
+                          )}
                           {s.customRate && s.customRate > 0 ? (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
                               ⚡ Rp {Number(s.customRate).toLocaleString('id-ID')} / Sesi
@@ -422,7 +544,7 @@ export const MasterSchedules: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nama Kelas</label>
                   <input
@@ -442,6 +564,18 @@ export const MasterSchedules: React.FC = () => {
                     <option value="SMP">SMP</option>
                     <option value="MA">MA</option>
                     <option value="PESANTREN">Pesantren</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Tipe Jadwal</label>
+                  <select
+                    value={formData.scheduleType || 'REGULER'}
+                    onChange={(e) => setFormData({ ...formData, scheduleType: e.target.value as any })}
+                    className="w-full px-2 py-2 bg-slate-50 dark:bg-[#121f1a] rounded-xl border border-slate-200 dark:border-emerald-900/40 focus:outline-none focus:border-[#1B4332] text-slate-900 dark:text-emerald-50 focus:bg-white font-medium"
+                  >
+                    <option value="REGULER">Reguler (KBM)</option>
+                    <option value="UTS">UTS (Ujian)</option>
+                    <option value="UAS">UAS (Ujian)</option>
                   </select>
                 </div>
               </div>

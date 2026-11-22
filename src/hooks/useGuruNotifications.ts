@@ -34,7 +34,8 @@ export const useGuruNotifications = () => {
     attendances, 
     badalAssignments, 
     teachers, 
-    learningNeedRequests 
+    learningNeedRequests,
+    academicSettings
   } = useHRIS();
 
   const [readNotifIds, setReadNotifIds] = useState<string[]>(() => {
@@ -126,9 +127,18 @@ export const useGuruNotifications = () => {
     });
 
     // 2. WAKTU PRESENSI KBM SUDAH MULAI (Hanya jika jendela waktu absen aktif & belum diabsen)
-    const myTodaySchedules = schedules.filter(
-      s => s.teacherId === currentUser.id && s.dayOfWeek === activeDay
-    );
+    const myTodaySchedules = schedules.filter(s => {
+      if (s.teacherId !== currentUser.id || s.dayOfWeek !== activeDay) return false;
+      const unitMode = s.unit === 'SMP'
+        ? (academicSettings?.smpMode || 'REGULER')
+        : s.unit === 'MA'
+        ? (academicSettings?.maMode || 'REGULER')
+        : s.unit === 'PESANTREN'
+        ? (academicSettings?.pesantrenMode || 'REGULER')
+        : 'REGULER';
+      const schedType = s.scheduleType || 'REGULER';
+      return schedType === unitMode;
+    });
 
     myTodaySchedules.forEach(sch => {
       const att = attendances.find(a => a.scheduleId === sch.id && a.date === todayStr);

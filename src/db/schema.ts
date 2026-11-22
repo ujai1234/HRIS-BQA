@@ -32,6 +32,7 @@ export const schedules = sqliteTable('schedules', {
   hours: integer('hours').notNull(),
   room: text('room').notNull(),
   customRate: integer('custom_rate'),
+  scheduleType: text('schedule_type').notNull().default('REGULER'),
 });
 
 export const attendances = sqliteTable('attendances', {
@@ -113,6 +114,15 @@ export const geofenceSettings = sqliteTable('geofence_settings', {
   strictMode: integer('strict_mode', { mode: 'boolean' }).notNull().default(true as any),
   enableMockBypass: integer('enable_mock_bypass', { mode: 'boolean' }).notNull().default(true as any),
   addressNotes: text('address_notes').default("Jl. KH. Al-Ikhwan No. 09, Gerbang Utama Pesantren"),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+  updatedBy: text('updated_by').default("Administrator"),
+});
+
+export const academicSettings = sqliteTable('academic_settings', {
+  id: text('id').primaryKey(),
+  smpMode: text('smp_mode').notNull().default('REGULER'),
+  maMode: text('ma_mode').notNull().default('REGULER'),
+  pesantrenMode: text('pesantren_mode').notNull().default('REGULER'),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   updatedBy: text('updated_by').default("Administrator"),
 });

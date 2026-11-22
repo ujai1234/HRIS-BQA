@@ -139,6 +139,15 @@ sqliteDb.exec(`
     updated_by TEXT DEFAULT "Administrator"
   );
 
+  CREATE TABLE IF NOT EXISTS academic_settings (
+    id TEXT PRIMARY KEY,
+    smp_mode TEXT NOT NULL DEFAULT 'REGULER',
+    ma_mode TEXT NOT NULL DEFAULT 'REGULER',
+    pesantren_mode TEXT NOT NULL DEFAULT 'REGULER',
+    updated_at INTEGER NOT NULL,
+    updated_by TEXT DEFAULT "Administrator"
+  );
+
   CREATE TABLE IF NOT EXISTS staff_tasks (
     id TEXT PRIMARY KEY,
     staff_id TEXT NOT NULL REFERENCES teachers(id),
@@ -359,6 +368,10 @@ try { sqliteDb.exec("ALTER TABLE account ADD COLUMN issuer TEXT;"); } catch(e) {
 try { sqliteDb.exec("ALTER TABLE session ADD COLUMN ip_address TEXT;"); } catch(e) {}
 try { sqliteDb.exec("ALTER TABLE session ADD COLUMN user_agent TEXT;"); } catch(e) {}
 try { sqliteDb.exec("ALTER TABLE schedules ADD COLUMN custom_rate INTEGER;"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE schedules ADD COLUMN schedule_type TEXT NOT NULL DEFAULT 'REGULER';"); } catch(e) {}
+try {
+  sqliteDb.exec("INSERT OR IGNORE INTO academic_settings (id, smp_mode, ma_mode, pesantren_mode, updated_at, updated_by) VALUES ('default_academic', 'REGULER', 'REGULER', 'REGULER', strftime('%s','now')*1000, 'Administrator');");
+} catch(e) {}
 
 // Ensure all Better-Auth credential accounts have the required local:credential issuer and account_id
 try {

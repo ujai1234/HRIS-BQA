@@ -1638,7 +1638,7 @@ async function startServer() {
   // Schedules
   app.get('/api/schedules', async (req, res) => {
     try {
-      const { teacherId, unit } = req.query;
+      const { teacherId, unit, scheduleType } = req.query;
       const conditions = [];
 
       if (teacherId && teacherId !== 'ALL' && teacherId !== 'undefined' && teacherId !== '') {
@@ -1647,6 +1647,10 @@ async function startServer() {
 
       if (unit && unit !== 'ALL' && unit !== 'undefined' && unit !== '') {
         conditions.push(eq(schema.schedules.unit, unit as any));
+      }
+
+      if (scheduleType && scheduleType !== 'ALL' && scheduleType !== 'undefined' && scheduleType !== '') {
+        conditions.push(eq(schema.schedules.scheduleType, scheduleType as any));
       }
 
       let whereClause = undefined;
@@ -1672,7 +1676,8 @@ async function startServer() {
         id: req.body.id || `SCH-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
         customRate: req.body.customRate !== undefined && req.body.customRate !== null && req.body.customRate !== ''
           ? Number(req.body.customRate)
-          : null
+          : null,
+        scheduleType: req.body.scheduleType || 'REGULER',
       };
       const result = await db.insert(schema.schedules).values(scheduleData).returning();
       res.json(result[0]);
@@ -1702,6 +1707,7 @@ async function startServer() {
         customRate: item.customRate !== undefined && item.customRate !== null && item.customRate !== ''
           ? Number(item.customRate)
           : null,
+        scheduleType: item.scheduleType || 'REGULER',
       }));
       const result = await db.insert(schema.schedules).values(sanitizedList).returning();
       res.json(result);
@@ -1730,6 +1736,7 @@ async function startServer() {
       if (req.body.endTime !== undefined) updateData.endTime = req.body.endTime;
       if (req.body.hours !== undefined) updateData.hours = Number(req.body.hours) || 2;
       if (req.body.room !== undefined) updateData.room = req.body.room;
+      if (req.body.scheduleType !== undefined) updateData.scheduleType = req.body.scheduleType || 'REGULER';
       if (req.body.customRate !== undefined) {
         updateData.customRate = (req.body.customRate === null || req.body.customRate === '' || isNaN(Number(req.body.customRate)))
           ? null
@@ -3431,9 +3438,25 @@ async function startServer() {
         where: eq(schema.schedules.dayOfWeek, currentDayIndo as any)
       });
 
+      // Get academic mode settings
+      const academic = await db.query.academicSettings.findFirst({
+        where: eq(schema.academicSettings.id, 'default_academic')
+      });
+      const getActiveUnitMode = (unit: string) => {
+        if (!academic) return 'REGULER';
+        if (unit === 'SMP') return academic.smpMode || 'REGULER';
+        if (unit === 'MA') return academic.maMode || 'REGULER';
+        if (unit === 'PESANTREN') return academic.pesantrenMode || 'REGULER';
+        return 'REGULER';
+      };
+
       const notificationsSent = [];
 
       for (const schedule of todaySchedules) {
+        // Only remind for schedules active in current academic mode
+        const activeMode = getActiveUnitMode(schedule.unit);
+        const schedType = (schedule as any).scheduleType || 'REGULER';
+        if (schedType !== activeMode) continue;
         // Check if attendance already exists for this schedule today
         const existingAttendance = await db.query.attendances.findFirst({
           where: and(
@@ -3719,6 +3742,109 @@ async function startServer() {
     } catch (error) {
       console.error('Failed to save geofence settings:', error);
       res.status(500).json({ error: 'Failed to save geofence settings', details: String(error) });
+    }
+  });
+
+  // ==========================================
+  // Academic Settings API (Unit Exam/Reguler Transition)
+  // ==========================================
+  app.get('/api/settings/academic', async (req, res) => {
+    try {
+      let settings: any = await db.query.academicSettings.findFirst({
+        where: eq(schema.academicSettings.id, 'default_academic')
+      });
+
+      if (!settings) {
+        const allSettings = await db.query.academicSettings.findMany();
+        if (allSettings.length > 0) {
+          settings = allSettings[0];
+        } else {
+          const created = await db.insert(schema.academicSettings).values({
+            id: 'default_academic',
+            smpMode: 'REGULER',
+            maMode: 'REGULER',
+            pesantrenMode: 'REGULER',
+            updatedAt: new Date(),
+            updatedBy: "Administrator"
+          }).returning();
+          settings = created[0];
+        }
+      }
+
+      res.json({
+        ...settings,
+        updatedAt: settings.updatedAt instanceof Date ? settings.updatedAt.toISOString() : (settings.updatedAt || new Date().toISOString())
+      });
+    } catch (error) {
+      console.error('Failed to fetch academic settings:', error);
+      res.status(500).json({ error: 'Failed to fetch academic settings' });
+    }
+  });
+
+  app.post('/api/settings/academic', async (req, res) => {
+    try {
+      const {
+        id = 'default_academic',
+        smpMode = 'REGULER',
+        maMode = 'REGULER',
+        pesantrenMode = 'REGULER',
+        updatedBy = 'Administrator'
+      } = req.body;
+
+      const existing = await db.query.academicSettings.findFirst({
+        where: eq(schema.academicSettings.id, id)
+      });
+
+      let result;
+      if (existing) {
+        result = await db.update(schema.academicSettings)
+          .set({
+            smpMode,
+            maMode,
+            pesantrenMode,
+            updatedAt: new Date(),
+            updatedBy,
+          })
+          .where(eq(schema.academicSettings.id, id))
+          .returning();
+      } else {
+        result = await db.insert(schema.academicSettings).values({
+          id,
+          smpMode,
+          maMode,
+          pesantrenMode,
+          updatedAt: new Date(),
+          updatedBy,
+        }).returning();
+      }
+
+      const saved = result[0];
+      const serialized = {
+        ...saved,
+        updatedAt: saved.updatedAt instanceof Date ? saved.updatedAt.toISOString() : (saved.updatedAt || new Date().toISOString())
+      };
+
+      // Add audit log
+      try {
+        await db.insert(schema.auditLogs).values({
+          id: `LOG-${Date.now()}`,
+          userId: 'T-00',
+          userName: updatedBy || 'Administrator',
+          userRole: 'ADMIN',
+          action: 'UPDATE_ACADEMIC_MODE',
+          category: 'SYSTEM',
+          details: `Pembaruan Mode Akademik: Pesantren=${pesantrenMode}, SMP=${smpMode}, MA=${maMode}`,
+          severity: 'INFO',
+          timestamp: new Date().toISOString(),
+        });
+      } catch (logErr) {
+        console.error('Failed to log academic settings update:', logErr);
+      }
+
+      res.json(serialized);
+    } catch (error) {
+      console.error('Failed to save academic settings:', error);
+      res.status(500).json({ error: 'Failed to save academic settings', details: String(error) });
     }
   });
 
@@ -4510,8 +4636,8 @@ async function startServer() {
 
       const items = targetTeachers.map((teacher: any) => {
         const teacherSchedules = schedules.filter((s: any) => s.teacherId === teacher.id);
-        const regularSchedules = teacherSchedules.filter((s: any) => !s.customRate || Number(s.customRate) <= 0);
-        const customSchedules = teacherSchedules.filter((s: any) => s.customRate && Number(s.customRate) > 0);
+        const regularSchedules = teacherSchedules.filter((s: any) => (!s.customRate || Number(s.customRate) <= 0) && (!s.scheduleType || s.scheduleType === 'REGULER'));
+        const customSchedules = teacherSchedules.filter((s: any) => s.customRate && Number(s.customRate) > 0 && (!s.scheduleType || s.scheduleType === 'REGULER'));
 
         const weeklyRegularHours = regularSchedules.reduce((sum: number, s: any) => sum + Number(s.hours || 0), 0);
         const baseMonthlyScheduledHours = weeklyRegularHours * 4;

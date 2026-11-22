@@ -30,7 +30,8 @@ export const TeacherDashboard: React.FC = () => {
     attendances, 
     badalAssignments, 
     selectedPeriod, 
-    calculateTeacherPayroll 
+    calculateTeacherPayroll,
+    academicSettings
   } = useHRIS();
 
   // Selected day for simulator (defaults to today's Indonesian day name)
@@ -78,9 +79,23 @@ export const TeacherDashboard: React.FC = () => {
 
   const teacherPayroll = calculateTeacherPayroll(currentUser.id, selectedPeriod);
 
+  // Helper to check if schedule is active according to the unit's academic mode (UTS / UAS / REGULER)
+  const isScheduleActiveInAcademicMode = (s: ClassSchedule) => {
+    const unitMode = s.unit === 'SMP'
+      ? (academicSettings?.smpMode || 'REGULER')
+      : s.unit === 'MA'
+      ? (academicSettings?.maMode || 'REGULER')
+      : s.unit === 'PESANTREN'
+      ? (academicSettings?.pesantrenMode || 'REGULER')
+      : 'REGULER';
+    const schedType = s.scheduleType || 'REGULER';
+    return schedType === unitMode;
+  };
+
   // Schedules for the selected day
   const daySchedules = schedules.filter((s) => {
     if (s.dayOfWeek !== selectedDay) return false;
+    if (!isScheduleActiveInAcademicMode(s)) return false;
     const isRegular = s.teacherId === currentUser.id;
     const isBadal = badalAssignments.some(
       (b) => b.scheduleId === s.id && b.badalTeacherId === currentUser.id && b.status !== 'PENDING'
@@ -284,6 +299,22 @@ export const TeacherDashboard: React.FC = () => {
           </div>
         </div>
 
+        {/* Academic Exam Mode Active Banner (if user's unit is in UTS / UAS) */}
+        {currentUser?.unit && (
+          (currentUser.unit === 'PESANTREN' && academicSettings?.pesantrenMode !== 'REGULER') ||
+          (currentUser.unit === 'SMP' && academicSettings?.smpMode !== 'REGULER') ||
+          (currentUser.unit === 'MA' && academicSettings?.maMode !== 'REGULER') ||
+          (currentUser.unit === 'UMUM' && (academicSettings?.pesantrenMode !== 'REGULER' || academicSettings?.smpMode !== 'REGULER' || academicSettings?.maMode !== 'REGULER'))
+        ) && (
+          <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl text-xs text-amber-900 dark:text-amber-200 flex items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
+            <div>
+              <span className="font-bold">Mode Ujian Aktif: </span>
+              <span>Unit Anda sedang menyelenggarakan ujian. Hanya jadwal pengawasan ujian yang ditampilkan dan wajib dipresensi. Jadwal KBM reguler tetap tersimpan aman.</span>
+            </div>
+          </div>
+        )}
+
         {/* Schedule Cards */}
         {daySchedules.length === 0 ? (
           <div className="text-center py-8 px-4 bg-slate-50 dark:bg-[#0f1a15]/60 dark:bg-[#0e1713] rounded-xl border border-dashed border-slate-200 dark:border-emerald-900/40">
@@ -339,6 +370,16 @@ export const TeacherDashboard: React.FC = () => {
                         {isBadalForMe && (
                           <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/40">
                             Tugas Badal
+                          </span>
+                        )}
+                        {schedule.scheduleType === 'UTS' && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800/40">
+                            Pengawas UTS
+                          </span>
+                        )}
+                        {schedule.scheduleType === 'UAS' && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-800/40">
+                            Pengawas UAS
                           </span>
                         )}
                       </div>
