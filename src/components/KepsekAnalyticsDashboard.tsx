@@ -52,7 +52,8 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
     badalAssignments, 
     currentUser,
     currentRole,
-    isDarkMode
+    isDarkMode,
+    academicSettings
   } = useHRIS();
 
   const userUnit = getRoleUnit(currentRole, currentUser?.unit);
@@ -80,6 +81,14 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
 
   const effectiveUnit: 'ALL' | UnitType = userUnit !== 'ALL' ? (userUnit as UnitType) : selectedUnit;
 
+  const activeAcademicMode = effectiveUnit === 'SMP'
+    ? (academicSettings?.smpMode || 'REGULER')
+    : effectiveUnit === 'MA'
+    ? (academicSettings?.maMode || 'REGULER')
+    : effectiveUnit === 'PESANTREN'
+    ? (academicSettings?.pesantrenMode || 'REGULER')
+    : 'CAMPURAN';
+
   // Filtered teachers and schedules
   const filteredTeachers = useMemo(() => {
     if (effectiveUnit === 'ALL') return teachers;
@@ -87,9 +96,19 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
   }, [teachers, effectiveUnit]);
 
   const filteredSchedules = useMemo(() => {
-    if (effectiveUnit === 'ALL') return schedules;
-    return schedules.filter(s => s.unit === effectiveUnit);
-  }, [schedules, effectiveUnit]);
+    return schedules.filter(s => {
+      if (effectiveUnit !== 'ALL' && s.unit !== effectiveUnit) return false;
+      const unitMode = s.unit === 'SMP'
+        ? (academicSettings?.smpMode || 'REGULER')
+        : s.unit === 'MA'
+        ? (academicSettings?.maMode || 'REGULER')
+        : s.unit === 'PESANTREN'
+        ? (academicSettings?.pesantrenMode || 'REGULER')
+        : 'REGULER';
+      const schedType = s.scheduleType || 'REGULER';
+      return schedType === unitMode;
+    });
+  }, [schedules, effectiveUnit, academicSettings]);
 
   const filteredAttendances = useMemo(() => {
     if (effectiveUnit === 'ALL') return attendances;
@@ -284,6 +303,19 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
 
           {/* Controls: Unit Filter & Refresh */}
           <div className="flex flex-wrap items-center gap-2">
+            {activeAcademicMode !== 'CAMPURAN' && (
+              <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border flex items-center gap-1.5 ${
+                activeAcademicMode === 'UTS'
+                  ? 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'
+                  : activeAcademicMode === 'UAS'
+                  ? 'bg-purple-50 text-purple-800 border-purple-300 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800'
+                  : 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
+              }`}>
+                <span className={`w-2 h-2 rounded-full ${activeAcademicMode === 'UTS' ? 'bg-amber-500 animate-pulse' : activeAcademicMode === 'UAS' ? 'bg-purple-500 animate-pulse' : 'bg-emerald-500'}`} />
+                <span>Mode Unit: {activeAcademicMode}</span>
+              </span>
+            )}
+
             {currentRole === 'ADMIN' && (
               <div className="flex bg-slate-100 dark:bg-[#0f1a15] p-0.5 rounded-lg border border-slate-200/60 dark:border-emerald-800/40 text-xs">
                 {(['ALL', 'SMP', 'MA', 'PESANTREN'] as const).map(u => (

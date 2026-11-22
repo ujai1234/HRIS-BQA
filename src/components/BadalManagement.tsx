@@ -32,7 +32,8 @@ export const BadalManagement: React.FC = () => {
     approveBadalAssignment,
     deleteBadalAssignment,
     currentUser,
-    currentRole
+    currentRole,
+    academicSettings
   } = useHRIS();
 
   const isKepsek = isKepsekRole(currentRole);
@@ -86,12 +87,22 @@ export const BadalManagement: React.FC = () => {
   // Schedules available for modal based on selected date & unit
   const filteredModalSchedules = useMemo(() => {
     const targetUnit = userUnit === 'ALL' ? modalUnit : userUnit;
+    const targetUnitMode = targetUnit === 'SMP'
+      ? (academicSettings?.smpMode || 'REGULER')
+      : targetUnit === 'MA'
+      ? (academicSettings?.maMode || 'REGULER')
+      : targetUnit === 'PESANTREN'
+      ? (academicSettings?.pesantrenMode || 'REGULER')
+      : 'REGULER';
+
     return schedules.filter(s => {
       const matchUnit = s.unit === targetUnit;
       const matchDay = s.dayOfWeek === selectedDayOfWeek;
-      return matchUnit && matchDay;
+      const schedType = s.scheduleType || 'REGULER';
+      const matchType = schedType === targetUnitMode;
+      return matchUnit && matchDay && matchType;
     });
-  }, [schedules, modalUnit, selectedDayOfWeek, userUnit]);
+  }, [schedules, modalUnit, selectedDayOfWeek, userUnit, academicSettings]);
 
   // Update schedule selection when modal unit or date changes
   const handleModalUnitOrDateChange = (newUnit: UnitType, newDate?: string) => {
@@ -962,7 +973,7 @@ export const BadalManagement: React.FC = () => {
                       const t = teachers.find((tch) => tch.id === s.teacherId);
                       return (
                         <option key={s.id} value={s.id}>
-                          {s.startTime}-{s.endTime} • {s.subject} ({s.className}) — Guru Utama: {t?.name}
+                          {s.startTime}-{s.endTime} • {s.scheduleType && s.scheduleType !== 'REGULER' ? `[${s.scheduleType}] ` : ''}{s.subject} ({s.className}) — Guru Utama: {t?.name}
                         </option>
                       );
                     })
