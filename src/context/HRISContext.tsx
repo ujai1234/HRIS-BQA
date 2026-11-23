@@ -24,7 +24,12 @@ import {
   getRoleUnit,
   getRoleDisplayName,
   UnitType,
-  StaffAssignedTask
+  StaffAssignedTask,
+  ExamEvent,
+  ExamSession,
+  ExamProctor,
+  ExamReport,
+  DayOfWeek
 } from '../types';
 import { 
   INITIAL_TEACHERS, 
@@ -130,6 +135,45 @@ interface HRISContextType {
   academicSettings: AcademicSettings;
   updateAcademicSettings: (settings: Partial<AcademicSettings>) => Promise<boolean>;
 
+  // ====== EXAM MODULE (UTS & UAS) ======
+  examEvents: ExamEvent[];
+  examSessions: ExamSession[];
+  fetchExamEvents: () => Promise<ExamEvent[]>;
+  fetchExamSessions: (params?: { eventId?: string; date?: string; unit?: string; teacherId?: string }) => Promise<ExamSession[]>;
+  createExamEvent: (event: Omit<ExamEvent, 'id' | 'createdAt'>) => Promise<ExamEvent | null>;
+  updateExamEvent: (id: string, updates: Partial<ExamEvent>) => Promise<boolean>;
+  deleteExamEvent: (id: string) => Promise<boolean>;
+  createExamSession: (session: {
+    eventId: string;
+    date: string;
+    dayOfWeek: DayOfWeek;
+    sessionName: string;
+    startTime: string;
+    endTime: string;
+    durationMinutes?: number;
+    subject: string;
+    targetClass: string;
+    roomName: string;
+    customRate?: number;
+    proctorTeacherIds: string[];
+  }) => Promise<ExamSession | null>;
+  addExamSessionsBulk: (eventId: string, sessions: any[]) => Promise<{ success: boolean; sessionsCount: number; proctorsCount: number }>;
+  deleteExamSession: (id: string) => Promise<boolean>;
+  assignExamBadal: (proctorId: string, replacementTeacherId: string, reason?: string) => Promise<boolean>;
+  clockInExamProctor: (sessionId: string, proctorId?: string, location?: any, photoUrl?: string) => Promise<AttendanceRecord | null>;
+  submitExamReport: (data: {
+    sessionId: string;
+    attendanceId: string;
+    proctorId?: string;
+    totalSantri: number;
+    presentCount: number;
+    absentCount: number;
+    sickCount: number;
+    permitCount: number;
+    violationNotes?: string;
+    handoverConfirmed?: boolean;
+  }) => Promise<boolean>;
+
   // ====== TAHFIDZ PAYROLL INTEGRATION ======
   tahfidzPayroll: import('../types').TahfidzPayrollSummary | null;
   fetchTahfidzPayroll: (bulan: number, tahun: number) => Promise<import('../types').TahfidzPayrollSummary>;
@@ -165,6 +209,8 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
   const [geofenceSettings, setGeofenceSettings] = useState<GeofenceSettings>(DEFAULT_GEOFENCE_SETTINGS);
   const [academicSettings, setAcademicSettings] = useState<AcademicSettings>(DEFAULT_ACADEMIC_SETTINGS);
+  const [examEvents, setExamEvents] = useState<ExamEvent[]>([]);
+  const [examSessions, setExamSessions] = useState<ExamSession[]>([]);
   const [payrollSummary, setPayrollSummary] = useState<MonthlyPayrollSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -226,7 +272,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchAllData = async () => {
     setIsLoading(true);
     try {
-      const [tRes, sRes, aRes, bRes, lRes, lnRes, gRes, acRes, stRes, seRes, saRes, pRes] = await Promise.all([
+      const [tRes, sRes, aRes, bRes, lRes, lnRes, gRes, acRes, stRes, seRes, saRes, pRes, eeRes, esRes] = await Promise.all([
         fetch('/api/teachers'),
         fetch('/api/schedules'),
         fetch('/api/attendances'),
@@ -238,10 +284,12 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         fetch('/api/staff-tasks'),
         fetch('/api/staff-expenses'),
         fetch('/api/staff-assignments'),
-        fetch(`/api/payroll?period=${selectedPeriod}`)
+        fetch(`/api/payroll?period=${selectedPeriod}`),
+        fetch('/api/exam-events'),
+        fetch('/api/exam-sessions')
       ]);
 
-      const [t, s, a, b, l, ln, g, ac, st, se, sa, p] = await Promise.all([
+      const [t, s, a, b, l, ln, g, ac, st, se, sa, p, ee, es] = await Promise.all([
         tRes.json(),
         sRes.json(),
         aRes.json(),
@@ -253,12 +301,16 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         stRes.ok ? stRes.json() : [],
         seRes.ok ? seRes.json() : [],
         saRes.ok ? saRes.json() : [],
-        pRes.ok ? pRes.json() : null
+        pRes.ok ? pRes.json() : null,
+        eeRes.ok ? eeRes.json() : [],
+        esRes.ok ? esRes.json() : []
       ]);
 
       setStaffJournals(Array.isArray(st) ? st : []);
       setExpenses(Array.isArray(se) ? se : []);
       setStaffAssignments(Array.isArray(sa) ? sa : []);
+      if (Array.isArray(ee)) setExamEvents(ee);
+      if (Array.isArray(es)) setExamSessions(es);
       if (p) setPayrollSummary(p);
 
       if (t.length === 0) {
@@ -316,6 +368,247 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (err) {
       console.error('Failed to refresh attendances:', err);
+    }
+  };
+
+  // ====== EXAM MODULE (UTS & UAS) ======
+  const fetchExamEvents = async (): Promise<ExamEvent[]> => {
+    try {
+      const res = await fetch('/api/exam-events');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setExamEvents(data);
+          return data;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch exam events:', e);
+    }
+    return [];
+  };
+
+  const fetchExamSessions = async (params?: { eventId?: string; date?: string; unit?: string; teacherId?: string }): Promise<ExamSession[]> => {
+    try {
+      const query = new URLSearchParams();
+      if (params?.eventId) query.append('eventId', params.eventId);
+      if (params?.date) query.append('date', params.date);
+      if (params?.unit) query.append('unit', params.unit);
+      if (params?.teacherId) query.append('teacherId', params.teacherId);
+      const url = `/api/exam-sessions${query.toString() ? `?${query.toString()}` : ''}`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setExamSessions(data);
+          return data;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch exam sessions:', e);
+    }
+    return [];
+  };
+
+  const createExamEvent = async (event: Omit<ExamEvent, 'id' | 'createdAt'>): Promise<ExamEvent | null> => {
+    try {
+      const res = await fetch('/api/exam-events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(event)
+      });
+      if (!res.ok) throw new Error('Gagal membuat event ujian');
+      const data = await res.json();
+      await fetchExamEvents();
+      toast.success('Event Ujian Berhasil Dibuat', { description: data.title });
+      return data;
+    } catch (err: any) {
+      toast.error('Gagal Membuat Event Ujian', { description: err.message });
+      return null;
+    }
+  };
+
+  const updateExamEvent = async (id: string, updates: Partial<ExamEvent>): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/exam-events/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+      if (!res.ok) throw new Error('Gagal memperbarui event ujian');
+      await fetchExamEvents();
+      toast.success('Event Ujian Diperbarui');
+      return true;
+    } catch (err: any) {
+      toast.error('Gagal Update Event Ujian', { description: err.message });
+      return false;
+    }
+  };
+
+  const deleteExamEvent = async (id: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/exam-events/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Gagal menghapus event ujian');
+      await fetchExamEvents();
+      await fetchExamSessions();
+      toast.success('Event Ujian Dihapus Beserta Sesi & Pengawasnya');
+      return true;
+    } catch (err: any) {
+      toast.error('Gagal Hapus Event Ujian', { description: err.message });
+      return false;
+    }
+  };
+
+  const createExamSession = async (session: any): Promise<ExamSession | null> => {
+    try {
+      const res = await fetch('/api/exam-sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(session)
+      });
+      if (!res.ok) throw new Error('Gagal membuat sesi ujian');
+      const data = await res.json();
+      await fetchExamSessions();
+      toast.success('Sesi Ujian Berhasil Ditambahkan');
+      return data;
+    } catch (err: any) {
+      toast.error('Gagal Tambah Sesi Ujian', { description: err.message });
+      return null;
+    }
+  };
+
+  const addExamSessionsBulk = async (eventId: string, sessions: any[]): Promise<{ success: boolean; sessionsCount: number; proctorsCount: number }> => {
+    try {
+      const res = await fetch('/api/exam-sessions/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventId, sessions })
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Gagal mengunggah jadwal ujian massal');
+      }
+      const result = await res.json();
+      await fetchExamSessions();
+      toast.success('Jadwal Ujian Berhasil Diunggah!', {
+        description: `Berhasil menambahkan ${result.sessionsCount} sesi ujian & ${result.proctorsCount} penugasan pengawas.`
+      });
+      return result;
+    } catch (err: any) {
+      toast.error('Unggah Jadwal Gagal', { description: err.message });
+      return { success: false, sessionsCount: 0, proctorsCount: 0 };
+    }
+  };
+
+  const deleteExamSession = async (id: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/exam-sessions/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Gagal menghapus sesi ujian');
+      await fetchExamSessions();
+      toast.success('Sesi Ujian Dihapus');
+      return true;
+    } catch (err: any) {
+      toast.error('Gagal Hapus Sesi Ujian', { description: err.message });
+      return false;
+    }
+  };
+
+  const assignExamBadal = async (proctorId: string, replacementTeacherId: string, reason?: string): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/exam-proctors/assign-badal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          proctorId,
+          replacementTeacherId,
+          reason,
+          assignedBy: currentUser.name || 'Admin'
+        })
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Gagal menunjuk guru badal');
+      }
+      await fetchExamSessions();
+      toast.success('Guru Badal Pengawas Berhasil Ditugaskan!');
+      return true;
+    } catch (err: any) {
+      toast.error('Gagal Menunjuk Badal Pengawas', { description: err.message });
+      return false;
+    }
+  };
+
+  const clockInExamProctor = async (sessionId: string, proctorId?: string, location?: any, photoUrl?: string): Promise<AttendanceRecord | null> => {
+    try {
+      const res = await fetch('/api/exam-attendances/clock-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          proctorId,
+          teacherId: currentUser.id,
+          clockInTime: new Date().toTimeString().slice(0, 5),
+          location,
+          photoUrl
+        })
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Gagal melakukan presensi pengawas');
+      }
+      const record = await res.json();
+      setAttendances(prev => {
+        const idx = prev.findIndex(a => a.id === record.id);
+        if (idx >= 0) {
+          const next = [...prev];
+          next[idx] = record;
+          return next;
+        }
+        return [record, ...prev];
+      });
+      await fetchExamSessions();
+      toast.success('Presensi Pengawas Berhasil!', {
+        description: `Status: ${record.lateCategory === 'TEPAT_WAKTU' ? 'Tepat Waktu' : 'Terlambat ' + record.lateMinutes + ' menit'}`
+      });
+      return record;
+    } catch (err: any) {
+      toast.error('Presensi Pengawas Gagal', { description: err.message });
+      return null;
+    }
+  };
+
+  const submitExamReport = async (data: {
+    sessionId: string;
+    attendanceId: string;
+    proctorId?: string;
+    totalSantri: number;
+    presentCount: number;
+    absentCount: number;
+    sickCount: number;
+    permitCount: number;
+    violationNotes?: string;
+    handoverConfirmed?: boolean;
+  }): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/exam-reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Gagal menyimpan Berita Acara Ujian');
+      }
+      const report = await res.json();
+      setAttendances(prev => prev.map(a => a.id === data.attendanceId ? { ...a, status: 'SELESAI', notes: data.violationNotes || 'BAP Ujian Selesai', examReport: report } : a));
+      await fetchExamSessions();
+      toast.success('Berita Acara Pengawasan Berhasil Disimpan!', {
+        description: 'Tugas pengawasan ujian selesai dan kafa\'ah tercatat.'
+      });
+      return true;
+    } catch (err: any) {
+      toast.error('Gagal Menyimpan BAP', { description: err.message });
+      return false;
     }
   };
 
@@ -1327,10 +1620,10 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // If it's a badal session, only the actual substitute teacher gets credited!
     const actualTeachingRecords = monthAttendances.filter((a) => {
       if (a.isBadal) {
-        return a.actualTeacherId === teacher.id && (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG');
+        return a.actualTeacherId === teacher.id && (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG' || !!a.clockInTime);
       }
       return (a.actualTeacherId === teacher.id || (!a.actualTeacherId && a.teacherId === teacher.id)) &&
-             (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG');
+             (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG' || !!a.clockInTime);
     });
 
     const badalSessions = actualTeachingRecords.filter((a) => a.isBadal);
@@ -1340,16 +1633,33 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let customSessionsCount = 0;
 
     for (const a of actualTeachingRecords) {
-      const sched = schedules.find((s) => s.id === a.scheduleId);
-      if (sched && sched.customRate && Number(sched.customRate) > 0) {
-        actualCustomHonorarium += Number(sched.customRate);
-        customSessionsCount += 1;
+      if (a.attendanceType === 'PENGAWAS_UJIAN' || a.examSessionId) {
+        const exSession = examSessions.find((es) => es.id === a.examSessionId);
+        if (exSession && exSession.customRate && Number(exSession.customRate) > 0) {
+          actualCustomHonorarium += Number(exSession.customRate);
+          customSessionsCount += 1;
+        } else {
+          const durMinutes = exSession ? Number(exSession.durationMinutes || 90) : 90;
+          const hours = Math.max(1, Math.round(durMinutes / 45));
+          actualRegularHoursCount += hours;
+        }
       } else {
-        actualRegularHoursCount += Number(sched ? sched.hours : 2);
+        const sched = schedules.find((s) => s.id === a.scheduleId);
+        if (sched && sched.customRate && Number(sched.customRate) > 0) {
+          actualCustomHonorarium += Number(sched.customRate);
+          customSessionsCount += 1;
+        } else {
+          actualRegularHoursCount += Number(sched ? sched.hours : 2);
+        }
       }
     }
 
     const badalHoursCount = badalSessions.reduce((sum, a) => {
+      if (a.attendanceType === 'PENGAWAS_UJIAN' || a.examSessionId) {
+        const exSession = examSessions.find((es) => es.id === a.examSessionId);
+        const durMinutes = exSession ? Number(exSession.durationMinutes || 90) : 90;
+        return sum + Math.max(1, Math.round(durMinutes / 45));
+      }
       const sched = schedules.find((s) => s.id === a.scheduleId);
       return sum + Number(sched ? sched.hours : 2);
     }, 0);
@@ -1375,6 +1685,7 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const emptyJournalRecords = monthAttendances.filter((a) => {
       const isTarget = a.isBadal ? a.actualTeacherId === teacher.id : (a.actualTeacherId === teacher.id || a.teacherId === teacher.id);
+      if (a.attendanceType === 'PENGAWAS_UJIAN' || a.examSessionId) return false;
       return isTarget && a.status === 'HADIR_JURNAL_KOSONG' && !a.journal;
     });
     const emptyJournalCount = emptyJournalRecords.length;
@@ -1741,6 +2052,19 @@ export const HRISProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateGeofenceSettings,
         academicSettings,
         updateAcademicSettings,
+        examEvents,
+        examSessions,
+        fetchExamEvents,
+        fetchExamSessions,
+        createExamEvent,
+        updateExamEvent,
+        deleteExamEvent,
+        createExamSession,
+        addExamSessionsBulk,
+        deleteExamSession,
+        assignExamBadal,
+        clockInExamProctor,
+        submitExamReport,
         currentUser,
         currentRole,
         selectedPeriod,

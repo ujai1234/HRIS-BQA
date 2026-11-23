@@ -1796,11 +1796,17 @@ async function startServer() {
       }
 
       const allJournals = await db.query.journals.findMany();
+      const allExamReports = await db.query.examReports.findMany();
 
       const records = attendancesList.map((att) => {
         const journal = allJournals.find(j => 
           j.attendanceId === att.id || 
           (j.scheduleId === att.scheduleId && j.date === att.date)
+        );
+
+        const examReport = allExamReports.find(r =>
+          r.attendanceId === att.id ||
+          (att.examSessionId && r.sessionId === att.examSessionId)
         );
 
         let formattedJournal = undefined;
@@ -1827,12 +1833,19 @@ async function startServer() {
               absentCount: journal.absentCount ?? 0,
             }
           };
+        } else if (examReport) {
+          effectiveStatus = 'SELESAI';
         }
 
         return { 
           ...att, 
           status: effectiveStatus,
-          journal: formattedJournal 
+          journal: formattedJournal,
+          examReport: examReport ? {
+            ...examReport,
+            handoverConfirmed: Boolean(examReport.handoverConfirmed),
+            submittedAt: examReport.submittedAt instanceof Date ? examReport.submittedAt.toISOString() : String(examReport.submittedAt)
+          } : undefined
         };
       });
 
@@ -3849,6 +3862,532 @@ async function startServer() {
   });
 
   // ==========================================
+  // EXAM ARCHITECTURE APIs (UTS / UAS / TO)
+  // ==========================================
+
+  // --- EXAM EVENTS ---
+  app.get('/api/exam-events', async (req, res) => {
+    try {
+      const { unit, status } = req.query;
+      let events = await db.query.examEvents.findMany({
+        orderBy: (ev, { desc }) => [desc(ev.createdAt)]
+      });
+      if (unit && unit !== 'ALL') {
+        events = events.filter(e => e.unit === unit);
+      }
+      if (status && status !== 'ALL') {
+        events = events.filter(e => e.status === status);
+      }
+      res.json(events);
+    } catch (error) {
+      console.error('Failed to fetch exam events:', error);
+      res.status(500).json({ error: 'Failed to fetch exam events' });
+    }
+  });
+
+  app.post('/api/exam-events', async (req, res) => {
+    try {
+      const { title, type, unit, startDate, endDate, defaultSessionRate, status } = req.body;
+      const id = `EVT-${Date.now()}`;
+      const newEvent = await db.insert(schema.examEvents).values({
+        id,
+        title: title || 'Ujian Tengah Semester',
+        type: type || 'UTS',
+        unit: unit || 'PESANTREN',
+        startDate: startDate || new Date().toISOString().slice(0, 10),
+        endDate: endDate || new Date().toISOString().slice(0, 10),
+        defaultSessionRate: defaultSessionRate ? Number(defaultSessionRate) : null,
+        status: status || 'ACTIVE',
+        createdAt: new Date()
+      }).returning();
+      res.json(newEvent[0]);
+    } catch (error) {
+      console.error('Failed to create exam event:', error);
+      res.status(500).json({ error: 'Failed to create exam event', details: String(error) });
+    }
+  });
+
+  app.patch('/api/exam-events/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = { ...req.body };
+      delete updates.id;
+      delete updates.createdAt;
+      if (updates.defaultSessionRate !== undefined) {
+        updates.defaultSessionRate = updates.defaultSessionRate ? Number(updates.defaultSessionRate) : null;
+      }
+      const updated = await db.update(schema.examEvents)
+        .set(updates)
+        .where(eq(schema.examEvents.id, id))
+        .returning();
+      res.json(updated[0]);
+    } catch (error) {
+      console.error('Failed to update exam event:', error);
+      res.status(500).json({ error: 'Failed to update exam event' });
+    }
+  });
+
+  app.delete('/api/exam-events/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const sessions = await db.query.examSessions.findMany({
+        where: eq(schema.examSessions.eventId, id)
+      });
+      const sessionIds = sessions.map(s => s.id);
+      for (const sId of sessionIds) {
+        await db.delete(schema.examReports).where(eq(schema.examReports.sessionId, sId));
+        await db.delete(schema.examProctors).where(eq(schema.examProctors.sessionId, sId));
+        await db.delete(schema.attendances).where(eq(schema.attendances.examSessionId, sId));
+        await db.delete(schema.examSessions).where(eq(schema.examSessions.id, sId));
+      }
+      await db.delete(schema.examEvents).where(eq(schema.examEvents.id, id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Failed to delete exam event:', error);
+      res.status(500).json({ error: 'Failed to delete exam event' });
+    }
+  });
+
+  // --- EXAM SESSIONS ---
+  app.get('/api/exam-sessions', async (req, res) => {
+    try {
+      const { eventId, date, unit, teacherId } = req.query;
+      let sessions = await db.query.examSessions.findMany();
+
+      if (eventId && eventId !== 'ALL') {
+        sessions = sessions.filter(s => s.eventId === eventId);
+      }
+      if (date && date !== 'ALL') {
+        sessions = sessions.filter(s => s.date === date);
+      }
+
+      const [allProctors, allTeachers, allAttendances, allReports, allEvents] = await Promise.all([
+        db.query.examProctors.findMany(),
+        db.query.teachers.findMany(),
+        db.query.attendances.findMany({
+          where: eq(schema.attendances.attendanceType, 'PENGAWAS_UJIAN')
+        }),
+        db.query.examReports.findMany(),
+        db.query.examEvents.findMany()
+      ]);
+
+      const eventsMap = new Map(allEvents.map(e => [e.id, e]));
+      const teachersMap = new Map(allTeachers.map(t => [t.id, t]));
+
+      if (unit && unit !== 'ALL') {
+        sessions = sessions.filter(s => {
+          const ev = eventsMap.get(s.eventId);
+          return ev && ev.unit === unit;
+        });
+      }
+
+      const results = sessions.map(sess => {
+        const sessProctors = allProctors.filter(p => p.sessionId === sess.id);
+        const enrichedProctors = sessProctors.map(p => {
+          const teacher = teachersMap.get(p.teacherId);
+          const replacementTeacher = p.replacementTeacherId ? teachersMap.get(p.replacementTeacherId) : undefined;
+          
+          const effectiveTeacherId = p.replacementTeacherId || p.teacherId;
+          const att = allAttendances.find(a => 
+            a.examProctorId === p.id || 
+            (a.examSessionId === sess.id && a.actualTeacherId === effectiveTeacherId)
+          );
+
+          let rep = undefined;
+          if (att) {
+            rep = allReports.find(r => r.attendanceId === att.id || r.sessionId === sess.id);
+          } else {
+            rep = allReports.find(r => r.sessionId === sess.id && r.proctorId === p.id);
+          }
+
+          return {
+            ...p,
+            teacher,
+            replacementTeacher,
+            attendance: att ? {
+              ...att,
+              status: rep ? 'SELESAI' : att.status,
+              examReport: rep
+            } : null,
+            report: rep
+          };
+        });
+
+        return {
+          ...sess,
+          event: eventsMap.get(sess.eventId),
+          proctors: enrichedProctors
+        };
+      });
+
+      if (teacherId && teacherId !== 'ALL') {
+        const filtered = results.filter(s => 
+          s.proctors.some((p: any) => p.teacherId === teacherId || p.replacementTeacherId === teacherId)
+        );
+        return res.json(filtered);
+      }
+
+      res.json(results);
+    } catch (error) {
+      console.error('Failed to fetch exam sessions:', error);
+      res.status(500).json({ error: 'Failed to fetch exam sessions' });
+    }
+  });
+
+  app.post('/api/exam-sessions', async (req, res) => {
+    try {
+      const {
+        eventId,
+        date,
+        dayOfWeek,
+        sessionName,
+        startTime,
+        endTime,
+        durationMinutes,
+        subject,
+        targetClass,
+        roomName,
+        customRate,
+        proctorTeacherIds = []
+      } = req.body;
+
+      const sessionId = `EXS-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+      
+      const newSession = await db.insert(schema.examSessions).values({
+        id: sessionId,
+        eventId,
+        date,
+        dayOfWeek,
+        sessionName,
+        startTime,
+        endTime,
+        durationMinutes: durationMinutes ? Number(durationMinutes) : 90,
+        subject,
+        targetClass,
+        roomName,
+        customRate: customRate ? Number(customRate) : null
+      }).returning();
+
+      const createdProctors = [];
+      for (let i = 0; i < proctorTeacherIds.length; i++) {
+        const teacherId = proctorTeacherIds[i];
+        if (!teacherId) continue;
+        const proctorId = `EXP-${Date.now()}-${i}-${Math.random().toString(36).substr(2, 4)}`;
+        const role = i === 0 ? 'PENGAWAS_1' : 'PENGAWAS_2';
+        const [proc] = await db.insert(schema.examProctors).values({
+          id: proctorId,
+          sessionId,
+          teacherId,
+          role,
+          status: 'ASSIGNED',
+          createdAt: new Date()
+        }).returning();
+        createdProctors.push(proc);
+      }
+
+      res.json({
+        ...newSession[0],
+        proctors: createdProctors
+      });
+    } catch (error) {
+      console.error('Failed to create exam session:', error);
+      res.status(500).json({ error: 'Failed to create exam session', details: String(error) });
+    }
+  });
+
+  // Bulk Upload Sessions & Proctors
+  app.post('/api/exam-sessions/bulk', async (req, res) => {
+    try {
+      const { eventId, sessions = [] } = req.body;
+      if (!eventId || !Array.isArray(sessions) || sessions.length === 0) {
+        return res.status(400).json({ error: 'Missing eventId or sessions list' });
+      }
+
+      const allTeachers = await db.query.teachers.findMany();
+      const teacherMapByName = new Map(allTeachers.map(t => [t.name.toLowerCase().trim(), t.id]));
+      const teacherMapByNip = new Map(allTeachers.map(t => [t.nip.trim(), t.id]));
+
+      let insertedSessionsCount = 0;
+      let insertedProctorsCount = 0;
+
+      for (let idx = 0; idx < sessions.length; idx++) {
+        const item = sessions[idx];
+        const sessionId = `EXS-${Date.now()}-${idx}-${Math.random().toString(36).substr(2, 6)}`;
+        
+        await db.insert(schema.examSessions).values({
+          id: sessionId,
+          eventId,
+          date: item.date,
+          dayOfWeek: item.dayOfWeek || 'SENIN',
+          sessionName: item.sessionName || 'Sesi Ujian',
+          startTime: item.startTime || '07:30',
+          endTime: item.endTime || '09:00',
+          durationMinutes: item.durationMinutes ? Number(item.durationMinutes) : 90,
+          subject: item.subject,
+          targetClass: item.targetClass || '-',
+          roomName: item.roomName || 'Ruang Ujian',
+          customRate: item.customRate ? Number(item.customRate) : null
+        });
+        insertedSessionsCount++;
+
+        const proctorIdsToAssign: string[] = [];
+        if (Array.isArray(item.proctorTeacherIds)) {
+          for (const tid of item.proctorTeacherIds) {
+            if (tid && !proctorIdsToAssign.includes(tid)) proctorIdsToAssign.push(tid);
+          }
+        }
+        if (Array.isArray(item.proctorNames)) {
+          for (const name of item.proctorNames) {
+            if (!name) continue;
+            const tid = teacherMapByName.get(name.toLowerCase().trim()) || teacherMapByNip.get(name.trim());
+            if (tid && !proctorIdsToAssign.includes(tid)) {
+              proctorIdsToAssign.push(tid);
+            }
+          }
+        }
+
+        for (let i = 0; i < proctorIdsToAssign.length; i++) {
+          const teacherId = proctorIdsToAssign[i];
+          const proctorId = `EXP-${Date.now()}-${idx}-${i}-${Math.random().toString(36).substr(2, 4)}`;
+          await db.insert(schema.examProctors).values({
+            id: proctorId,
+            sessionId,
+            teacherId,
+            role: i === 0 ? 'PENGAWAS_1' : 'PENGAWAS_2',
+            status: 'ASSIGNED',
+            createdAt: new Date()
+          });
+          insertedProctorsCount++;
+        }
+      }
+
+      res.json({
+        success: true,
+        sessionsCount: insertedSessionsCount,
+        proctorsCount: insertedProctorsCount
+      });
+    } catch (error) {
+      console.error('Failed to bulk upload exam sessions:', error);
+      res.status(500).json({ error: 'Failed to bulk upload exam sessions', details: String(error) });
+    }
+  });
+
+  app.delete('/api/exam-sessions/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      await db.delete(schema.examReports).where(eq(schema.examReports.sessionId, id));
+      await db.delete(schema.examProctors).where(eq(schema.examProctors.sessionId, id));
+      await db.delete(schema.attendances).where(eq(schema.attendances.examSessionId, id));
+      await db.delete(schema.examSessions).where(eq(schema.examSessions.id, id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Failed to delete exam session:', error);
+      res.status(500).json({ error: 'Failed to delete exam session' });
+    }
+  });
+
+  // Quick Badal Assignment for Exam Proctor
+  app.post('/api/exam-proctors/assign-badal', async (req, res) => {
+    try {
+      const { proctorId, replacementTeacherId, reason, assignedBy } = req.body;
+      if (!proctorId || !replacementTeacherId) {
+        return res.status(400).json({ error: 'Missing proctorId or replacementTeacherId' });
+      }
+
+      const proctor = await db.query.examProctors.findFirst({
+        where: eq(schema.examProctors.id, proctorId)
+      });
+      if (!proctor) {
+        return res.status(404).json({ error: 'Proctor assignment not found' });
+      }
+
+      const updated = await db.update(schema.examProctors)
+        .set({
+          status: 'REPLACED',
+          replacementTeacherId,
+          badalReason: reason || 'Badal Pengawas Ujian'
+        })
+        .where(eq(schema.examProctors.id, proctorId))
+        .returning();
+
+      try {
+        await db.insert(schema.auditLogs).values({
+          id: `LOG-${Date.now()}`,
+          userId: assignedBy || 'ADMIN',
+          userName: 'Admin / Kepsek',
+          userRole: 'KEPSEK',
+          action: 'ASSIGN_EXAM_BADAL',
+          category: 'ATTENDANCE',
+          details: `Penunjukan Badal Pengawas: Proctor ${proctorId} digantikan oleh ${replacementTeacherId} alasan: ${reason || '-'}`,
+          severity: 'INFO',
+          timestamp: new Date().toISOString()
+        });
+      } catch (logErr) {}
+
+      res.json(updated[0]);
+    } catch (error) {
+      console.error('Failed to assign exam badal:', error);
+      res.status(500).json({ error: 'Failed to assign exam badal' });
+    }
+  });
+
+  // Clock In for Exam Proctor (GPS + 5 Min Punctuality Tolerance)
+  app.post('/api/exam-attendances/clock-in', async (req, res) => {
+    try {
+      const { sessionId, proctorId, teacherId, clockInTime, location, photoUrl } = req.body;
+      if (!sessionId || !teacherId) {
+        return res.status(400).json({ error: 'Missing sessionId or teacherId' });
+      }
+
+      const session = await db.query.examSessions.findFirst({
+        where: eq(schema.examSessions.id, sessionId)
+      });
+      if (!session) {
+        return res.status(404).json({ error: 'Exam session not found' });
+      }
+
+      const teacher = await db.query.teachers.findFirst({
+        where: eq(schema.teachers.id, teacherId)
+      });
+
+      let proctor = null;
+      if (proctorId) {
+        proctor = await db.query.examProctors.findFirst({
+          where: eq(schema.examProctors.id, proctorId)
+        });
+      } else {
+        proctor = await db.query.examProctors.findFirst({
+          where: and(
+            eq(schema.examProctors.sessionId, sessionId),
+            or(
+              eq(schema.examProctors.teacherId, teacherId),
+              eq(schema.examProctors.replacementTeacherId, teacherId)
+            )
+          )
+        });
+      }
+
+      const isBadal = proctor && proctor.replacementTeacherId === teacherId;
+      const originalTeacherId = proctor ? proctor.teacherId : teacherId;
+
+      const actualClockIn = clockInTime || new Date().toTimeString().slice(0, 5);
+      const scheduledStartTime = session.startTime || '07:30';
+
+      const penaltyData = calculateLatePenalty(
+        actualClockIn,
+        scheduledStartTime,
+        teacher?.dailyTransport || 10000,
+        Math.round((session.durationMinutes || 90) / 45),
+        teacher?.hourlyRate || 40000
+      );
+
+      let existingAtt = await db.query.attendances.findFirst({
+        where: and(
+          eq(schema.attendances.examSessionId, sessionId),
+          eq(schema.attendances.actualTeacherId, teacherId)
+        )
+      });
+
+      let savedAtt;
+      if (existingAtt) {
+        const [updated] = await db.update(schema.attendances)
+          .set({
+            clockInTime: actualClockIn,
+            clockInLocation: location ? (typeof location === 'string' ? location : JSON.stringify(location)) : existingAtt.clockInLocation,
+            clockInPhoto: photoUrl || existingAtt.clockInPhoto,
+            lateMinutes: penaltyData.lateMinutes,
+            lateCategory: penaltyData.category,
+            latePenalty: penaltyData.penalty,
+            isLate: penaltyData.penalty > 0,
+            status: existingAtt.status === 'SELESAI' ? 'SELESAI' : 'HADIR_JURNAL_KOSONG'
+          })
+          .where(eq(schema.attendances.id, existingAtt.id))
+          .returning();
+        savedAtt = updated;
+      } else {
+        const attId = `ATT-EXAM-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+        const [inserted] = await db.insert(schema.attendances).values({
+          id: attId,
+          scheduleId: null,
+          teacherId: originalTeacherId,
+          actualTeacherId: teacherId,
+          isBadal: !!isBadal,
+          date: session.date,
+          clockInTime: actualClockIn,
+          clockInLocation: location ? (typeof location === 'string' ? location : JSON.stringify(location)) : null,
+          clockInPhoto: photoUrl || null,
+          lateMinutes: penaltyData.lateMinutes,
+          lateCategory: penaltyData.category,
+          latePenalty: penaltyData.penalty,
+          isLate: penaltyData.penalty > 0,
+          status: 'HADIR_JURNAL_KOSONG',
+          attendanceType: 'PENGAWAS_UJIAN',
+          examSessionId: sessionId,
+          examProctorId: proctor?.id || null,
+          notes: isBadal ? `Badal Pengawas Ujian (${session.subject})` : `Pengawas Ujian (${session.subject})`
+        }).returning();
+        savedAtt = inserted;
+      }
+
+      res.json(savedAtt);
+    } catch (error) {
+      console.error('Failed to clock in exam proctor:', error);
+      res.status(500).json({ error: 'Failed to clock in exam proctor', details: String(error) });
+    }
+  });
+
+  // Submit Exam Report (Berita Acara Pengawasan / BAP)
+  app.post('/api/exam-reports', async (req, res) => {
+    try {
+      const {
+        sessionId,
+        attendanceId,
+        proctorId,
+        totalSantri,
+        presentCount,
+        absentCount,
+        sickCount,
+        permitCount,
+        violationNotes,
+        handoverConfirmed
+      } = req.body;
+
+      if (!sessionId || !attendanceId) {
+        return res.status(400).json({ error: 'Missing sessionId or attendanceId' });
+      }
+
+      const reportId = `REP-EXAM-${Date.now()}`;
+      const [report] = await db.insert(schema.examReports).values({
+        id: reportId,
+        attendanceId,
+        sessionId,
+        proctorId: proctorId || null,
+        totalSantri: Number(totalSantri || 0),
+        presentCount: Number(presentCount || 0),
+        absentCount: Number(absentCount || 0),
+        sickCount: Number(sickCount || 0),
+        permitCount: Number(permitCount || 0),
+        violationNotes: violationNotes || null,
+        handoverConfirmed: handoverConfirmed !== false,
+        submittedAt: new Date()
+      }).returning();
+
+      // Mark attendance as SELESAI
+      await db.update(schema.attendances)
+        .set({
+          status: 'SELESAI',
+          notes: violationNotes ? `BAP Ujian Selesai. Catatan: ${violationNotes}` : 'BAP Ujian Selesai'
+        })
+        .where(eq(schema.attendances.id, attendanceId));
+
+      res.json(report);
+    } catch (error) {
+      console.error('Failed to submit exam report:', error);
+      res.status(500).json({ error: 'Failed to submit exam report', details: String(error) });
+    }
+  });
+
+  // ==========================================
   // Database Explorer API (SQLite + Drizzle ORM Inspector)  // ==========================================
   // PORTAL SANTRI (SIS) APIs
   // ==========================================
@@ -4583,23 +5122,31 @@ async function startServer() {
       const unitFilter = (req.query.unitFilter as string) || 'ALL';
       const singleTeacherId = req.query.teacherId as string | undefined;
 
-      const [teachers, schedules, rawAttendances, staffTasksList, allJournals] = await Promise.all([
+      const [teachers, schedules, rawAttendances, staffTasksList, allJournals, allExamSessions, allExamReports] = await Promise.all([
         db.query.teachers.findMany(),
         db.query.schedules.findMany(),
         db.query.attendances.findMany(),
         db.query.staffTasks.findMany(),
-        db.query.journals.findMany()
+        db.query.journals.findMany(),
+        db.query.examSessions.findMany(),
+        db.query.examReports.findMany()
       ]);
 
       const journalAttIds = new Set(allJournals.map((j: any) => j.attendanceId));
       const journalSchedDates = new Set(allJournals.map((j: any) => `${j.scheduleId}-${j.date}`));
+      const examReportAttIds = new Set(allExamReports.map((r: any) => r.attendanceId));
+      const examReportSessionIds = new Set(allExamReports.map((r: any) => r.sessionId));
 
       const attendances = rawAttendances.map((att: any) => {
         const hasJournal = journalAttIds.has(att.id) || journalSchedDates.has(`${att.scheduleId}-${att.date}`);
+        const hasExamReport = examReportAttIds.has(att.id) || (att.examSessionId && examReportSessionIds.has(att.examSessionId));
+        const isExam = att.attendanceType === 'PENGAWAS_UJIAN' || !!att.examSessionId;
         return {
           ...att,
-          status: hasJournal ? 'SELESAI' : att.status,
-          hasJournal
+          status: (hasJournal || hasExamReport) ? 'SELESAI' : att.status,
+          hasJournal,
+          hasExamReport,
+          isExam
         };
       });
 
@@ -4646,10 +5193,10 @@ async function startServer() {
         // Actual teaching records: If it's a badal session, only the actual substitute teacher gets credited!
         const actualTeachingRecords = monthAttendances.filter((a: any) => {
           if (a.isBadal) {
-            return a.actualTeacherId === teacher.id && (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG');
+            return a.actualTeacherId === teacher.id && (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG' || !!a.clockInTime);
           }
           return (a.actualTeacherId === teacher.id || (!a.actualTeacherId && a.teacherId === teacher.id)) &&
-                 (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG');
+                 (a.status === 'SELESAI' || a.status === 'HADIR_JURNAL_KOSONG' || !!a.clockInTime);
         });
 
         const badalSessions = actualTeachingRecords.filter((a: any) => a.isBadal);
@@ -4659,16 +5206,33 @@ async function startServer() {
         let customSessionsCount = 0;
 
         for (const a of actualTeachingRecords) {
-          const sched = schedules.find((s: any) => s.id === a.scheduleId);
-          if (sched && sched.customRate && Number(sched.customRate) > 0) {
-            actualCustomHonorarium += Number(sched.customRate);
-            customSessionsCount += 1;
+          if (a.isExam || a.attendanceType === 'PENGAWAS_UJIAN' || a.examSessionId) {
+            const exSession = allExamSessions.find((es: any) => es.id === a.examSessionId);
+            if (exSession && exSession.customRate && Number(exSession.customRate) > 0) {
+              actualCustomHonorarium += Number(exSession.customRate);
+              customSessionsCount += 1;
+            } else {
+              const durMinutes = exSession ? Number(exSession.durationMinutes || 90) : 90;
+              const hours = Math.max(1, Math.round(durMinutes / 45));
+              actualRegularHoursCount += hours;
+            }
           } else {
-            actualRegularHoursCount += Number(sched ? sched.hours : 2);
+            const sched = schedules.find((s: any) => s.id === a.scheduleId);
+            if (sched && sched.customRate && Number(sched.customRate) > 0) {
+              actualCustomHonorarium += Number(sched.customRate);
+              customSessionsCount += 1;
+            } else {
+              actualRegularHoursCount += Number(sched ? sched.hours : 2);
+            }
           }
         }
 
         const badalHoursCount = badalSessions.reduce((sum: number, a: any) => {
+          if (a.isExam || a.attendanceType === 'PENGAWAS_UJIAN' || a.examSessionId) {
+            const exSession = allExamSessions.find((es: any) => es.id === a.examSessionId);
+            const durMinutes = exSession ? Number(exSession.durationMinutes || 90) : 90;
+            return sum + Math.max(1, Math.round(durMinutes / 45));
+          }
           const sched = schedules.find((s: any) => s.id === a.scheduleId);
           return sum + Number(sched ? sched.hours : 2);
         }, 0);
@@ -4695,6 +5259,7 @@ async function startServer() {
 
         const emptyJournalRecords = monthAttendances.filter((a: any) => {
           const isTarget = a.isBadal ? a.actualTeacherId === teacher.id : (a.actualTeacherId === teacher.id || a.teacherId === teacher.id);
+          if (a.isExam || a.attendanceType === 'PENGAWAS_UJIAN' || a.examSessionId) return false;
           return isTarget && a.status === 'HADIR_JURNAL_KOSONG' && !a.hasJournal;
         });
         const emptyJournalCount = emptyJournalRecords.length;

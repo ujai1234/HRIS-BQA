@@ -10,7 +10,11 @@ import {
   Star,
   TrendingUp,
   Sparkles,
-  UserCheck
+  UserCheck,
+  Calendar,
+  MapPin,
+  AlertTriangle,
+  Clock
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -33,8 +37,9 @@ import {
   Tooltip
 } from 'recharts';
 import { useHRIS } from '../context/HRISContext';
-import { UnitType, getRoleUnit, AttendanceRecord, ClassSchedule } from '../types';
+import { UnitType, getRoleUnit, AttendanceRecord, ClassSchedule, ExamSession, ExamProctor } from '../types';
 import { TeacherAvatar } from './TeacherAvatar';
+import { AssignExamBadalModal } from './AssignExamBadalModal';
 
 interface KepsekAnalyticsDashboardProps {
   onNavigateToAudit?: () => void;
@@ -53,13 +58,27 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
     currentUser,
     currentRole,
     isDarkMode,
-    academicSettings
+    academicSettings,
+    examEvents,
+    examSessions
   } = useHRIS();
 
   const userUnit = getRoleUnit(currentRole, currentUser?.unit);
 
+  const effectiveUnit: 'ALL' | UnitType = userUnit !== 'ALL' ? (userUnit as UnitType) : 'PESANTREN';
+
+  const activeAcademicMode = effectiveUnit === 'SMP'
+    ? (academicSettings?.smpMode || 'REGULER')
+    : effectiveUnit === 'MA'
+    ? (academicSettings?.maMode || 'REGULER')
+    : effectiveUnit === 'PESANTREN'
+    ? (academicSettings?.pesantrenMode || 'REGULER')
+    : 'CAMPURAN';
+
   // Active Main Tab within Monitoring
-  const [activeView, setActiveView] = useState<'REALTIME' | 'BADAL' | 'REKAP'>('REALTIME');
+  const [activeView, setActiveView] = useState<'REALTIME' | 'UJIAN' | 'BADAL' | 'REKAP'>(
+    activeAcademicMode !== 'REGULER' ? 'UJIAN' : 'REALTIME'
+  );
 
   // Filters State
   const [selectedUnit, setSelectedUnit] = useState<'ALL' | UnitType>(
@@ -71,6 +90,7 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
   const [lastUpdated, setLastUpdated] = useState('10:12');
   const [selectedSessionDetail, setSelectedSessionDetail] = useState<any | null>(null);
   const [selectedTopTeacherDetail, setSelectedTopTeacherDetail] = useState<any | null>(null);
+  const [examBadalTarget, setExamBadalTarget] = useState<{ session: ExamSession; proctor: ExamProctor } | null>(null);
 
   // Keep selectedUnit strictly synchronized if user role is specific Kepsek
   useEffect(() => {
@@ -79,15 +99,21 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
     }
   }, [userUnit, currentRole]);
 
-  const effectiveUnit: 'ALL' | UnitType = userUnit !== 'ALL' ? (userUnit as UnitType) : selectedUnit;
-
-  const activeAcademicMode = effectiveUnit === 'SMP'
-    ? (academicSettings?.smpMode || 'REGULER')
-    : effectiveUnit === 'MA'
-    ? (academicSettings?.maMode || 'REGULER')
-    : effectiveUnit === 'PESANTREN'
-    ? (academicSettings?.pesantrenMode || 'REGULER')
-    : 'CAMPURAN';
+  const todayDateStr = new Date().toISOString().slice(0, 10);
+  const todayExamSessions = useMemo(() => {
+    return examSessions.filter(s => {
+      if (s.date !== todayDateStr) {
+        const todayDayMap: Record<number, string> = {
+          1: 'SENIN', 2: 'SELASA', 3: 'RABU', 4: 'KAMIS', 5: 'JUMAT', 6: 'SABTU', 0: 'AHAD'
+        };
+        const curDay = todayDayMap[new Date().getDay()] || 'SENIN';
+        if (s.dayOfWeek !== curDay) return false;
+      }
+      const ev = examEvents.find(e => e.id === s.eventId);
+      if (selectedUnit !== 'ALL' && ev && ev.unit !== selectedUnit) return false;
+      return true;
+    });
+  }, [examSessions, examEvents, selectedUnit, todayDateStr]);
 
   // Filtered teachers and schedules
   const filteredTeachers = useMemo(() => {
@@ -358,6 +384,17 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
             Live Sesi Hari Ini ({totalSessionsToday})
           </button>
           <button
+            onClick={() => setActiveView('UJIAN')}
+            className={`px-4 py-2 rounded-full transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeView === 'UJIAN'
+                ? 'bg-amber-600 text-white font-semibold shadow-md'
+                : 'text-slate-500 hover:text-[#051F20] dark:text-[#8EB69B]/70 dark:hover:text-[#DAF1DE] hover:bg-slate-50 dark:hover:bg-[#163832]/30'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            <span>Monitoring Ujian ({todayExamSessions.length})</span>
+          </button>
+          <button
             onClick={() => setActiveView('BADAL')}
             className={`px-4 py-2 rounded-full transition-all cursor-pointer flex items-center gap-2 ${
               activeView === 'BADAL'
@@ -451,6 +488,145 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
           </div>
         </div>
       </div>
+
+      {/* VIEW: LIVE EXAM ROOMS MONITORING */}
+      {activeView === 'UJIAN' && (
+        <div className="bg-white dark:bg-[#0B2B26]/60 border border-slate-200/80 dark:border-[#163832] rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] overflow-hidden space-y-4 p-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-[#163832] pb-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-500" />
+                Live Monitoring Ruang Ujian Hari Ini
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold">
+                  {todayExamSessions.length} Ruang & Sesi
+                </span>
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-emerald-400/80 mt-0.5">
+                Pantau kehadiran pengawas di setiap ruang ujian secara real-time. Tunjuk guru badal instan jika ustadz berhalangan hadir.
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500 dark:text-emerald-400/70">
+                Toleransi: ≤5 mnt (Tepat Waktu)
+              </span>
+            </div>
+          </div>
+
+          {todayExamSessions.length === 0 ? (
+            <div className="py-12 text-center text-slate-400">
+              <Calendar className="w-8 h-8 mx-auto opacity-40 mb-2" />
+              <p className="text-xs font-semibold">Tidak ada sesi ujian yang terjadwal untuk hari ini.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 dark:bg-[#051F20] text-slate-500 dark:text-emerald-400 uppercase text-[10px] font-bold border-b border-slate-200 dark:border-[#163832]">
+                  <tr>
+                    <th className="py-3 px-4">Ruang Ujian & Sesi</th>
+                    <th className="py-3 px-4">Mata Pelajaran & Kelas</th>
+                    <th className="py-3 px-4">Pengawas Terjadwal</th>
+                    <th className="py-3 px-4">Status Kehadiran</th>
+                    <th className="py-3 px-4">BAP Ujian</th>
+                    <th className="py-3 px-4 text-center w-28">Aksi Cepat</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-[#163832]">
+                  {todayExamSessions.map((sess) => {
+                    return (
+                      <tr key={sess.id} className="hover:bg-slate-50/50 dark:hover:bg-[#163832]/20">
+                        <td className="py-3.5 px-4">
+                          <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                            <MapPin className="w-3.5 h-3.5 text-rose-500" />
+                            <span>{sess.roomName}</span>
+                          </div>
+                          <div className="text-[11px] text-slate-500 font-mono mt-0.5">
+                            {sess.startTime} - {sess.endTime} ({sess.sessionName})
+                          </div>
+                        </td>
+
+                        <td className="py-3.5 px-4">
+                          <div className="font-bold text-slate-900 dark:text-white">{sess.subject}</div>
+                          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Kelas {sess.targetClass}</div>
+                        </td>
+
+                        <td className="py-3.5 px-4">
+                          <div className="space-y-1">
+                            {sess.proctors?.map((p, idx) => {
+                              const teacher = teachers.find(t => t.id === p.teacherId);
+                              const repl = p.replacementTeacherId ? teachers.find(t => t.id === p.replacementTeacherId) : null;
+                              return (
+                                <div key={idx} className="text-xs">
+                                  {p.replacementTeacherId ? (
+                                    <div>
+                                      <span className="line-through text-slate-400 text-[10px] mr-1">{teacher?.name}</span>
+                                      <span className="font-bold text-amber-600 dark:text-amber-400">✓ Badal: {repl?.name}</span>
+                                    </div>
+                                  ) : (
+                                    <span className="font-semibold text-slate-800 dark:text-emerald-100">{teacher?.name || p.teacherId}</span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </td>
+
+                        <td className="py-3.5 px-4">
+                          <div className="space-y-1">
+                            {sess.proctors?.map((p, idx) => {
+                              const att = p.attendance;
+                              if (att && att.clockInTime) {
+                                return (
+                                  <div key={idx} className="flex items-center gap-1.5">
+                                    <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold text-[10px]">
+                                      ✓ Hadir {att.clockInTime}
+                                    </span>
+                                    <span className="text-[10px] text-slate-500">
+                                      ({att.lateCategory === 'TEPAT_WAKTU' ? 'Tepat Waktu' : `Terlambat ${att.lateMinutes} mnt`})
+                                    </span>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <span key={idx} className="px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-600 font-bold text-[10px]">
+                                  Belum Hadir
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </td>
+
+                        <td className="py-3.5 px-4">
+                          {sess.proctors?.some(p => p.report || p.attendance?.status === 'SELESAI') ? (
+                            <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold text-[11px]">
+                              <CheckCircle2 className="w-3.5 h-3.5" /> BAP Terisi
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 text-[11px]">Menunggu Pelaksanaan</span>
+                          )}
+                        </td>
+
+                        <td className="py-3.5 px-4 text-center">
+                          {sess.proctors?.[0] && (
+                            <button
+                              onClick={() => setExamBadalTarget({ session: sess, proctor: sess.proctors![0] })}
+                              className="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-[11px] font-bold transition-all cursor-pointer inline-flex items-center gap-1"
+                              title="Tunjuk Badal Pengawas jika ustadz berhalangan"
+                            >
+                              <UserCheck className="w-3 h-3" />
+                              <span>Tunjuk Badal</span>
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 3. VIEW 1: LIVE REALTIME MONITORING TABLE */}
       {activeView === 'REALTIME' && (
@@ -1225,6 +1401,16 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
             </div>
           </div>
         </div>
+      )}
+
+      {/* Quick Badal Modal for Exam */}
+      {examBadalTarget && (
+        <AssignExamBadalModal
+          isOpen={!!examBadalTarget}
+          onClose={() => setExamBadalTarget(null)}
+          session={examBadalTarget.session}
+          proctor={examBadalTarget.proctor}
+        />
       )}
 
     </div>

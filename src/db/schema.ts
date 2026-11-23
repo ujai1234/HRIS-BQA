@@ -37,7 +37,7 @@ export const schedules = sqliteTable('schedules', {
 
 export const attendances = sqliteTable('attendances', {
   id: text('id').primaryKey(),
-  scheduleId: text('schedule_id').references(() => schedules.id).notNull(),
+  scheduleId: text('schedule_id'),
   teacherId: text('teacher_id').references(() => teachers.id).notNull(),
   actualTeacherId: text('actual_teacher_id').references(() => teachers.id).notNull(),
   isBadal: integer('is_badal', { mode: 'boolean' }).notNull().default(false as any),
@@ -48,6 +48,9 @@ export const attendances = sqliteTable('attendances', {
   latePenalty: integer('late_penalty').notNull().default(0),
   status: text('status').notNull().default('BELUM_HADIR'),
   notes: text('notes'),
+  attendanceType: text('attendance_type').notNull().default('KBM_REGULER'),
+  examSessionId: text('exam_session_id'),
+  examProctorId: text('exam_proctor_id'),
 });
 
 export const journals = sqliteTable('journals', {
@@ -377,4 +380,61 @@ export const financeTransactions = sqliteTable('finance_transactions', {
   referenceType: text('reference_type'), // 'SANTRI', 'EMPLOYEE', 'OPERATIONAL'
   referenceId: text('reference_id'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+
+// ==========================================
+// EXAM MODULE TABLES (UTS & UAS ARCHITECTURE)
+// ==========================================
+
+export const examEvents = sqliteTable('exam_events', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  type: text('type').notNull().default('UTS'), // 'UTS' | 'UAS' | 'TO'
+  unit: text('unit').notNull().default('PESANTREN'), // 'PESANTREN' | 'SMP' | 'MA'
+  startDate: text('start_date').notNull(), // YYYY-MM-DD
+  endDate: text('end_date').notNull(), // YYYY-MM-DD
+  status: text('status').notNull().default('ACTIVE'), // 'DRAFT' | 'ACTIVE' | 'COMPLETED'
+  defaultSessionRate: integer('default_session_rate'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+
+export const examSessions = sqliteTable('exam_sessions', {
+  id: text('id').primaryKey(),
+  eventId: text('event_id').references(() => examEvents.id).notNull(),
+  date: text('date').notNull(), // YYYY-MM-DD
+  dayOfWeek: text('day_of_week').notNull(),
+  sessionName: text('session_name').notNull(), // e.g. 'Sesi 1 (Pagi)'
+  startTime: text('start_time').notNull(), // '07:30'
+  endTime: text('end_time').notNull(), // '09:00'
+  durationMinutes: integer('duration_minutes').notNull().default(90),
+  subject: text('subject').notNull(),
+  targetClass: text('target_class').notNull(),
+  roomName: text('room_name').notNull(),
+  customRate: integer('custom_rate'),
+});
+
+export const examProctors = sqliteTable('exam_proctors', {
+  id: text('id').primaryKey(),
+  sessionId: text('session_id').references(() => examSessions.id).notNull(),
+  teacherId: text('teacher_id').references(() => teachers.id).notNull(),
+  role: text('role').notNull().default('PENGAWAS_1'), // 'PENGAWAS_1' | 'PENGAWAS_2'
+  status: text('status').notNull().default('ASSIGNED'), // 'ASSIGNED' | 'BADAL_REQUESTED' | 'REPLACED'
+  replacementTeacherId: text('replacement_teacher_id').references(() => teachers.id),
+  badalReason: text('badal_reason'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+
+export const examReports = sqliteTable('exam_reports', {
+  id: text('id').primaryKey(),
+  attendanceId: text('attendance_id').references(() => attendances.id).notNull(),
+  sessionId: text('session_id').references(() => examSessions.id).notNull(),
+  proctorId: text('proctor_id').references(() => examProctors.id),
+  totalSantri: integer('total_santri').notNull().default(0),
+  presentCount: integer('present_count').notNull().default(0),
+  absentCount: integer('absent_count').notNull().default(0),
+  sickCount: integer('sick_count').notNull().default(0),
+  permitCount: integer('permit_count').notNull().default(0),
+  violationNotes: text('violation_notes'),
+  handoverConfirmed: integer('handover_confirmed', { mode: 'boolean' }).notNull().default(true as any),
+  submittedAt: integer('submitted_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });

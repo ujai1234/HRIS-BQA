@@ -9,17 +9,20 @@ import {
   CalendarOff,
   Check,
   Lock,
-  Camera
+  Camera,
+  Sparkles,
+  UserCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useHRIS } from '../context/HRISContext';
-import { ClassSchedule, AttendanceRecord } from '../types';
+import { ClassSchedule, AttendanceRecord, ExamSession, ExamProctor } from '../types';
 import { ClockInModal } from './ClockInModal';
 import { JournalModal } from './JournalModal';
 import { TeacherLeaveModal } from './TeacherLeaveModal';
 import { GpsPermissionPromptModal } from './GpsPermissionPromptModal';
 import { TeacherAvatar } from './TeacherAvatar';
 import { UserProfileModal } from './UserProfileModal';
+import { ExamReportModal } from './ExamReportModal';
 import { preCheckDeviceGps, GpsPreCheckState } from '../services/geofenceService';
 import { validateScheduleTimeWindow, getTodayIndonesianDayName } from '../utils/formatters';
 
@@ -31,7 +34,9 @@ export const TeacherDashboard: React.FC = () => {
     badalAssignments, 
     selectedPeriod, 
     calculateTeacherPayroll,
-    academicSettings
+    academicSettings,
+    examSessions,
+    clockInExamProctor
   } = useHRIS();
 
   // Selected day for simulator (defaults to today's Indonesian day name)
@@ -77,7 +82,52 @@ export const TeacherDashboard: React.FC = () => {
   const [leaveTargetSchedule, setLeaveTargetSchedule] = useState<ClassSchedule | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
+  // Exam Module States
+  const [activeExamReportData, setActiveExamReportData] = useState<{
+    session: ExamSession;
+    proctor: ExamProctor;
+    attendance: AttendanceRecord;
+  } | null>(null);
+  const [isClockingInExam, setIsClockingInExam] = useState(false);
+
   const teacherPayroll = calculateTeacherPayroll(currentUser.id, selectedPeriod);
+
+  // Today's Exam Sessions assigned to currentUser (either original or badal replacement)
+  const todayDateStr = new Date().toISOString().slice(0, 10);
+  const myExamSessionsToday = examSessions.filter(s => {
+    if (s.date !== todayDateStr && s.dayOfWeek !== selectedDay) return false;
+    return s.proctors?.some(p => 
+      (p.teacherId === currentUser.id && p.status !== 'REPLACED') ||
+      p.replacementTeacherId === currentUser.id
+    );
+  });
+
+  const handleExamClockIn = async (session: ExamSession, proctor: ExamProctor) => {
+    setIsClockingInExam(true);
+    try {
+      let coords: { latitude: number; longitude: number } | undefined = undefined;
+      if (navigator.geolocation) {
+        try {
+          const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000, enableHighAccuracy: true });
+          });
+          coords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+        } catch (geoErr) {
+          console.warn('Geolocation warning, proceeding:', geoErr);
+        }
+      }
+      const record = await clockInExamProctor(session.id, proctor.id, coords);
+      if (record) {
+        toast.success('Presensi Pengawas Berhasil!', {
+          description: `Tercatat jam ${record.clockInTime} WIB`
+        });
+      }
+    } catch (err: any) {
+      toast.error('Gagal Presensi Pengawas', { description: err.message });
+    } finally {
+      setIsClockingInExam(false);
+    }
+  };
 
   // Helper to check if schedule is active according to the unit's academic mode (UTS / UAS / REGULER)
   const isScheduleActiveInAcademicMode = (s: ClassSchedule) => {
@@ -257,6 +307,147 @@ export const TeacherDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Tugas Pengawasan Ujian Hari Ini (UTS / UAS) */}
+      {myExamSessionsToday.length > 0 && (
+        <div className="bqa-card p-5 sm:p-6 space-y-4 border-2 border-amber-500/40 bg-gradient-to-br from-amber-500/5 via-transparent to-emerald-500/5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-500/20 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  Tugas Pengawasan Ujian (UTS / UAS)
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold">
+                    {myExamSessionsToday.length} Sesi Terjadwal
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-emerald-400/80">
+                  Presensi tepat waktu (toleransi ≤5 menit tanpa potongan) dan serahkan BAP setelah ujian selesai.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {myExamSessionsToday.map((sess) => {
+              const myProctor = sess.proctors?.find(p => 
+                (p.teacherId === currentUser.id && p.status !== 'REPLACED') ||
+                p.replacementTeacherId === currentUser.id
+              );
+              if (!myProctor) return null;
+
+              const isBadal = myProctor.replacementTeacherId === currentUser.id;
+              const att = myProctor.attendance || attendances.find(a => 
+                a.examSessionId === sess.id && a.actualTeacherId === currentUser.id
+              );
+              const rep = myProctor.report || att?.examReport;
+              const isCompleted = att?.status === 'SELESAI' || !!rep;
+              const isClockedIn = att && att.clockInTime;
+
+              return (
+                <div
+                  key={sess.id}
+                  className={`rounded-2xl border p-4.5 transition-all flex flex-col justify-between space-y-3 shadow-xs ${
+                    isCompleted
+                      ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-800'
+                      : isClockedIn
+                      ? 'bg-blue-50/50 dark:bg-blue-950/20 border-blue-300 dark:border-blue-800'
+                      : 'bg-white dark:bg-[#0B2B26] border-slate-200 dark:border-[#163832]'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                          {sess.sessionName}
+                        </span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-[#163832] text-slate-600 dark:text-emerald-300 font-semibold">
+                          {sess.durationMinutes} Menit
+                        </span>
+                        {isBadal && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold flex items-center gap-1">
+                            <UserCheck className="w-3 h-3" /> Badal
+                          </span>
+                        )}
+                      </div>
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-1">
+                        {sess.subject}
+                      </h4>
+                      <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-emerald-400/80 mt-1">
+                        <span className="font-semibold text-emerald-600 dark:text-emerald-400">Kelas: {sess.targetClass}</span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3 text-rose-500" /> {sess.roomName}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <div className="text-xs font-mono font-bold text-slate-800 dark:text-emerald-200 flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>{sess.startTime} - {sess.endTime}</span>
+                      </div>
+                      <span className="text-[10px] text-slate-400 block mt-0.5">WIB</span>
+                    </div>
+                  </div>
+
+                  {/* Attendance & BAP Actions */}
+                  <div className="pt-3 border-t border-slate-100 dark:border-[#163832]/80 flex items-center justify-between gap-2">
+                    {isCompleted ? (
+                      <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300 font-bold">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        <span>Pengawasan Selesai & BAP Terisi (Hadir: {rep?.presentCount ?? '-'} santri)</span>
+                      </div>
+                    ) : isClockedIn ? (
+                      <div className="flex items-center justify-between w-full gap-2">
+                        <div className="text-xs">
+                          <div className="font-bold text-blue-700 dark:text-blue-300">
+                            ✓ Hadir Jam {att.clockInTime}
+                          </div>
+                          <div className="text-[10px] text-slate-500 dark:text-emerald-400/70">
+                            {att.lateCategory === 'TEPAT_WAKTU' ? (
+                              <span className="text-emerald-600 font-semibold">Tepat Waktu (≤5 mnt)</span>
+                            ) : (
+                              <span className="text-rose-600 font-semibold">Terlambat {att.lateMinutes} mnt</span>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setActiveExamReportData({
+                            session: sess,
+                            proctor: myProctor,
+                            attendance: att
+                          })}
+                          className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                          <span>Isi Berita Acara (BAP)</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between w-full gap-2">
+                        <div className="text-[11px] text-slate-500 dark:text-emerald-400/70">
+                          Toleransi: ≤5 mnt tanpa potongan
+                        </div>
+                        <button
+                          disabled={isClockingInExam}
+                          onClick={() => handleExamClockIn(sess, myProctor)}
+                          className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-amber-900/20 cursor-pointer flex items-center gap-1.5"
+                        >
+                          <MapPin className="w-3.5 h-3.5" />
+                          <span>{isClockingInExam ? 'Memverifikasi...' : 'Presensi Pengawas Ujian'}</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Sesi KBM Hari Ini & Jadwal */}
       <div className="bqa-card p-6 space-y-4 transition-colors">
@@ -695,6 +886,17 @@ export const TeacherDashboard: React.FC = () => {
         initialSchedule={leaveTargetSchedule}
         selectedDateInitial={todayStr}
       />
+
+      {/* Exam Report Modal (Berita Acara Pengawasan) */}
+      {activeExamReportData && (
+        <ExamReportModal
+          isOpen={!!activeExamReportData}
+          onClose={() => setActiveExamReportData(null)}
+          session={activeExamReportData.session}
+          proctor={activeExamReportData.proctor}
+          attendance={activeExamReportData.attendance}
+        />
+      )}
 
       {/* User Profile Modal */}
       <UserProfileModal

@@ -344,6 +344,60 @@ sqliteDb.exec(`
     admin_response TEXT,
     created_at INTEGER NOT NULL
   );
+
+  -- Exam Architecture Tables (UTS & UAS)
+  CREATE TABLE IF NOT EXISTS exam_events (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    type TEXT NOT NULL DEFAULT 'UTS',
+    unit TEXT NOT NULL DEFAULT 'PESANTREN',
+    start_date TEXT NOT NULL,
+    end_date TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'ACTIVE',
+    default_session_rate INTEGER,
+    created_at INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS exam_sessions (
+    id TEXT PRIMARY KEY,
+    event_id TEXT NOT NULL REFERENCES exam_events(id),
+    date TEXT NOT NULL,
+    day_of_week TEXT NOT NULL,
+    session_name TEXT NOT NULL,
+    start_time TEXT NOT NULL,
+    end_time TEXT NOT NULL,
+    duration_minutes INTEGER NOT NULL DEFAULT 90,
+    subject TEXT NOT NULL,
+    target_class TEXT NOT NULL,
+    room_name TEXT NOT NULL,
+    custom_rate INTEGER
+  );
+
+  CREATE TABLE IF NOT EXISTS exam_proctors (
+    id TEXT PRIMARY KEY,
+    session_id TEXT NOT NULL REFERENCES exam_sessions(id),
+    teacher_id TEXT NOT NULL REFERENCES teachers(id),
+    role TEXT NOT NULL DEFAULT 'PENGAWAS_1',
+    status TEXT NOT NULL DEFAULT 'ASSIGNED',
+    replacement_teacher_id TEXT REFERENCES teachers(id),
+    badal_reason TEXT,
+    created_at INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS exam_reports (
+    id TEXT PRIMARY KEY,
+    attendance_id TEXT NOT NULL REFERENCES attendances(id),
+    session_id TEXT NOT NULL REFERENCES exam_sessions(id),
+    proctor_id TEXT REFERENCES exam_proctors(id),
+    total_santri INTEGER NOT NULL DEFAULT 0,
+    present_count INTEGER NOT NULL DEFAULT 0,
+    absent_count INTEGER NOT NULL DEFAULT 0,
+    sick_count INTEGER NOT NULL DEFAULT 0,
+    permit_count INTEGER NOT NULL DEFAULT 0,
+    violation_notes TEXT,
+    handover_confirmed INTEGER NOT NULL DEFAULT 1,
+    submitted_at INTEGER NOT NULL
+  );
 `);
 
 try { sqliteDb.exec("ALTER TABLE students ADD COLUMN nik TEXT;"); } catch(e) {}
@@ -369,6 +423,9 @@ try { sqliteDb.exec("ALTER TABLE session ADD COLUMN ip_address TEXT;"); } catch(
 try { sqliteDb.exec("ALTER TABLE session ADD COLUMN user_agent TEXT;"); } catch(e) {}
 try { sqliteDb.exec("ALTER TABLE schedules ADD COLUMN custom_rate INTEGER;"); } catch(e) {}
 try { sqliteDb.exec("ALTER TABLE schedules ADD COLUMN schedule_type TEXT NOT NULL DEFAULT 'REGULER';"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE attendances ADD COLUMN attendance_type TEXT NOT NULL DEFAULT 'KBM_REGULER';"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE attendances ADD COLUMN exam_session_id TEXT;"); } catch(e) {}
+try { sqliteDb.exec("ALTER TABLE attendances ADD COLUMN exam_proctor_id TEXT;"); } catch(e) {}
 try {
   sqliteDb.exec("INSERT OR IGNORE INTO academic_settings (id, smp_mode, ma_mode, pesantren_mode, updated_at, updated_by) VALUES ('default_academic', 'REGULER', 'REGULER', 'REGULER', strftime('%s','now')*1000, 'Administrator');");
 } catch(e) {}

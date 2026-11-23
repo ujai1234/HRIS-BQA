@@ -167,6 +167,10 @@ export interface AttendanceRecord {
   status: AttendanceStatus;
   journal?: TeachingJournal;
   notes?: string;
+  attendanceType?: 'KBM_REGULER' | 'PENGAWAS_UJIAN';
+  examSessionId?: string;
+  examProctorId?: string;
+  examReport?: ExamReport;
 }
 
 export interface BadalAssignment {
@@ -376,4 +380,65 @@ export interface StaffAssignedTask {
   completionNotes?: string;
   completedAt?: string;
   createdAt: string;
+}
+
+// ====== EXAM MODULE TYPES (UTS & UAS) ======
+export type ExamType = 'UTS' | 'UAS' | 'TO';
+export type ExamEventStatus = 'DRAFT' | 'ACTIVE' | 'COMPLETED';
+export type ExamProctorRole = 'PENGAWAS_1' | 'PENGAWAS_2';
+export type ExamProctorStatus = 'ASSIGNED' | 'BADAL_REQUESTED' | 'REPLACED';
+
+export interface ExamEvent {
+  id: string;
+  title: string;
+  type: ExamType;
+  unit: UnitType;
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  status: ExamEventStatus;
+  defaultSessionRate?: number | null;
+  createdAt?: string;
+}
+
+export interface ExamSession {
+  id: string;
+  eventId: string;
+  date: string; // YYYY-MM-DD
+  dayOfWeek: DayOfWeek;
+  sessionName: string; // e.g. "Sesi 1 (Pagi)"
+  startTime: string; // "07:30"
+  endTime: string; // "09:00"
+  durationMinutes: number; // 90
+  subject: string; // e.g. "Fiqih Ibadah"
+  targetClass: string; // e.g. "VII-A"
+  roomName: string; // e.g. "Kelas 7A"
+  customRate?: number | null;
+  proctors?: ExamProctor[];
+}
+
+export interface ExamProctor {
+  id: string;
+  sessionId: string;
+  teacherId: string;
+  role: ExamProctorRole;
+  status: ExamProctorStatus;
+  replacementTeacherId?: string | null;
+  badalReason?: string | null;
+  attendance?: AttendanceRecord | null;
+  report?: ExamReport | null;
+}
+
+export interface ExamReport {
+  id: string;
+  attendanceId: string;
+  sessionId: string;
+  proctorId?: string;
+  totalSantri: number;
+  presentCount: number;
+  absentCount: number;
+  sickCount: number;
+  permitCount: number;
+  violationNotes?: string | null;
+  handoverConfirmed: boolean;
+  submittedAt: string;
 }

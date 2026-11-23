@@ -10,11 +10,21 @@ import {
   Clock, 
   BookOpen, 
   Sparkles,
-  Info
+  Info,
+  Calendar,
+  Users,
+  CheckCircle2,
+  AlertCircle,
+  UserCheck,
+  Download
 } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
-import { ClassSchedule } from '../types';
+import { ClassSchedule, ExamSession, ExamProctor } from '../types';
 import { BulkScheduleUploadModal } from './BulkScheduleUploadModal';
+import { BulkExamUploadModal } from './BulkExamUploadModal';
+import { AddExamSessionModal } from './AddExamSessionModal';
+import { AssignExamBadalModal } from './AssignExamBadalModal';
+import { AdminExamView } from './AdminExamView';
 import { useConfirm } from '../context/ConfirmContext';
 
 export const MasterSchedules: React.FC = () => {
@@ -26,14 +36,28 @@ export const MasterSchedules: React.FC = () => {
     deleteSchedule, 
     resetSchedules,
     academicSettings,
-    updateAcademicSettings
+    updateAcademicSettings,
+    examEvents,
+    examSessions,
+    deleteExamSession
   } = useHRIS();
   const { confirm } = useConfirm();
+
+  const isAnyUnitInExam = academicSettings?.pesantrenMode !== 'REGULER' || academicSettings?.smpMode !== 'REGULER' || academicSettings?.maMode !== 'REGULER';
+  const [activeTab, setActiveTab] = useState<'REGULER' | 'UJIAN'>(isAnyUnitInExam ? 'UJIAN' : 'REGULER');
 
   const [selectedDayFilter, setSelectedDayFilter] = useState<string>('ALL');
   const [selectedUnitFilter, setSelectedUnitFilter] = useState<string>('ALL');
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Exam Schedule Filters & State
+  const [selectedExamEventId, setSelectedExamEventId] = useState<string>('ALL');
+  const [selectedExamDateFilter, setSelectedExamDateFilter] = useState<string>('ALL');
+  const [selectedExamUnitFilter, setSelectedExamUnitFilter] = useState<string>('ALL');
+  const [isBulkExamUploadOpen, setIsBulkExamUploadOpen] = useState(false);
+  const [isAddExamSessionOpen, setIsAddExamSessionOpen] = useState(false);
+  const [badalTarget, setBadalTarget] = useState<{ session: ExamSession; proctor: ExamProctor } | null>(null);
 
   const [editingSchedule, setEditingSchedule] = useState<ClassSchedule | null>(null);
   const [isAddingSchedule, setIsAddingSchedule] = useState(false);
@@ -237,6 +261,43 @@ export const MasterSchedules: React.FC = () => {
         </div>
       </div>
 
+      {/* Tab Navigation: KBM Reguler vs Jadwal Ujian */}
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-[#163832] pb-2">
+        <button
+          onClick={() => setActiveTab('REGULER')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+            activeTab === 'REGULER'
+              ? 'bg-[#163832] text-white shadow-md'
+              : 'text-slate-600 dark:text-emerald-400/80 hover:bg-slate-100 dark:hover:bg-[#163832]/40'
+          }`}
+        >
+          <BookOpen className="w-4 h-4" />
+          <span>Jadwal KBM Reguler</span>
+          <span className="px-2 py-0.5 rounded-full text-[10px] bg-white/20 text-white">
+            {schedules.length} JP
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('UJIAN')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+            activeTab === 'UJIAN'
+              ? 'bg-amber-600 text-white shadow-md'
+              : 'text-slate-600 dark:text-emerald-400/80 hover:bg-slate-100 dark:hover:bg-[#163832]/40'
+          }`}
+        >
+          <Sparkles className="w-4 h-4" />
+          <span>Jadwal Pengawasan Ujian (UTS / UAS)</span>
+          <span className="px-2 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-200">
+            {examSessions.length} Sesi
+          </span>
+        </button>
+      </div>
+
+      {activeTab === 'UJIAN' ? (
+        <AdminExamView />
+      ) : (
+        <>
       {/* 2. Advanced Search & Modern Filter Suite */}
       <div className="bqa-card p-4 sm:p-5 space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -486,6 +547,8 @@ export const MasterSchedules: React.FC = () => {
           </table>
         </div>
       </div>
+      </>
+      )}
 
       {/* 4. Refined Minimalist Dialog / Form Modal */}
       {(editingSchedule || isAddingSchedule) && (
