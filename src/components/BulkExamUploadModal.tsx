@@ -8,7 +8,6 @@ import {
   X, 
   Info,
   Calendar,
-  Sparkles,
   Users
 } from 'lucide-react';
 import { useHRIS } from '../context/HRISContext';
@@ -397,7 +396,7 @@ export const BulkExamUploadModal: React.FC<BulkExamUploadModalProps> = ({
           <div className="bg-slate-50 dark:bg-[#051F20]/50 border border-slate-200 dark:border-[#163832] p-4 rounded-xl space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-slate-700 dark:text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Event Ujian Target
+                <Calendar className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Event Ujian Target
               </label>
               <button
                 type="button"

@@ -9,7 +9,6 @@ import {
   Award,
   Star,
   TrendingUp,
-  Sparkles,
   UserCheck,
   Calendar,
   MapPin,
@@ -391,7 +390,7 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
                 : 'text-slate-500 hover:text-[#051F20] dark:text-[#8EB69B]/70 dark:hover:text-[#DAF1DE] hover:bg-slate-50 dark:hover:bg-[#163832]/30'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            <Calendar className="w-3.5 h-3.5" />
             <span>Monitoring Ujian ({todayExamSessions.length})</span>
           </button>
           <button
@@ -495,7 +494,7 @@ export const KepsekAnalyticsDashboard: React.FC<KepsekAnalyticsDashboardProps> =
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-[#163832] pb-4">
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-500" />
+                <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 Live Monitoring Ruang Ujian Hari Ini
                 <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold">
                   {todayExamSessions.length} Ruang & Sesi

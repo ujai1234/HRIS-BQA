@@ -10,7 +10,6 @@ import {
   Check,
   Lock,
   Camera,
-  Sparkles,
   UserCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -310,21 +309,21 @@ export const TeacherDashboard: React.FC = () => {
 
       {/* Tugas Pengawasan Ujian Hari Ini (UTS / UAS) */}
       {myExamSessionsToday.length > 0 && (
-        <div className="bqa-card p-5 sm:p-6 space-y-4 border-2 border-amber-500/40 bg-gradient-to-br from-amber-500/5 via-transparent to-emerald-500/5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-500/20 pb-3">
-            <div className="flex items-center gap-2.5">
+        <div className="bqa-card p-5 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-[#163832] pb-3">
+            <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                <Sparkles className="w-5 h-5" />
+                <Calendar className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  Tugas Pengawasan Ujian (UTS / UAS)
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold">
-                    {myExamSessionsToday.length} Sesi Terjadwal
+                  Tugas Pengawasan Ujian Hari Ini
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 font-semibold font-mono">
+                    {myExamSessionsToday.length} Sesi
                   </span>
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-emerald-400/80">
-                  Presensi tepat waktu (toleransi ≤5 menit tanpa potongan) dan serahkan BAP setelah ujian selesai.
+                <p className="text-xs text-slate-500 dark:text-emerald-400/70">
+                  Presensi kehadiran di lokasi ruang ujian dan isi Berita Acara (BAP).
                 </p>
               </div>
             </div>

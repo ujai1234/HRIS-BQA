@@ -9,7 +9,6 @@ import {
   MapPin, 
   Clock, 
   BookOpen, 
-  Sparkles,
   Info,
   Calendar,
   Users,
@@ -170,125 +169,97 @@ export const MasterSchedules: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       
-      {/* 1. Header Title */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-base sm:text-lg font-bold text-[#051F20] tracking-tight">
-          Manajemen Jadwal KBM Asatidz
-        </h2>
-        <span className="text-xs text-[#8EB69B] font-bold uppercase tracking-wider">
-          {schedules.length} Jam Pelajaran
-        </span>
-      </div>
+      {/* 1. Header Minimalis & Status Unit */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-200/80 dark:border-[#163832]">
+        <div>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-emerald-50 tracking-tight">
+            Manajemen Jadwal
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-emerald-400/70 mt-0.5">
+            Pengaturan jadwal KBM reguler dan jadwal ujian per unit.
+          </p>
+        </div>
 
-      {/* Mode Akademik Unit Control Bar (Solusi Tetap Peralihan UTS / UAS / Reguler) */}
-      <div className="bg-gradient-to-r from-emerald-950/20 via-emerald-900/10 to-amber-950/20 border border-emerald-800/30 rounded-2xl p-4 sm:p-5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <h3 className="text-sm font-bold text-slate-900 dark:text-emerald-100">
-                Mode Akademik Unit (Peralihan KBM Reguler / Ujian)
-              </h3>
-            </div>
-            <p className="text-xs text-slate-600 dark:text-emerald-400/80 mt-1 max-w-xl">
-              Atur status aktif per unit. Ketika unit dialihkan ke <strong>UTS</strong> atau <strong>UAS</strong>, asatidz di unit tersebut otomatis hanya melihat jadwal pengawasan ujian di dashboard, sedangkan jadwal belajar reguler tetap aman dan kafa'ah tetap terhitung.
-            </p>
-          </div>
+        {/* Status Mode Unit (Clean & Compact) */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[11px] font-semibold text-slate-500 dark:text-emerald-400/80 uppercase tracking-wider">
+            Status Unit:
+          </span>
+          {(['PESANTREN', 'SMP', 'MA'] as const).map(unit => {
+            const currentMode = unit === 'PESANTREN' 
+              ? (academicSettings?.pesantrenMode || 'REGULER')
+              : unit === 'SMP'
+              ? (academicSettings?.smpMode || 'REGULER')
+              : (academicSettings?.maMode || 'REGULER');
 
-          <div className="flex items-center gap-2.5 flex-wrap">
-            {/* Pesantren Mode Switcher */}
-            <div className="bg-white dark:bg-[#0B2B26] border border-slate-200 dark:border-[#163832] p-2 rounded-xl shadow-xs">
-              <div className="text-[10px] font-bold text-[#8EB69B] uppercase mb-1">Unit Pesantren</div>
-              <div className="flex items-center gap-1">
-                {(['REGULER', 'UTS', 'UAS'] as const).map(mode => (
-                  <button
-                    key={mode}
-                    onClick={() => updateAcademicSettings({ pesantrenMode: mode })}
-                    className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
-                      (academicSettings?.pesantrenMode || 'REGULER') === mode
-                        ? mode === 'UTS' ? 'bg-amber-600 text-white shadow-xs' : mode === 'UAS' ? 'bg-purple-600 text-white shadow-xs' : 'bg-[#163832] text-white shadow-xs'
-                        : 'text-slate-500 hover:text-slate-900 dark:text-emerald-400/70 hover:bg-slate-100 dark:hover:bg-emerald-950/40'
-                    }`}
-                  >
-                    {mode}
-                  </button>
-                ))}
+            return (
+              <div 
+                key={unit} 
+                className="inline-flex items-center bg-slate-100 dark:bg-[#0B2B26] border border-slate-200/80 dark:border-[#163832] rounded-lg p-0.5 text-xs shadow-2xs"
+              >
+                <span className="px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:text-emerald-300 uppercase tracking-wider">
+                  {unit}
+                </span>
+                <select
+                  value={currentMode}
+                  onChange={(e) => {
+                    const val = e.target.value as any;
+                    if (unit === 'PESANTREN') updateAcademicSettings({ pesantrenMode: val });
+                    else if (unit === 'SMP') updateAcademicSettings({ smpMode: val });
+                    else updateAcademicSettings({ maMode: val });
+                  }}
+                  className={`rounded-md px-2 py-1 text-[11px] font-bold border-0 outline-none cursor-pointer transition-colors ${
+                    currentMode === 'UTS' 
+                      ? 'bg-amber-600 text-white shadow-xs' 
+                      : currentMode === 'UAS' 
+                      ? 'bg-purple-600 text-white shadow-xs' 
+                      : 'bg-white dark:bg-[#163832] text-slate-900 dark:text-white shadow-xs'
+                  }`}
+                >
+                  <option value="REGULER">Reguler</option>
+                  <option value="UTS">UTS</option>
+                  <option value="UAS">UAS</option>
+                </select>
               </div>
-            </div>
-
-            {/* SMP Mode Switcher */}
-            <div className="bg-white dark:bg-[#0B2B26] border border-slate-200 dark:border-[#163832] p-2 rounded-xl shadow-xs">
-              <div className="text-[10px] font-bold text-[#8EB69B] uppercase mb-1">Unit SMP</div>
-              <div className="flex items-center gap-1">
-                {(['REGULER', 'UTS', 'UAS'] as const).map(mode => (
-                  <button
-                    key={mode}
-                    onClick={() => updateAcademicSettings({ smpMode: mode })}
-                    className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
-                      (academicSettings?.smpMode || 'REGULER') === mode
-                        ? mode === 'UTS' ? 'bg-amber-600 text-white shadow-xs' : mode === 'UAS' ? 'bg-purple-600 text-white shadow-xs' : 'bg-[#163832] text-white shadow-xs'
-                        : 'text-slate-500 hover:text-slate-900 dark:text-emerald-400/70 hover:bg-slate-100 dark:hover:bg-emerald-950/40'
-                    }`}
-                  >
-                    {mode}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* MA Mode Switcher */}
-            <div className="bg-white dark:bg-[#0B2B26] border border-slate-200 dark:border-[#163832] p-2 rounded-xl shadow-xs">
-              <div className="text-[10px] font-bold text-[#8EB69B] uppercase mb-1">Unit MA</div>
-              <div className="flex items-center gap-1">
-                {(['REGULER', 'UTS', 'UAS'] as const).map(mode => (
-                  <button
-                    key={mode}
-                    onClick={() => updateAcademicSettings({ maMode: mode })}
-                    className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
-                      (academicSettings?.maMode || 'REGULER') === mode
-                        ? mode === 'UTS' ? 'bg-amber-600 text-white shadow-xs' : mode === 'UAS' ? 'bg-purple-600 text-white shadow-xs' : 'bg-[#163832] text-white shadow-xs'
-                        : 'text-slate-500 hover:text-slate-900 dark:text-emerald-400/70 hover:bg-slate-100 dark:hover:bg-emerald-950/40'
-                    }`}
-                  >
-                    {mode}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Tab Navigation: KBM Reguler vs Jadwal Ujian */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-[#163832] pb-2">
+      {/* 2. Navigation Tabs (Clean Segmented Control) */}
+      <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#0B2B26] p-1 rounded-xl border border-slate-200/80 dark:border-[#163832] w-fit">
         <button
           onClick={() => setActiveTab('REGULER')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
             activeTab === 'REGULER'
-              ? 'bg-[#163832] text-white shadow-md'
-              : 'text-slate-600 dark:text-emerald-400/80 hover:bg-slate-100 dark:hover:bg-[#163832]/40'
+              ? 'bg-white dark:bg-[#163832] text-slate-900 dark:text-white shadow-xs font-bold'
+              : 'text-slate-600 dark:text-emerald-400/80 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
-          <BookOpen className="w-4 h-4" />
+          <BookOpen className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
           <span>Jadwal KBM Reguler</span>
-          <span className="px-2 py-0.5 rounded-full text-[10px] bg-white/20 text-white">
+          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200/70 dark:bg-emerald-950/70 text-slate-700 dark:text-emerald-300 font-mono font-bold">
             {schedules.length} JP
           </span>
         </button>
 
         <button
           onClick={() => setActiveTab('UJIAN')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
             activeTab === 'UJIAN'
-              ? 'bg-amber-600 text-white shadow-md'
-              : 'text-slate-600 dark:text-emerald-400/80 hover:bg-slate-100 dark:hover:bg-[#163832]/40'
+              ? 'bg-white dark:bg-[#163832] text-slate-900 dark:text-white shadow-xs font-bold'
+              : 'text-slate-600 dark:text-emerald-400/80 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
-          <Sparkles className="w-4 h-4" />
-          <span>Jadwal Pengawasan Ujian (UTS / UAS)</span>
-          <span className="px-2 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-200">
+          <Calendar className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+          <span>Jadwal Ujian (UTS / UAS)</span>
+          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+            examSessions.length > 0
+              ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300'
+              : 'bg-slate-200/70 dark:bg-emerald-950/70 text-slate-700 dark:text-emerald-300'
+          }`}>
             {examSessions.length} Sesi
           </span>
         </button>
@@ -416,9 +387,8 @@ export const MasterSchedules: React.FC = () => {
         </div>
 
         {/* Subtle dynamic summary of loaded data */}
-        <div className="flex items-center gap-2 text-[10px] text-[#8EB69B] font-bold uppercase tracking-wider pl-1 pt-2.5">
-          <Sparkles className="w-3 h-3 text-amber-500" />
-          <span>Ditemukan {filteredSchedules.length} Jadwal Aktif dari total {schedules.length} jam pelajaran pekanan</span>
+        <div className="text-[11px] text-slate-500 dark:text-emerald-400/80 font-medium pl-1 pt-2">
+          <span>Ditemukan {filteredSchedules.length} jadwal aktif dari total {schedules.length} JP mingguan</span>
         </div>
       </div>
 

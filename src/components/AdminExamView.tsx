@@ -6,7 +6,6 @@ import {
   UploadCloud, 
   Calendar, 
   Clock, 
-  Sparkles, 
   Users, 
   CheckCircle2, 
   AlertCircle, 
@@ -130,23 +129,24 @@ export const AdminExamView: React.FC = () => {
       {/* Event Header Card & Quick Operations */}
       <div className="bqa-card p-4 sm:p-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-emerald-100">
-                Pusat Kontrol Jadwal & Pengawasan Ujian (UTS / UAS)
-              </h3>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-[#163832] text-slate-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
+              <Calendar className="w-5 h-5" />
             </div>
-            <p className="text-xs text-slate-500 dark:text-emerald-400/80 mt-1 max-w-xl">
-              Kelola sesi ujian, penugasan asatidz pengawas, dan pemantauan presensi ujian. Jadwal pengawasan ujian otomatis terhitung dalam perhitungan kafa'ah guru.
-            </p>
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-emerald-100">
+                Jadwal & Pengawasan Ujian (UTS / UAS)
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-emerald-400/70 mt-0.5">
+                Kelola sesi ujian, penugasan pengawas asatidz, dan berita acara.
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={downloadTemplate}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-[#163832] dark:hover:bg-[#1b433c] text-slate-700 dark:text-emerald-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs"
-              title="Unduh Format Excel untuk Impor Massal"
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-[#163832] dark:hover:bg-[#1b433c] text-slate-700 dark:text-emerald-200 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-2xs"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Format Excel</span>
@@ -154,7 +154,7 @@ export const AdminExamView: React.FC = () => {
 
             <button
               onClick={() => setIsBulkUploadOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs shadow-amber-900/20"
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white dark:bg-emerald-800 dark:hover:bg-emerald-700 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs"
             >
               <UploadCloud className="w-3.5 h-3.5" />
               <span>Unggah CSV / Excel</span>
@@ -162,10 +162,10 @@ export const AdminExamView: React.FC = () => {
 
             <button
               onClick={() => setIsAddSessionOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs shadow-emerald-900/20"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Tambah Sesi Manual</span>
+              <span>Tambah Sesi</span>
             </button>
           </div>
         </div>
@@ -173,10 +173,10 @@ export const AdminExamView: React.FC = () => {
         {/* Event Selector Pill Bar */}
         {examEvents.length > 0 && (
           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-[#163832] flex items-center gap-2 overflow-x-auto pb-1">
-            <span className="text-[11px] font-bold text-slate-400 uppercase shrink-0">Event Ujian:</span>
+            <span className="text-[11px] font-semibold text-slate-400 uppercase shrink-0">Event:</span>
             <button
               onClick={() => setSelectedEventId('ALL')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 transition-all cursor-pointer ${
                 selectedEventId === 'ALL'
                   ? 'bg-[#163832] text-white shadow-xs'
                   : 'bg-slate-100 dark:bg-[#0B2B26] text-slate-600 dark:text-emerald-400 hover:bg-slate-200'
@@ -188,9 +188,9 @@ export const AdminExamView: React.FC = () => {
               <button
                 key={ev.id}
                 onClick={() => setSelectedEventId(ev.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all cursor-pointer flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 transition-all cursor-pointer flex items-center gap-1.5 ${
                   selectedEventId === ev.id
-                    ? 'bg-amber-600 text-white shadow-xs'
+                    ? 'bg-emerald-700 text-white shadow-xs'
                     : 'bg-slate-100 dark:bg-[#0B2B26] text-slate-600 dark:text-emerald-400 hover:bg-slate-200'
                 }`}
               >
@@ -212,8 +212,8 @@ export const AdminExamView: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari mapel, kelas, ruang, atau nama pengawas..."
-              className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#0B2B26] border border-slate-200 dark:border-[#163832] rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+              placeholder="Cari mata pelajaran, kelas, ruang, atau pengawas..."
+              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-[#0B2B26] border border-slate-200 dark:border-[#163832] rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none"
             />
           </div>
 
@@ -240,7 +240,7 @@ export const AdminExamView: React.FC = () => {
               <select
                 value={selectedDateFilter}
                 onChange={(e) => setSelectedDateFilter(e.target.value)}
-                className="text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-[#163832] bg-white dark:bg-[#0B2B26] text-slate-900 dark:text-white focus:outline-none"
+                className="text-xs px-3 py-1.5 rounded-xl border border-slate-200 dark:border-[#163832] bg-white dark:bg-[#0B2B26] text-slate-900 dark:text-white focus:outline-none"
               >
                 <option value="ALL">Semua Tanggal Ujian</option>
                 {availableDates.map(d => (
@@ -253,7 +253,7 @@ export const AdminExamView: React.FC = () => {
 
         <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-emerald-400/70 pt-2 border-t border-slate-100 dark:border-[#163832]">
           <span>Menampilkan <strong>{filteredSessions.length}</strong> sesi ujian dari total {examSessions.length} sesi</span>
-          <span className="text-amber-600 dark:text-amber-400 font-semibold">Toleransi presensi pengawas: ≤ 5 menit = Tepat Waktu</span>
+          <span className="text-slate-400 font-medium">Toleransi kehadiran pengawas: 5 menit</span>
         </div>
       </div>
 
